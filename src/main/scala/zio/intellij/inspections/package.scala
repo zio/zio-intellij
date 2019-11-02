@@ -1,6 +1,6 @@
 package zio.intellij
 
-import org.jetbrains.plugins.scala.codeInspection.collections.Qualified
+import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 
@@ -9,8 +9,9 @@ package object inspections {
 
   def invocation(methodName: String) = new Qualified(methodName == _)
 
-  private[inspections] val `.*>` = invocation("*>").from(zio)
-  private[inspections] val `.as` = invocation("as").from(zio)
+  private[inspections] val `.*>`  = invocation("*>").from(zio)
+  private[inspections] val `.as`  = invocation("as").from(zio)
+  private[inspections] val `.map` = invocation("map").from(zio)
 
   object zioUnit {
     def unapply(expr: ScExpression): Boolean = expr match {
@@ -29,4 +30,16 @@ package object inspections {
       case _             => false
     }
   }
+
+  object returnsUnit {
+    def unapply(expr: ScExpression): Boolean = expr match {
+      case ScFunctionExpr(_, Some(result)) =>
+        stripped(result) match {
+          case unitLiteral() => true
+          case _             => false
+        }
+      case _ => false
+    }
+  }
+
 }
