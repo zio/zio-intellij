@@ -7,14 +7,15 @@
     A companion IntelliJ IDEA plugin for the ZIO library ecosystem.<br>
     ]]></description>
 
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
-    <!-- uncomment to enable plugin in all products
-    <depends>com.intellij.modules.lang</depends>
-    -->
+    <idea-version since-build="192.1"/>
+
+    <depends>org.intellij.scala</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyUnitInspection"
+                         displayName="Simplify ZIO.unit to .unit" groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyUnitInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
     </extensions>
 
     <actions>
