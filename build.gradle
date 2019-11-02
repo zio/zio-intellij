@@ -1,0 +1,27 @@
+plugins {
+    id 'org.jetbrains.intellij' version '0.4.11'
+    id 'scala'
+}
+
+group 'dev.zio.intellij'
+version '0.1.0'
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version '2019.2.4'
+    plugins 'org.intellij.scala:2019.2.15'
+}
+
+repositories() {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.scala-lang:scala-library:2.13.1'
+}
+
+patchPluginXml {
+    changeNotes """
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>"""
+}

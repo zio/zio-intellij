@@ -1,0 +1,23 @@
+<idea-plugin>
+    <id>dev.zio.intellij.zio-intellij</id>
+    <name>ZIO for IntelliJ IDEA</name>
+    <vendor email="hmemcpy@gmail.com" url="https://github.com/hmemcpy/zio-intellij">https://github.com/hmemcpy/zio-intellij</vendor>
+
+    <description><![CDATA[
+    A companion IntelliJ IDEA plugin for the ZIO library ecosystem.<br>
+    ]]></description>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
