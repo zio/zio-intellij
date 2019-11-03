@@ -12,10 +12,10 @@ object UnitSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression) = replace(expr).withText(invocationText(qual, "unit"))
     expr match {
-      case qual `.*>` zioUnit()      => Some(replacement(qual)) // *> ZIO.unit
-      case qual `.as` unitLiteral()  => Some(replacement(qual)) // .as(())
-      case qual `.map` returnsUnit() => Some(replacement(qual)) // .map(_ => ())
-      case _                         => None
+      case qual `.*>` `ZIO.unit`() => Some(replacement(qual))
+      case qual `.as` `()`()       => Some(replacement(qual))
+      case qual `.map` `_ => ()`() => Some(replacement(qual))
+      case _                       => None
     }
   }
 

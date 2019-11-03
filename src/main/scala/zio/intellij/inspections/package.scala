@@ -9,34 +9,53 @@ package object inspections {
 
   def invocation(methodName: String) = new Qualified(methodName == _)
 
-  private[inspections] val `.*>`  = invocation("*>").from(zio)
-  private[inspections] val `.as`  = invocation("as").from(zio)
-  private[inspections] val `.map` = invocation("map").from(zio)
+  private[inspections] val `.*>`         = invocation("*>").from(zio)
+  private[inspections] val `.as`         = invocation("as").from(zio)
+  private[inspections] val `.map`        = invocation("map").from(zio)
+  private[inspections] val `.catchAll`   = invocation("catchAll").from(zio)
+  private[inspections] val `.foldCause`  = invocation("foldCause").from(zio)
+  private[inspections] val `.foldCauseM` = invocation("foldCauseM").from(zio)
 
-  object zioUnit {
+  def fromZio(r: ScExpression): Boolean =
+    isOfClassFrom(r, zio)
+
+  object `ZIO.unit` {
     def unapply(expr: ScExpression): Boolean = expr match {
       case ref @ ScReferenceExpression(_) if ref.refName == "unit" =>
         ref.resolve() match {
-          case m: ScReferencePattern if m.containingClass.qualifiedName == "zio.ZIOFunctions" => true
-          case _                                                                              => false
+          case _: ScReferencePattern if fromZio(expr) => true
+          case _                                      => false
         }
       case _ => false
     }
   }
 
-  object unitLiteral {
+  object `()` {
     def unapply(expr: ScExpression): Boolean = expr match {
       case _: ScUnitExpr => true
       case _             => false
     }
   }
 
-  object returnsUnit {
+  // todo deal with this nasty duplication.
+  // I want to be able somehow select the matched extractor dynamically
+  object `_ => ()` {
     def unapply(expr: ScExpression): Boolean = expr match {
       case ScFunctionExpr(_, Some(result)) =>
         stripped(result) match {
-          case unitLiteral() => true
-          case _             => false
+          case `()`() => true
+          case _      => false
+        }
+      case _ => false
+    }
+  }
+
+  object `_ => ZIO.unit` {
+    def unapply(expr: ScExpression): Boolean = expr match {
+      case ScFunctionExpr(_, Some(result)) =>
+        stripped(result) match {
+          case `ZIO.unit`() => true
+          case _            => false
         }
       case _ => false
     }

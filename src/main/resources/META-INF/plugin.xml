@@ -13,8 +13,12 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyUnitInspection"
-                         displayName="Simplify ZIO.unit to .unit" groupPath="Scala,ZIO" groupName="Simplifications"
+                         displayName="Simplify returning Unit to .unit" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyUnitInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyIgnoreInspection"
+                         displayName="Simplify recovering with Unit to .ignore" groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyIgnoreInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
     </extensions>
 
