@@ -20,6 +20,10 @@
                          displayName="Simplify recovering with Unit to .ignore" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyIgnoreInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyAsInspection"
+                         displayName="Simplify discarding effect result to .as/.asError" groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyAsInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
     </extensions>
 
     <actions>

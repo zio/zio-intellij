@@ -3,6 +3,7 @@ package zio.intellij
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
+import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 
 package object inspections {
   val zio = Array("zio.ZIO")
@@ -12,6 +13,7 @@ package object inspections {
   private[inspections] val `.*>`         = invocation("*>").from(zio)
   private[inspections] val `.as`         = invocation("as").from(zio)
   private[inspections] val `.map`        = invocation("map").from(zio)
+  private[inspections] val `.mapError`   = invocation("mapError").from(zio)
   private[inspections] val `.catchAll`   = invocation("catchAll").from(zio)
   private[inspections] val `.foldCause`  = invocation("foldCause").from(zio)
   private[inspections] val `.foldCauseM` = invocation("foldCauseM").from(zio)
@@ -48,6 +50,17 @@ package object inspections {
         }
       case _ => false
     }
+  }
+
+  object `_ => x` {
+    def unapply(expr: ScExpression): Option[ScExpression] = expr match {
+      case ScFunctionExpr(Seq(x), res @ Some(_)) if underscore(x) => res
+      case _                                                      => None
+    }
+
+    // todo there must be a better way!
+    def underscore(x: ScParameter): Boolean =
+      x.isWildcard
   }
 
   object `_ => ZIO.unit` {
