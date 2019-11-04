@@ -40,16 +40,10 @@ package object inspections {
     }
   }
 
-  // todo deal with this nasty duplication.
-  // I want to be able somehow select the matched extractor dynamically
-  object `_ => ()` {
-    def unapply(expr: ScExpression): Boolean = expr match {
-      case ScFunctionExpr(_, Some(result)) =>
-        stripped(result) match {
-          case `()`() => true
-          case _      => false
-        }
-      case _ => false
+  object zioRef {
+    def unapply(expr: ScReferenceExpression): Boolean = expr match {
+      case _ if fromZio(expr) => true
+      case _                  => false
     }
   }
 
@@ -62,6 +56,19 @@ package object inspections {
     // todo there must be a better way!
     def underscore(x: ScParameter): Boolean =
       x.isWildcard
+  }
+
+  // todo deal with this nasty duplication.
+  // I want to be able somehow select the matched extractor dynamically
+  object `_ => ()` {
+    def unapply(expr: ScExpression): Boolean = expr match {
+      case ScFunctionExpr(_, Some(result)) =>
+        stripped(result) match {
+          case `()`() => true
+          case _      => false
+        }
+      case _ => false
+    }
   }
 
   object `_ => ZIO.unit` {

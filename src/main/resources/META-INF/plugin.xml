@@ -28,6 +28,10 @@
                          displayName="Simplify mapping result and error effects to .bimap" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyBimapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyWhenInspection"
+                         displayName="Simplify condition to .when" groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyWhenInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
     </extensions>
 
     <actions>
