@@ -24,6 +24,10 @@
                          displayName="Simplify discarding effect result to .as/.asError" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyAsInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyBimapInspection"
+                         displayName="Simplify mapping result and error effects to .bimap" groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyBimapInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
     </extensions>
 
     <actions>

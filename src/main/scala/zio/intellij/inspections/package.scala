@@ -14,6 +14,7 @@ package object inspections {
   private[inspections] val `.as`         = invocation("as").from(zio)
   private[inspections] val `.map`        = invocation("map").from(zio)
   private[inspections] val `.mapError`   = invocation("mapError").from(zio)
+  private[inspections] val `.asError`    = invocation("asError").from(zio)
   private[inspections] val `.catchAll`   = invocation("catchAll").from(zio)
   private[inspections] val `.foldCause`  = invocation("foldCause").from(zio)
   private[inspections] val `.foldCauseM` = invocation("foldCauseM").from(zio)
