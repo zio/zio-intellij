@@ -1,0 +1,1 @@
+def print(s: String): <spot>ZIO[Any, Nothing, Unit]</spot>
