@@ -11,6 +11,10 @@
 
     <depends>org.intellij.scala</depends>
 
+    <extensions defaultExtensionNs="org.intellij.scala">
+        <syntheticMemberInjector implementation="zio.intellij.synthetic.macros.ModulePatternAccessible"/>
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyUnitInspection"
                          displayName="Simplify returning Unit to .unit" groupPath="Scala,ZIO" groupName="Simplifications"
