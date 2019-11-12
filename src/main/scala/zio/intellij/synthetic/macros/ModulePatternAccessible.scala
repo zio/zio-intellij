@@ -16,7 +16,7 @@ class ModulePatternAccessible extends SyntheticMembersInjector {
 
   private def helperObjectExtension(annotation: ScAnnotation, sco: ScObject): Seq[String] =
     annotationFirstParam(annotation)
-      .map(name => s"def $name : ${sco.qualifiedName}.Service[R] = ???")
+      .map(name => s"def $name : ${sco.qualifiedName}.Service[${sco.qualifiedName}] = ???")
       .toSeq
 
   private def accessorTraitExtension(sco: ScObject): String = {
