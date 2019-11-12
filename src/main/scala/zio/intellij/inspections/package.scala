@@ -22,16 +22,24 @@ package object inspections {
   def fromZio(r: ScExpression): Boolean =
     isOfClassFrom(r, zio)
 
-  object `ZIO.unit` {
-    def unapply(expr: ScExpression): Boolean = expr match {
-      case ref @ ScReferenceExpression(_) if ref.refName == "unit" =>
+  class ZIOMemberReference(refName: String) {
+    def unapply(expr: ScExpression): Option[ScExpression] = expr match {
+      case ref @ ScReferenceExpression(_) if ref.refName == refName =>
         ref.resolve() match {
-          case _: ScReferencePattern if fromZio(expr) => true
-          case _                                      => false
+          case _: ScReferencePattern if fromZio(expr) => Some(expr)
+          case _                                      => None
         }
-      case _ => false
+      case MethodRepr(_, _, Some(ref), Seq(e)) if ref.refName == refName =>
+        ref.resolve() match {
+          case _ if fromZio(expr) => Some(e)
+          case _                  => None
+        }
+      case _ => None
     }
   }
+
+  val `ZIO.unit`    = new ZIOMemberReference("unit")
+  val `ZIO.succeed` = new ZIOMemberReference("succeed")
 
   object `()` {
     def unapply(expr: ScExpression): Boolean = expr match {
@@ -75,8 +83,8 @@ package object inspections {
     def unapply(expr: ScExpression): Boolean = expr match {
       case ScFunctionExpr(_, Some(result)) =>
         stripped(result) match {
-          case `ZIO.unit`() => true
-          case _            => false
+          case `ZIO.unit`(_) => true
+          case _             => false
         }
       case _ => false
     }

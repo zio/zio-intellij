@@ -14,8 +14,8 @@ object WhenSimplificationType extends SimplificationType {
       replace(ifStmt).withText(s"${arg.getText}.when(${cond.getText})")
 
     expr match {
-      case cond @ IfStmt(condition, tb @ zioRef(), `ZIO.unit`()) => Some(replacement(cond, tb, condition))
-      case _                                                     => None
+      case cond @ IfStmt(condition, tb @ zioRef(), `ZIO.unit`(_)) => Some(replacement(cond, tb, condition))
+      case _                                                      => None
     }
   }
 }

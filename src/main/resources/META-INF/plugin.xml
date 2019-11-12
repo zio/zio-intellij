@@ -36,7 +36,10 @@
                          displayName="Simplify condition to .when" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyWhenInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
-
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedOptionInspection"
+                         displayName="Simplify optional values to .none/.some" groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifySucceedOptionInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.actions.SuggestTypeAliasAction</className>
