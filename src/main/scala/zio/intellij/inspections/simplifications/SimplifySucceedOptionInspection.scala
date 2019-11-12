@@ -4,7 +4,7 @@ import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
 
-class SimplifySucceedOptionInspection extends ZInspection(NoneSimplificationType)
+class SimplifySucceedOptionInspection extends ZInspection(NoneSimplificationType, SomeSimplificationType)
 
 object NoneSimplificationType extends SimplificationType {
   override def hint: String = "Replace with ZIO.none"
