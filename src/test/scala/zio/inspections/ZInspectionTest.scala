@@ -18,7 +18,6 @@ abstract class ZInspectionTest[T <: ZInspection: ClassTag] extends OperationsOnC
 
   def z(s: String): String =
     s"""import zio._
-       |import scala._
        |object Test {
        |  def foo = {
        |   $s
