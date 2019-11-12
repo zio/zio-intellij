@@ -18,6 +18,7 @@ repositories() {
 
 dependencies {
     compileOnly 'org.scala-lang:scala-library:2.12.7'
+    testCompileOnly 'org.scala-lang:scala-library:2.12.7'
 }
 
 patchPluginXml {
