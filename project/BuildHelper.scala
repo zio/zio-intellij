@@ -4,6 +4,7 @@ object BuildHelper {
   lazy val ScalacOptions = Seq(
     "-encoding",
     "UTF-8",
+    "-target:jvm-1.8",
     "-unchecked",
     "-deprecation",
     "-feature",
