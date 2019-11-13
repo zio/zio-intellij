@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>dev.zio.intellij.zio-intellij</id>
+    <id>zio.intellij.zio-intellij</id>
     <name>ZIO for IntelliJ IDEA</name>
     <vendor email="hmemcpy@gmail.com" url="https://github.com/hmemcpy/zio-intellij">https://github.com/hmemcpy/zio-intellij</vendor>
 
