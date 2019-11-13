@@ -1,7 +1,7 @@
 import BuildHelper._
 
 intellijPluginName in ThisBuild := "zio-intellij"
-intellijBuild in ThisBuild := "193.4778.7"
+intellijBuild in ThisBuild := "192.7142.36"
 
 lazy val root = project
   .in(file("."))
