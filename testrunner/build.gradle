@@ -1,0 +1,16 @@
+plugins {
+    id 'scala'
+    id 'org.jetbrains.intellij'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+repositories() {
+    mavenCentral()
+}
+
+dependencies {
+    shadow 'org.scala-lang:scala-library:2.13.1'
+    compileOnly 'dev.zio:zio_2.12:1.0.0-RC17'
+    compileOnly 'dev.zio:zio-test_2.12:1.0.0-RC17'
+}
+

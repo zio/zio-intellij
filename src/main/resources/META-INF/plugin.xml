@@ -7,7 +7,7 @@
     A companion IntelliJ IDEA plugin for the ZIO library ecosystem.<br>
     ]]></description>
 
-    <idea-version since-build="192.1"/>
+    <idea-version since-build="192.5118.30"/>
 
     <depends>org.intellij.scala</depends>
 
@@ -44,6 +44,12 @@
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.actions.SuggestTypeAliasAction</className>
         </intentionAction>
+
+        <!-- test runner -->
+        <configurationType implementation="zio.intellij.testsupport.ZTestConfigurationType"/>
+        <runConfigurationProducer implementation="zio.intellij.testsupport.ZTestRunConfigurationProducer"/>
+        <runLineMarkerContributor implementationClass="zio.intellij.testsupport.ZTestRunLineMarkerProvider" language="Scala" order="first" />
+        <testFramework implementation="zio.intellij.testsupport.ZTestFramework" order="first"/>
 
     </extensions>
 
