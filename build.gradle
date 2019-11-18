@@ -17,8 +17,13 @@ repositories() {
 }
 
 dependencies {
+    compile project(':testrunner')
     compileOnly 'org.scala-lang:scala-library:2.12.10'
     testCompileOnly 'org.scala-lang:scala-library:2.12.10'
+}
+
+jar {
+    archiveName = "zio-intellij.jar"
 }
 
 patchPluginXml {
