@@ -1,10 +1,13 @@
 package zio.intellij.testsupport
 
+import java.util.function.Function
+
 import com.intellij.execution.TestStateStorage
 import com.intellij.execution.lineMarker.{ExecutorAction, RunLineMarkerContributor}
 import com.intellij.execution.testframework.TestIconMapper
 import com.intellij.execution.testframework.sm.runner.states.TestStateInfo._
 import com.intellij.icons.AllIcons.RunConfigurations.TestState
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.project.Project
 import com.intellij.psi.{PsiClass, PsiElement}
 import javax.swing.Icon
@@ -41,7 +44,7 @@ final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
   def buildLineInfo(url: String, project: Project, isClass: Boolean): RunLineMarkerContributor.Info = {
     val icon    = iconFor(url, project, isClass)
     val actions = ExecutorAction.getActions(1)
-    new RunLineMarkerContributor.Info(icon, actions, TooltipProvider)
+    new ReplacementInfo(icon, actions, TooltipProvider)
   }
 
   private def iconFor(url: String, project: Project, isClass: Boolean): Icon = {
@@ -59,5 +62,14 @@ final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
       case PASSED_INDEX | COMPLETE_INDEX => TestState.Green2
       case _                             => defaultIcon
     }
+  }
+
+  private[this] class ReplacementInfo(
+    icon: Icon,
+    actions: Array[AnAction],
+    tooltipProvider: Function[PsiElement, String]
+  ) extends RunLineMarkerContributor.Info(icon, actions, tooltipProvider) {
+    override def shouldReplace(other: RunLineMarkerContributor.Info): Boolean =
+      true
   }
 }

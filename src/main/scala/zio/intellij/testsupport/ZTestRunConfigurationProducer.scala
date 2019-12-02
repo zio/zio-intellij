@@ -6,7 +6,7 @@ import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.{PsiDirectory, PsiElement, PsiPackage}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef._
-import org.jetbrains.plugins.scala.testingSupport.test.scalatest.ScalaTestRunConfiguration
+import org.jetbrains.plugins.scala.runner.ScalaApplicationConfigurationProducer
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, SingleTestData}
 import org.jetbrains.plugins.scala.testingSupport.test.{AbstractTestConfigurationProducer, TestConfigurationUtil}
 
@@ -31,7 +31,7 @@ final class ZTestRunConfigurationProducer
     if (testClass == null) return false
     val testClassPath = testClass.qualifiedName
     configuration match {
-      case configuration: ScalaTestRunConfiguration =>
+      case configuration: ZTestRunConfiguration =>
         configuration.testConfigurationData match {
           case testData: SingleTestData => testData.testClassPath == testClassPath && testData.testName == testName
           case classData: ClassTestData => classData.testClassPath == testClassPath && testName == null
@@ -39,7 +39,6 @@ final class ZTestRunConfigurationProducer
         }
       case _ => false
     }
-
   }
 
   override protected def prepareRunConfiguration(
@@ -58,12 +57,12 @@ final class ZTestRunConfigurationProducer
   }
 
   override def shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean =
-    other.getConfiguration.getName == "HelloWorldSpec"
+    other.isProducedBy(classOf[ScalaApplicationConfigurationProducer])
 
-  override protected def configurationNameForPackage(packageName: String): String = "ZIO Tests in $packageName"
+  override protected def configurationNameForPackage(packageName: String): String = s"ZIO Tests in $packageName"
 
   override protected def configurationName(testClass: ScTypeDefinition, testName: String): String =
-    StringUtil.getShortName(testClass.qualifiedName) + Option(testName).fold("")("." + _)
+    StringUtil.getShortName(testClass.qualifiedName)
 
   override protected def getTestClassWithTestNameImpl(location: Location[_ <: PsiElement]): (ScTypeDefinition, String) =
     location.getPsiElement match {
