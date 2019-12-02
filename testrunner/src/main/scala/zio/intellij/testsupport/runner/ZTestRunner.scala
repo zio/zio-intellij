@@ -46,7 +46,7 @@ object ZTestRunner {
 }
 
 object TestRunnerReporter {
-  def apply[L, E, S](): TestReporter[L, E, S] = { (duration: Duration, executedSpec: ExecutedSpec[L, E, S]) =>
+  def apply[L, E, S](): TestReporter[L, E, S] = { (_: Duration, executedSpec: ExecutedSpec[L, E, S]) =>
     for {
       res <- render(executedSpec.mapLabel(_.toString))
       _   <- ZIO.foreach(res)(s => ZIO.effectTotal(println(s)))

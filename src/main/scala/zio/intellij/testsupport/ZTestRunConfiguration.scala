@@ -1,7 +1,5 @@
 package zio.intellij.testsupport
 
-import java.io.File
-
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.{JavaCommandLineState, RunProfileState}
 import com.intellij.execution.runners.ExecutionEnvironment
@@ -9,8 +7,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.util.PathUtil
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration
-
-import scala.util.Try
 
 final class ZTestRunConfiguration(
   project: Project,
@@ -38,7 +34,8 @@ final class ZTestRunConfiguration(
     // .·´¯`(>▂<)´¯`·.
 
     val state = super.getState(executor, env).asInstanceOf[JavaCommandLineState]
-    val runnersPath = PathUtil.getJarPathForClass(getClass)
+    val runnersPath = PathUtil
+      .getJarPathForClass(getClass)
       .replace("zio-intellij.jar", "testrunner.jar")
 
     state.getJavaParameters.getClassPath.add(runnersPath)

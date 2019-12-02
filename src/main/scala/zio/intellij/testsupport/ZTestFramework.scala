@@ -12,10 +12,7 @@ final class ZTestFramework extends AbstractTestFramework {
   override def getName: String                 = "ZIO Test"
 
   override protected def getLibraryDependencies(scalaVersion: Option[String]): Seq[String] =
-    Seq(
-      "\"dev.zio\" %% \"zio-test\" % \"latest.integration\" % \"test\"",
-      "\"dev.zio\" %% \"zio-test-sbt\" % \"latest.integration\" % \"test\""
-    )
+    Seq("\"dev.zio\" %% \"zio-test\" % \"latest.integration\" % \"test\"")
 
   override protected def getLibraryResolvers(scalaVersion: Option[String]): Seq[String] = Seq.empty
 

@@ -1,7 +1,9 @@
 <idea-plugin>
     <id>zio.intellij.zio-intellij</id>
     <name>ZIO for IntelliJ IDEA</name>
-    <vendor email="hmemcpy@gmail.com" url="https://github.com/hmemcpy/zio-intellij">https://github.com/hmemcpy/zio-intellij</vendor>
+    <vendor email="hmemcpy@gmail.com" url="https://github.com/hmemcpy/zio-intellij">
+        https://github.com/hmemcpy/zio-intellij
+    </vendor>
 
     <description><![CDATA[
     A companion IntelliJ IDEA plugin for the ZIO library ecosystem.<br>
@@ -17,19 +19,23 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyUnitInspection"
-                         displayName="Simplify returning Unit to .unit" groupPath="Scala,ZIO" groupName="Simplifications"
+                         displayName="Simplify returning Unit to .unit" groupPath="Scala,ZIO"
+                         groupName="Simplifications"
                          shortName="SimplifyUnitInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyIgnoreInspection"
-                         displayName="Simplify recovering with Unit to .ignore" groupPath="Scala,ZIO" groupName="Simplifications"
+                         displayName="Simplify recovering with Unit to .ignore" groupPath="Scala,ZIO"
+                         groupName="Simplifications"
                          shortName="SimplifyIgnoreInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyAsInspection"
-                         displayName="Simplify discarding effect result to .as/.asError" groupPath="Scala,ZIO" groupName="Simplifications"
+                         displayName="Simplify discarding effect result to .as/.asError" groupPath="Scala,ZIO"
+                         groupName="Simplifications"
                          shortName="SimplifyAsInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyBimapInspection"
-                         displayName="Simplify mapping result and error effects to .bimap" groupPath="Scala,ZIO" groupName="Simplifications"
+                         displayName="Simplify mapping result and error effects to .bimap" groupPath="Scala,ZIO"
+                         groupName="Simplifications"
                          shortName="SimplifyBimapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyWhenInspection"
@@ -37,7 +43,8 @@
                          shortName="SimplifyWhenInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedOptionInspection"
-                         displayName="Simplify optional values to .none/.some" groupPath="Scala,ZIO" groupName="Simplifications"
+                         displayName="Simplify optional values to .none/.some" groupPath="Scala,ZIO"
+                         groupName="Simplifications"
                          shortName="SimplifySucceedOptionInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
         <intentionAction>
@@ -48,7 +55,8 @@
         <!-- test runner -->
         <configurationType implementation="zio.intellij.testsupport.ZTestConfigurationType"/>
         <runConfigurationProducer implementation="zio.intellij.testsupport.ZTestRunConfigurationProducer"/>
-        <runLineMarkerContributor implementationClass="zio.intellij.testsupport.ZTestRunLineMarkerProvider" language="Scala" order="first" />
+        <runLineMarkerContributor implementationClass="zio.intellij.testsupport.ZTestRunLineMarkerProvider"
+                                  language="Scala" order="first"/>
         <testFramework implementation="zio.intellij.testsupport.ZTestFramework" order="first"/>
 
     </extensions>
