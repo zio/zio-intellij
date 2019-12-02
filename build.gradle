@@ -3,13 +3,13 @@ plugins {
     id 'scala'
 }
 
-group 'dev.zio.intellij'
+group 'zio.intellij'
 version '0.1.0'
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2019.2.4'
-    plugins 'org.intellij.scala:2019.2.36', 'java'
+    plugins 'org.intellij.scala:2019.2.37', 'java'
 }
 
 repositories() {
