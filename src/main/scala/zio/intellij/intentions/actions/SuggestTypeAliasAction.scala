@@ -12,7 +12,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiManager
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
 import org.jetbrains.plugins.scala.lang.psi.types.api.{ParameterizedType, ScTypeText, UndefinedType}
 import org.jetbrains.plugins.scala.lang.psi.types.recursiveUpdate.ScSubstitutor
-import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType}
+import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresentationContext}
 import org.jetbrains.plugins.scala.project.ProjectContext
 import zio.intellij.intentions.ZTypeAnnotationIntention
 
@@ -44,7 +44,9 @@ final class SuggestTypeAliasAction extends ZTypeAnnotationIntention {
       val replaced = te.replace(createTypeElementFromText(aliases.head.canonicalText, te.getContext, te))
       TypeAdjuster.markToAdjust(replaced)
     } else {
-      val texts = aliases.map(ScTypeText)
+      implicit val tpc: TypePresentationContext = TypePresentationContext(te)
+
+      val texts = aliases.map(ScTypeText(_))
       val expr  = new ChooseTypeTextExpression(texts, ScTypeText(declaredType))
       startTemplate(te, te.getParent, expr, editor)
     }

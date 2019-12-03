@@ -1,8 +1,9 @@
 import BuildHelper._
 
 intellijPluginName in ThisBuild := "zio-intellij"
-intellijBuild in ThisBuild := "192.7142.36" // 2019.2
-//intellijBuild in ThisBuild := "193.4778.7" // 2019.3
+
+// Repository: https://www.jetbrains.com/intellij-repository/releases
+intellijBuild in ThisBuild := "193.5233.102" // 2019.3
 
 val ScalaVersion = "2.12.10"
 

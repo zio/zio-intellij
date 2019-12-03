@@ -23,13 +23,11 @@ trait ScalaSdkOwner extends Test {
 
   protected lazy val myLoaders: ListBuffer[LibraryLoader] = mutable.ListBuffer.empty[LibraryLoader]
 
-  protected def setUpLibraries(implicit module: Module): Unit = {
-
+  protected def setUpLibraries(implicit module: Module): Unit =
     librariesLoaders.foreach { loader =>
       myLoaders += loader
       loader.init
     }
-  }
 
   protected def disposeLibraries(implicit module: Module): Unit = {
     myLoaders.foreach(_.clean)
@@ -49,20 +47,25 @@ trait ScalaSdkOwner extends Test {
 object ScalaSdkOwner {
   // todo: eventually move to version Scala_2_13
   //       (or better, move ScalaLanguageLevel.getDefault to Scala_2_13 and use ScalaVersion.default again)
-  val defaultSdkVersion: ScalaVersion = Scala_2_12 // ScalaVersion.default
+  val defaultSdkVersion: ScalaVersion          = Scala_2_12 // ScalaVersion.default
   val allTestVersions: SortedSet[ScalaVersion] = SortedSet(ScalaVersion.allScalaVersions: _*)
 
   def selectVersion(wantedVersion: ScalaVersion, possibleVersions: SortedSet[ScalaVersion]): ScalaVersion =
     possibleVersions.iteratorFrom(wantedVersion).toStream.headOption.getOrElse(possibleVersions.last)
 
   lazy val configuredScalaVersion: Option[ScalaVersion] = {
-    scala.util.Properties.envOrNone("SCALA_SDK_TEST_VERSION").map(
-      ScalaVersion.fromString(_).filter(allTestVersions.contains).getOrElse(
-        throw new AssertionError(
-          "Scala SDK Version specified in environment variable SCALA_SDK_TEST_VERSION is not one of "
-            + allTestVersions.mkString(", ")
-        )
+    scala.util.Properties
+      .envOrNone("SCALA_SDK_TEST_VERSION")
+      .map(
+        ScalaVersion
+          .fromString(_)
+          .filter(allTestVersions.contains)
+          .getOrElse(
+            throw new AssertionError(
+              "Scala SDK Version specified in environment variable SCALA_SDK_TEST_VERSION is not one of "
+                + allTestVersions.mkString(", ")
+            )
+          )
       )
-    )
   }
 }
