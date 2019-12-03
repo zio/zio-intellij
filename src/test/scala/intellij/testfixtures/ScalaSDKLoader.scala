@@ -10,7 +10,7 @@ import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibrary
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.{JarFileSystem, VirtualFile}
 import com.intellij.testFramework.PsiTestUtil
-import org.jetbrains.plugins.scala.project.{ModuleExt, ScalaLibraryProperties, ScalaLibraryType, template}
+import org.jetbrains.plugins.scala.project.{template, ModuleExt, ScalaLibraryProperties, ScalaLibraryType}
 import org.junit.Assert._
 
 case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryLoader {
@@ -29,24 +29,21 @@ case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryL
 
   def scalaReflectDescription(implicit scalaVersion: ScalaVersion): DependencyDescription = scalaDependency("reflect")
 
-  private def scalaDependency(kind: String)
-                             (implicit scalaVersion: ScalaVersion) = {
+  private def scalaDependency(kind: String)(implicit scalaVersion: ScalaVersion) = {
     val (org, idPrefix, idSuffix) = scalaVersion match {
       case Scala_3_0 => ("ch.epfl.lamp", "dotty", "_" + scalaVersion.major)
-      case _ => ("org.scala-lang", "scala", "")
+      case _         => ("org.scala-lang", "scala", "")
     }
 
     DependencyDescription(org, idPrefix + "-" + kind + idSuffix, scalaVersion.minor)
   }
 
-
   protected def binaryDependencies(implicit version: ScalaVersion): List[DependencyDescription] =
     for {
       descriptor <- scalaCompilerDescription ::
-        scalaLibraryDescription ::
-        scalaReflectDescription ::
-        Nil
-
+                     scalaLibraryDescription ::
+                     scalaReflectDescription ::
+                     Nil
       if includeScalaReflect || !descriptor.artId.contains("reflect")
     } yield descriptor
 
@@ -60,7 +57,7 @@ case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryL
 
   override final def init(implicit module: Module, version: ScalaVersion): Unit = {
     val dependencies = binaryDependencies
-    val resolved = DependencyManager.resolve(dependencies: _*)
+    val resolved     = DependencyManager.resolve(dependencies: _*)
 
     assertEquals(
       s"Failed to resolve scala sdk version $version, result:\n${resolved.mkString("\n")}",

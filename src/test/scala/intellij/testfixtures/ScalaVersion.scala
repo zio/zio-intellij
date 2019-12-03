@@ -5,8 +5,8 @@ import org.jetbrains.plugins.scala.project.ScalaLanguageLevel
 /**
  * @author Nikolay.Tropin
  */
-sealed abstract class ScalaVersion(val languageLevel: ScalaLanguageLevel,
-                                   private val minorSuffix: String) extends Ordered[ScalaVersion] {
+sealed abstract class ScalaVersion(val languageLevel: ScalaLanguageLevel, private val minorSuffix: String)
+    extends Ordered[ScalaVersion] {
 
   def major: String = languageLevel.getVersion
 
@@ -32,32 +32,38 @@ object ScalaVersion {
     ScalaVersion.allScalaVersions.find(_.toString == versionString)
 }
 
-case object Scala_2_9 extends ScalaVersion(
-  ScalaLanguageLevel.Scala_2_9,
-  "3"
-)
+case object Scala_2_9
+    extends ScalaVersion(
+      ScalaLanguageLevel.Scala_2_9,
+      "3"
+    )
 
-case object Scala_2_10 extends ScalaVersion(
-  ScalaLanguageLevel.Scala_2_10,
-  "7"
-)
+case object Scala_2_10
+    extends ScalaVersion(
+      ScalaLanguageLevel.Scala_2_10,
+      "7"
+    )
 
-case object Scala_2_11 extends ScalaVersion(
-  ScalaLanguageLevel.Scala_2_11,
-  "12"
-)
+case object Scala_2_11
+    extends ScalaVersion(
+      ScalaLanguageLevel.Scala_2_11,
+      "12"
+    )
 
-case object Scala_2_12 extends ScalaVersion(
-  ScalaLanguageLevel.Scala_2_12,
-  "3"
-)
+case object Scala_2_12
+    extends ScalaVersion(
+      ScalaLanguageLevel.Scala_2_12,
+      "3"
+    )
 
-case object Scala_2_13 extends ScalaVersion(
-  ScalaLanguageLevel.Scala_2_13,
-  "0"
-)
+case object Scala_2_13
+    extends ScalaVersion(
+      ScalaLanguageLevel.Scala_2_13,
+      "0"
+    )
 
-case object Scala_3_0 extends ScalaVersion(
-  ScalaLanguageLevel.Scala_3_0,
-  "0-RC1"
-)
+case object Scala_3_0
+    extends ScalaVersion(
+      ScalaLanguageLevel.Scala_3_0,
+      "0-RC1"
+    )

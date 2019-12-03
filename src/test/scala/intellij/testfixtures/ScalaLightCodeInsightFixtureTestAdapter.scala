@@ -21,7 +21,10 @@ import org.junit.Assert.{assertNotNull, fail}
  * Date: 3/5/12
  */
 abstract class ScalaLightCodeInsightFixtureTestAdapter
-  extends LightJavaCodeInsightFixtureTestCase with ScalaSdkOwner with TestFixtureProvider with FailableTest {
+    extends LightJavaCodeInsightFixtureTestCase
+    with ScalaSdkOwner
+    with TestFixtureProvider
+    with FailableTest {
 
   import ScalaLightCodeInsightFixtureTestAdapter._
   import libraryLoaders._
@@ -40,7 +43,7 @@ abstract class ScalaLightCodeInsightFixtureTestAdapter
 
   override protected def getProjectDescriptor: LightProjectDescriptor = new ScalaLightProjectDescriptor() {
     override def tuneModule(module: Module): Unit = setUpLibraries(module)
-    override def getSdk: Sdk = SmartJDKLoader.getOrCreateJDK()
+    override def getSdk: Sdk                      = SmartJDKLoader.getOrCreateJDK()
   }
 
   override def setUpLibraries(implicit module: Module): Unit = {
@@ -88,9 +91,11 @@ abstract class ScalaLightCodeInsightFixtureTestAdapter
 
   protected def getCurrentCodeStyleSettings: CodeStyleSettings = CodeStyle.getSettings(getProject)
 
-  protected def getCommonSettings: CommonCodeStyleSettings = getCurrentCodeStyleSettings.getCommonSettings(ScalaLanguage.INSTANCE)
+  protected def getCommonSettings: CommonCodeStyleSettings =
+    getCurrentCodeStyleSettings.getCommonSettings(ScalaLanguage.INSTANCE)
 
-  protected def getScalaSettings: ScalaCodeStyleSettings = getCurrentCodeStyleSettings.getCustomSettings(classOf[ScalaCodeStyleSettings])
+  protected def getScalaSettings: ScalaCodeStyleSettings =
+    getCurrentCodeStyleSettings.getCustomSettings(classOf[ScalaCodeStyleSettings])
 
   private def testHighlighting(virtualFile: VirtualFile): Unit = getFixture.testHighlighting(
     false,
@@ -99,7 +104,7 @@ abstract class ScalaLightCodeInsightFixtureTestAdapter
     virtualFile
   )
 
-  protected def changePsiAt(offset: Int): Unit = {
+  protected def changePsiAt(offset: Int): Unit =
     invokeAndWait {
       getEditor.getCaretModel.moveToOffset(offset)
       myFixture.`type`('a')
@@ -107,7 +112,6 @@ abstract class ScalaLightCodeInsightFixtureTestAdapter
       myFixture.performEditorAction(IdeActions.ACTION_EDITOR_BACKSPACE)
       commitDocument()
     }
-  }
 
   private def commitDocument(): Unit = PsiDocumentManager.getInstance(getProject).commitDocument(getEditor.getDocument)
 }
@@ -117,7 +121,7 @@ object ScalaLightCodeInsightFixtureTestAdapter {
   def normalize(text: String, stripTrailingSpaces: Boolean = true): String =
     text.stripMargin.replace("\r", "") match {
       case result if stripTrailingSpaces => result.trim
-      case result => result
+      case result                        => result
     }
 
   def findCaretOffset(text: String, stripTrailingSpaces: Boolean): (String, Int) = {
@@ -138,13 +142,16 @@ object ScalaLightCodeInsightFixtureTestAdapter {
 
     @scala.annotation.tailrec
     def collectCaretIndices(idx: Int)(indices: Seq[Int]): Seq[Int] =
-      if (idx < 0) indices else {
+      if (idx < 0) indices
+      else {
         val nextIdx = caretIndex(idx + 1)
         collectCaretIndices(nextIdx)(indices :+ idx)
       }
 
     val caretIndices = collectCaretIndices(caretIndex(0))(Seq[Int]())
-    val caretIndicesNormalized = caretIndices.zipWithIndex.map { case (caretIdx, idx) => caretIdx - idx * CARET_TAG.length }
+    val caretIndicesNormalized = caretIndices.zipWithIndex.map {
+      case (caretIdx, idx) => caretIdx - idx * CARET_TAG.length
+    }
     (
       textNormalized.replace(CARET_TAG, ""),
       caretIndicesNormalized
@@ -153,12 +160,10 @@ object ScalaLightCodeInsightFixtureTestAdapter {
 
   implicit class Ext(private val adapter: ScalaLightCodeInsightFixtureTestAdapter) extends AnyVal {
 
-    def configureJavaFile(fileText: String,
-                          className: String,
-                          packageName: String = null): Unit = inWriteAction {
+    def configureJavaFile(fileText: String, className: String, packageName: String = null): Unit = inWriteAction {
       val root = LightPlatformTestCase.getSourceRoot match {
         case sourceRoot if packageName == null => sourceRoot
-        case sourceRoot => sourceRoot.createChildDirectory(null, packageName)
+        case sourceRoot                        => sourceRoot.createChildDirectory(null, packageName)
       }
 
       val file = root.createChildData(null, className + ".java")
