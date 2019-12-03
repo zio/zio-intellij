@@ -1,15 +1,11 @@
 import BuildHelper._
 
-intellijPluginName in ThisBuild := "zio-intellij"
-
-// Repository: https://www.jetbrains.com/intellij-repository/releases
-intellijBuild in ThisBuild := "193.5233.102" // 2019.3
-
 val ScalaVersion = "2.12.10"
 
 lazy val root = project
   .in(file("."))
   .enablePlugins(SbtIdeaPlugin)
+  .settings(org.jetbrains.sbtidea.Keys.buildSettings)
   .settings(
     name := "zio-intellij",
     version := "0.1.0",
@@ -18,10 +14,14 @@ lazy val root = project
     javacOptions in Global ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked"),
     scalacOptions in Global ++= Seq("-target:jvm-1.8", "-deprecation"),
     scalacOptions ++= ScalacOptions,
-    intellijInternalPlugins := Seq("java"),
+    autoScalaLibrary := false,
+    intellijPluginName := "zio-intellij",
+    intellijPlatform := IntelliJPlatform.IdeaCommunity,
+    // Repository: https://www.jetbrains.com/intellij-repository/releases
+    intellijBuild := "193.5233.102", // 2019.3
+    intellijInternalPlugins += "java",
     intellijExternalPlugins += "org.intellij.scala:2019.3.17".toPlugin,
-//    packageLibraryMappings := Seq.empty,
-    packageLibraryMappings += "org.scala-lang" % "scala-library" % ScalaVersion -> Some("lib/scala-library.jar"),
+    intellijMainJars ++= maybeToolsJar,
     welcomeMessage
   )
 
