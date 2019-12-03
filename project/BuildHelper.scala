@@ -37,6 +37,7 @@ object BuildHelper {
     s"""|${header(s"ZIO IntelliJ ${version.value}")}
         |Useful sbt tasks:
         |${item("fmt")} - Formats source files using scalafmt
+        |${item("packageArtifactZip")} - Produces a zip file of this plugin which can be used to install it manually
         |${item("runIDE")} - runs IntelliJ with this plugin""".stripMargin
   }
 }
