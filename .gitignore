@@ -7,12 +7,10 @@
 ### Scala ###
 *.class
 *.log
-.bloop/*
-.metals/*
-.idea/*
-target/*
-project/.bloop/*
-project/target/*
+.bloop
+.metals
+.idea
+target
 
 ### Gradle ###
 .gradle
