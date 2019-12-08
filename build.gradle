@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.intellij' version '0.4.11'
+    id 'org.jetbrains.intellij' version '0.4.14'
     id 'scala'
 }
 
@@ -8,8 +8,8 @@ version '0.1.0'
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2019.2.4'
-    plugins 'org.intellij.scala:2019.2.37', 'java'
+    version '2019.3'
+    plugins 'org.intellij.scala:2019.3.17', 'java'
 }
 
 repositories() {
@@ -17,8 +17,8 @@ repositories() {
 }
 
 dependencies {
-    compileOnly 'org.scala-lang:scala-library:2.12.7'
-    testCompileOnly 'org.scala-lang:scala-library:2.12.7'
+    compileOnly 'org.scala-lang:scala-library:2.12.10'
+    testCompileOnly 'org.scala-lang:scala-library:2.12.10'
 }
 
 patchPluginXml {

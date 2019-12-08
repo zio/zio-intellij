@@ -45,9 +45,8 @@ final class SuggestTypeAliasAction extends ZTypeAnnotationIntention {
       TypeAdjuster.markToAdjust(replaced)
     } else {
       implicit val tpc: TypePresentationContext = TypePresentationContext(te)
-
-      val texts = aliases.map(ScTypeText(_))
-      val expr  = new ChooseTypeTextExpression(texts, ScTypeText(declaredType))
+      val texts                                 = aliases.map(ScTypeText(_))
+      val expr                                  = new ChooseTypeTextExpression(texts, ScTypeText(declaredType))
       startTemplate(te, te.getParent, expr, editor)
     }
 
