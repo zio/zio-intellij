@@ -1,6 +1,5 @@
 package org.jetbrains.plugins.scala
 
-import com.intellij.openapi.module.Module
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 
 /**

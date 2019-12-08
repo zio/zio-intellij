@@ -9,7 +9,8 @@ class ScalaLightProjectDescriptor extends LightProjectDescriptor {
 
   private var myModule: Module = _
 
-  class SetupHandlerDelegate(delegate: LightProjectDescriptor.SetupHandler) extends LightProjectDescriptor.SetupHandler {
+  class SetupHandlerDelegate(delegate: LightProjectDescriptor.SetupHandler)
+      extends LightProjectDescriptor.SetupHandler {
     override def moduleCreated(module: Module): Unit = {
       delegate.moduleCreated(module)
       myModule = module

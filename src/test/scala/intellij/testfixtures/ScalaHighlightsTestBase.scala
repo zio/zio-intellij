@@ -30,33 +30,41 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
 
   protected override def checkTextHasNoErrors(text: String): Unit = {
     val ranges = findRanges(text)
-    assertTrue(if (shouldPass) s"Highlights found at: ${ranges.mkString(", ")}." else failingPassed,
-      !shouldPass ^ ranges.isEmpty)
+    assertTrue(
+      if (shouldPass) s"Highlights found at: ${ranges.mkString(", ")}." else failingPassed,
+      !shouldPass ^ ranges.isEmpty
+    )
   }
 
   protected def checkTextHasError(text: String, allowAdditionalHighlights: Boolean = false): Unit = {
-    val actualRanges = findRanges(text)
+    val actualRanges  = findRanges(text)
     val expectedRange = selectedRange(getEditor.getSelectionModel)
     checkTextHasError(Seq(expectedRange), actualRanges, allowAdditionalHighlights)
   }
 
-  protected def checkTextHasError(expectedHighlightRanges: Seq[TextRange],
-                                  actualHighlightRanges: Seq[TextRange],
-                                  allowAdditionalHighlights: Boolean): Unit = {
+  protected def checkTextHasError(
+    expectedHighlightRanges: Seq[TextRange],
+    actualHighlightRanges: Seq[TextRange],
+    allowAdditionalHighlights: Boolean
+  ): Unit = {
     val expectedRangesNotFound = expectedHighlightRanges.filterNot(actualHighlightRanges.contains)
     if (shouldPass) {
       assertTrue(s"Highlights not found: $description", actualHighlightRanges.nonEmpty)
       assertTrue(
         s"Highlights found at: ${actualHighlightRanges.mkString(", ")}, " +
           s"not found: ${expectedRangesNotFound.mkString(", ")}",
-        expectedRangesNotFound.isEmpty)
+        expectedRangesNotFound.isEmpty
+      )
       val duplicatedHighlights = actualHighlightRanges
         .groupBy(identity)
         .mapValues(_.length)
         .toSeq
         .collect { case (highlight, count) if count > 1 => highlight }
 
-      assertTrue(s"Some highlights were duplicated: ${duplicatedHighlights.mkString(", ")}", duplicatedHighlights.isEmpty)
+      assertTrue(
+        s"Some highlights were duplicated: ${duplicatedHighlights.mkString(", ")}",
+        duplicatedHighlights.isEmpty
+      )
       if (!allowAdditionalHighlights) {
         assertTrue(
           s"Found too many highlights: ${actualHighlightRanges.mkString(", ")}, " +
@@ -73,14 +81,16 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
   protected def findRanges(text: String): Seq[TextRange] = configureByText(text).map(_._2)
 
   protected def configureByText(text: String): Seq[(HighlightInfo, TextRange)] = {
-    val fileText = createTestText(text)
+    val fileText                 = createTestText(text)
     val (normalizedText, offset) = findCaretOffset(fileText, stripTrailingSpaces = true)
 
     val fixture = getFixture
     fixture.configureByText(fileType, normalizedText)
 
     import JavaConverters._
-    val highlightInfos = fixture.doHighlighting().asScala
+    val highlightInfos = fixture
+      .doHighlighting()
+      .asScala
       .filter(it => descriptionMatches(it.getDescription))
     highlightInfos
       .map(info => (info, highlightedRange(info)))
@@ -99,7 +109,7 @@ object ScalaHighlightsTestBase {
 
   private def checkOffset(pair: (HighlightInfo, TextRange), offset: Int): Boolean = pair match {
     case _ if offset == -1 => true
-    case (_, range) => range.containsOffset(offset)
+    case (_, range)        => range.containsOffset(offset)
   }
 }
 
@@ -128,7 +138,10 @@ abstract class ScalaAnnotatorQuickFixTestBase extends ScalaHighlightsTestBase {
   protected def checkIsNotAvailable(text: String, hint: String): Unit = {
     val maybeAction = findQuickFix(text, hint)
     assertTrue("Quick fix not found.", maybeAction.nonEmpty)
-    assertTrue("Quick fix is available", maybeAction.forall(action => !action.isAvailable(getProject, getEditor, getFile)))
+    assertTrue(
+      "Quick fix is available",
+      maybeAction.forall(action => !action.isAvailable(getProject, getEditor, getFile))
+    )
   }
 
   private def findQuickFix(text: String, hint: String): Option[IntentionAction] =
@@ -181,8 +194,7 @@ trait ForceInspectionSeverity extends ScalaInspectionTestBase {
   }
 
   private def inspectionEP =
-    LocalInspectionEP.LOCAL_INSPECTION
-      .getExtensions
+    LocalInspectionEP.LOCAL_INSPECTION.getExtensions
       .find(_.implementationClass == classOfInspection.getCanonicalName)
       .get
 

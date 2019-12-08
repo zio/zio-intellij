@@ -18,7 +18,7 @@ abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention 
 
   override def invocationStrategy(maybeEditor: Option[Editor]): Strategy = ZStrategy {
     case (te, declaredType) if maybeEditor.isDefined => invoke(te, declaredType, maybeEditor.get)
-    case _ => false
+    case _                                           => false
   }
 
   protected def invoke(te: ScTypeElement, declaredType: ScType, editor: Editor): Boolean
