@@ -9,7 +9,7 @@ version '0.1.0'
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2019.3'
-    plugins 'org.intellij.scala:2019.3.17', 'java'
+    plugins 'org.intellij.scala:2019.3.23', 'java'
 }
 
 repositories() {
