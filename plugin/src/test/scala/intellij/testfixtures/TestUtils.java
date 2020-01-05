@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.jetbrains.plugins.scala.util;
+package intellij.testfixtures;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;

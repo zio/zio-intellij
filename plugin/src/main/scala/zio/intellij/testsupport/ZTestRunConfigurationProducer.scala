@@ -64,15 +64,15 @@ final class ZTestRunConfigurationProducer
   override protected def configurationName(testClass: ScTypeDefinition, testName: String): String =
     StringUtil.getShortName(testClass.qualifiedName)
 
-  override protected def getTestClassWithTestNameImpl(location: Location[_ <: PsiElement]): (ScTypeDefinition, String) =
-    location.getPsiElement match {
-      case IsZioTestElement(td, tm) =>
-        tm match {
-          case Some(testName(name)) =>
-            (td, name)
-          case _ =>
-            (td, null)
-        }
-      case _ => (null, null) // god help me
-    }
+  override def getTestClassWithTestName(location: Location[_ <: PsiElement]): (ScTypeDefinition, String) =
+      location.getPsiElement match {
+        case IsZioTestElement(td, tm) =>
+          tm match {
+            case Some(testName(name)) =>
+              (td, name)
+            case _ =>
+              (td, null)
+          }
+        case _ => (null, null) // god help me
+      }
 }

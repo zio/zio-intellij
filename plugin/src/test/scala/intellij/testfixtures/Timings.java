@@ -2,7 +2,7 @@
  * Copyright (c) 2000-2005 by JetBrains s.r.o. All Rights Reserved.
  * Use is subject to license terms.
  */
-package org.jetbrains.plugins.scala.util;
+package intellij.testfixtures;
 
 import java.io.File;
 import java.io.FileReader;

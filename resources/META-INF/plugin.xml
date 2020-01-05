@@ -9,7 +9,7 @@
     A companion IntelliJ IDEA plugin for the ZIO library ecosystem.<br>
     ]]></description>
 
-    <idea-version since-build="192.5118.30"/>
+    <idea-version since-build="193.5233.102"/>
 
     <depends>org.intellij.scala</depends>
 

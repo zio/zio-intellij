@@ -41,7 +41,7 @@ final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
     }
   }
 
-  def buildLineInfo(url: String, project: Project, isClass: Boolean): RunLineMarkerContributor.Info = {
+  override def buildLineInfo(url: String, project: Project, isClass: Boolean): RunLineMarkerContributor.Info = {
     val icon    = iconFor(url, project, isClass)
     val actions = ExecutorAction.getActions(1)
     new ReplacementInfo(icon, actions, TooltipProvider)
