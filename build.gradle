@@ -4,7 +4,11 @@ plugins {
 }
 
 group 'zio.intellij'
-version '0.1.0'
+version '2019.3.0.1'
+
+repositories {
+    mavenCentral()
+}
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
@@ -12,12 +16,9 @@ intellij {
     plugins 'org.intellij.scala:2019.3.23', 'java'
 }
 
-repositories() {
-    mavenCentral()
-}
-
 dependencies {
-    compile project(':testrunner')
+    compile project(':testrunner_2.12')
+    compile project(':testrunner_2.13')
     compileOnly 'org.scala-lang:scala-library:2.12.10'
     testCompileOnly 'org.scala-lang:scala-library:2.12.10'
 }
