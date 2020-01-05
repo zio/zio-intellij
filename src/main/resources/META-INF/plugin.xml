@@ -1,12 +1,12 @@
 <idea-plugin>
     <id>zio.intellij.zio-intellij</id>
-    <name>ZIO for IntelliJ IDEA</name>
+    <name>IntelliJ IDEA support for the ZIO library ecosystem</name>
     <vendor email="hmemcpy@gmail.com" url="https://github.com/hmemcpy/zio-intellij">
         https://github.com/hmemcpy/zio-intellij
     </vendor>
 
     <description><![CDATA[
-    A companion IntelliJ IDEA plugin for the ZIO library ecosystem.<br>
+    This plugin adds enhancements to the users of the ZIO library .<br>
     ]]></description>
 
     <idea-version since-build="193.5233.102"/>

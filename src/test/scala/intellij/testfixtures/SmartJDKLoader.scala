@@ -56,7 +56,7 @@ object SmartJDKLoader {
     "/Library/Java/JavaVirtualMachines" // mac style
   )
 
-  def getOrCreateJDK(jdkVersion: JavaSdkVersion = JavaSdkVersion.JDK_1_8): Sdk = {
+  def getOrCreateJDK(jdkVersion: JavaSdkVersion = JavaSdkVersion.JDK_11): Sdk = {
     val jdkTable = JavaAwareProjectJdkTableImpl.getInstanceEx
     val jdkName  = jdkVersion.getDescription
     Option(jdkTable.findJdk(jdkName)).getOrElse {

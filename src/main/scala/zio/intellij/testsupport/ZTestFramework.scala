@@ -20,5 +20,6 @@ final class ZTestFramework extends AbstractTestFramework {
 
   override def isTestMethod(element: PsiElement): Boolean = isTestMethod(element, checkAbstract = false)
 
-  override def isTestMethod(element: PsiElement, checkAbstract: Boolean): Boolean = element.getText == "testM"
+  override def isTestMethod(element: PsiElement, checkAbstract: Boolean): Boolean =
+    element.getText == "testM"
 }
