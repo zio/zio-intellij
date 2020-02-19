@@ -1,17 +1,30 @@
 <idea-plugin>
     <id>zio.intellij.zio-intellij</id>
-    <name>IntelliJ IDEA support for the ZIO library ecosystem</name>
-    <vendor email="hmemcpy@gmail.com" url="https://github.com/hmemcpy/zio-intellij">
-        https://github.com/hmemcpy/zio-intellij
-    </vendor>
+    <name>ZIO for IntelliJ</name>
+    <vendor>The ZIO Maintainers</vendor>
 
-    <description><![CDATA[
-    This plugin adds enhancements to the users of the ZIO library .<br>
-    ]]></description>
+    <description>
+        <![CDATA[
+        Suggestions, refactorings, and other enhancements for the ZIO library ecosystem.
+        The following features are available:
+        <ul>
+        <li>Refactorings and suggestions</li>
+        <li>Support for zio-macros (e.g. <code>@accessible</code>)</li>
+        <li>Test runner</li>
+        <li>And much more!</li>
+        </ul>
+
+        Contribute to the plugin at <a href="https://github.com/zio/zio-intellij">https://github.com/zio/zio-intellij</a>
+      ]]>
+
+    </description>
 
     <idea-version since-build="193.5233.102"/>
 
     <depends>org.intellij.scala</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="org.intellij.scala">
         <syntheticMemberInjector implementation="zio.intellij.synthetic.macros.ModulePatternAccessible"/>
