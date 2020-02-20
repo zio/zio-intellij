@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'zio.intellij'
-version '2019.3.0.2'
+version '2019.3.0.3'
 
 repositories {
     mavenCentral()
