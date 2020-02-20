@@ -7,6 +7,11 @@ repositories() {
     mavenCentral()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 dependencies {
     compileOnly 'org.scala-lang:scala-library:2.13.1'
     compileOnly 'dev.zio:zio_2.13:1.0.0-RC17'
