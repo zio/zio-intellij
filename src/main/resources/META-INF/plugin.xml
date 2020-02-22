@@ -60,6 +60,18 @@
                          groupName="Simplifications"
                          shortName="SimplifySucceedOptionInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyCollectAllToForeachInspection"
+                         displayName="Simplify collection of effects obtained by mapping each element of some Iterable to .foreach/.foreachPar"
+                         groupPath="Scala,ZIO"
+                         groupName="Simplifications"
+                         shortName="SimplifyCollectAllToForeachInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyCollectAllToTraverseInspection"
+                         displayName="Simplify collection of effects obtained by mapping each element of some Iterable to .traverse/.traversePar"
+                         groupPath="Scala,ZIO"
+                         groupName="Simplifications"
+                         shortName="SimplifyCollectAllToTraverseInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.actions.SuggestTypeAliasAction</className>

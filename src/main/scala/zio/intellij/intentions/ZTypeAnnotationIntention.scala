@@ -6,13 +6,13 @@ import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
-import zio.intellij.inspections.zio
+import zio.intellij.inspections.zioClasses
 
 abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention {
   final override def getText: String = getFamilyName
 
   override protected def descriptionStrategy: Strategy = ZStrategy {
-    case (_, declaredType) => isOfClassFrom(declaredType, zio)
+    case (_, declaredType) => isOfClassFrom(declaredType, zioClasses)
     case _                 => false
   }
 

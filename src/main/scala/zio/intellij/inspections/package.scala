@@ -6,21 +6,12 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 
 package object inspections {
-  val zio = Array("zio.ZIO")
+  val zioClasses: Array[String] = Array("zio.ZIO")
 
   def invocation(methodName: String) = new Qualified(methodName == _)
 
-  private[inspections] val `.*>`         = invocation("*>").from(zio)
-  private[inspections] val `.as`         = invocation("as").from(zio)
-  private[inspections] val `.map`        = invocation("map").from(zio)
-  private[inspections] val `.mapError`   = invocation("mapError").from(zio)
-  private[inspections] val `.asError`    = invocation("asError").from(zio)
-  private[inspections] val `.catchAll`   = invocation("catchAll").from(zio)
-  private[inspections] val `.foldCause`  = invocation("foldCause").from(zio)
-  private[inspections] val `.foldCauseM` = invocation("foldCauseM").from(zio)
-
   def fromZio(r: ScExpression): Boolean =
-    isOfClassFrom(r, zio)
+    isOfClassFrom(r, zioClasses)
 
   class ZIOMemberReference(refName: String) {
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
@@ -29,8 +20,10 @@ package object inspections {
     }
   }
 
-  val `ZIO.unit`    = new ZIOMemberReference("unit")
-  val `ZIO.succeed` = new ZIOMemberReference("succeed")
+  val `ZIO.unit`          = new ZIOMemberReference("unit")
+  val `ZIO.succeed`       = new ZIOMemberReference("succeed")
+  val `ZIO.collectAll`    = new ZIOMemberReference("collectAll")
+  val `ZIO.collectAllPar` = new ZIOMemberReference("collectAllPar")
 
   object `()` {
     def unapply(expr: ScExpression): Boolean = expr match {
