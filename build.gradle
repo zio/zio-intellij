@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'zio.intellij'
-version '2019.3.0.4'
+version '2020.1.0.4'
 
 repositories {
     mavenCentral()
@@ -12,8 +12,8 @@ repositories {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2019.3'
-    plugins 'org.intellij.scala:2019.3.27', 'java'
+    version '2020.1'
+    plugins 'org.intellij.scala:2020.1.27', 'java'
 }
 
 dependencies {
@@ -22,11 +22,9 @@ dependencies {
 }
 
 patchPluginXml {
+    sinceBuild '201'
+    untilBuild '202'
     changeNotes """
-<h2>Note: this is the last supported release for IntelliJ IDEA 2019.x</h2>
-Please upgrade to the latest available IntelliJ IDEA to receive updates.
-<strong>&nbsp;</strong>
-<p>
 <strong>Bug fixes</strong>
 <ul>
     <li>The test runner no longer depends on a ZIO version!</li>
