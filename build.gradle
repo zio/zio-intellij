@@ -30,7 +30,7 @@ jar {
 }
 
 patchPluginXml {
-    sinceBuild '193'
+    sinceBuild '201'
     untilBuild '201.*'
     changeNotes """
     <p>What's new in this version?</p>
