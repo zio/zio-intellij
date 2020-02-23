@@ -8,7 +8,8 @@ import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
-import zio.intellij.inspections._
+import zio.intellij.inspections.zioClasses
+
 
 abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention with Iconable {
   final override def getText: String = getFamilyName
