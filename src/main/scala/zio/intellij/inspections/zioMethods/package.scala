@@ -9,4 +9,6 @@ package object zioMethods {
   private[inspections] val `.catchAll`   = invocation("catchAll").from(zioClasses)
   private[inspections] val `.foldCause`  = invocation("foldCause").from(zioClasses)
   private[inspections] val `.foldCauseM` = invocation("foldCauseM").from(zioClasses)
+
+  private[inspections] val `assert` = unqualified("assert").from(zioClasses)
 }

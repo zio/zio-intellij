@@ -1,18 +1,12 @@
 package zio.intellij.intentions.migrations
 
-import com.intellij.codeInsight.daemon.impl.AnnotationHolderImpl
-import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
-import com.intellij.lang.annotation.{Annotation, AnnotationSession}
+import com.intellij.lang.annotation.Annotation
 import com.intellij.openapi.editor.ex.util.EditorUIUtil
 import com.intellij.openapi.editor.{Caret, Editor, EditorModificationUtil}
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Iconable
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.{PsiDocumentManager, PsiElement, PsiMember}
 import com.intellij.refactoring.HelpID
 import com.intellij.refactoring.move.moveMembers.{MoveMemberHandler, MoveMembersOptions}
-import javax.swing.Icon
-import org.jetbrains.plugins.scala.annotator.element.ScConstructorInvocationAnnotator
 import org.jetbrains.plugins.scala.extensions.executeWriteActionCommand
 import org.jetbrains.plugins.scala.lang.psi.ScalaPsiUtil
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScConstructorInvocation
@@ -21,21 +15,16 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory._
 import org.jetbrains.plugins.scala.lang.refactoring.introduceField._
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaRefactoringUtil
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaRefactoringUtil._
+import zio.intellij.intentions.ZElementAnnotationIntention
 
-import scala.collection.JavaConverters._
-
-
-// this is a mess...
-final class MigrateTestSuiteToSpecField extends PsiElementBaseIntentionAction with Iconable {
+final class MigrateTestSuiteToSpecField extends ZElementAnnotationIntention[ScConstructorInvocation] {
   val ProblemText = "DefaultRunnableSpec is a trait and thus has no constructor"
 
   override def getFamilyName: String = "Migrate suite to the 'val spec = ...' syntax"
 
-  override def getText: String = getFamilyName
-
   override def invoke(project: Project, editor: Editor, element: PsiElement): Unit =
-    problemAnnotation(element, project, editor).foreach {
-      case (ctor, annotation) =>
+    problemAnnotations(element, project, editor).foreach {
+      case (ctor, List(annotation)) =>
         val file = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument)
         ctor.arguments.flatMap(_.exprs).headOption.map(_.getTextRange).foreach { range =>
           val startOffset = range.getStartOffset
@@ -44,31 +33,14 @@ final class MigrateTestSuiteToSpecField extends PsiElementBaseIntentionAction wi
           new IntroduceSpecFieldRefactoring(annotation)
             .invoke(file, startOffset, endOffset)(project, editor)
         }
-
+      case _ =>
     }
 
   override def isAvailable(project: Project, editor: Editor, element: PsiElement): Boolean =
-    problemAnnotation(element, project, editor).isDefined
-
-  private def problemAnnotation(
-    element: PsiElement,
-    project: Project,
-    editor: Editor
-  ): Option[(ScConstructorInvocation, Annotation)] = {
-    def annotationsFor(ctor: ScConstructorInvocation): List[Annotation] = {
-      val file   = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument)
-      val holder = new AnnotationHolderImpl(new AnnotationSession(file))
-      ScConstructorInvocationAnnotator.annotate(ctor, typeAware = true)(holder)
-      holder.asScala.toList
+    problemAnnotations(element, project, editor) match {
+      case Some((_, List(_))) => true
+      case _ => false
     }
-
-    for {
-      ctor <- Option(PsiTreeUtil.getParentOfType(element, classOf[ScConstructorInvocation]))
-      ann  <- annotationsFor(ctor).find(_.getMessage == ProblemText)
-    } yield (ctor, ann)
-  }
-
-  override def getIcon(flags: Int): Icon = zio.intellij.ZioIcon
 }
 
 final private[this] class IntroduceSpecFieldRefactoring(annotation: Annotation)
