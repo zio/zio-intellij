@@ -1,14 +1,17 @@
 package zio.intellij
 
+import com.intellij.psi.PsiAnnotation
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 
 package object inspections {
-  val zioClasses: Array[String] = Array("zio.ZIO")
+  val zioClasses: Array[String] = Array("zio.ZIO", "zio.test")
 
   def invocation(methodName: String) = new Qualified(methodName == _)
+  def unqualified(methodName: String) = new Unqualified(methodName == _)
 
   def fromZio(r: ScExpression): Boolean =
     isOfClassFrom(r, zioClasses)
@@ -83,4 +86,14 @@ package object inspections {
     }
   }
 
+  object IsDeprecated {
+    def unapply(expr: ScExpression): Option[PsiAnnotation] = expr match {
+      case ScMethodCall(ref: ScReferenceExpression, _) =>
+        ref.resolve() match {
+          case fn: ScFunctionDefinition if fn.isDeprecated => Some(fn.findAnnotation("scala.deprecated"))
+          case _                                           => None
+        }
+      case _ => None
+    }
+  }
 }

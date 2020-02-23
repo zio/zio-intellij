@@ -72,9 +72,16 @@
         <localInspection implementationClass="zio.intellij.inspections.deprecations.DeprecatedTraverseInspection"
                          displayName="Replace deprecated traverse methods with foreach"
                          groupPath="Scala,ZIO"
-                         groupName="Simplifications"
-                         shortName="DeprecatedTraverseInspection" level="WEAK WARNING"
+                         groupName="Migrations"
+                         shortName="DeprecatedTraverseInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.deprecations.DeprecatedAssertInspection"
+                         displayName="Replace deprecated assert methods with new syntax"
+                         groupPath="Scala,ZIO"
+                         groupName="Migrations"
+                         shortName="DeprecatedAssertInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
@@ -84,7 +91,7 @@
             <category>ZIO/Migrations</category>
             <className>zio.intellij.intentions.migrations.MigrateTestSuiteToSpecField</className>
         </intentionAction>
-
+        
         <!-- test runner -->
         <configurationType implementation="zio.intellij.testsupport.ZTestConfigurationType"/>
         <runConfigurationProducer implementation="zio.intellij.testsupport.ZTestRunConfigurationProducer"/>
