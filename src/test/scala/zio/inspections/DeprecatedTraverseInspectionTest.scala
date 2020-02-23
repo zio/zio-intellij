@@ -3,18 +3,23 @@ package zio.inspections
 import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.deprecations.DeprecatedTraverseInspection
 
-abstract class DeprecatedTraverseInspectionTest(methodToReplace: String, methodToReplaceWith: String)
-    extends ZInspectionTest[DeprecatedTraverseInspection] {
-  import EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
+abstract class DeprecatedTraverseInspectionTest(
+  methodToReplace: String,
+  methodToReplaceWith: String,
+  isParN: Boolean = false
+) extends ZInspectionTest[DeprecatedTraverseInspection] {
+  import EditorTestUtil.{ SELECTION_END_TAG => END, SELECTION_START_TAG => START }
+
+  private val params = if (isParN) "(n)(myIterable)(f)" else "(myIterable)(f)"
 
   override protected val hint: String = s"Replace with ZIO.$methodToReplaceWith"
 
   def testHighlighting(): Unit =
-    z(s"${START}ZIO.$methodToReplace$END(myIterable)(f)").assertHighlighted()
+    z(s"${START}ZIO.$methodToReplace$END$params").assertHighlighted()
 
   def testReplacement(): Unit = {
-    val text   = z(s"ZIO.$methodToReplace(myIterable)(f)")
-    val result = z(s"ZIO.$methodToReplaceWith(myIterable)(f)")
+    val text   = z(s"ZIO.$methodToReplace$params")
+    val result = z(s"ZIO.$methodToReplaceWith$params")
     testQuickFix(text, result, hint)
   }
 }
@@ -30,3 +35,17 @@ class DeprecatedTraverse_ToForeach_InspectionTest
 
 class DeprecatedTraversePar_ToForeachPar_InspectionTest
     extends DeprecatedTraverseInspectionTest(methodToReplace = "traversePar_", methodToReplaceWith = "foreachPar_")
+
+class DeprecatedTraverseParNToForeachParNInspectionTest
+    extends DeprecatedTraverseInspectionTest(
+      methodToReplace = "traverseParN",
+      methodToReplaceWith = "foreachParN",
+      isParN = true
+    )
+
+class DeprecatedTraverseParN_ToForeachParN_InspectionTest
+    extends DeprecatedTraverseInspectionTest(
+      methodToReplace = "traverseParN_",
+      methodToReplaceWith = "foreachParN_",
+      isParN = true
+    )
