@@ -62,7 +62,12 @@
                          enabledByDefault="true" language="Scala"/>
         <intentionAction>
             <category>ZIO/Suggestions</category>
-            <className>zio.intellij.intentions.actions.SuggestTypeAliasAction</className>
+            <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
+        </intentionAction>
+
+        <intentionAction>
+            <category>ZIO/Migrations</category>
+            <className>zio.intellij.intentions.migrations.MigrateTestSuiteToSpecField</className>
         </intentionAction>
 
         <!-- test runner -->

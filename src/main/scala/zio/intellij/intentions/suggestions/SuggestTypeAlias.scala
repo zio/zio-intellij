@@ -1,4 +1,4 @@
-package zio.intellij.intentions.actions
+package zio.intellij.intentions.suggestions
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.search.GlobalSearchScope
@@ -16,7 +16,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresen
 import org.jetbrains.plugins.scala.project.ProjectContext
 import zio.intellij.intentions.ZTypeAnnotationIntention
 
-final class SuggestTypeAliasAction extends ZTypeAnnotationIntention {
+final class SuggestTypeAlias extends ZTypeAnnotationIntention {
 
   override def getFamilyName: String = "Choose a more specific ZIO type alias"
 
