@@ -1,0 +1,11 @@
+object HelloWorldSpec
+  extends DefaultRunnableSpec {
+  <spot>val spec = suite("HelloWorldSpec")(
+    testM("Says Hello world!") {
+      for {
+        _ <- sayHello
+        output <- TestConsole.output
+      } yield assert(output, equalTo(Vector("Hello, World!")))
+    }
+  )</spot>
+}
