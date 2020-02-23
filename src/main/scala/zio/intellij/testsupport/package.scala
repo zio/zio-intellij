@@ -16,8 +16,6 @@ import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenTypes
 package object testsupport {
   val ZSuitePaths = List("zio.test.AbstractRunnableSpec")
 
-  val ZioTestIcon: Icon = getIcon("/images/zio-full-color-rgb.svg")
-
   def parentTypeDefinition(e: PsiElement): Option[ScTypeDefinition] =
     Option(PsiTreeUtil.getParentOfType(e, classOf[ScTypeDefinition], false))
 
