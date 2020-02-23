@@ -2,9 +2,7 @@
 <body>
 <pre>
 ZIO.collectAll(xs.map(f)) -> ZIO.foreach(xs)(f)
-ZIO.collectAll(xs.map(f)) -> ZIO.traverse(xs)(f)
 ZIO.collectAllPar(xs.map(f)) -> ZIO.foreachPar(xs)(f)
-ZIO.collectAllPar(xs.map(f)) -> ZIO.traversePar(xs)(f)
 </pre>
 </body>
 </html>

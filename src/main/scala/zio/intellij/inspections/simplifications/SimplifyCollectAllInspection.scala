@@ -5,15 +5,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
 import zio.intellij.inspections.collectionMethods.`.map`
 
-sealed trait SimplifyCollectAllInspection
-
-class SimplifyCollectAllToForeachInspection
+class SimplifyCollectAllInspection
     extends ZInspection(CollectAllToForeachSimplificationType, CollectAllParToForeachParSimplificationType)
-    with SimplifyCollectAllInspection
-
-class SimplifyCollectAllToTraverseInspection
-    extends ZInspection(CollectAllToTraverseSimplificationType, CollectAllParToTraverseParParSimplificationType)
-    with SimplifyCollectAllInspection
 
 sealed abstract class BaseCollectAllSimplificationType(methodName: String, methodExtractor: ZIOMemberReference)
     extends SimplificationType {
@@ -35,9 +28,3 @@ object CollectAllToForeachSimplificationType
 
 object CollectAllParToForeachParSimplificationType
     extends BaseCollectAllSimplificationType(methodName = "foreachPar", methodExtractor = `ZIO.collectAllPar`)
-
-object CollectAllToTraverseSimplificationType
-    extends BaseCollectAllSimplificationType(methodName = "traverse", methodExtractor = `ZIO.collectAll`)
-
-object CollectAllParToTraverseParParSimplificationType
-    extends BaseCollectAllSimplificationType(methodName = "traversePar", methodExtractor = `ZIO.collectAllPar`)
