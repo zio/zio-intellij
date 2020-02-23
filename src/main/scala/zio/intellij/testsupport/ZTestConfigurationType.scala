@@ -15,6 +15,5 @@ final class ZTestConfigurationType extends ConfigurationType with DumbAware {
 
   def getId: String = "ZIOTestRunConfiguration"
 
-  def getIcon: Icon = ZioTestIcon
-
+  def getIcon: Icon = zio.intellij.ZioIcon
 }
