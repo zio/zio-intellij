@@ -2,6 +2,7 @@ package zio.intellij.inspections.simplifications
 
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
+import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
 
@@ -16,15 +17,18 @@ object BimapSimplificationType extends SimplificationType {
         .withText(invocationText(qual, s"bimap(${b.getText}, ${a.getText})"))
         .highlightFrom(qual)
 
+    def toFunctionExpr(e: ScExpression): ScExpression =
+      ScalaPsiElementFactory.createExpressionFromText(s"_ => ${e.getText}")(e.projectContext)
+
     expr match {
       case qual `.map` a `.mapError` b => Some(replacement(qual, a, b))
-      case qual `.map` a `.asError` b  => Some(replacement(qual, a, b))
-      case qual `.as` a `.mapError` b  => Some(replacement(qual, a, b))
-      case qual `.as` a `.asError` b   => Some(replacement(qual, a, b))
+      case qual `.map` a `.asError` b  => Some(replacement(qual, a, toFunctionExpr(b)))
+      case qual `.as` a `.mapError` b  => Some(replacement(qual, toFunctionExpr(a), b))
+      case qual `.as` a `.asError` b   => Some(replacement(qual, toFunctionExpr(a), toFunctionExpr(b)))
       case qual `.mapError` a `.map` b => Some(replacement(qual, b, a))
-      case qual `.mapError` a `.as` b  => Some(replacement(qual, b, a))
-      case qual `.asError` a `.map` b  => Some(replacement(qual, b, a))
-      case qual `.asError` a `.as` b   => Some(replacement(qual, b, a))
+      case qual `.mapError` a `.as` b  => Some(replacement(qual, toFunctionExpr(b), a))
+      case qual `.asError` a `.map` b  => Some(replacement(qual, b, toFunctionExpr(a)))
+      case qual `.asError` a `.as` b   => Some(replacement(qual, toFunctionExpr(b), toFunctionExpr(a)))
       case _                           => None
     }
   }

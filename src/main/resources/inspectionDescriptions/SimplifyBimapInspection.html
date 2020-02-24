@@ -2,14 +2,14 @@
 <body>Simplify the following expressions to use <code>.bimap</code> instead:
 <pre>
 x.map(a).mapError(b)  -> x.bimap(b, a)
-x.map(a).asError(b)   -> x.bimap(b, a)
-x.as(a).mapError(b)   -> x.bimap(b, a)
-x.as(a).asError(b)    -> x.bimap(b, a)
+x.map(a).asError(b)   -> x.bimap(_ => b, a)
+x.as(a).mapError(b)   -> x.bimap(b, _ => a)
+x.as(a).asError(b)    -> x.bimap(_ => b, _ => a)
 
 x.mapError(a).map(b)  -> x.bimap(a, b)
-x.mapError(a).as(b)   -> x.bimap(a, b)
-x.asError(a).map(b)   -> x.bimap(a, b)
-x.asError(a).as(b)    -> x.bimap(a, b)
+x.mapError(a).as(b)   -> x.bimap(a, _ => b)
+x.asError(a).map(b)   -> x.bimap(_ => a, b)
+x.asError(a).as(b)    -> x.bimap(_ => a, _ => b)
 </pre>
 </body>
 </html>
