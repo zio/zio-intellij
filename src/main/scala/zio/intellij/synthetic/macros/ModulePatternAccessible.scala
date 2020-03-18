@@ -1,47 +1,66 @@
 package zio.intellij.synthetic.macros
 
-import org.jetbrains.plugins.scala.lang.psi.api.base.literals.ScStringLiteral
-import org.jetbrains.plugins.scala.lang.psi.api.base.{ScAnnotation, ScLiteral}
+import org.jetbrains.plugins.scala.lang.psi.api.base.{ScAnnotation, ScFieldId}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDeclaration
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
-import org.jetbrains.plugins.scala.lang.psi.types.PhysicalMethodSignature
+import org.jetbrains.plugins.scala.lang.psi.types.{PhysicalMethodSignature, TermSignature}
 
 class ModulePatternAccessible extends SyntheticMembersInjector {
 
-  private def annotationFirstParam(scAnnotation: ScAnnotation): Option[String] =
-    scAnnotation.annotationExpr.getAnnotationParameters.collectFirst {
-      case sl: ScStringLiteral => sl.getValue()
-    }
-
-  private def helperObjectExtension(annotation: ScAnnotation, sco: ScObject): Seq[String] =
-    annotationFirstParam(annotation)
-      .map(name => s"def $name : ${sco.qualifiedName}.Service[${sco.qualifiedName}] = ???")
-      .toSeq
-
-  private def accessorTraitExtension(sco: ScObject): String = {
+  private def members(sco: ScObject): Seq[String] = {
     val serviceTrait = sco.typeDefinitions.find(_.name == "Service")
-    val signatures = serviceTrait.toSeq.flatMap(_.allMethods).collect {
-      case PhysicalMethodSignature(method: ScFunctionDeclaration, _) => s"${method.getText} = ???"
+    val methods      = serviceTrait.toSeq.flatMap(td => td.allMethods ++ td.allVals)
+
+    object Field {
+      def unapply(ts: TermSignature): Option[ScFieldId] =
+        Some(ts.namedElement).collect {
+          case fid: ScFieldId => fid
+        }
     }
 
-    s"""trait Accessors extends ${sco.qualifiedName}.Service[${sco.name}] {" +
-           ${signatures.mkString("\n")}
-        }"""
+    methods.collect {
+      case Field(fid) =>
+        s"val ${fid.name} = zio.ZIO.access[zio.Has[${sco.qualifiedName}.Service]](_.get).flatMap(_.${fid.name})"
+      case PhysicalMethodSignature(method: ScFunctionDeclaration, _) =>
+        val name       = method.name
+        val typeParams = method.typeParametersClause.map(_.getText).getOrElse("")
+        val params     = method.paramClauses.getText
+        val typeParameterApplication =
+          method.typeParametersClause
+            .map { tps =>
+              tps.typeParameters
+                .map(tp => tp.name)
+                .mkString("[", ", ", "]")
+            }
+            .getOrElse("")
+        val parameterApplication =
+          method.paramClauses.clauses
+            .map { clause =>
+              clause.parameters
+                .map { parameter =>
+                  if (parameter.isVarArgs()) s"${parameter.name}: _*"
+                  else parameter.name
+                }
+                .mkString("(", ", ", ")")
+            }
+            .mkString("")
+        s"def $name$typeParams$params =" +
+          s" zio.ZIO.access[zio.Has[${sco.qualifiedName}.Service]](_.get)" +
+          s".flatMap(_.$name$typeParameterApplication$parameterApplication)"
+    }
   }
 
-  private def findAccessibleMacroAnnotation(sco: ScObject): Option[ScAnnotation] = {
-    val companion = sco.fakeCompanionClassOrCompanionClass
-    Option(companion.getAnnotation("zio.macros.annotation.accessible")).collect {
+  private def findAccessibleMacroAnnotation(sco: ScObject): Option[ScAnnotation] =
+    Option(sco.getAnnotation("zio.macros.accessible")).collect {
       case a: ScAnnotation => a
     }
-  }
 
   override def injectMembers(source: ScTypeDefinition): Seq[String] =
     source match {
       case sco: ScObject =>
         val annotation = findAccessibleMacroAnnotation(sco)
-        annotation.map(a => helperObjectExtension(a, sco) :+ accessorTraitExtension(sco)).getOrElse(Nil)
+        annotation.map(_ => members(sco)).getOrElse(Nil)
       case _ =>
         Nil
     }
