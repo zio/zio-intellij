@@ -17,8 +17,11 @@ intellij {
 }
 
 dependencies {
+    compile('com.lihaoyi:fansi_2.12:0.2.7') { transitive = false }
     compileOnly 'org.scala-lang:scala-library:2.12.10'
     testCompileOnly 'org.scala-lang:scala-library:2.12.10'
+    testCompile 'dev.zio:zio_2.12:1.0.0-RC18-2'
+    testCompile 'dev.zio:zio-test_2.12:1.0.0-RC18-2'
 }
 
 // do not change, this is needed for the test runner copy hack
