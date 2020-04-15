@@ -115,7 +115,8 @@ object ZTestTreeBuilderTest extends DefaultRunnableSpec {
           )
         )
 
-      assert(builder.testTree)(isSome(equalTo(expected)))
+      val actual = builder.testTree.get
+      assert(actual)(equalTo(expected))
     }
   )
 

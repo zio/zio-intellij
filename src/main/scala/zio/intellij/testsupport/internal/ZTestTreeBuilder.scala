@@ -2,8 +2,10 @@ package zio.intellij.testsupport.internal
 
 import java.util.concurrent.atomic.AtomicReference
 
-import fansi.{ Color, Str }
-import zio.intellij.testsupport.internal.ZTestTreeBuilder.{ Graph, Node, TestTree }
+import fansi.{Color, Str}
+import zio.intellij.testsupport.internal.ZTestTreeBuilder.Node.Kind.Error
+import zio.intellij.testsupport.internal.ZTestTreeBuilder.{Graph, Node, TestTree}
+import scala.compat.Platform.EOL
 
 import scala.annotation.tailrec
 
@@ -16,8 +18,8 @@ private[testsupport] class ZTestTreeBuilder {
       head <- ns.headOption
     } yield head.toTestTree
 
-  def addAll(lines: String): Unit =
-    lines.split(System.lineSeparator()).foreach(addLine)
+  private [testsupport] def addAll(lines: String): Unit =
+    lines.split(EOL).foreach(addLine)
 
   def addLine(line: String): Unit =
     graph.getAndUpdate(g => add0(line)(g))
@@ -32,7 +34,7 @@ private[testsupport] class ZTestTreeBuilder {
             case Nil => throw new Exception("empty node")
             case _ =>
               val last  = nodes.last
-              val child = last.find(node.name)
+              val child = last.find(node.value)
               val newChildren = child match {
                 case None    => last.children :+ node
                 case Some(c) => last.replace(c, node)
@@ -42,8 +44,12 @@ private[testsupport] class ZTestTreeBuilder {
           }
       }
 
-    val str  = s.dropWhile(_.isWhitespace)
-    val id   = (s.length - str.length) / 2
+    val str = s.dropWhile(_.isWhitespace)
+    val id = (str.length, (s.length - str.length) / 2) match {
+      case (0, _)                         => Option(graph.keys.toSeq.max).getOrElse(0)
+      case (_, size) if size > graph.size => graph.size
+      case (_, size)                      => size
+    }
     val node = Node(s)
 
     val g = graph.get(id) match {
@@ -64,15 +70,15 @@ object ZTestTreeBuilder {
     case class TestNode(label: String, status: Node.Status, message: Option[String] = None) extends TestTree
   }
 
-  case class Node(name: String, children: List[Node] = Nil) { self =>
+  case class Node(value: String, children: List[Node] = Nil) { self =>
     import Node.Kind._
     import Node.Status._
     import Node._
     import TestTree._
 
-    private lazy val ansi = Str(name.dropWhile(_.isWhitespace))
+    private lazy val ansi = Str(value.dropWhile(_.isWhitespace))
 
-    def find(s: String): Option[Node] = children.find(_.name == s)
+    def find(s: String): Option[Node] = children.find(_.value == s)
 
     def replace(n: Node, r: Node): List[Node] = children.updated(children.indexOf(n), r)
 
@@ -92,7 +98,22 @@ object ZTestTreeBuilder {
 
     def assertString: Option[String] =
       if (children.isEmpty || !children.forall(_.isAssertion)) None
-      else Some(children.map(_.ansi).mkString(System.lineSeparator()))
+      else Some(children.map(_.ansi).mkString(EOL))
+
+    def failureString: Option[String] = {
+      def go(node: Node, output: List[String]): List[String] =
+        if (node.children.isEmpty || !node.children.forall(_.isError)) output
+        else
+          node.children.foldLeft(output)((acc, next) =>
+            (next.isError, next.kind) match {
+              case (true, Error(str)) => go(next, acc :+ str)
+              case _ => go(next, acc)
+            }
+          )
+      val output = go(self, Nil)
+      if (output.isEmpty) None
+      else Some(output.mkString(EOL))
+    }
 
     private val isAssertion: Boolean = kind.isInstanceOf[Assertion.type]
 
@@ -101,9 +122,10 @@ object ZTestTreeBuilder {
     private val isError: Boolean = kind.isInstanceOf[Error]
 
     def toTestTree: TestTree =
-      assertString match {
-        case a @ Some(_) => TestNode(plainText, Failed(Assertion), a)
-        case None =>
+      (assertString, failureString) match {
+        case (a @ Some(_), _) => TestNode(plainText, Failed(Assertion), a)
+        case (_, Some(f))     => TestNode(plainText, Failed(Error(f)))
+        case _ =>
           if (children.isEmpty) TestNode(plainText, Completed)
           else
             children.foldLeft(SuiteNode(plainText, List.empty)) { (suite, next) =>
@@ -126,7 +148,7 @@ object ZTestTreeBuilder {
     object IsAssertion {
 
       def unapply(n: Node): Boolean =
-        if (n.name.isEmpty) false
+        if (n.ansi.plainText.isEmpty) false
         else
           (n.ansi.getColor(0), n.ansi.getChar(0), n.ansi.getChar(1), n.status) match {
             case (Color.Blue.applyMask, c, s, Status.Unknown) if notStatus(c, s) => true
@@ -140,7 +162,7 @@ object ZTestTreeBuilder {
         "Ran (\\d) test(s)? in (.*(?=:)): (\\d).*(\\d).*(\\d).*".r
 
       def unapply(n: Node): Option[Kind.Summary] =
-        if (n.name.isEmpty) None
+        if (n.value.isEmpty) None
         else
           (n.ansi.getColor(0), n.ansi.getChar(0), n.ansi.getChar(1)) match {
             case (Color.Cyan.applyMask, c, s) if notStatus(c, s) =>
@@ -154,8 +176,17 @@ object ZTestTreeBuilder {
     }
 
     object IsError {
-      def unapply(n: Node): Option[Kind.Error] = None
-      // todo handle stack traces
+
+      def unapply(n: Node): Option[Kind.Error] =
+        (n.ansi.getColors.forall(_ == 0), n.ansi.plainText.headOption) match {
+          case (isPlain, Some(c)) if isPlain && !statusChars.contains(c) =>
+            Some(Error(n.value))
+          case _ =>
+            if (n.value.isEmpty)
+              Some(Error(""))
+            else None
+        }
+
     }
 
     sealed trait Status
