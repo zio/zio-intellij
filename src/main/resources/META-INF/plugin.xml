@@ -19,7 +19,7 @@
 
     </description>
 
-    <idea-version since-build="193.5233.102"/>
+    <idea-version since-build="193.3.*"/>
 
     <depends>org.intellij.scala</depends>
     <depends>com.intellij.modules.java</depends>
@@ -98,7 +98,6 @@
         <runLineMarkerContributor implementationClass="zio.intellij.testsupport.ZTestRunLineMarkerProvider"
                                   language="Scala" order="first"/>
         <testFramework implementation="zio.intellij.testsupport.ZTestFramework" order="first"/>
-
     </extensions>
 
     <actions>
