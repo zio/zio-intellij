@@ -5,8 +5,8 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfigurationFactory
 
 final class ZTestRunConfigurationFactory(configurationType: ZTestConfigurationType)
-  extends AbstractTestRunConfigurationFactory(configurationType) {
+    extends AbstractTestRunConfigurationFactory(configurationType) {
 
   override def createTemplateConfiguration(project: Project): RunConfiguration =
-      new ZTestRunConfiguration(project, "", this)
+    new ZTestRunConfiguration(project, "", this)
 }

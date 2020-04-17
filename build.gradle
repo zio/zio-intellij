@@ -17,8 +17,6 @@ intellij {
 }
 
 dependencies {
-    compile project(':testrunner_2.12')
-    compile project(':testrunner_2.13')
     compileOnly 'org.scala-lang:scala-library:2.12.10'
     testCompileOnly 'org.scala-lang:scala-library:2.12.10'
 }

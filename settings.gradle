@@ -1,2 +1,1 @@
 rootProject.name = 'zio-intellij'
-include 'testrunner_2.12', 'testrunner_2.13'
