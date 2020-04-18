@@ -61,14 +61,6 @@ final class ZTestRunConfigurationProducer
     }
   }
 
-  override def onFirstRun(
-    configuration: ConfigurationFromContext,
-    context: ConfigurationContext,
-    startRunnable: Runnable
-  ): Unit =
-    // TODO this would be a great place to prompt the user for adding the test runner support
-    super.onFirstRun(configuration, context, startRunnable)
-
   override def shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean =
     other.isProducedBy(classOf[ScalaApplicationConfigurationProducer])
 
