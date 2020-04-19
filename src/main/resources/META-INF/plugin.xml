@@ -6,11 +6,11 @@
     <description>
         <![CDATA[
         Suggestions, refactorings, and other enhancements for the ZIO library ecosystem.
-        The following features are available:
+        The plugin enhances ZIO with features, such as:
         <ul>
         <li>Refactorings and suggestions</li>
         <li>Support for zio-macros (e.g. <code>@accessible</code>)</li>
-        <li>Test runner</li>
+        <li>Integrated test runner</li>
         <li>And much more!</li>
         </ul>
 
@@ -19,7 +19,7 @@
 
     </description>
 
-    <idea-version since-build="193.3.*"/>
+    <idea-version since-build="193.3" until-build="193.3.*"/>
 
     <depends>org.intellij.scala</depends>
     <depends>com.intellij.modules.java</depends>

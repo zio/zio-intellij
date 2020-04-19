@@ -18,8 +18,6 @@ import zio.intellij.ZioIcon
 final class ZTestRunConfigurationProducer
     extends AbstractTestConfigurationProducer[ZTestRunConfiguration](new ZTestConfigurationType) {
 
-  private val DoNotAdvertiseZTestRunner = "zio.intellij.do.not.advertise.testrunner"
-
   override protected def suitePaths: List[String] = ZSuitePaths
 
   override def isConfigurationByLocation(

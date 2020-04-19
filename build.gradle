@@ -14,7 +14,6 @@ repositories {
 intellij {
     version '2019.3'
     plugins 'org.intellij.scala:2019.3.27', 'java'
-    updateSinceUntilBuild false
 }
 
 dependencies {
@@ -24,10 +23,15 @@ dependencies {
 
 patchPluginXml {
     changeNotes """
-    <p>What's new in this version?</p>
-    <strong>Bug fixes</strong>:
-    <ul>
-    <li>Fixed an issue where the test runner didn't work on JDK 1.8 (<a href=https://github.com/zio/zio-intellij/issues/29>#29</a>)
-    </ul>
-      """
+<h2>Note: this is the last supported release for IntelliJ IDEA 2019.x</h2>
+Please upgrade to the latest available IntelliJ IDEA to receive updates.
+<strong>&nbsp;</strong>
+<p>
+<strong>Bug fixes</strong>
+<ul>
+    <li>The test runner no longer depends on a ZIO version!</li>
+    <li>Removed some suggestions that were deprecated in ZIO RC18</li>
+    <li>Minor refactorings and stability improvements</li>
+</ul>
+</p>"""
 }
