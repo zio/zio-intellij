@@ -13,7 +13,7 @@ abstract class ZInspectionTest[T <: ZInspection: ClassTag] extends OperationsOnC
   override protected def librariesLoaders: Seq[LibraryLoader] =
     super.librariesLoaders :+
       IvyManagedLoader(
-        "dev.zio" %% "zio" % "1.0.0-RC16"
+        "dev.zio" %% "zio" % "1.0.0-RC18-2"
       )
 
   def z(s: String): String =

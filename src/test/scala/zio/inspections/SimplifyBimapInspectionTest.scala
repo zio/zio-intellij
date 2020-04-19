@@ -15,9 +15,9 @@ class SimplifyBimapInspectionTest extends ZInspectionTest[SimplifyBimapInspectio
     testQuickFix(text, result, hint)
   }
 
-  def test_map_asError(): Unit = {
-    z(s"ZIO.succeed(42).${START}map(a).asError(b)$END").assertHighlighted()
-    val text   = z("ZIO.succeed(42).map(a).asError(b)")
+  def test_map_orElseFail(): Unit = {
+    z(s"ZIO.succeed(42).${START}map(a).orElseFail(b)$END").assertHighlighted()
+    val text   = z("ZIO.succeed(42).map(a).orElseFail(b)")
     val result = z("ZIO.succeed(42).bimap(_ => b, a)")
     testQuickFix(text, result, hint)
   }
@@ -29,9 +29,9 @@ class SimplifyBimapInspectionTest extends ZInspectionTest[SimplifyBimapInspectio
     testQuickFix(text, result, hint)
   }
 
-  def test_as_asError(): Unit = {
-    z(s"ZIO.succeed(42).${START}as(a).asError(b)$END").assertHighlighted()
-    val text   = z("ZIO.succeed(42).as(a).asError(b)")
+  def test_as_orElseFail(): Unit = {
+    z(s"ZIO.succeed(42).${START}as(a).orElseFail(b)$END").assertHighlighted()
+    val text   = z("ZIO.succeed(42).as(a).orElseFail(b)")
     val result = z("ZIO.succeed(42).bimap(_ => b, _ => a)")
     testQuickFix(text, result, hint)
   }
@@ -50,16 +50,16 @@ class SimplifyBimapInspectionTest extends ZInspectionTest[SimplifyBimapInspectio
     testQuickFix(text, result, hint)
   }
 
-  def test_asError_map(): Unit = {
-    z(s"ZIO.succeed(42).${START}asError(a).map(b)$END").assertHighlighted()
-    val text   = z("ZIO.succeed(42).asError(a).map(b)")
+  def test_orElseFail_map(): Unit = {
+    z(s"ZIO.succeed(42).${START}orElseFail(a).map(b)$END").assertHighlighted()
+    val text   = z("ZIO.succeed(42).orElseFail(a).map(b)")
     val result = z("ZIO.succeed(42).bimap(_ => a, b)")
     testQuickFix(text, result, hint)
   }
 
-  def test_asError_as(): Unit = {
-    z(s"ZIO.succeed(42).${START}asError(a).as(b)$END").assertHighlighted()
-    val text   = z("ZIO.succeed(42).asError(a).as(b)")
+  def test_orElseFail_as(): Unit = {
+    z(s"ZIO.succeed(42).${START}orElseFail(a).as(b)$END").assertHighlighted()
+    val text   = z("ZIO.succeed(42).orElseFail(a).as(b)")
     val result = z("ZIO.succeed(42).bimap(_ => a, _ => b)")
     testQuickFix(text, result, hint)
   }

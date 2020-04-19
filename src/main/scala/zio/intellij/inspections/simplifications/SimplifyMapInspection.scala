@@ -5,7 +5,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
 
-class SimplifyAsInspection extends ZInspection(AsSimplificationType, AsErrorSimplificationType)
+class SimplifyMapInspection extends ZInspection(AsSimplificationType, MapErrorSimplificationType)
 
 object AsSimplificationType extends SimplificationType {
   override def hint: String = "Replace with .as"
@@ -20,12 +20,12 @@ object AsSimplificationType extends SimplificationType {
   }
 }
 
-object AsErrorSimplificationType extends SimplificationType {
-  override def hint: String = "Replace with .asError"
+object MapErrorSimplificationType extends SimplificationType {
+  override def hint: String = "Replace with .orElseFail"
 
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression, arg: ScExpression) =
-      replace(expr).withText(invocationText(qual, s"asError(${arg.getText}"))
+      replace(expr).withText(invocationText(qual, s"orElseFail(${arg.getText}"))
     expr match {
       case qual `.mapError` `_ => x`(x) => Some(replacement(qual, x))
       case _                            => None

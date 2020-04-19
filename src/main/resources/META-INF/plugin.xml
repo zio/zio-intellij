@@ -42,10 +42,10 @@
                          groupName="Simplifications"
                          shortName="SimplifyIgnoreInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
-        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyAsInspection"
-                         displayName="Simplify discarding effect result to .as/.asError" groupPath="Scala,ZIO"
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyMapInspection"
+                         displayName="Simplify discarding effect result to .as/.orElseFail" groupPath="Scala,ZIO"
                          groupName="Simplifications"
-                         shortName="SimplifyAsInspection" level="WARNING"
+                         shortName="SimplifyMap" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyBimapInspection"
                          displayName="Simplify mapping result and error effects to .bimap" groupPath="Scala,ZIO"
@@ -67,31 +67,11 @@
                          groupName="Simplifications"
                          shortName="SimplifyCollectAllInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
-
-        <!-- deprecations-->
-        <localInspection implementationClass="zio.intellij.inspections.deprecations.DeprecatedTraverseInspection"
-                         displayName="Replace deprecated traverse methods with foreach"
-                         groupPath="Scala,ZIO"
-                         groupName="Migrations"
-                         shortName="DeprecatedTraverseInspection" level="WARNING"
-                         enabledByDefault="true" language="Scala"/>
-        <localInspection implementationClass="zio.intellij.inspections.deprecations.DeprecatedAssertInspection"
-                         displayName="Replace deprecated assert methods with new syntax"
-                         groupPath="Scala,ZIO"
-                         groupName="Migrations"
-                         shortName="DeprecatedAssertInspection" level="WARNING"
-                         enabledByDefault="true" language="Scala"/>
-
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
         </intentionAction>
 
-        <intentionAction>
-            <category>ZIO/Migrations</category>
-            <className>zio.intellij.intentions.migrations.MigrateTestSuiteToSpecField</className>
-        </intentionAction>
-        
         <!-- test runner -->
         <configurationType implementation="zio.intellij.testsupport.ZTestConfigurationType"/>
         <runConfigurationProducer implementation="zio.intellij.testsupport.ZTestRunConfigurationProducer"/>
