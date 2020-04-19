@@ -53,7 +53,7 @@ final class ZTestRunConfiguration(
   private def fromTestConfiguration(data: TestConfigurationData) =
     data match {
       case d: ClassTestData => d.testClassPath
-      case d if d.getKind != CLASS || d.getKind != TEST_NAME =>
+      case d if d.getKind != CLAZZ || d.getKind != TEST_NAME =>
         throw new InvalidDataException(s"Test configuration kind '${d.getKind}' is not supported.")
     }
 
@@ -69,7 +69,7 @@ final class ZTestRunConfiguration(
     new JavaCommandLineState(env) {
       override def createJavaParameters(): JavaParameters = oldState.getJavaParameters
 
-      override def execute(executor: Executor, runner: ProgramRunner[_ <: RunnerSettings]): ExecutionResult = {
+      override def execute(executor: Executor, runner: ProgramRunner[_]): ExecutionResult = {
         val processHandler = startProcess()
 
         val consoleView: ConsoleView =

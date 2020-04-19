@@ -1,22 +1,16 @@
 package zio.intellij.testsupport
 
 import com.intellij.execution.Location
-import com.intellij.execution.actions.{ ConfigurationContext, ConfigurationFromContext }
-import com.intellij.execution.configurations.RunConfiguration
-import com.intellij.ide.BrowserUtil
-import com.intellij.ide.util.PropertiesComponent
-import com.intellij.notification.{ Notification, NotificationAction, NotificationType, Notifications }
-import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.execution.actions.ConfigurationFromContext
+import com.intellij.execution.configurations.{ ConfigurationFactory, ConfigurationTypeUtil, RunConfiguration }
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.{ PsiDirectory, PsiElement, PsiPackage }
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef._
 import org.jetbrains.plugins.scala.runner.ScalaApplicationConfigurationProducer
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ ClassTestData, SingleTestData }
 import org.jetbrains.plugins.scala.testingSupport.test.{ AbstractTestConfigurationProducer, TestConfigurationUtil }
-import zio.intellij.ZioIcon
 
-final class ZTestRunConfigurationProducer
-    extends AbstractTestConfigurationProducer[ZTestRunConfiguration](new ZTestConfigurationType) {
+final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProducer[ZTestRunConfiguration] {
 
   override protected def suitePaths: List[String] = ZSuitePaths
 
@@ -80,4 +74,9 @@ final class ZTestRunConfigurationProducer
         }
       case _ => (null, null) // god help me
     }
+
+  override def configurationFactory: ConfigurationFactory = {
+    val configurationType = ConfigurationTypeUtil.findConfigurationType(classOf[ZTestConfigurationType])
+    configurationType.confFactory
+  }
 }

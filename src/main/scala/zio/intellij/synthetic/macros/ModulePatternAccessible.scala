@@ -1,9 +1,9 @@
 package zio.intellij.synthetic.macros
 
-import org.jetbrains.plugins.scala.lang.psi.api.base.ScAnnotation
+import org.jetbrains.plugins.scala.lang.psi.api.base.literals.ScStringLiteral
+import org.jetbrains.plugins.scala.lang.psi.api.base.{ScAnnotation, ScLiteral}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDeclaration
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
-import org.jetbrains.plugins.scala.lang.psi.impl.base.ScLiteralImpl
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
 import org.jetbrains.plugins.scala.lang.psi.types.PhysicalMethodSignature
 
@@ -11,7 +11,7 @@ class ModulePatternAccessible extends SyntheticMembersInjector {
 
   private def annotationFirstParam(scAnnotation: ScAnnotation): Option[String] =
     scAnnotation.annotationExpr.getAnnotationParameters.collectFirst {
-      case sl: ScLiteralImpl => sl.getValue()
+      case sl: ScStringLiteral => sl.getValue()
     }
 
   private def helperObjectExtension(annotation: ScAnnotation, sco: ScObject): Seq[String] =

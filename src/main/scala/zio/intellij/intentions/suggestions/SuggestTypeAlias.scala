@@ -2,19 +2,21 @@ package zio.intellij.intentions.suggestions
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.search.GlobalSearchScope
-import org.jetbrains.plugins.scala.codeInsight.intention.types.{startTemplate, ChooseTypeTextExpression}
+import org.jetbrains.plugins.scala.codeInsight.intention.types.{ ChooseTypeTextExpression, startTemplate }
 import org.jetbrains.plugins.scala.lang.psi.TypeAdjuster
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
-import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScTypeAlias, ScTypeAliasDefinition}
+import org.jetbrains.plugins.scala.lang.psi.api.statements.{ ScTypeAlias, ScTypeAliasDefinition }
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTypeElementFromText
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiManager
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
-import org.jetbrains.plugins.scala.lang.psi.types.api.{ParameterizedType, ScTypeText, UndefinedType}
+import org.jetbrains.plugins.scala.lang.psi.types.api.{ ParameterizedType, ScTypeText, UndefinedType }
 import org.jetbrains.plugins.scala.lang.psi.types.recursiveUpdate.ScSubstitutor
-import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresentationContext}
+import org.jetbrains.plugins.scala.lang.psi.types.{ AliasType, ScType, TypePresentationContext }
 import org.jetbrains.plugins.scala.project.ProjectContext
 import zio.intellij.intentions.ZTypeAnnotationIntention
+
+// borrowed from MakeTypeMoreSpecificIntention
 
 final class SuggestTypeAlias extends ZTypeAnnotationIntention {
 
@@ -56,7 +58,7 @@ final class SuggestTypeAlias extends ZTypeAnnotationIntention {
   def topLevelType(te: ScTypeElement): List[ScType] =
     te.`type`().toOption match {
       case Some(typ) =>
-        typ.isAliasType match {
+        typ.aliasType match {
           case Some(AliasType(_, _, Right(value))) => List(value)
           case _                                   => List(typ)
         }

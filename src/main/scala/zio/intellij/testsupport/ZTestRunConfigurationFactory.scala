@@ -9,4 +9,6 @@ final class ZTestRunConfigurationFactory(configurationType: ZTestConfigurationTy
 
   override def createTemplateConfiguration(project: Project): RunConfiguration =
     new ZTestRunConfiguration(project, "", this)
+
+  override def getIdExplicit: String = "ZIO Test"
 }

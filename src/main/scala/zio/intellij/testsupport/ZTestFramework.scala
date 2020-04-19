@@ -4,12 +4,12 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
 
 final class ZTestFramework extends AbstractTestFramework {
-  override def getSuitePaths: Seq[String]      = ZSuitePaths
-  override def getMarkerClassFQName: String    = getSuitePaths.head
-  override def getDefaultSuperClass: String    = getSuitePaths.head
-  override def getTestFileTemplateName: String = "ZIO Test Suite"
-  override def getMnemonic: Char               = 'z'
-  override def getName: String                 = "ZIO Test"
+  override def suitePaths: Seq[String]      = ZSuitePaths
+  override def getMarkerClassFQName: String = suitePaths.head
+  override def getDefaultSuperClass: String = suitePaths.head
+  override def testFileTemplateName: String = "ZIO Test Suite"
+  override def getMnemonic: Char            = 'z'
+  override def getName: String              = "ZIO Test"
 
   override protected def getLibraryDependencies(scalaVersion: Option[String]): Seq[String] = Seq.empty
 
