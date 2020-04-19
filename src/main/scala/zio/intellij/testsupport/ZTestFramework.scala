@@ -11,8 +11,7 @@ final class ZTestFramework extends AbstractTestFramework {
   override def getMnemonic: Char               = 'z'
   override def getName: String                 = "ZIO Test"
 
-  override protected def getLibraryDependencies(scalaVersion: Option[String]): Seq[String] =
-    Seq("\"dev.zio\" %% \"zio-test\" % \"latest.integration\" % \"test\"")
+  override protected def getLibraryDependencies(scalaVersion: Option[String]): Seq[String] = Seq.empty
 
   override protected def getLibraryResolvers(scalaVersion: Option[String]): Seq[String] = Seq.empty
 
@@ -21,5 +20,6 @@ final class ZTestFramework extends AbstractTestFramework {
   override def isTestMethod(element: PsiElement): Boolean = isTestMethod(element, checkAbstract = false)
 
   override def isTestMethod(element: PsiElement, checkAbstract: Boolean): Boolean =
-    element.getText == "testM" // todo make this a proper check
+    element.textMatches("testM") ||
+      element.textMatches("test") // todo make this a proper check for actual ZIO Test class
 }

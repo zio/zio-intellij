@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'zio.intellij'
-version '2019.3.0.3'
+version '2019.3.0.4'
 
 repositories {
     mavenCentral()
@@ -13,20 +13,13 @@ repositories {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2019.3'
-    plugins 'org.intellij.scala:2019.3.23', 'java'
+    plugins 'org.intellij.scala:2019.3.27', 'java'
+    updateSinceUntilBuild false
 }
 
 dependencies {
-    compile project(':testrunner_2.12')
-    compile project(':testrunner_2.13')
     compileOnly 'org.scala-lang:scala-library:2.12.10'
     testCompileOnly 'org.scala-lang:scala-library:2.12.10'
-}
-
-// do not change, this is needed for the test runner copy hack
-// it will be fixed at some point.
-jar {
-    archiveName = "zio-intellij.jar"
 }
 
 patchPluginXml {
