@@ -8,7 +8,7 @@ The plugin is now available on the [JetBrains Plugin Marketplace](https://plugin
 
 ![](https://user-images.githubusercontent.com/601206/74926361-6fb1f480-53de-11ea-820a-fca2958716f0.png)
 
-**Supported versions**: IntelliJ IDEA 2019.3 (Community edition or better)
+**Supported versions**: IntelliJ IDEA 2019.3, 2020.x (Community edition or better)
 
 ### Features
 
