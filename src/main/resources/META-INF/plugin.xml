@@ -19,7 +19,7 @@
 
     </description>
 
-    <idea-version since-build="193.3" until-build="193.3.*"/>
+    <idea-version since-build="201.1" until-build="201.*"/>
 
     <depends>org.intellij.scala</depends>
     <depends>com.intellij.modules.java</depends>
