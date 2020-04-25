@@ -67,6 +67,14 @@
                          groupName="Simplifications"
                          shortName="SimplifyCollectAllInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.UnusedZIOExpressionsInspection"
+                         displayName="Detects unused ZIO expressions that are mistakenly used like statements"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="UnusedExpressionsInspection"
+                         language="Scala" level="WARNING"
+                         enabledByDefault="true"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
