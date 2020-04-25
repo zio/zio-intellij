@@ -8,15 +8,34 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 
 package object inspections {
-  val zioClasses: Array[String] = Array("zio.ZIO", "zio.test")
 
-  def invocation(methodName: String) = new Qualified(methodName == _)
+  object collectionMethods {
+    private[inspections] val `.map` = invocation("map").from(likeCollectionClasses)
+  }
+
+  object zioMethods {
+    private[inspections] val `.*>`         = invocation("*>").from(zioClasses)
+    private[inspections] val `.as`         = invocation("as").from(zioClasses)
+    private[inspections] val `.map`        = invocation("map").from(zioClasses)
+    private[inspections] val `.mapError`   = invocation("mapError").from(zioClasses)
+    private[inspections] val `.orElseFail` = invocation("orElseFail").from(zioClasses)
+    private[inspections] val `.catchAll`   = invocation("catchAll").from(zioClasses)
+    private[inspections] val `.foldCause`  = invocation("foldCause").from(zioClasses)
+    private[inspections] val `.foldCauseM` = invocation("foldCauseM").from(zioClasses)
+
+    private[inspections] val `assert` = unqualified("assert").from(zioClasses)
+  }
+
+  val zioClasses: Array[String] = Array("zio.ZIO", "zio.test._")
+
+  def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
 
   def fromZio(r: ScExpression): Boolean =
     isOfClassFrom(r, zioClasses)
 
   class ZIOMemberReference(refName: String) {
+
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
       case `zioRef`(ref, e) if ref.refName == refName => Some(e)
       case _                                          => None
@@ -29,6 +48,7 @@ package object inspections {
   val `ZIO.collectAllPar` = new ZIOMemberReference("collectAllPar")
 
   object `()` {
+
     def unapply(expr: ScExpression): Boolean = expr match {
       case _: ScUnitExpr => true
       case _             => false
@@ -36,6 +56,7 @@ package object inspections {
   }
 
   object zioRef {
+
     def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] = expr match {
       case ref @ ScReferenceExpression(_) =>
         ref.resolve() match {
@@ -52,6 +73,7 @@ package object inspections {
   }
 
   object `_ => x` {
+
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
       case ScFunctionExpr(Seq(x), res @ Some(_)) if underscore(x) => res
       case _                                                      => None
@@ -65,6 +87,7 @@ package object inspections {
   // todo deal with this nasty duplication.
   // I want to be able somehow select the matched extractor dynamically
   object `_ => ()` {
+
     def unapply(expr: ScExpression): Boolean = expr match {
       case ScFunctionExpr(_, Some(result)) =>
         stripped(result) match {
@@ -76,6 +99,7 @@ package object inspections {
   }
 
   object `_ => ZIO.unit` {
+
     def unapply(expr: ScExpression): Boolean = expr match {
       case ScFunctionExpr(_, Some(result)) =>
         stripped(result) match {
@@ -87,6 +111,7 @@ package object inspections {
   }
 
   object IsDeprecated {
+
     def unapply(expr: ScExpression): Option[PsiAnnotation] = expr match {
       case ScMethodCall(ref: ScReferenceExpression, _) =>
         ref.resolve() match {
