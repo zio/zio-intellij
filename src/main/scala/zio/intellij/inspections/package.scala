@@ -68,6 +68,9 @@ package object inspections {
           case _ if fromZio(expr) => Some((ref, e))
           case _                  => None
         }
+      // multiple argument lists
+      case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if fromZio(expr) =>
+        Some((ref, expr))
       case _ => None
     }
   }

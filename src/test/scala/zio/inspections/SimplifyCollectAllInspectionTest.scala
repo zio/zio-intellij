@@ -4,7 +4,7 @@ import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.simplifications.SimplifyCollectAllInspection
 
 abstract class CollectAllInspectionTest(methodToReplace: String, methodToReplaceWith: String, isParN: Boolean = false)
-    extends ZInspectionTest[SimplifyCollectAllInspection] {
+    extends ZSimplifyInspectionTest[SimplifyCollectAllInspection] {
   import EditorTestUtil.{ SELECTION_END_TAG => END, SELECTION_START_TAG => START }
 
   private val nParamList = if (isParN) "(n)" else ""

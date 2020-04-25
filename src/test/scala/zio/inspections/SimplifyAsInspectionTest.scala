@@ -3,7 +3,7 @@ package zio.inspections
 import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.simplifications.SimplifyMapInspection
 
-abstract class MapInspectionTest(s: String) extends ZInspectionTest[SimplifyMapInspection] {
+abstract class MapInspectionTest(s: String) extends ZSimplifyInspectionTest[SimplifyMapInspection] {
   override protected val hint = s"Replace with $s"
 }
 
