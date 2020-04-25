@@ -1,0 +1,16 @@
+<html>
+<body>
+Detects if an ZIO expression is used as a statement, where it's not composed with other expressions, so its value gets ignored:
+<pre>
+putStrLn("Hello, world")
+ZIO.succeed(42)
+</pre>
+<br/>
+Will highlight the expression <code>putStrLn("...")</code>.<br/>
+Fix by composing it with the next expression, e.g.:
+<pre>putStrLn("Hello world") *>
+  ZIO.succeed(42)
+</pre>
+
+</body>
+</html>

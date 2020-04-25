@@ -19,11 +19,10 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
       case expr: ScExpression if IntentionAvailabilityChecker.checkInspection(this, expr.getParent) =>
         (expr, Option(expr.getNextSiblingNotWhitespace)) match {
           case (zioRef(ref1, _), Some(zioRef(_, _))) =>
-            val message = "This expression is unused. Did you mean to compose it with another effect?"
             Some(
               manager.createProblemDescriptor(
                 expr,
-                message,
+                UnusedZIOExpressionsInspection.message,
                 isOnTheFly,
                 Array.empty[LocalQuickFix],
                 ProblemHighlightType.LIKE_UNUSED_SYMBOL
@@ -33,4 +32,8 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
         }
       case _ => None
     }
+}
+
+object UnusedZIOExpressionsInspection {
+  val message = "This expression is unused. Did you mean to compose it with another effect?"
 }

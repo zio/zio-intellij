@@ -3,7 +3,7 @@ package zio.inspections
 import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.simplifications.SimplifyBimapInspection
 
-class SimplifyBimapInspectionTest extends ZInspectionTest[SimplifyBimapInspection] {
+class SimplifyBimapInspectionTest extends ZSimplifyInspectionTest[SimplifyBimapInspection] {
   import EditorTestUtil.{ SELECTION_END_TAG => END, SELECTION_START_TAG => START }
 
   override protected val hint = "Replace with .bimap"
