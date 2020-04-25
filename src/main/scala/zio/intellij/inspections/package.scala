@@ -44,10 +44,11 @@ package object inspections {
 
   val `ZIO.unit`          = new ZIOMemberReference("unit")
   val `ZIO.succeed`       = new ZIOMemberReference("succeed")
+  val `ZIO.fail`          = new ZIOMemberReference("fail")
   val `ZIO.collectAll`    = new ZIOMemberReference("collectAll")
   val `ZIO.collectAllPar` = new ZIOMemberReference("collectAllPar")
 
-  object `()` {
+  object unit {
 
     def unapply(expr: ScExpression): Boolean = expr match {
       case _: ScUnitExpr => true
@@ -75,11 +76,20 @@ package object inspections {
     }
   }
 
+  object lambda {
+
+    def unapply(expr: ScExpression): Option[(Seq[ScParameter], Option[ScExpression])] = expr match {
+      case ScFunctionExpr(params @ Seq(_), res @ Some(_)) =>
+        Some(params, res.map(stripped))
+      case _ => None
+    }
+  }
+
   object `_ => x` {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case ScFunctionExpr(Seq(x), res @ Some(_)) if underscore(x) => res
-      case _                                                      => None
+      case lambda(Seq(x), res) if underscore(x) => res
+      case _                                    => None
     }
 
     // todo there must be a better way!
@@ -92,24 +102,16 @@ package object inspections {
   object `_ => ()` {
 
     def unapply(expr: ScExpression): Boolean = expr match {
-      case ScFunctionExpr(_, Some(result)) =>
-        stripped(result) match {
-          case `()`() => true
-          case _      => false
-        }
-      case _ => false
+      case lambda(_, Some(unit())) => true
+      case _                       => false
     }
   }
 
   object `_ => ZIO.unit` {
 
     def unapply(expr: ScExpression): Boolean = expr match {
-      case ScFunctionExpr(_, Some(result)) =>
-        stripped(result) match {
-          case `ZIO.unit`(_) => true
-          case _             => false
-        }
-      case _ => false
+      case lambda(_, Some(`ZIO.unit`(_))) => true
+      case _                              => false
     }
   }
 

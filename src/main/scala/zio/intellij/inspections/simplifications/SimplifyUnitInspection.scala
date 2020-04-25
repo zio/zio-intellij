@@ -14,7 +14,7 @@ object UnitSimplificationType extends SimplificationType {
     def replacement(qual: ScExpression) = replace(expr).withText(invocationText(qual, "unit"))
     expr match {
       case qual `.*>` `ZIO.unit`(_) => Some(replacement(qual))
-      case qual `.as` `()`()        => Some(replacement(qual))
+      case qual `.as` unit()        => Some(replacement(qual))
       case qual `.map` `_ => ()`()  => Some(replacement(qual))
       case _                        => None
     }

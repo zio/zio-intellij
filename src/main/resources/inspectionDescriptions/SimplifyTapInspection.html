@@ -1,0 +1,9 @@
+<html>
+<body>
+Simplifies an expression catches all errors and explicitly fails the computation with it with `.tapError`:
+<pre>
+program.catchAll(ex => logger.logError(ex) *> ZIO.fail(ex)) -> program.tapError(ex => logger.logError(ex))
+</pre>
+<br/>
+</body>
+</html>
