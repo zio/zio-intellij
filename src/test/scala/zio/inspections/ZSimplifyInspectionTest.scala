@@ -24,11 +24,18 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
        |import zio.test._
        |import zio.test.Assertion._
        |object Test {
+       |
+       |  val logger: Logger = null
+       |  val b = ZIO.unit
        |  def f(a: Any): ZIO[Any, Throwable, Unit] = ???
+       |  def f(a: Any, b: Any): ZIO[Any, Throwable, Unit] = ???
        |
        |  def foo = {
        |   $s
        | }
+       |}
+       |trait Logger {
+       |  def log[A](a: A): ZIO[Any, Nothing, Unit]
        |}
        |""".stripMargin
 

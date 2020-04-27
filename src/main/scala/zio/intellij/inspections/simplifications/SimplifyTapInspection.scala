@@ -3,6 +3,7 @@ package zio.intellij.inspections.simplifications
 import org.jetbrains.plugins.scala.codeInspection.collections.{ Simplification, SimplificationType, invocationText }
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ ScExpression, ScInfixExpr, ScReferenceExpression }
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
+import zio.intellij.inspections.ZInspection.simplifyFunctionCall
 import zio.intellij.inspections.zioMethods._
 import zio.intellij.inspections.{ ZInspection, _ }
 
@@ -14,7 +15,7 @@ object FlatMapSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression, param: ScParameter, body: ScExpression) =
       replace(expr)
-        .withText(invocationText(qual, s"tap(${param.getText} => ${body.getText}"))
+        .withText(invocationText(qual, s"tap(${simplifyFunctionCall(param, body)})"))
         .highlightFrom(qual)
 
     expr match {
