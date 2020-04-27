@@ -1,50 +1,67 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil.{ SELECTION_END_TAG => END, SELECTION_START_TAG => START }
+import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 import zio.intellij.inspections.simplifications.SimplifyTapInspection
 
-abstract class SimplifyTapInspectionTestBase(s: String) extends ZSimplifyInspectionTest[SimplifyTapInspection] {
+abstract class BaseSimplifyTapInspectionTest(s: String) extends ZSimplifyInspectionTest[SimplifyTapInspection] {
   override protected val hint = s"Replace with $s"
 }
 
-class SimplifyTapErrorInspectionTest extends SimplifyTapInspectionTestBase(".tapError") {
+class SimplifyTapBothInspectionTest extends BaseSimplifyTapInspectionTest(".tapBoth") {
 
-  def test_catchall_infix_zio_fail(): Unit = {
+  def test_tap_tapError(): Unit = {
+    z(s"ZIO.unit.${START}tap(_ => ZIO.unit).tapError(t => logError(t))$END").assertHighlighted()
+    val text   = z(s"ZIO.unit.tap(_ => ZIO.unit).tapError(t => logError(t))")
+    val result = z(s"ZIO.unit.tapBoth(t => logError(t), _ => ZIO.unit)")
+    testQuickFix(text, result, hint)
+  }
+
+  def test_tapError_tap(): Unit = {
+    z(s"ZIO.unit.${START}tapError(t => logError(t)).tap(_ => ZIO.unit)$END").assertHighlighted()
+    val text   = z(s"ZIO.unit.tapError(t => logError(t)).tap(_ => ZIO.unit)")
+    val result = z(s"ZIO.unit.tapBoth(t => logError(t), _ => ZIO.unit)")
+    testQuickFix(text, result, hint)
+  }
+}
+
+class SimplifyTapErrorInspectionTest extends BaseSimplifyTapInspectionTest(".tapError") {
+
+  def test_catchAll_zipRight_ZIO_fail(): Unit = {
     z(s"ZIO.unit.${START}catchAll(ex => logError(ex) *> ZIO.fail(ex))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.catchAll(ex => logError(ex) *> ZIO.fail(ex))")
     val result = z(s"ZIO.unit.tapError(logError)")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmaperror_reduce_func_no_params(): Unit = {
+  def test_flatMapError_reduce_func_no_params(): Unit = {
     z(s"ZIO.unit.${START}flatMapError(a => f(a).as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMapError(a => f(a).as(a))")
     val result = z(s"ZIO.unit.tapError(f)")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmaperror_func_with_params(): Unit = {
+  def test_flatMapError_func_with_params(): Unit = {
     z(s"ZIO.unit.${START}flatMapError(a => f(a, 42).as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMapError(a => f(a, 42).as(a))")
     val result = z(s"ZIO.unit.tapError(a => f(a, 42))")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmaperror_method_invocation_on_ref(): Unit = {
+  def test_flatMapError_method_invocation_on_ref(): Unit = {
     z(s"ZIO.unit.${START}flatMapError(a => logger.log(a).as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMapError(a => logger.log(a).as(a))")
     val result = z(s"ZIO.unit.tapError(a => logger.log(a))")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmaperror_to_value_underscore(): Unit = {
+  def test_flatMapError_to_value_underscore(): Unit = {
     z(s"ZIO.unit.${START}flatMapError(a => b.as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMapError(a => b.as(a))")
     val result = z(s"ZIO.unit.tapError(_ => b)")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmaperror_to_qualified_value_underscore(): Unit = {
+  def test_flatMapError_to_qualified_value_underscore(): Unit = {
     z(s"ZIO.unit.${START}flatMapError(a => ZIO.unit.as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMapError(a => ZIO.unit.as(a))")
     val result = z(s"ZIO.unit.tapError(_ => ZIO.unit)")
@@ -52,37 +69,37 @@ class SimplifyTapErrorInspectionTest extends SimplifyTapInspectionTestBase(".tap
   }
 }
 
-class SimplifyTapInspectionTest extends SimplifyTapInspectionTestBase(".tap") {
+class SimplifyTapInspectionTest extends BaseSimplifyTapInspectionTest(".tap") {
 
-  def test_flatmap_reduce_func_no_params(): Unit = {
+  def test_flatMap_reduce_func_no_params(): Unit = {
     z(s"ZIO.unit.${START}flatMap(a => f(a).as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMap(a => f(a).as(a))")
     val result = z(s"ZIO.unit.tap(f)")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmap_func_with_params(): Unit = {
+  def test_flatMap_func_with_params(): Unit = {
     z(s"ZIO.unit.${START}flatMap(a => f(a, 42).as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMap(a => f(a, 42).as(a))")
     val result = z(s"ZIO.unit.tap(a => f(a, 42))")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmap_method_invocation_on_ref(): Unit = {
+  def test_flatMap_method_invocation_on_ref(): Unit = {
     z(s"ZIO.unit.${START}flatMap(a => logger.log(a).as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMap(a => logger.log(a).as(a))")
     val result = z(s"ZIO.unit.tap(a => logger.log(a))")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmap_to_value_underscore(): Unit = {
+  def test_flatMap_to_value_underscore(): Unit = {
     z(s"ZIO.unit.${START}flatMap(a => b.as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMap(a => b.as(a))")
     val result = z(s"ZIO.unit.tap(_ => b)")
     testQuickFix(text, result, hint)
   }
 
-  def test_flatmap_to_qualified_value_underscore(): Unit = {
+  def test_flatMap_to_qualified_value_underscore(): Unit = {
     z(s"ZIO.unit.${START}flatMap(a => ZIO.unit.as(a))$END").assertHighlighted()
     val text   = z(s"ZIO.unit.flatMap(a => ZIO.unit.as(a))")
     val result = z(s"ZIO.unit.tap(_ => ZIO.unit)")

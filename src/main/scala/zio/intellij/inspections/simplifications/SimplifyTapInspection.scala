@@ -8,7 +8,12 @@ import zio.intellij.inspections.zioMethods._
 import zio.intellij.inspections.{ZInspection, _}
 
 class SimplifyTapInspection
-    extends ZInspection(FlatMapSimplificationType, FlatMapErrorSimplificationType, CatchAllToFailSimplificationType)
+    extends ZInspection(
+      FlatMapSimplificationType,
+      FlatMapErrorSimplificationType,
+      CatchAllToFailSimplificationType,
+      TapBothSimplificationType
+    )
 
 sealed abstract class BaseRefactoringType(invocation: Qualified, replaceWith: String) extends SimplificationType {
   override def hint: String = s"Replace with .$replaceWith"
@@ -36,3 +41,21 @@ sealed abstract class BaseRefactoringType(invocation: Qualified, replaceWith: St
 object FlatMapSimplificationType        extends BaseRefactoringType(`.flatMap`, "tap")
 object FlatMapErrorSimplificationType   extends BaseRefactoringType(`.flatMapError`, "tapError")
 object CatchAllToFailSimplificationType extends BaseRefactoringType(`.catchAll`, "tapError")
+
+object TapBothSimplificationType extends SimplificationType {
+  override def hint: String = "Replace with .tapBoth"
+
+  override def getSimplification(expr: ScExpression): Option[Simplification] = {
+    def replacement(qual: ScExpression, tapError: ScExpression, tap: ScExpression) =
+      replace(expr)
+        .withText(invocationText(qual, s"tapBoth(${tapError.getText}, ${tap.getText})"))
+        .highlightFrom(qual)
+
+    expr match {
+      case qual `.tap` tap `.tapError` tapError => Some(replacement(qual, tapError, tap))
+      case qual `.tapError` tapError `.tap` tap => Some(replacement(qual, tapError, tap))
+      case _                             => None
+    }
+  }
+
+}

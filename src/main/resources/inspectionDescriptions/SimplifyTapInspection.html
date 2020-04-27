@@ -24,8 +24,16 @@ effect.flatMap(a => b.as(a)) -> effect.tap(_ => b)
 effect.flatMap(a => logger.log(a).as(a)) -> effect.tap(a => logger.log(a))
 </pre>
 </p>
-
+<p>
 Same rules apply to the <code>.tapError</code> variant.
+</p>
+<p>
+In the case of either <code>.tap</code> followed by <code>.tapError</code> or vice-versa, they're replaced with <code>.tapBoth</code> unchanged:
+<pre>
+effect.tap(x => f(x)).tapError(t => logger.log(t)) -> effect.tapBoth(t => logger.log(t), x => f(x))
+effect.tapError(t => logger.log(t)).tap(x => f(x)) -> effect.tapBoth(t => logger.log(t), x => f(x))
+</pre>
+</p>
 
 </body>
 </html>
