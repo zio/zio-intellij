@@ -22,9 +22,11 @@ sealed abstract class BaseRefactoringType(invocation: Qualified, replaceWith: St
     expr match {
       case qual invocation lambda(Seq(param), Some(body) /* once told me */ ) =>
         body match {
+          // .flatMap*(a => expr(e).as(a))
           case ref `.as` ScReferenceExpression(a) if a == param => Some(replacement(qual, param, ref))
-          case ScInfixExpr(ref, _, `ZIO.fail`(_))               => Some(replacement(qual, param, ref))
-          case _                                                => None
+          // .catchAll(e => expr(e) *> ZIO.fail(e))
+          case ScInfixExpr(ref, _, `ZIO.fail`(_)) => Some(replacement(qual, param, ref))
+          case _                                  => None
         }
       case _ => None
     }
