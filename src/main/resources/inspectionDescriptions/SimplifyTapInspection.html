@@ -1,6 +1,6 @@
 <html>
 <body>
-Simplifies expressions that consume a value without changing it. Supports the following:
+Simplifies expressions that consume a value without changing it, by using <code>.tap</code>/<code>.tapError</code> instead. Supports the following:
 <p>
     A chain of <code>.catchAll</code> followed by failing with <code>ZIO.fail</code> can be simplified with <code>.tapError</code>:
 <pre>
@@ -24,6 +24,8 @@ effect.flatMap(a => b.as(a)) -> effect.tap(_ => b)
 effect.flatMap(a => logger.log(a).as(a)) -> effect.tap(a => logger.log(a))
 </pre>
 </p>
+
+Same rules apply to the <code>.tapError</code> variant.
 
 </body>
 </html>
