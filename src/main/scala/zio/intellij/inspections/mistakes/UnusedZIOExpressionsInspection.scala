@@ -1,11 +1,12 @@
-package zio.intellij.inspections
+package zio.intellij.inspections.mistakes
 
-import com.intellij.codeInspection.{ InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType }
+import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.AbstractRegisteredInspection
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
+import zio.intellij.inspections.zioRef
 
 class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
 

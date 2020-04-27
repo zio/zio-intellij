@@ -1,0 +1,39 @@
+<html>
+<body>
+Simplifies expressions that consume a value without changing it, by using <code>.tap</code>/<code>.tapError</code> instead. Supports the following:
+<p>
+    A chain of <code>.catchAll</code> followed by failing with <code>ZIO.fail</code> can be simplified with <code>.tapError</code>:
+<pre>
+program.catchAll(ex => logger.logError(ex) *> ZIO.fail(ex)) -> program.tapError(ex => logger.logError(ex))
+</pre>
+</p>
+<p>
+    Consuming a result of a function and returning it unchanged can be simplified using `.tap`. The following modes are
+    supported:
+<pre>
+// single argument is simplified to a direct function call
+effect.flatMap(a => f(a).as(a)) -> effect.tap(f)
+
+// if any other arguments are passed, the call remains unchanged:
+effect.flatMap(a => f(a, 42).as(a)) -> effect.tap(a => f(a, 42))
+
+// calling a value without arguments:
+effect.flatMap(a => b.as(a)) -> effect.tap(_ => b)
+
+// a method call on a value preserves the explicit argument:
+effect.flatMap(a => logger.log(a).as(a)) -> effect.tap(a => logger.log(a))
+</pre>
+</p>
+<p>
+Same rules apply to the <code>.tapError</code> variant.
+</p>
+<p>
+In the case of either <code>.tap</code> followed by <code>.tapError</code> or vice-versa, they're replaced with <code>.tapBoth</code> unchanged:
+<pre>
+effect.tap(x => f(x)).tapError(t => logger.log(t)) -> effect.tapBoth(t => logger.log(t), x => f(x))
+effect.tapError(t => logger.log(t)).tap(x => f(x)) -> effect.tapBoth(t => logger.log(t), x => f(x))
+</pre>
+</p>
+
+</body>
+</html>

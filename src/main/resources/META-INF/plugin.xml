@@ -67,8 +67,14 @@
                          groupName="Simplifications"
                          shortName="SimplifyCollectAllInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyTapInspection"
+                         displayName="Simplify various call chains with .tap"
+                         groupPath="Scala,ZIO"
+                         groupName="Simplifications"
+                         shortName="SimplifyTapInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
 
-        <localInspection implementationClass="zio.intellij.inspections.UnusedZIOExpressionsInspection"
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.UnusedZIOExpressionsInspection"
                          displayName="Detects unused ZIO expressions that are mistakenly used like statements"
                          groupPath="Scala,ZIO" groupName="Inspections"
                          shortName="UnusedZIOExpressionsInspection"
