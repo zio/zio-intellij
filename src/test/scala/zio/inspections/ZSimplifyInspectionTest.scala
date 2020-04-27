@@ -24,6 +24,8 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
        |import zio.test._
        |import zio.test.Assertion._
        |object Test {
+       |  def f(a: Any): ZIO[Any, Throwable, Unit] = ???
+       |
        |  def foo = {
        |   $s
        | }
