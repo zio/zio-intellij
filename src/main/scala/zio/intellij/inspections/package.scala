@@ -51,6 +51,7 @@ package object inspections {
   val `ZIO.fail`          = new ZIOMemberReference("fail")
   val `ZIO.collectAll`    = new ZIOMemberReference("collectAll")
   val `ZIO.collectAllPar` = new ZIOMemberReference("collectAllPar")
+  val `ZIO.sleep`         = new ZIOMemberReference("sleep")
 
   object unit {
 

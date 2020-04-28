@@ -73,13 +73,16 @@
                          groupName="Simplifications"
                          shortName="SimplifyTapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySleepInspection"
+                         displayName="Simplify ZIO.sleep to .delay" groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifySleepInspection" level="WEAK WARNING"
+                         enabledByDefault="true" language="Scala"/>
 
         <localInspection implementationClass="zio.intellij.inspections.mistakes.UnusedZIOExpressionsInspection"
                          displayName="Detects unused ZIO expressions that are mistakenly used like statements"
                          groupPath="Scala,ZIO" groupName="Inspections"
-                         shortName="UnusedZIOExpressionsInspection"
-                         language="Scala" level="WARNING"
-                         enabledByDefault="true"/>
+                         shortName="UnusedZIOExpressionsInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
 
         <intentionAction>
             <category>ZIO/Suggestions</category>
