@@ -9,6 +9,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createEx
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
 import zio.intellij.inspections._
 import zio.intellij.inspections.mistakes.WrapInsteadOfLiftInspection.messageFormat
+import scala.language.reflectiveCalls
 
 class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
 
@@ -38,14 +39,16 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
     }
   }
 
-  object Future {
+  val Future = new ExpressionExtractor(scalaFuture)
+
+  final class ExpressionExtractor(extractor: { def unapply(expr: ScExpression): Option[ScExpression] }) {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case `ZIO`(scalaFuture(f))             => Some(f)
-      case `ZIO.apply`(scalaFuture(f))       => Some(f)
-      case `ZIO.effect`(scalaFuture(f))      => Some(f)
-      case `ZIO.effectTotal`(scalaFuture(f)) => Some(f)
-      case _                                 => None
+      case `ZIO`(extractor(f))             => Some(f)
+      case `ZIO.apply`(extractor(f))       => Some(f)
+      case `ZIO.effect`(extractor(f))      => Some(f)
+      case `ZIO.effectTotal`(extractor(f)) => Some(f)
+      case _                               => None
     }
   }
 }
