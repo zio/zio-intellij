@@ -1,0 +1,24 @@
+<html>
+<body>
+Detects if a ZIO is returned inside the yield part of a for comprehension.
+<pre>
+for {
+    x <- ZIO.succeed(1)
+    y <- ZIO.succeed(2)
+} yield {
+    ZIO.effect(x + y)
+}
+</pre>
+<br/>
+Will highlight the expression <code>ZIO.effect(x + y)</code>.<br/>
+Fix by moving effect from yield inside of the for:
+<pre>
+for {
+    x <- ZIO.succeed(1)
+    y <- ZIO.succeed(2)
+    res <- ZIO.effect(x + y)
+} yield res
+</pre>
+
+</body>
+</html>
