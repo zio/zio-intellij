@@ -6,6 +6,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScMember
 
 package object inspections {
 
@@ -46,12 +47,16 @@ package object inspections {
     }
   }
 
+  val `ZIO`               = new ZIOMemberReference("ZIO")
+  val `ZIO.apply`         = new ZIOMemberReference("apply")
   val `ZIO.unit`          = new ZIOMemberReference("unit")
   val `ZIO.succeed`       = new ZIOMemberReference("succeed")
   val `ZIO.fail`          = new ZIOMemberReference("fail")
   val `ZIO.collectAll`    = new ZIOMemberReference("collectAll")
   val `ZIO.collectAllPar` = new ZIOMemberReference("collectAllPar")
   val `ZIO.sleep`         = new ZIOMemberReference("sleep")
+  val `ZIO.effect`        = new ZIOMemberReference("effect")
+  val `ZIO.effectTotal`   = new ZIOMemberReference("effectTotal")
 
   object unit {
 
@@ -117,6 +122,23 @@ package object inspections {
     def unapply(expr: ScExpression): Boolean = expr match {
       case lambda(_, Some(`ZIO.unit`(_))) => true
       case _                              => false
+    }
+  }
+
+  object scalaFuture {
+
+    def unapply(expr: ScExpression): Option[ScExpression] = expr match {
+      case MethodRepr(self, _, Some(ref), Seq(_)) if ref.refName == "Future" =>
+        ref.resolve() match {
+          case m: ScMember if m.containingClass.qualifiedName == "scala.concurrent.Future" => Some(self)
+          case _                                                                           => None
+        }
+      case ref @ ScReferenceExpression(_) =>
+        ref.resolve() match {
+          case _: ScReferencePattern if isOfClassFrom(expr, Array("scala.concurrent.Future")) => Some(ref)
+          case _                                                                              => None
+        }
+      case _ => None
     }
   }
 

@@ -84,10 +84,17 @@
                          shortName="UnusedZIOExpressionsInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.WrapInsteadOfLiftInspection"
+                         displayName="Detects Future, Try, Option, and Either mistakenly wrapped in ZIO instead of using the ZIO.from* functions"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="WrapInsteadOfLiftInspection" level="WEAK WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
+
         <localInspection implementationClass="zio.intellij.inspections.mistakes.YieldingZIOEffectInspection"
                          displayName="Detects if a ZIO is returned inside the yield part of a for comprehension"
                          groupPath="Scala,ZIO" groupName="Inspections"
-                         shortName="YieldingZIOEffectInspection" level="WARNING"
+                         shortName="YieldingZIOEffectInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
         <intentionAction>

@@ -29,13 +29,11 @@ class YieldingZIOEffectInspection extends AbstractRegisteredInspection {
     element match {
       case expr: ScFor if IntentionAvailabilityChecker.checkInspection(this, expr.getParent) =>
         expr.body match {
-          case Some(body @ zioRef(_, _)) =>
-            Some(createDescriptor(body))
+          case Some(body @ zioRef(_, _)) => Some(createDescriptor(body))
           case Some(e: ScBlock) =>
             e.exprs.lastOption match {
-              case Some(body @ zioRef(_, _)) =>
-                Some(createDescriptor(body))
-              case None => None
+              case Some(body @ zioRef(_, _)) => Some(createDescriptor(body))
+              case None                      => None
             }
           case _ => None
         }
@@ -44,5 +42,5 @@ class YieldingZIOEffectInspection extends AbstractRegisteredInspection {
 }
 
 object YieldingZIOEffectInspection {
-  val message = "Returning a ZIO inside the yield part of a for comprehension"
+  val message = "Possibly mistaken yielding of a ZIO effect. Perhaps you meant to yield the result instead?"
 }
