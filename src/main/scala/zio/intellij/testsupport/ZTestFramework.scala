@@ -23,6 +23,6 @@ final class ZTestFramework extends AbstractTestFramework {
   override def isTestMethod(element: PsiElement, checkAbstract: Boolean): Boolean =
     element match {
       case sc: ScReferenceExpression => sc.textMatches("testM") || sc.textMatches("test")
-      case _ => false
+      case _                         => false
     }
 }

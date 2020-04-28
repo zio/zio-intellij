@@ -28,7 +28,7 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
 
   protected def descriptionMatches(s: String): Boolean = s == normalize(description)
 
-  protected override def checkTextHasNoErrors(text: String): Unit = {
+  override protected def checkTextHasNoErrors(text: String): Unit = {
     val ranges = findRanges(text)
     assertTrue(
       if (shouldPass) s"Highlights found at: ${ranges.mkString(", ")}." else failingPassed,
@@ -104,6 +104,7 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
 }
 
 object ScalaHighlightsTestBase {
+
   private def highlightedRange(info: HighlightInfo): TextRange =
     new TextRange(info.getStartOffset, info.getEndOffset)
 
@@ -154,6 +155,7 @@ abstract class ScalaAnnotatorQuickFixTestBase extends ScalaHighlightsTestBase {
 }
 
 object ScalaAnnotatorQuickFixTestBase {
+
   private def quickFixes(info: HighlightInfo): Seq[IntentionAction] = {
     import JavaConverters._
     Option(info.quickFixActionRanges).toSeq
@@ -167,7 +169,7 @@ abstract class ScalaInspectionTestBase extends ScalaAnnotatorQuickFixTestBase {
 
   protected val classOfInspection: Class[_ <: LocalInspectionTool]
 
-  protected override def setUp(): Unit = {
+  override protected def setUp(): Unit = {
     super.setUp()
     getFixture.enableInspections(classOfInspection)
   }
@@ -176,7 +178,8 @@ abstract class ScalaInspectionTestBase extends ScalaAnnotatorQuickFixTestBase {
 trait ForceInspectionSeverity extends ScalaInspectionTestBase {
 
   private var oldLevel: HighlightDisplayLevel = _
-  protected override def setUp(): Unit = {
+
+  override protected def setUp(): Unit = {
     super.setUp()
     val toolState = inspectionToolState
     oldLevel = toolState.getLevel

@@ -54,7 +54,7 @@ object TapBothSimplificationType extends SimplificationType {
     expr match {
       case qual `.tap` tap `.tapError` tapError => Some(replacement(qual, tapError, tap))
       case qual `.tapError` tapError `.tap` tap => Some(replacement(qual, tapError, tap))
-      case _                             => None
+      case _                                    => None
     }
   }
 

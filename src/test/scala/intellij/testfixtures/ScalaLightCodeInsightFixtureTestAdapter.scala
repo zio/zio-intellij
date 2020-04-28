@@ -32,7 +32,7 @@ abstract class ScalaLightCodeInsightFixtureTestAdapter
 
   val CARET = EditorTestUtil.CARET_TAG
 
-  override final def getFixture: JavaCodeInsightTestFixture = myFixture
+  final override def getFixture: JavaCodeInsightTestFixture = myFixture
 
   override def getTestDataPath: String = TestUtils.getTestDataPath + "/"
 

@@ -26,6 +26,7 @@ package object testsupport {
     }
 
   object testName {
+
     def unapply(expr: ScReferenceExpression): Option[String] = expr.parent match {
       case Some(m: ScMethodCall) =>
         m.argumentExpressions.headOption.collect {
@@ -36,6 +37,7 @@ package object testsupport {
   }
 
   object IsZioTestElement {
+
     def unapply(element: PsiElement): Option[(ScTypeDefinition, Option[ScReferenceExpression])] = element match {
       case leaf: LeafPsiElement if leaf.getElementType == ScalaTokenTypes.tIDENTIFIER =>
         leaf.parent match {

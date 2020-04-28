@@ -21,6 +21,7 @@ case class InternalJDKLoader() extends SmartJDKLoader() {
  * Consider using this instead of HeavyJDKLoader if you don't need java interop in your tests
  */
 case class MockJDKLoader(jdkVersion: JavaSdkVersion = JavaSdkVersion.JDK_1_8) extends SmartJDKLoader(jdkVersion) {
+
   override protected def createSdkInstance(): Sdk = jdkVersion match {
     case JavaSdkVersion.JDK_1_9 => IdeaTestUtil.getMockJdk9
     case JavaSdkVersion.JDK_1_8 => IdeaTestUtil.getMockJdk18
@@ -34,6 +35,7 @@ case class HeavyJDKLoader(jdkVersion: JavaSdkVersion = JavaSdkVersion.JDK_1_8) e
 }
 
 abstract class SmartJDKLoader(jdkVersion: JavaSdkVersion = JavaSdkVersion.JDK_1_8) extends LibraryLoader {
+
   override def init(implicit module: Module, version: ScalaVersion): Unit =
     ModuleRootModificationUtil.setModuleSdk(module, createSdkInstance())
 
@@ -111,7 +113,7 @@ object SmartJDKLoader {
     if (priorityPaths.exists(_.isDefined)) {
       priorityPaths.flatten.headOption
     } else {
-      val fullSearchPaths = paths flatMap { p =>
+      val fullSearchPaths = paths.flatMap { p =>
         versionStrings.map((p, _))
       }
       for ((path, ver) <- fullSearchPaths) {

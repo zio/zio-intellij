@@ -57,12 +57,16 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
     }
   }
 
-  override def setupConfigurationFromContext(configuration: ZTestRunConfiguration, context: ConfigurationContext, sourceElement: Ref[PsiElement]): Boolean = {
+  override def setupConfigurationFromContext(
+    configuration: ZTestRunConfiguration,
+    context: ConfigurationContext,
+    sourceElement: Ref[PsiElement]
+  ): Boolean = {
     val result = super.setupConfigurationFromContext(configuration, context, sourceElement)
     configuration.testConfigurationData match {
       case _: SingleTestData => configuration.setTestKind(TestKind.TEST_NAME)
-      case _: ClassTestData => configuration.setTestKind(TestKind.CLAZZ)
-      case _ =>
+      case _: ClassTestData  => configuration.setTestKind(TestKind.CLAZZ)
+      case _                 =>
     }
     result
   }
