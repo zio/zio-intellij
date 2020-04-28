@@ -3,7 +3,7 @@ package zio.intellij.inspections
 import javax.swing.JComponent
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
-import org.jetbrains.plugins.scala.lang.psi.api.expr.{ ScExpression, ScMethodCall, ScReferenceExpression }
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScMethodCall, ScReferenceExpression}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 
 abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOnCollectionInspection {

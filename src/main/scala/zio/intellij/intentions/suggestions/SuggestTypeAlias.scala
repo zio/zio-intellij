@@ -37,7 +37,8 @@ final class SuggestTypeAlias extends ZTypeAnnotationIntention {
         val undefSubst  = ScSubstitutor.bind(alias.typeParameters, undefParams)
         alias.aliasedType.toOption
           .flatMap(aliasType =>
-            undefSubst(aliasType).conformanceSubstitutor(declaredType)
+            undefSubst(aliasType)
+              .conformanceSubstitutor(declaredType)
               .map(subst => subst.apply(ParameterizedType(ScDesignatorType(alias), undefParams)))
               .collect {
                 case tpe: ScType if declaredType.conforms(tpe) => tpe

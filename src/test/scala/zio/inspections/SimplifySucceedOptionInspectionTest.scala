@@ -3,7 +3,8 @@ package zio.inspections
 import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.simplifications.SimplifySucceedOptionInspection
 
-abstract class SimplifyOptionInspectionTest(s: String) extends ZSimplifyInspectionTest[SimplifySucceedOptionInspection] {
+abstract class SimplifyOptionInspectionTest(s: String)
+    extends ZSimplifyInspectionTest[SimplifySucceedOptionInspection] {
   override protected val hint = s"Replace with $s"
 }
 

@@ -11,6 +11,7 @@ object SynteticInjectorsTestUtils {
   private val log = Logger.getInstance(getClass)
 
   sealed trait TDefKind
+
   object TDefKind {
     case object Object extends TDefKind
     case object Trait  extends TDefKind
@@ -21,19 +22,20 @@ object SynteticInjectorsTestUtils {
     def validate(e: ScalaPsiElement, strict: Boolean): Unit
   }
 
-  protected final case class SyntheticTypeDef(
+  final protected case class SyntheticTypeDef(
     sig: String,
     kind: TDefKind,
     functions: Seq[SyntheticMethod] = Seq.empty,
     inners: Seq[SyntheticTypeDef] = Seq.empty
   ) extends SyntheticElement {
+
     def `with`(member: SyntheticElement): SyntheticTypeDef = member match {
       case m: SyntheticMethod     => copy(functions = functions :+ m)
       case tdef: SyntheticTypeDef => copy(inners = inners :+ tdef)
     }
 
     def apply(inners: SyntheticElement*): SyntheticTypeDef =
-      inners.foldLeft(this)(_ `with` _)
+      inners.foldLeft(this)(_.`with`(_))
 
     def validateInner(
       target: ScTypeDefinition,
@@ -76,6 +78,7 @@ object SynteticInjectorsTestUtils {
     tpeSig: String,
     isImplicit: Boolean
   ) extends SyntheticElement {
+
     override def validate(e: ScalaPsiElement, strict: Boolean): Unit = e match {
       case f: ScFunction => assertEquals(s"Failed to validate function $f against $this", this, f.toSynthetic)
       case _             => throw new IllegalArgumentException
@@ -103,6 +106,7 @@ object SynteticInjectorsTestUtils {
   }
 
   implicit class ScTypeDefSig(private val tdef: ScTypeDefinition) extends AnyVal {
+
     def sig: String = {
       val supers  = tdef.extendsBlock.templateParents.fold("")(" extends " + _.getText)
       val name    = tdef.name
@@ -112,6 +116,7 @@ object SynteticInjectorsTestUtils {
   }
 
   implicit class ScFunctionToSynthetic(private val f: ScFunction) extends AnyVal {
+
     def toSynthetic: SyntheticMethod =
       SyntheticMethod(f.name, f.polymorphicType().canonicalText, f.hasModifierPropertyScala("implicit"))
   }

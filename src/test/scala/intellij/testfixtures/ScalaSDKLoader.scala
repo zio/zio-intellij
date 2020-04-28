@@ -10,7 +10,7 @@ import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibrary
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.{JarFileSystem, VirtualFile}
 import com.intellij.testFramework.PsiTestUtil
-import org.jetbrains.plugins.scala.project.{template, ModuleExt, ScalaLibraryProperties, ScalaLibraryType}
+import org.jetbrains.plugins.scala.project.{ModuleExt, ScalaLibraryProperties, ScalaLibraryType, template}
 import org.junit.Assert._
 
 case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryLoader {
@@ -55,7 +55,7 @@ case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryL
     findJarFile(file)
   }
 
-  override final def init(implicit module: Module, version: ScalaVersion): Unit = {
+  final override def init(implicit module: Module, version: ScalaVersion): Unit = {
     val dependencies = binaryDependencies
     val resolved     = DependencyManager.resolve(dependencies: _*)
 
@@ -107,6 +107,7 @@ case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryL
 }
 
 object ScalaSDKLoader {
+
   private def findJarFile(file: File) =
     JarFileSystem.getInstance().refreshAndFindFileByPath {
       file.getCanonicalPath + "!/"

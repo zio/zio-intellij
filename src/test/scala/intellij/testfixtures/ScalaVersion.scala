@@ -16,6 +16,7 @@ sealed abstract class ScalaVersion(val languageLevel: ScalaLanguageLevel, privat
 }
 
 object ScalaVersion {
+
   val allScalaVersions: Seq[ScalaVersion] = Seq(
     Scala_2_9,
     Scala_2_10,

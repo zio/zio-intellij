@@ -1,26 +1,26 @@
 package zio.intellij.testsupport
 
-import com.intellij.execution.configurations.{ JavaCommandLineState, JavaParameters, RunProfileState, RunnerSettings }
+import com.intellij.execution.configurations.{JavaCommandLineState, JavaParameters, RunProfileState, RunnerSettings}
 import com.intellij.execution.impl.ConsoleViewImpl
-import com.intellij.execution.runners.{ ExecutionEnvironment, ProgramRunner }
+import com.intellij.execution.runners.{ExecutionEnvironment, ProgramRunner}
 import com.intellij.execution.testDiscovery.JavaAutoRunManager
 import com.intellij.execution.testframework.TestFrameworkRunningModel
-import com.intellij.execution.testframework.autotest.{ AbstractAutoTestManager, ToggleAutoTestAction }
+import com.intellij.execution.testframework.autotest.{AbstractAutoTestManager, ToggleAutoTestAction}
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
 import com.intellij.execution.testframework.ui.BaseTestsOutputConsoleView
 import com.intellij.execution.ui.ConsoleView
-import com.intellij.execution.{ DefaultExecutionResult, ExecutionResult, Executor }
+import com.intellij.execution.{DefaultExecutionResult, ExecutionResult, Executor}
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.{ Getter, InvalidDataException }
+import com.intellij.openapi.util.{Getter, InvalidDataException}
 import com.intellij.psi.PsiClass
 import org.jetbrains.plugins.scala.project.ModuleExt
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration
 import org.jetbrains.plugins.scala.testingSupport.test.TestRunConfigurationForm.TestKind._
 import org.jetbrains.plugins.scala.testingSupport.test.actions.AbstractTestRerunFailedTestsAction
-import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ ClassTestData, TestConfigurationData }
+import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
 
 final class ZTestRunConfiguration(
   project: Project,

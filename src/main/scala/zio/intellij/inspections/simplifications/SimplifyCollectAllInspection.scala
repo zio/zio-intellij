@@ -1,7 +1,7 @@
 package zio.intellij.inspections.simplifications
 
 import org.jetbrains.plugins.scala.codeInspection.collections._
-import org.jetbrains.plugins.scala.lang.psi.api.expr.{ ScExpression, ScMethodCall, ScReferenceExpression }
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScMethodCall, ScReferenceExpression}
 import zio.intellij.inspections._
 import zio.intellij.inspections.collectionMethods.`.map`
 
