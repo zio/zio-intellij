@@ -9,7 +9,6 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createEx
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
 import zio.intellij.inspections._
 import zio.intellij.inspections.mistakes.WrapInsteadOfLiftInspection.messageFormat
-import scala.language.reflectiveCalls
 
 class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
 
@@ -20,31 +19,36 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
     highlightType: ProblemHighlightType
   )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] = {
 
-    def createFix(expr: ScExpression, wrappedEffect: String, localFix: LocalQuickFix): ProblemDescriptor =
+    def createFix(localFix: QuickFix): ProblemDescriptor =
       manager.createProblemDescriptor(
-        expr,
-        messageFormat.format(wrappedEffect, wrappedEffect),
+        localFix.toReplace,
+        messageFormat.format(localFix.wrappedEffect, localFix.wrappedEffect),
         isOnTheFly,
-        Array(localFix),
+        Array[LocalQuickFix](localFix),
         ProblemHighlightType.WEAK_WARNING
       )
 
     element match {
       case expr: ScExpression if IntentionAvailabilityChecker.checkInspection(this, expr.getParent) =>
         expr match {
-          case Future(f) => Some(createFix(expr, "Future", new FutureToZio(expr, f)))
-          case _         => None
+          case FutureExpression(f) => Some(createFix(new QuickFix(expr, f, "Future", "implicit ec => ")))
+          case TryExpression(f)    => Some(createFix(new QuickFix(expr, f, "Try")))
+          case OptionExpression(f) => Some(createFix(new QuickFix(expr, f, "Option")))
+          case EitherExpression(f) => Some(createFix(new QuickFix(expr, f, "Either")))
+          case _                   => None
         }
       case _ => None
     }
   }
 
-  val Future = new ExpressionExtractor(scalaFuture)
+  val FutureExpression = new ExpressionExtractor(scalaFuture)
+  val TryExpression    = new ExpressionExtractor(scalaTry)
+  val OptionExpression = new ExpressionExtractor(scalaOption)
+  val EitherExpression = new ExpressionExtractor(scalaEither)
 
-  final class ExpressionExtractor(extractor: { def unapply(expr: ScExpression): Option[ScExpression] }) {
+  final class ExpressionExtractor(extractor: TypeReference) {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case `ZIO`(extractor(f))             => Some(f)
       case `ZIO.apply`(extractor(f))       => Some(f)
       case `ZIO.effect`(extractor(f))      => Some(f)
       case `ZIO.effectTotal`(extractor(f)) => Some(f)
@@ -53,11 +57,15 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
   }
 }
 
-final class FutureToZio(toReplace: ScExpression, replaceWith: ScExpression)
-    extends AbstractFixOnPsiElement("Replace with ZIO.fromFuture", toReplace) {
+final class QuickFix(
+  val toReplace: ScExpression,
+  val replaceWith: ScExpression,
+  val wrappedEffect: String,
+  prefix: String = ""
+) extends AbstractFixOnPsiElement(s"Replace with ZIO.from$wrappedEffect", toReplace) {
 
   override protected def doApplyFix(element: ScExpression)(implicit project: Project): Unit =
-    element.replace(createExpressionFromText(s"ZIO.fromFuture(implicit ec => ${replaceWith.getText}"))
+    element.replace(createExpressionFromText(s"ZIO.from$wrappedEffect($prefix${replaceWith.getText}"))
 }
 
 object WrapInsteadOfLiftInspection {
