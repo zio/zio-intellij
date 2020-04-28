@@ -1,14 +1,16 @@
 package zio.intellij.testsupport
 
 import com.intellij.execution.Location
-import com.intellij.execution.actions.ConfigurationFromContext
-import com.intellij.execution.configurations.{ ConfigurationFactory, ConfigurationTypeUtil, RunConfiguration }
+import com.intellij.execution.actions.{ConfigurationContext, ConfigurationFromContext}
+import com.intellij.execution.configurations.{ConfigurationFactory, ConfigurationTypeUtil, RunConfiguration}
+import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.text.StringUtil
-import com.intellij.psi.{ PsiDirectory, PsiElement, PsiPackage }
+import com.intellij.psi.{PsiDirectory, PsiElement, PsiPackage}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef._
 import org.jetbrains.plugins.scala.runner.ScalaApplicationConfigurationProducer
-import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ ClassTestData, SingleTestData }
-import org.jetbrains.plugins.scala.testingSupport.test.{ AbstractTestConfigurationProducer, TestConfigurationUtil }
+import org.jetbrains.plugins.scala.testingSupport.test.TestRunConfigurationForm.TestKind
+import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, SingleTestData}
+import org.jetbrains.plugins.scala.testingSupport.test.{AbstractTestConfigurationProducer, TestConfigurationUtil}
 
 final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProducer[ZTestRunConfiguration] {
 
@@ -55,13 +57,23 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
     }
   }
 
+  override def setupConfigurationFromContext(configuration: ZTestRunConfiguration, context: ConfigurationContext, sourceElement: Ref[PsiElement]): Boolean = {
+    val result = super.setupConfigurationFromContext(configuration, context, sourceElement)
+    configuration.testConfigurationData match {
+      case _: SingleTestData => configuration.setTestKind(TestKind.TEST_NAME)
+      case _: ClassTestData => configuration.setTestKind(TestKind.CLAZZ)
+      case _ =>
+    }
+    result
+  }
+
   override def shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean =
     other.isProducedBy(classOf[ScalaApplicationConfigurationProducer])
 
   override protected def configurationNameForPackage(packageName: String): String = s"ZIO Tests in $packageName"
 
   override protected def configurationName(testClass: ScTypeDefinition, testName: String): String =
-    StringUtil.getShortName(testClass.qualifiedName)
+    StringUtil.getShortName(testClass.qualifiedName) + Option(testName).fold("")("::" + _)
 
   override def getTestClassWithTestName(location: Location[_ <: PsiElement]): (ScTypeDefinition, String) =
     location.getPsiElement match {
