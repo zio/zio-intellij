@@ -66,8 +66,8 @@ package object inspections {
     def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] = expr match {
       case ref @ ScReferenceExpression(_) =>
         ref.resolve() match {
-          case _: ScReferencePattern if fromZio(expr) => Some((ref, expr))
-          case _                                      => None
+          case _: ScReferencePattern | _: ScFunctionDefinition if fromZio(expr) => Some((ref, expr))
+          case _                                                                => None
         }
       case MethodRepr(_, _, Some(ref), Seq(e)) =>
         ref.resolve() match {
