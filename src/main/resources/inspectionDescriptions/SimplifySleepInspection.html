@@ -1,0 +1,8 @@
+<html>
+<body>Simplify the following expressions to use <code>.delay</code> instead:
+<pre>
+ZIO.sleep(duration) *> putStrLn("...")            -> putStrLn("").delay(duration)
+ZIO.sleep(duration).flatMap(_ => putStrLn("...")) -> putStrLn("").delay(duration)
+</pre>
+</body>
+</html>

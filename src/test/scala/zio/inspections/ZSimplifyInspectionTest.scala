@@ -21,6 +21,7 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
   def z(s: String): String =
     s"""import zio._
        |import zio.console._
+       |import zio.duration._
        |import zio.test._
        |import zio.test.Assertion._
        |object Test {
