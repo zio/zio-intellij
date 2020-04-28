@@ -3,13 +3,13 @@ package zio.intellij.testsupport
 import java.util.function.Function
 
 import com.intellij.execution.TestStateStorage
-import com.intellij.execution.lineMarker.{ ExecutorAction, RunLineMarkerContributor }
+import com.intellij.execution.lineMarker.{ExecutorAction, RunLineMarkerContributor}
 import com.intellij.execution.testframework.TestIconMapper
 import com.intellij.execution.testframework.sm.runner.states.TestStateInfo._
 import com.intellij.icons.AllIcons.RunConfigurations.TestState
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.project.Project
-import com.intellij.psi.{ PsiClass, PsiElement }
+import com.intellij.psi.{PsiClass, PsiElement}
 import javax.swing.Icon
 import org.jetbrains.plugins.scala.decompiler.scalasig.ScalaSigPrinter
 import org.jetbrains.plugins.scala.extensions._
@@ -37,7 +37,7 @@ final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
 
     expr match {
       case Some(testName(name)) => s"$url.${ScalaSigPrinter.quote(name)}"
-      case None                 => url
+      case _                    => url
     }
   }
 
