@@ -1,11 +1,13 @@
 package zio.intellij
 
 import com.intellij.psi.PsiAnnotation
-import org.jetbrains.plugins.scala.codeInspection.collections._
+import org.jetbrains.plugins.scala.codeInspection.collections.{isOfClassFrom, _}
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScMember
 
 package object inspections {
 
@@ -41,17 +43,46 @@ package object inspections {
   class ZIOMemberReference(refName: String) {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case `zioRef`(ref, e) if ref.refName == refName => Some(e)
-      case _                                          => None
+      case `zioRef`(ref, e) =>
+        if (ref.refName == refName) Some(e)
+        else
+          ref.resolve() match {
+            case n: ScNamedElement if n.name == refName => Some(e) // handles the 'apply' case when called with ZIO(x)
+            case _                                      => None
+          }
+      case _ => None
     }
   }
 
+  class TypeReference(typeFQNs: Set[String]) {
+
+    def unapply(expr: ScExpression): Option[ScExpression] = expr match {
+      case MethodRepr(_, _, Some(ref), Seq(_)) =>
+        ref.resolve() match {
+          case m: ScMember if typeFQNs.contains(m.containingClass.qualifiedName) => Some(expr)
+          case _                                                                 => None
+        }
+      case MethodRepr(_, Some(ref @ ScReferenceExpression(_)), None, Seq(_)) if isOfClassFrom(ref, typeFQNs.toArray) =>
+        Some(expr)
+      case ref @ ScReferenceExpression(_) if isOfClassFrom(expr, typeFQNs.toArray) => Some(ref)
+      case _                                                                       => None
+    }
+  }
+
+  val scalaFuture = new TypeReference(Set("scala.concurrent.Future"))
+  val scalaTry    = new TypeReference(Set("scala.util.Try", "scala.util.Success", "scala.util.Failure"))
+  val scalaOption = new TypeReference(Set("scala.Option", "scala.Some", "scala.None"))
+  val scalaEither = new TypeReference(Set("scala.util.Either", "scala.util.Left", "scala.util.Right"))
+
+  val `ZIO.apply`         = new ZIOMemberReference("apply")
   val `ZIO.unit`          = new ZIOMemberReference("unit")
   val `ZIO.succeed`       = new ZIOMemberReference("succeed")
   val `ZIO.fail`          = new ZIOMemberReference("fail")
   val `ZIO.collectAll`    = new ZIOMemberReference("collectAll")
   val `ZIO.collectAllPar` = new ZIOMemberReference("collectAllPar")
   val `ZIO.sleep`         = new ZIOMemberReference("sleep")
+  val `ZIO.effect`        = new ZIOMemberReference("effect")
+  val `ZIO.effectTotal`   = new ZIOMemberReference("effectTotal")
 
   object unit {
 

@@ -1,0 +1,16 @@
+<html>
+<body>
+Detects Future, Try, Option, and Either mistakenly wrapped in ZIO instead of using the <code>ZIO.from*</code> functions.
+
+Instead of:
+<pre>
+val myFuture = Future { someComputation() }
+ZIO.effect(myFuture)
+</pre>
+<br/>
+Will highlight and suggest fixing it by using the appropriate ZIO function:
+<pre>
+ZIO.fromFuture(implicit ec => myFuture)
+</pre>
+</body>
+</html>

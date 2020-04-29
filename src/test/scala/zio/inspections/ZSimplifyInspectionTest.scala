@@ -24,6 +24,9 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
        |import zio.duration._
        |import zio.test._
        |import zio.test.Assertion._
+       |import scala.concurrent.Future
+       |import scala.concurrent.ExecutionContext.Implicits.global
+       |import scala.util._
        |object Test {
        |
        |  val logger: Logger = null
