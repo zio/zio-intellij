@@ -18,7 +18,7 @@ lazy val `zio-intellij` = project
     version := pluginVersion,
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2020.1.27".toPlugin
+      "org.intellij.scala:2020.1.29".toPlugin
     )
   )
 
