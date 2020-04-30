@@ -29,16 +29,20 @@ package object inspections {
     private[inspections] val `.tap`          = invocation("tap").from(zioClasses)
     private[inspections] val `.tapError`     = invocation("tapError").from(zioClasses)
 
-    private[inspections] val `assert` = unqualified("assert").from(zioClasses)
+    private[inspections] val `assert` = unqualified("assert").from(zioTestClasses)
   }
 
-  val zioClasses: Array[String] = Array("zio.ZIO", "zio.test._")
+  val zioClasses: Array[String]     = Array("zio.ZIO")
+  val zioTestClasses: Array[String] = Array("zio.test._")
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
 
   def fromZio(r: ScExpression): Boolean =
     isOfClassFrom(r, zioClasses)
+
+  def fromZioTest(r: ScExpression): Boolean =
+    isOfClassFrom(r, zioTestClasses)
 
   class ZIOMemberReference(refName: String) {
 
@@ -92,24 +96,33 @@ package object inspections {
     }
   }
 
-  object zioRef {
+  sealed trait baseZioRef {
 
-    def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] = expr match {
-      case ref @ ScReferenceExpression(_) =>
-        ref.resolve() match {
-          case _: ScReferencePattern | _: ScFunctionDefinition if fromZio(expr) => Some((ref, expr))
-          case _                                                                => None
-        }
-      case MethodRepr(_, _, Some(ref), Seq(e)) =>
-        ref.resolve() match {
-          case _ if fromZio(expr) => Some((ref, e))
-          case _                  => None
-        }
-      // multiple argument lists
-      case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if fromZio(expr) =>
-        Some((ref, expr))
-      case _ => None
-    }
+    def extract(expr: ScExpression, isZioRef: ScExpression => Boolean): Option[(ScReferenceExpression, ScExpression)] =
+      expr match {
+        case ref @ ScReferenceExpression(_) =>
+          ref.resolve() match {
+            case _: ScReferencePattern | _: ScFunctionDefinition if isZioRef(expr) => Some((ref, expr))
+            case _                                                                 => None
+          }
+        case MethodRepr(_, _, Some(ref), Seq(e)) =>
+          ref.resolve() match {
+            case _ if isZioRef(expr) => Some((ref, e))
+            case _                   => None
+          }
+        // multiple argument lists
+        case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if isZioRef(expr) =>
+          Some((ref, expr))
+        case _ => None
+      }
+  }
+
+  object zioRef extends baseZioRef {
+    def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] = extract(expr, fromZio)
+  }
+
+  object zioTestRef extends baseZioRef {
+    def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] = extract(expr, fromZioTest)
   }
 
   object lambda {
