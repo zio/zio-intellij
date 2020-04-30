@@ -20,7 +20,7 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
       case expr: ScExpression if IntentionAvailabilityChecker.checkInspection(this, expr.getParent) =>
         (expr, Option(expr.getNextSiblingNotWhitespace)) match {
           case (zioRef(_, _), Some(zioRef(_, _))) | (zioTestRef(_, _), Some(zioTestRef(_, _))) |
-              (zioRef(_, _), Some(zioTestRef(_, _))) =>
+              (zioRef(_, _), Some(zioTestRef(_, _))) | (zioTestRef(_, _), Some(zioRef(_, _))) =>
             Some(
               manager.createProblemDescriptor(
                 expr,
