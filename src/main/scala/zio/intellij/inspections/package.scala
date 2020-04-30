@@ -32,7 +32,7 @@ package object inspections {
     private[inspections] val `assert` = unqualified("assert").from(zioTestClasses)
   }
 
-  val zioClasses: Array[String]     = Array("zio.ZIO")
+  val zioClasses: Array[String]     = Array("zio._")
   val zioTestClasses: Array[String] = Array("zio.test._")
 
   def invocation(methodName: String)  = new Qualified(methodName == _)

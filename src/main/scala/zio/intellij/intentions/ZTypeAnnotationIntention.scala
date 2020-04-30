@@ -15,8 +15,9 @@ abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention 
   final override def getText: String = getFamilyName
 
   override protected def descriptionStrategy: Strategy = ZStrategy {
-    case (_, declaredType) => isOfClassFrom(declaredType, zioClasses)
-    case _                 => false
+    case (te, declaredType) =>
+      isOfClassFrom(declaredType, zioClasses) && shouldSuggest(te, declaredType)
+    case _ => false
   }
 
   override def invocationStrategy(maybeEditor: Option[Editor]): Strategy = ZStrategy {
@@ -25,6 +26,8 @@ abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention 
   }
 
   protected def invoke(te: ScTypeElement, declaredType: ScType, editor: Editor): Boolean
+
+  protected def shouldSuggest(te: ScTypeElement, scType: ScType): Boolean = true
 }
 
 object ZStrategy {

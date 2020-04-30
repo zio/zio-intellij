@@ -3,6 +3,7 @@ package zio.intellij.intentions.suggestions
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.search.GlobalSearchScope
 import org.jetbrains.plugins.scala.codeInsight.intention.types.{ChooseTypeTextExpression, startTemplate}
+import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.TypeAdjuster
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScTypeAlias, ScTypeAliasDefinition}
@@ -20,18 +21,52 @@ import zio.intellij.intentions.ZTypeAnnotationIntention
 
 final class SuggestTypeAlias extends ZTypeAnnotationIntention {
 
-  override def getFamilyName: String = "Choose a more specific ZIO type alias"
+  override def getFamilyName: String = "Choose a more specific type alias"
 
-  def allAliases(context: ProjectContext, scope: GlobalSearchScope): List[ScTypeAlias] = {
-    val manager = ScalaPsiManager.instance(context)
-    manager.getCachedClass(scope, "zio") match {
-      case Some(z: ScObject) => z.aliases.toList
-      case _                 => Nil
+  override protected def invoke(te: ScTypeElement, declaredType: ScType, editor: Editor): Boolean = {
+    val aliases = SuggestTypeAlias.findMatchingAliases(te, declaredType)
+    if (aliases.size == 1) {
+      val replaced = te.replace(createTypeElementFromText(aliases.head.canonicalText, te.getContext, te))
+      TypeAdjuster.markToAdjust(replaced)
+    } else {
+      implicit val tpc: TypePresentationContext = TypePresentationContext(te)
+      val texts                                 = aliases.sortBy(_.presentableText.length).map(ScTypeText(_))
+      val expr                                  = new ChooseTypeTextExpression(texts, ScTypeText(declaredType))
+      startTemplate(te, te.getParent, expr, editor)
+    }
+    true
+  }
+
+  override protected def shouldSuggest(te: ScTypeElement, declaredType: ScType): Boolean = {
+    val aliases = SuggestTypeAlias.findMatchingAliases(te, declaredType)
+    aliases.length > 1 && aliases.head != declaredType
+  }
+}
+
+object SuggestTypeAlias {
+
+  def allAliasesFor(tpe: ScType, context: ProjectContext, scope: GlobalSearchScope): List[ScTypeAlias] = {
+    // TODO find a better way!
+    // need to extract the package object name where type aliases are usually declared
+    val qualifier = tpe.extractClass.flatMap { c =>
+      (c.qualifiedName, c.name) match {
+        case (qual, name) if qual == name              => Some(qual)
+        case (qual, name) if qual.endsWith("." + name) => Some(qual.substring(0, qual.length - name.length - 1))
+        case _                                         => None
+      }
+    }
+
+    qualifier.toList.flatMap { fqn =>
+      val manager = ScalaPsiManager.instance(context)
+      manager.getCachedClass(scope, fqn) match {
+        case Some(z: ScObject) => z.aliases.toList
+        case _                 => Nil
+      }
     }
   }
 
-  override protected def invoke(te: ScTypeElement, declaredType: ScType, editor: Editor): Boolean = {
-    val aliases = (allAliases(te.projectContext, te.getResolveScope).collect {
+  def findMatchingAliases(te: ScTypeElement, declaredType: ScType): List[ScType] =
+    (allAliasesFor(declaredType, te.projectContext, te.resolveScope).collect {
       case alias: ScTypeAliasDefinition =>
         val undefParams = alias.typeParameters.map(UndefinedType(_))
         val undefSubst  = ScSubstitutor.bind(alias.typeParameters, undefParams)
@@ -45,19 +80,6 @@ final class SuggestTypeAlias extends ZTypeAnnotationIntention {
               }
           )
     }.flatten ++ topLevelType(te)).distinct
-
-    if (aliases.size == 1) {
-      val replaced = te.replace(createTypeElementFromText(aliases.head.canonicalText, te.getContext, te))
-      TypeAdjuster.markToAdjust(replaced)
-    } else {
-      implicit val tpc: TypePresentationContext = TypePresentationContext(te)
-      val texts                                 = aliases.sortBy(_.presentableText.length).map(ScTypeText(_))
-      val expr                                  = new ChooseTypeTextExpression(texts, ScTypeText(declaredType))
-      startTemplate(te, te.getParent, expr, editor)
-    }
-
-    true
-  }
 
   def topLevelType(te: ScTypeElement): List[ScType] =
     te.`type`().toOption match {
