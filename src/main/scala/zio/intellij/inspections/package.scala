@@ -16,30 +16,30 @@ package object inspections {
   }
 
   object zioMethods {
-    private[inspections] val `.*>`           = invocation("*>").from(zioClasses)
-    private[inspections] val `.as`           = invocation("as").from(zioClasses)
-    private[inspections] val `.map`          = invocation("map").from(zioClasses)
-    private[inspections] val `.flatMap`      = invocation("flatMap").from(zioClasses)
-    private[inspections] val `.flatMapError` = invocation("flatMapError").from(zioClasses)
-    private[inspections] val `.mapError`     = invocation("mapError").from(zioClasses)
-    private[inspections] val `.orElseFail`   = invocation("orElseFail").from(zioClasses)
-    private[inspections] val `.catchAll`     = invocation("catchAll").from(zioClasses)
-    private[inspections] val `.foldCause`    = invocation("foldCause").from(zioClasses)
-    private[inspections] val `.foldCauseM`   = invocation("foldCauseM").from(zioClasses)
-    private[inspections] val `.tap`          = invocation("tap").from(zioClasses)
-    private[inspections] val `.tapError`     = invocation("tapError").from(zioClasses)
+    private[inspections] val `.*>`           = invocation("*>").from(zioLikePackages)
+    private[inspections] val `.as`           = invocation("as").from(zioLikePackages)
+    private[inspections] val `.map`          = invocation("map").from(zioLikePackages)
+    private[inspections] val `.flatMap`      = invocation("flatMap").from(zioLikePackages)
+    private[inspections] val `.flatMapError` = invocation("flatMapError").from(zioLikePackages)
+    private[inspections] val `.mapError`     = invocation("mapError").from(zioLikePackages)
+    private[inspections] val `.orElseFail`   = invocation("orElseFail").from(zioLikePackages)
+    private[inspections] val `.catchAll`     = invocation("catchAll").from(zioLikePackages)
+    private[inspections] val `.foldCause`    = invocation("foldCause").from(zioLikePackages)
+    private[inspections] val `.foldCauseM`   = invocation("foldCauseM").from(zioLikePackages)
+    private[inspections] val `.tap`          = invocation("tap").from(zioLikePackages)
+    private[inspections] val `.tapError`     = invocation("tapError").from(zioLikePackages)
 
     private[inspections] val `assert` = unqualified("assert").from(zioTestClasses)
   }
 
-  val zioClasses: Array[String]     = Array("zio._")
-  val zioTestClasses: Array[String] = Array("zio.test._")
+  val zioLikePackages: Array[String] = Array("zio._", "zquery._")
+  val zioTestClasses: Array[String]  = Array("zio.test._")
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
 
   def fromZio(r: ScExpression): Boolean =
-    isOfClassFrom(r, zioClasses)
+    isOfClassFrom(r, zioLikePackages)
 
   def fromZioTest(r: ScExpression): Boolean =
     isOfClassFrom(r, zioTestClasses)

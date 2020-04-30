@@ -9,14 +9,15 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScUnderscoreSection
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
-import zio.intellij.inspections.zioClasses
+import zio.intellij.inspections._
 
 abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention with ZIcon {
   final override def getText: String = getFamilyName
 
   override protected def descriptionStrategy: Strategy = ZStrategy {
     case (te, declaredType) =>
-      isOfClassFrom(declaredType, zioClasses) && shouldSuggest(te, declaredType)
+      (isOfClassFrom(declaredType, zioLikePackages) || isOfClassFrom(declaredType, zioTestClasses)) &&
+        shouldSuggest(te, declaredType)
     case _ => false
   }
 
