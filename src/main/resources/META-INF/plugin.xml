@@ -97,6 +97,12 @@
                          shortName="YieldingZIOEffectInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.NothingInContravariantPositionInspection"
+                         displayName="Detects Nothing being used in the contravariant position in a ZIO effect"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="NothingInContravariantPositionInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
