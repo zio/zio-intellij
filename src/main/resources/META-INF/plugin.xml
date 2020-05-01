@@ -2,9 +2,9 @@
     <id>zio.intellij.zio-intellij</id>
     <name>ZIO for IntelliJ</name>
     <vendor>The ZIO Maintainers</vendor>
+    <version>replaced-by-build</version>
 
-    <description>
-        <![CDATA[
+    <description><![CDATA[
         Suggestions, refactorings, and other enhancements for the ZIO library ecosystem.
         The plugin enhances ZIO with features, such as:
         <ul>
@@ -15,9 +15,9 @@
         </ul>
 
         Contribute to the plugin at <a href="https://github.com/zio/zio-intellij">https://github.com/zio/zio-intellij</a>
-      ]]>
+        ]]></description>
 
-    </description>
+    <change-notes>replaced-by-build</change-notes>
 
     <idea-version since-build="201.1" until-build="201.*"/>
 
