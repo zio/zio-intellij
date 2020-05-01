@@ -6,7 +6,7 @@ import org.jetbrains.plugins.scala.codeInspection.AbstractRegisteredInspection
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
-import zio.intellij.inspections.{zioRef, zioTestRef}
+import zio.intellij.inspections.zioRef
 
 class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
 
@@ -19,8 +19,7 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
     element match {
       case expr: ScExpression if IntentionAvailabilityChecker.checkInspection(this, expr.getParent) =>
         (expr, Option(expr.getNextSiblingNotWhitespace)) match {
-          case (zioRef(_, _), Some(zioRef(_, _))) | (zioTestRef(_, _), Some(zioTestRef(_, _))) |
-              (zioRef(_, _), Some(zioTestRef(_, _))) | (zioTestRef(_, _), Some(zioRef(_, _))) =>
+          case (zioRef(_, _), Some(zioRef(_, _))) =>
             Some(
               manager.createProblemDescriptor(
                 expr,
