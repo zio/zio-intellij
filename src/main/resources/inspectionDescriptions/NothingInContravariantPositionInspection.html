@@ -1,0 +1,12 @@
+<html>
+<body>
+Detects if <code>Nothing</code> was placed in the <code>R</code> type parameter. Having <code>Nothing</code> in the
+contravariant position is most likely a mistake, where the use of <code>Any</code> was intended.
+<pre>
+val x: ZIO[Nothing, Nothing, Unit] = ???
+</pre>
+<br/>
+Will highlight the <code>Nothing</code> parameter, as it is impossible to satisfy the <code>R</code> requirement with it.<br/>
+
+</body>
+</html>

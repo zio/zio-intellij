@@ -45,6 +45,19 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
 
   implicit protected class S(s: String) {
     def assertHighlighted(): Unit = checkTextHasError(s)
+
+    def assertNotHighlighted(): Unit = {
+      var thrownEx: AssertionError = null // ;(
+      try checkTextHasError(s)
+      catch {
+        case e: AssertionError => thrownEx = e
+      }
+      finally {
+        if (thrownEx != null) ()
+        else throw new AssertionError("An error from the highlighter was expected to be thrown, but wasn't.")
+      }
+    }
+
   }
 }
 
