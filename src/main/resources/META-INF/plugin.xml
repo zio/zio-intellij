@@ -92,7 +92,7 @@
 
 
         <localInspection implementationClass="zio.intellij.inspections.mistakes.YieldingZIOEffectInspection"
-                         displayName="Detects if a ZIO is returned inside the yield part of a for comprehension"
+                         displayName="Detects if a value returned from the yield part of a for comprehension is explicitly wrapped in a ZIO effect"
                          groupPath="Scala,ZIO" groupName="Inspections"
                          shortName="YieldingZIOEffectInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>

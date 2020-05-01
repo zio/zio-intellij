@@ -63,5 +63,5 @@ class YieldingZIOEffectInspection extends AbstractRegisteredInspection {
 }
 
 object YieldingZIOEffectInspection {
-  val message = "Possibly mistaken yielding of a ZIO effect. Perhaps you meant to yield the result instead?"
+  val message = "Possibly mistaken wrapping of the result in a ZIO effect. Perhaps you meant to yield the result directly?"
 }
