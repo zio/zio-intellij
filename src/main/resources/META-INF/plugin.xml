@@ -45,7 +45,7 @@
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyMapInspection"
                          displayName="Simplify discarding effect result to .as/.orElseFail" groupPath="Scala,ZIO"
                          groupName="Simplifications"
-                         shortName="SimplifyMap" level="WARNING"
+                         shortName="SimplifyMapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyBimapInspection"
                          displayName="Simplify mapping result and error effects to .bimap" groupPath="Scala,ZIO"
