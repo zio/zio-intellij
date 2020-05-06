@@ -7,7 +7,7 @@ import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.TypeAdjuster
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScTypeAlias, ScTypeAliasDefinition}
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTypeElementFromText
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiManager
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
@@ -46,16 +46,11 @@ final class SuggestTypeAlias extends ZTypeAnnotationIntention {
 object SuggestTypeAlias {
 
   def allAliasesFor(tpe: ScType, context: ProjectContext, scope: GlobalSearchScope): List[ScTypeAlias] = {
-    // TODO find a better way!
-    // need to extract the package object name where type aliases are usually declared
-    val qualifier = tpe.extractClass.flatMap { c =>
-      (c.qualifiedName, c.name) match {
-        case (qual, name) if qual == name              => Some(qual)
-        case (qual, name) if qual.endsWith("." + name) => Some(qual.substring(0, qual.length - name.length - 1))
-        case _                                         => None
-      }
+    val qualifier = tpe.extractClass.flatMap {
+      case t: ScTypeDefinition => Some(t.getPath)
+      case _ => None
     }
-
+    
     qualifier.toList.flatMap { fqn =>
       val manager = ScalaPsiManager.instance(context)
       manager.getCachedClass(scope, fqn) match {
