@@ -39,7 +39,7 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
     testQuickFix(text, result, hint)
   }
 
-  def test_either_direct_none(): Unit = {
+  def test_option_direct_none(): Unit = {
     z(s"${START}ZIO(None)$END").assertHighlighted()
     val text   = z(s"ZIO(None)")
     val result = z(s"ZIO.fromOption(None)")
@@ -92,7 +92,7 @@ class TryWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Try") {
     testQuickFix(text, result, hint)
   }
 
-  def test_either_direct_failure(): Unit = {
+  def test_try_direct_failure(): Unit = {
     z(s"${START}ZIO(Failure(new Exception()))$END").assertHighlighted()
     val text   = z(s"ZIO(Failure(new Exception()))")
     val result = z(s"ZIO.fromTry(Failure(new Exception()))")

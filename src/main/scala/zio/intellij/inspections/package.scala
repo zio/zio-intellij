@@ -7,7 +7,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScMember
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScTemplateDefinition}
 
 package object inspections {
 
@@ -40,18 +40,41 @@ package object inspections {
   def fromZio(r: ScExpression): Boolean =
     isOfClassFrom(r, zioLikePackages)
 
-  class ZIOMemberReference(refName: String) {
+  class ZIOStaticMemberReference(refName: String) {
+    private def matchesRefName(ref: ScReferenceExpression) =
+      if (ref.refName == refName) true
+      else
+        ref.resolve() match {
+          // handles the 'apply' case when called with ZIO(x)
+          case n: ScNamedElement if n.name == refName => true
+          case _                                      => false
+        }
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case `zioRef`(ref, e) =>
-        if (ref.refName == refName) Some(e)
-        else
-          ref.resolve() match {
-            case n: ScNamedElement if n.name == refName => Some(e) // handles the 'apply' case when called with ZIO(x)
-            case _                                      => None
-          }
+      case ref @ ScReferenceExpression(_) if matchesRefName(ref) =>
+        ref.smartQualifier match {
+          case Some(ZIOStaticMemberReference()) => Some(expr)
+          case _                                => None
+        }
+      case MethodRepr(_, _, Some(ref), Seq(e)) if matchesRefName(ref) =>
+        ref match {
+          case ZIOStaticMemberReference() => Some(e)
+          case _                          => None
+        }
       case _ => None
     }
+  }
+
+  object ZIOStaticMemberReference {
+    // todo make me not do this
+    val zioTypes = Set("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
+
+    def unapply(ref: ScReferenceExpression): Boolean =
+      ref.resolve() match {
+        case t: ScTemplateDefinition if zioTypes.contains(t.qualifiedName)                 => true
+        case f: ScFunctionDefinition if zioTypes.contains(f.containingClass.qualifiedName) => true
+        case _                                                                             => false
+      }
   }
 
   class TypeReference(typeFQNs: Set[String]) {
@@ -74,15 +97,15 @@ package object inspections {
   val scalaOption = new TypeReference(Set("scala.Option", "scala.Some", "scala.None"))
   val scalaEither = new TypeReference(Set("scala.util.Either", "scala.util.Left", "scala.util.Right"))
 
-  val `ZIO.apply`         = new ZIOMemberReference("apply")
-  val `ZIO.unit`          = new ZIOMemberReference("unit")
-  val `ZIO.succeed`       = new ZIOMemberReference("succeed")
-  val `ZIO.fail`          = new ZIOMemberReference("fail")
-  val `ZIO.collectAll`    = new ZIOMemberReference("collectAll")
-  val `ZIO.collectAllPar` = new ZIOMemberReference("collectAllPar")
-  val `ZIO.sleep`         = new ZIOMemberReference("sleep")
-  val `ZIO.effect`        = new ZIOMemberReference("effect")
-  val `ZIO.effectTotal`   = new ZIOMemberReference("effectTotal")
+  val `ZIO.apply`         = new ZIOStaticMemberReference("apply")
+  val `ZIO.unit`          = new ZIOStaticMemberReference("unit")
+  val `ZIO.succeed`       = new ZIOStaticMemberReference("succeed")
+  val `ZIO.fail`          = new ZIOStaticMemberReference("fail")
+  val `ZIO.collectAll`    = new ZIOStaticMemberReference("collectAll")
+  val `ZIO.collectAllPar` = new ZIOStaticMemberReference("collectAllPar")
+  val `ZIO.sleep`         = new ZIOStaticMemberReference("sleep")
+  val `ZIO.effect`        = new ZIOStaticMemberReference("effect")
+  val `ZIO.effectTotal`   = new ZIOStaticMemberReference("effectTotal")
 
   object unit {
 

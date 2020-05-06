@@ -12,7 +12,7 @@ class SimplifyCollectAllInspection
       CollectAllParNToForeachParNSimplificationType
     )
 
-sealed abstract class BaseCollectAllSimplificationType(methodName: String, methodExtractor: ZIOMemberReference)
+sealed abstract class BaseCollectAllSimplificationType(methodName: String, methodExtractor: ZIOStaticMemberReference)
     extends SimplificationType {
   override def hint: String = s"Replace with ZIO.$methodName"
 
