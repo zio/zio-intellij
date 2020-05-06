@@ -35,4 +35,8 @@ class SimplifyUnitInspectionTest extends ZSimplifyInspectionTest[SimplifyUnitIns
     val result = z("ZIO.succeed(42).unit")
     testQuickFix(text, result, hint)
   }
+
+  def test_does_not_highlight_unit_member(): Unit = {
+    z(s"""UIO(println("a")) $START*> UIO(println("b")).unit$END""").assertNotHighlighted()
+  }
 }
