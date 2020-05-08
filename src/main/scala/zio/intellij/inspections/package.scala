@@ -41,6 +41,7 @@ package object inspections {
     isOfClassFrom(r, zioLikePackages)
 
   class ZIOStaticMemberReference(refName: String) {
+
     private def matchesRefName(ref: ScReferenceExpression) =
       if (ref.refName == refName) true
       else

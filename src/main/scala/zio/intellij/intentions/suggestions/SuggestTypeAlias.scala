@@ -48,9 +48,9 @@ object SuggestTypeAlias {
   def allAliasesFor(tpe: ScType, context: ProjectContext, scope: GlobalSearchScope): List[ScTypeAlias] = {
     val qualifier = tpe.extractClass.flatMap {
       case t: ScTypeDefinition => Some(t.getPath)
-      case _ => None
+      case _                   => None
     }
-    
+
     qualifier.toList.flatMap { fqn =>
       val manager = ScalaPsiManager.instance(context)
       manager.getCachedClass(scope, fqn) match {

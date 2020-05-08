@@ -50,6 +50,7 @@ class NothingInContravariantPositionInspection extends AbstractRegisteredInspect
     }
 
 }
+
 object NothingInContravariantPositionInspection {
   val message = "Possibly erroneous use of Nothing in the R type parameter. Perhaps you meant to use Any?"
 }
