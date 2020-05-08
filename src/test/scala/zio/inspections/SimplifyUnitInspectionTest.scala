@@ -36,7 +36,6 @@ class SimplifyUnitInspectionTest extends ZSimplifyInspectionTest[SimplifyUnitIns
     testQuickFix(text, result, hint)
   }
 
-  def test_does_not_highlight_unit_member(): Unit = {
+  def test_does_not_highlight_unit_member(): Unit =
     z(s"""UIO(println("a")) $START*> UIO(println("b")).unit$END""").assertNotHighlighted()
-  }
 }

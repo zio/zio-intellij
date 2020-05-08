@@ -21,9 +21,8 @@ lazy val `zio-intellij` = project
       "org.intellij.scala:2020.1.29".toPlugin
     ),
     patchPluginXml := pluginXmlOptions { xml =>
-      xml.version           = version.value
-      xml.changeNotes       =
-        s"""<![CDATA[
+      xml.version = version.value
+      xml.changeNotes = s"""<![CDATA[
         Lots of new features and bugfixes in this release!
         <ul>
         <li>Detecting ZIO effects being used as statements (<a href="https://github.com/zio/zio-intellij/pull/60">#60</a>)</li>
