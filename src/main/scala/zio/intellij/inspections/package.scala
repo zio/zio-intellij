@@ -8,6 +8,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScTemplateDefinition}
+import org.jetbrains.plugins.scala.lang.psi.types.ScType
 
 package object inspections {
 
@@ -32,13 +33,16 @@ package object inspections {
     private[inspections] val `assert` = unqualified("assert").from(zioLikePackages)
   }
 
-  val zioLikePackages: Array[String] = Array("zio._", "zquery._", "zio.test._")
+  val zioLikePackages: Array[String] = Array("zio._")
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
 
   def fromZio(r: ScExpression): Boolean =
     isOfClassFrom(r, zioLikePackages)
+
+  def fromZio(tpe: ScType): Boolean =
+    isOfClassFrom(tpe, zioLikePackages)
 
   class ZIOStaticMemberReference(refName: String) {
 

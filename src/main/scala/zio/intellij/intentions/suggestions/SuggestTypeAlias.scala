@@ -1,11 +1,13 @@
 package zio.intellij.intentions.suggestions
 
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
+import org.jetbrains.plugins.scala.codeInsight.intention.types.AbstractTypeAnnotationIntention.complete
 import org.jetbrains.plugins.scala.codeInsight.intention.types.{ChooseTypeTextExpression, startTemplate}
 import org.jetbrains.plugins.scala.extensions._
-import org.jetbrains.plugins.scala.lang.psi.TypeAdjuster
-import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
+import org.jetbrains.plugins.scala.lang.psi.api.base.types.{ScSimpleTypeElement, ScTypeElement}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScTypeAlias, ScTypeAliasDefinition}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTypeElementFromText
@@ -14,7 +16,10 @@ import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorTyp
 import org.jetbrains.plugins.scala.lang.psi.types.api.{ParameterizedType, ScTypeText, UndefinedType}
 import org.jetbrains.plugins.scala.lang.psi.types.recursiveUpdate.ScSubstitutor
 import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresentationContext}
+import org.jetbrains.plugins.scala.lang.psi.{ScalaPsiUtil, TypeAdjuster}
 import org.jetbrains.plugins.scala.project.ProjectContext
+import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker.checkIntention
+import zio.intellij.inspections.fromZio
 import zio.intellij.intentions.ZTypeAnnotationIntention
 
 // borrowed from MakeTypeMoreSpecificIntention
@@ -41,6 +46,20 @@ final class SuggestTypeAlias extends ZTypeAnnotationIntention {
     val aliases = SuggestTypeAlias.findMatchingAliases(te, declaredType)
     aliases.length > 1 && aliases.head != declaredType
   }
+
+  override def isAvailable(project: Project, editor: Editor, element: PsiElement): Boolean =
+    adjustElementAtOffset(element, editor) match {
+      case element: PsiElement if checkIntention(this, element) =>
+        element.parentOfType[ScSimpleTypeElement] match {
+          case Some(tpe) if tpe.`type`().toOption.exists(fromZio) =>
+            complete(element, descriptionStrategy)
+          case _ => false
+        }
+      case _ => false
+    }
+
+  private def adjustElementAtOffset(element: PsiElement, editor: Editor): PsiElement =
+    ScalaPsiUtil.adjustElementAtOffset(element, editor.getCaretModel.getOffset)
 }
 
 object SuggestTypeAlias {
