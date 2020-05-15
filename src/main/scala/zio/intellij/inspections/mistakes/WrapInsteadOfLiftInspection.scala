@@ -3,12 +3,19 @@ package zio.intellij.inspections.mistakes
 import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.search.searches.ReferencesSearch
+import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, AbstractRegisteredInspection}
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
+import org.jetbrains.plugins.scala.extensions._
+import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGenerator}
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScValueOrVariable
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createExpressionFromText
-import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
 import zio.intellij.inspections._
 import zio.intellij.inspections.mistakes.WrapInsteadOfLiftInspection.messageFormat
+
+import scala.annotation.tailrec
 
 class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
 
@@ -18,6 +25,23 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
     descriptionTemplate: String,
     highlightType: ProblemHighlightType
   )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] = {
+
+    @tailrec
+    def isUsed(expr: Option[PsiElement]): Boolean = {
+      val _isUsed: PsiElement => Boolean = {
+        case n: ScNamedElement => isElementUsed(n, isOnTheFly)
+        case _                 => false
+      }
+
+      expr match {
+        case Some(v: ScValueOrVariable) =>
+          v.hasExplicitType || v.declaredElements.exists(_isUsed)
+        case Some(r: ScReferencePattern) =>
+          r.bindings.filterNot(_.isWildcard).exists(_isUsed)
+        case Some(ScGenerator(p)) => isUsed(p.toOption.map(_._1))
+        case _                    => false
+      }
+    }
 
     def createFix(localFix: QuickFix): ProblemDescriptor =
       manager.createProblemDescriptor(
@@ -29,22 +53,39 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
       )
 
     element match {
-      case expr: ScExpression if IntentionAvailabilityChecker.checkInspection(this, expr.getParent) =>
+      case expr: ScExpression =>
         expr match {
-          case FutureExpression(f) => Some(createFix(new QuickFix(expr, f, "Future", "implicit ec => ")))
-          case TryExpression(f)    => Some(createFix(new QuickFix(expr, f, "Try")))
-          case OptionExpression(f) => Some(createFix(new QuickFix(expr, f, "Option")))
-          case EitherExpression(f) => Some(createFix(new QuickFix(expr, f, "Either")))
-          case _                   => None
+          case Future(f) if !isUsed(expr.parent) => Some(createFix(new QuickFix(expr, f, "Future", "implicit ec => ")))
+          case Try(f) if !isUsed(expr.parent)    => Some(createFix(new QuickFix(expr, f, "Try")))
+          case Option(f) if !isUsed(expr.parent) => Some(createFix(new QuickFix(expr, f, "Option")))
+          case Either(f) if !isUsed(expr.parent) => Some(createFix(new QuickFix(expr, f, "Either")))
+          case _                                 => None
         }
       case _ => None
     }
   }
 
-  val FutureExpression = new ExpressionExtractor(scalaFuture)
-  val TryExpression    = new ExpressionExtractor(scalaTry)
-  val OptionExpression = new ExpressionExtractor(scalaOption)
-  val EitherExpression = new ExpressionExtractor(scalaEither)
+  // taken from ScalaUnusedSymbolInspection
+  private def isElementUsed(element: ScNamedElement, isOnTheFly: Boolean): Boolean =
+    if (isOnTheFly) {
+      //we can trust RefCounter because references are counted during highlighting
+      val refCounter = ScalaRefCountHolder(element)
+      var used       = false
+
+      val success = refCounter.retrieveUnusedReferencesInfo { () =>
+        used |= refCounter.isValueReadUsed(element) || refCounter.isValueWriteUsed(element)
+      }
+
+      !success || used //want to return true if it was a failure
+    } else {
+      //need to look for references because file is not highlighted
+      ReferencesSearch.search(element, element.getUseScope).findFirst() != null
+    }
+
+  val Future = new ExpressionExtractor(scalaFuture)
+  val Try    = new ExpressionExtractor(scalaTry)
+  val Option = new ExpressionExtractor(scalaOption)
+  val Either = new ExpressionExtractor(scalaEither)
 
   final class ExpressionExtractor(extractor: TypeReference) {
 

@@ -12,5 +12,36 @@ Will highlight and suggest fixing it by using the appropriate ZIO function:
 <pre>
 ZIO.fromFuture(implicit ec => myFuture)
 </pre>
+<p>
+<strong>Note</strong>: the highlighting only applies to values that:
+<ul>
+    <li>Do not have explicit type annotations, e.g.:
+    <pre>
+    val a = ZIO(Option(1))
+    </pre>
+    will be highlighted, while
+    <pre>
+    val a: Task[Option[Int]] = ZIO(Option(1))
+    </pre>
+    will not.
+    </li>
+    <br/>
+    <li>Do not have usages, e.g.:
+    <pre>
+    for {
+      a <- ZIO(Option(1))
+    } yield ???
+    </pre>
+    will be highlighted, while
+    <pre>
+    for {
+      a <- ZIO(Option(1))
+      b <- doSomethingWith(a)
+    } yield ???
+    </pre>
+    will not.
+    </li>
+</ul>
+</p>
 </body>
 </html>
