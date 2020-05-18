@@ -8,10 +8,11 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.vfs.{VfsUtil, VirtualFile}
+import com.intellij.pom.java.LanguageLevel
 import com.intellij.psi.codeStyle.{CodeStyleSettings, CommonCodeStyleSettings}
 import com.intellij.psi.{PsiDocumentManager, PsiFile}
 import com.intellij.testFramework.fixtures.{JavaCodeInsightTestFixture, LightJavaCodeInsightFixtureTestCase}
-import com.intellij.testFramework.{EditorTestUtil, LightPlatformTestCase, LightProjectDescriptor}
+import com.intellij.testFramework.{EditorTestUtil, IdeaTestUtil, LightPlatformTestCase, LightProjectDescriptor}
 import intellij.testfixtures.TestUtils
 import org.jetbrains.plugins.scala.extensions.invokeAndWait
 import org.jetbrains.plugins.scala.lang.formatting.settings.ScalaCodeStyleSettings
@@ -44,7 +45,7 @@ abstract class ScalaLightCodeInsightFixtureTestAdapter
 
   override protected def getProjectDescriptor: LightProjectDescriptor = new ScalaLightProjectDescriptor() {
     override def tuneModule(module: Module): Unit = setUpLibraries(module)
-    override def getSdk: Sdk                      = SmartJDKLoader.getOrCreateJDK()
+    override def getSdk: Sdk                      = IdeaTestUtil.getMockJdk(LanguageLevel.JDK_11.toJavaVersion)
   }
 
   override def setUpLibraries(implicit module: Module): Unit = {
