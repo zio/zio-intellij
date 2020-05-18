@@ -1,6 +1,6 @@
 package zio.intellij.testsupport
 
-import com.intellij.execution.configurations.{JavaCommandLineState, JavaParameters, RunProfileState, RunnerSettings}
+import com.intellij.execution.configurations.{JavaCommandLineState, JavaParameters, RunProfileState}
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.runners.{ExecutionEnvironment, ProgramRunner}
 import com.intellij.execution.testDiscovery.JavaAutoRunManager
@@ -14,8 +14,10 @@ import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.{DefaultExecutionResult, ExecutionResult, Executor}
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.util.{Getter, InvalidDataException}
 import com.intellij.psi.PsiClass
+import org.jetbrains.bsp.BspUtil
 import org.jetbrains.plugins.scala.project.ModuleExt
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration
 import org.jetbrains.plugins.scala.testingSupport.test.TestRunConfigurationForm.TestKind._
@@ -61,7 +63,16 @@ final class ZTestRunConfiguration(
     runnerClassName == ZTestRunnerName
 
   private def hasTestRunner(module: Module): Boolean =
-    module.libraries.map(_.getName).exists(_.contains("zio-test-intellij"))
+    if (BspUtil.isBspModule(module)) {
+      // todo there must be a better way!
+      val allFiles = module.libraries
+        .flatMap(_.getUrls(OrderRootType.CLASSES))
+        .toSet
+
+      allFiles.exists(_.contains("zio-test-intellij"))
+    } else {
+      module.libraries.map(_.getName).exists(_.contains("zio-test-intellij"))
+    }
 
   override def getState(executor: Executor, env: ExecutionEnvironment): RunProfileState = {
     val oldState = super.getState(executor, env).asInstanceOf[JavaCommandLineState]
