@@ -105,4 +105,32 @@ class SimplifyTapInspectionTest extends BaseSimplifyTapInspectionTest(".tap") {
     val result = z(s"ZIO.unit.tap(_ => ZIO.unit)")
     testQuickFix(text, result, hint)
   }
+
+  def test_flatMap_forkManaged(): Unit = {
+    z(s"""class Server {
+         |  def serve(): UIO[Unit] = ???
+         |}
+         |
+         |val build: ZManaged[Any, Nothing, Server] = ???
+         |
+         |build.${START}flatMap(server => server.serve().forkManaged.as(server))$END
+         |""".stripMargin).assertHighlighted()
+    val text   = z(s"""class Server {
+                    |  def serve(): UIO[Unit] = ???
+                    |}
+                    |
+                    |val build: ZManaged[Any, Nothing, Server] = ???
+                    |
+                    |build.flatMap(server => server.serve().forkManaged.as(server))
+                    |""".stripMargin)
+    val result = z(s"""class Server {
+                      |  def serve(): UIO[Unit] = ???
+                      |}
+                      |
+                      |val build: ZManaged[Any, Nothing, Server] = ???
+                      |
+                      |build.tap(_.serve().forkManaged)
+                      |""".stripMargin)
+    testQuickFix(text, result, hint)
+  }
 }
