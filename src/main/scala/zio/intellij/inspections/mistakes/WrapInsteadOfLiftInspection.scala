@@ -3,8 +3,6 @@ package zio.intellij.inspections.mistakes
 import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import com.intellij.psi.search.searches.ReferencesSearch
-import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, AbstractRegisteredInspection}
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
@@ -14,6 +12,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createExpressionFromText
 import zio.intellij.inspections._
 import zio.intellij.inspections.mistakes.WrapInsteadOfLiftInspection.messageFormat
+import zio.intellij.utils._
 
 import scala.annotation.tailrec
 
@@ -65,22 +64,6 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
     }
   }
 
-  // taken from ScalaUnusedSymbolInspection
-  private def isElementUsed(element: ScNamedElement, isOnTheFly: Boolean): Boolean =
-    if (isOnTheFly) {
-      //we can trust RefCounter because references are counted during highlighting
-      val refCounter = ScalaRefCountHolder(element)
-      var used       = false
-
-      val success = refCounter.retrieveUnusedReferencesInfo { () =>
-        used |= refCounter.isValueReadUsed(element) || refCounter.isValueWriteUsed(element)
-      }
-
-      !success || used //want to return true if it was a failure
-    } else {
-      //need to look for references because file is not highlighted
-      ReferencesSearch.search(element, element.getUseScope).findFirst() != null
-    }
 
   val Future = new ExpressionExtractor(scalaFuture)
   val Try    = new ExpressionExtractor(scalaTry)
