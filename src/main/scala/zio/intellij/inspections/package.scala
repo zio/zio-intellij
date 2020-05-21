@@ -33,6 +33,12 @@ package object inspections {
     private[inspections] val `assert` = unqualified("assert").from(zioLikePackages)
   }
 
+  object hasMethods {
+    val zioHasLikeClasses: Array[String] = Array("zio.Has", "zio.Has._")
+
+    private[inspections] val `.get` = invocation("get").from(zioHasLikeClasses)
+  }
+
   val zioLikePackages: Array[String] = Array("zio._")
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
@@ -111,6 +117,7 @@ package object inspections {
   val `ZIO.sleep`         = new ZIOStaticMemberReference("sleep")
   val `ZIO.effect`        = new ZIOStaticMemberReference("effect")
   val `ZIO.effectTotal`   = new ZIOStaticMemberReference("effectTotal")
+  val `ZIO.access`        = new ZIOStaticMemberReference("access")
 
   object unit {
 
