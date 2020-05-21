@@ -24,7 +24,12 @@ final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
 
   override def getInfo(element: PsiElement): RunLineMarkerContributor.Info = {
     def buildInfo(td: ScTypeDefinition, tm: Option[ScReferenceExpression]) =
-      buildLineInfo(buildUrl(td, tm), td.getProject, tm.isEmpty)
+      tm match {
+        case Some(method) if method.refName == "suite" =>
+          buildLineInfo(buildUrl(td, tm), td.getProject, true)
+        case _ =>
+          buildLineInfo(buildUrl(td, tm), td.getProject, tm.isEmpty)
+      }
 
     element match {
       case IsZioTestElement(td, tm) => buildInfo(td, tm)

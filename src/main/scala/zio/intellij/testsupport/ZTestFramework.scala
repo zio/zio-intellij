@@ -3,6 +3,7 @@ package zio.intellij.testsupport
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
+import zio.intellij.testsupport.ZTestFramework.testMethods
 
 final class ZTestFramework extends AbstractTestFramework {
   override def suitePaths: Seq[String]      = ZSuitePaths
@@ -22,7 +23,11 @@ final class ZTestFramework extends AbstractTestFramework {
 
   override def isTestMethod(element: PsiElement, checkAbstract: Boolean): Boolean =
     element match {
-      case sc: ScReferenceExpression => sc.textMatches("testM") || sc.textMatches("test")
+      case sc: ScReferenceExpression => testMethods.contains(sc.refName)
       case _                         => false
     }
+}
+
+object ZTestFramework {
+  private[ZTestFramework] val testMethods = Set("test", "testM", "suite")
 }
