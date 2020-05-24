@@ -15,6 +15,7 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
         |  trait Service {
         |    def getUser(userId: UserId): Task[Option[User]]
         |    def createUser(user: User): Task[Unit]
+        |    def notEffect: Boolean
         |  }
         |  val testRepo: ULayer[UserRepo] = ZLayer.succeed(???)
         |}
@@ -57,6 +58,14 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
     testQuickFix(text, result, hint)
   }
 
+  def test_not_highlighted(): Unit = {
+    def assignment(expr: String) = s"val res: URIO[Has[UserRepo.Service], Boolean] = $expr"
+    val reference                = "ZIO.access(_.get.notEffect)"
+
+    z(base(assignment(s"$START$reference$END")))
+      .assertNotHighlighted()
+  }
+
   def test_generic_access_get(): Unit = {
     val reference = "ZIO.access[UserRepo](_.get)"
 
@@ -64,7 +73,7 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
       .assertHighlighted()
 
     val text   = z(base(reference))
-    val result = z(base("ZIO.service[UserRepo]"))
+    val result = z(base("ZIO.service[UserRepo.Service]"))
     testQuickFix(text, result, hint)
   }
 
@@ -75,8 +84,15 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
       .assertHighlighted()
 
     val text   = z(base(reference))
-    val result = z(base("ZIO.service[UserRepo]"))
+    val result = z(base("ZIO.service[UserRepo.Service]"))
     testQuickFix(text, result, hint)
+  }
+
+  def test_generic_not_highlighted(): Unit = {
+    val reference = "ZIO.access[UserRepo](_.get.notEffect)"
+
+    z(base(s"$START$reference$END"))
+      .assertNotHighlighted()
   }
 
 }
