@@ -26,19 +26,25 @@ object AccessGetSimplificationType extends SimplificationType {
       case _ => None
     }
 
-    val serviceTypeArg =
-      accessTypeArg
-        .flatMap(_.`type`().toOption)
-        .flatMap { tpe =>
-          if (!tpe.isAliasType) extractTypeArgument(tpe)
-          else {
-            tpe.aliasType.flatMap {
-              case AliasType(typeDef: ScTypeAliasDefinition, _, _) =>
-                typeDef.aliasedType.toOption.flatMap(extractTypeArgument)
-              case _ => None
+    @annotation.tailrec
+    def resolveAliases(tpe: ScType): Option[ScType] =
+      if (!tpe.isAliasType) Some(tpe)
+      else
+        tpe.aliasType match {
+          case Some(AliasType(typeDef: ScTypeAliasDefinition, _, _)) =>
+            typeDef.aliasedType match {
+              case Right(aliasedType) => resolveAliases(aliasedType)
+              case Left(_)            => None
             }
-          }
+          case _ => None
         }
+
+    val serviceTypeArg = for {
+      arg          <- accessTypeArg
+      tpe          <- arg.`type`().toOption
+      baseType     <- resolveAliases(tpe)
+      innerTypeArg <- extractTypeArgument(baseType)
+    } yield innerTypeArg
 
     val simplification = replace(accessExpr)
       .withText(s"ZIO.service${serviceTypeArg.fold("")(t => s"[${t.codeText}]")}")

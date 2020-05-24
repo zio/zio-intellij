@@ -11,6 +11,8 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
         |final case class User(id: UserId, name: String)
         |
         |type UserRepo = Has[UserRepo.Service]
+        |type AnotherAlias = UserRepo
+        |type AndOneMoreAlias = AnotherAlias
         |object UserRepo {
         |  trait Service {
         |    def getUser(userId: UserId): Task[Option[User]]
@@ -93,6 +95,17 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
 
     z(base(s"$START$reference$END"))
       .assertNotHighlighted()
+  }
+
+  def test_multiple_aliases(): Unit = {
+    val reference = "ZIO.access[AndOneMoreAlias](_.get)"
+
+    z(base(s"$START$reference$END"))
+      .assertHighlighted()
+
+    val text   = z(base(reference))
+    val result = z(base("ZIO.service[UserRepo.Service]"))
+    testQuickFix(text, result, hint)
   }
 
 }
