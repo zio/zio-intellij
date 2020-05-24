@@ -81,7 +81,7 @@
                          displayName="Simplify ZIO.access(_.get) with ZIO.service"
                          groupPath="Scala,ZIO"
                          groupName="Simplifications"
-                         shortName="SimplifyServiceInspection" level="WARNING"
+                         shortName="SimplifyServiceInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
         <localInspection implementationClass="zio.intellij.inspections.mistakes.UnusedZIOExpressionsInspection"

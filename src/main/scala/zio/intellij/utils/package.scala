@@ -5,6 +5,7 @@ import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 
 package object utils {
+
   // taken from ScalaUnusedSymbolInspection
   def isElementUsed(element: ScNamedElement, isOnTheFly: Boolean): Boolean =
     if (isOnTheFly) {
