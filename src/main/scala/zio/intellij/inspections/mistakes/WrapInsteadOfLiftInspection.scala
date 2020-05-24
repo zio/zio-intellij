@@ -64,7 +64,6 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
     }
   }
 
-
   val Future = new ExpressionExtractor(scalaFuture)
   val Try    = new ExpressionExtractor(scalaTry)
   val Option = new ExpressionExtractor(scalaOption)
