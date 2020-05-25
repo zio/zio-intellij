@@ -20,7 +20,7 @@ You can run individual ZIO tests or the whole specs from IDEA:
 
 <img src="https://user-images.githubusercontent.com/601206/79748798-af318a00-8316-11ea-818d-5f266aa52ffe.png" />
 
-And view the results in the integrated runner:
+And view the results in the integrated runner (requires an [additional module in your project](https://github.com/zio/zio-test-intellij)):
 
 <img src="https://user-images.githubusercontent.com/601206/79748960-fb7cca00-8316-11ea-8e4a-e080de4bdf1c.png" />
 
