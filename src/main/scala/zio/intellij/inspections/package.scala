@@ -25,6 +25,7 @@ package object inspections {
     private[inspections] val `.mapError`     = invocation("mapError").from(zioLikePackages)
     private[inspections] val `.orElseFail`   = invocation("orElseFail").from(zioLikePackages)
     private[inspections] val `.catchAll`     = invocation("catchAll").from(zioLikePackages)
+    private[inspections] val `.fold`         = invocation("fold").from(zioLikePackages)
     private[inspections] val `.foldCause`    = invocation("foldCause").from(zioLikePackages)
     private[inspections] val `.foldCauseM`   = invocation("foldCauseM").from(zioLikePackages)
     private[inspections] val `.tap`          = invocation("tap").from(zioLikePackages)
@@ -144,6 +145,21 @@ package object inspections {
       case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if fromZio(expr) =>
         Some((ref, expr))
       case _ => None
+    }
+  }
+
+  val exitCodeSuccess = new ExitCode("success")
+  val exitCodeFailure = new ExitCode("failure")
+
+  class ExitCode(refName: String) {
+
+    def unapply(expr: ScExpression): Boolean = expr match {
+      case ref @ ScReferenceExpression(_) if ref.refName == refName =>
+        ref.resolve() match {
+          case p: ScReferencePattern if p.containingClass.qualifiedName == "zio.ExitCode" => true
+          case _                                                                          => false
+        }
+      case _ => false
     }
   }
 
