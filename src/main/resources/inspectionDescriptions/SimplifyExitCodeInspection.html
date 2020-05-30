@@ -1,0 +1,9 @@
+<html>
+<body>Simplify the following expressions to use <code>.exitCode</code> instead:
+<pre>
+x.map(_ => ExitCode.success)                         -> x.exitCode
+x.as(ExitCode.success)                               -> x.exitCode
+x.fold(_ => ExitCode.failure, _ => ExitCode.success) -> x.exitCode
+</pre>
+</body>
+</html>

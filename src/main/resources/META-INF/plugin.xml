@@ -73,6 +73,12 @@
                          groupName="Simplifications"
                          shortName="SimplifyTapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyExitCodeInspection"
+                         displayName="Simplify producing an exit code"
+                         groupPath="Scala,ZIO"
+                         groupName="Simplifications"
+                         shortName="SimplifyExitCodeInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySleepInspection"
                          displayName="Simplify ZIO.sleep to .delay" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifySleepInspection" level="WEAK WARNING"
