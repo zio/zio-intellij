@@ -2,7 +2,7 @@ package zio.intellij
 
 import com.intellij.psi.PsiAnnotation
 import org.jetbrains.plugins.scala.codeInspection.collections.{isOfClassFrom, _}
-import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScBindingPattern, ScReferencePattern}
+import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
@@ -108,6 +108,8 @@ package object inspections {
   val scalaTry    = new TypeReference(Set("scala.util.Try", "scala.util.Success", "scala.util.Failure"))
   val scalaOption = new TypeReference(Set("scala.Option", "scala.Some", "scala.None"))
   val scalaEither = new TypeReference(Set("scala.util.Either", "scala.util.Left", "scala.util.Right"))
+  val scalaLeft   = new TypeReference(Set("scala.util.Left"))
+  val scalaRight  = new TypeReference(Set("scala.util.Right"))
 
   val `ZIO.apply`         = new ZIOStaticMemberReference("apply")
   val `ZIO.unit`          = new ZIOStaticMemberReference("unit")
@@ -220,31 +222,6 @@ package object inspections {
         } yield args
       case _ => None
     }
-  }
-
-  object scalaEitherExtractors {
-
-    final class EitherExtractor private[scalaEitherExtractors] (refName: String) {
-
-      def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-        case call: ScMethodCall =>
-          val args = call.args.exprs.map(stripped)
-          (call.getEffectiveInvokedExpr, args) match {
-            case (ref: ScReferenceExpression, Seq(arg)) if ref.refName == refName =>
-              ref.resolve() match {
-                case m: ScMember if m.containingClass.qualifiedName == s"scala.util.$refName" => Some(arg)
-                case p: ScBindingPattern if p.containingClass.qualifiedName == "scala"        => Some(arg)
-                case _                                                                        => None
-              }
-            case _ => None
-          }
-        case _ => None
-      }
-    }
-
-    val scalaLeft  = new EitherExtractor("Left")
-    val scalaRight = new EitherExtractor("Right")
-
   }
 
   object IsDeprecated {

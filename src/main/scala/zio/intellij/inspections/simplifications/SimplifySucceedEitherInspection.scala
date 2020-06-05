@@ -3,39 +3,33 @@ package zio.intellij.inspections.simplifications
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
-import zio.intellij.inspections.scalaEitherExtractors._
-import zio.intellij.inspections.simplifications.SimplifySucceedEitherInspection.UIOApply
 
 class SimplifySucceedEitherInspection extends ZInspection(LeftSimplificationType, RightSimplificationType)
 
-object LeftSimplificationType extends SimplificationType {
-  override def hint: String = "Replace with ZIO.left"
+sealed abstract class EitherSimplificationType(extractor: TypeReference, zioMethodName: String)
+    extends SimplificationType {
+  private val UIOApply = new Apply(Set("zio.UIO"))
 
-  private def replacement(expr: ScExpression, a: ScExpression): Simplification =
-    replace(expr).withText(s"ZIO.left(${a.getText}").highlightFrom(expr)
+  override def hint: String = s"Replace with ZIO.$zioMethodName"
 
-  override def getSimplification(expr: ScExpression): Option[Simplification] =
-    expr match {
-      case `ZIO.succeed`(scalaLeft(a)) => Some(replacement(expr, a))
-      case UIOApply(scalaLeft(a))      => Some(replacement(expr, a))
-      case _                           => None
-    }
-}
+  private def replacement(zioExpr: ScExpression, eitherArg: ScExpression): Simplification =
+    replace(zioExpr)
+      .withText(s"ZIO.$zioMethodName(${eitherArg.getText}")
+      .highlightFrom(zioExpr)
 
-object RightSimplificationType extends SimplificationType {
-  override def hint: String = "Replace with ZIO.right"
-
-  private def replacement(expr: ScExpression, a: ScExpression): Simplification =
-    replace(expr).withText(s"ZIO.right(${a.getText}").highlightFrom(expr)
+  private def getArg(eitherExpr: ScExpression): Option[ScExpression] = eitherExpr match {
+    case MethodRepr(_, _, _, Seq(arg)) => Some(arg)
+    case _                             => None
+  }
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case `ZIO.succeed`(scalaRight(a)) => Some(replacement(expr, a))
-      case UIOApply(scalaRight(a))      => Some(replacement(expr, a))
-      case _                            => None
+      case `ZIO.succeed`(extractor(eitherExpr)) => getArg(eitherExpr).map(replacement(expr, _))
+      case UIOApply(extractor(eitherExpr))      => getArg(eitherExpr).map(replacement(expr, _))
+      case _                                    => None
     }
 }
 
-object SimplifySucceedEitherInspection {
-  val UIOApply = new Apply(Set("zio.UIO"))
-}
+object LeftSimplificationType extends EitherSimplificationType(extractor = scalaLeft, zioMethodName = "left")
+
+object RightSimplificationType extends EitherSimplificationType(extractor = scalaRight, zioMethodName = "right")
