@@ -126,6 +126,9 @@
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
         </intentionAction>
 
+        <codeInsight.lineMarkerProvider implementationClass="zio.intellij.gutter.ForkedCodeLineMarkerProvider"
+                                        language="Scala"/>
+
         <!-- test runner -->
         <configurationType implementation="zio.intellij.testsupport.ZTestConfigurationType"/>
         <runConfigurationProducer implementation="zio.intellij.testsupport.ZTestRunConfigurationProducer"/>

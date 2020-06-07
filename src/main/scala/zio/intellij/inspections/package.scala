@@ -17,19 +17,26 @@ package object inspections {
   }
 
   object zioMethods {
-    private[inspections] val `.*>`           = invocation("*>").from(zioLikePackages)
-    private[inspections] val `.as`           = invocation("as").from(zioLikePackages)
-    private[inspections] val `.map`          = invocation("map").from(zioLikePackages)
-    private[inspections] val `.flatMap`      = invocation("flatMap").from(zioLikePackages)
-    private[inspections] val `.flatMapError` = invocation("flatMapError").from(zioLikePackages)
-    private[inspections] val `.mapError`     = invocation("mapError").from(zioLikePackages)
-    private[inspections] val `.orElseFail`   = invocation("orElseFail").from(zioLikePackages)
-    private[inspections] val `.catchAll`     = invocation("catchAll").from(zioLikePackages)
-    private[inspections] val `.fold`         = invocation("fold").from(zioLikePackages)
-    private[inspections] val `.foldCause`    = invocation("foldCause").from(zioLikePackages)
-    private[inspections] val `.foldCauseM`   = invocation("foldCauseM").from(zioLikePackages)
-    private[inspections] val `.tap`          = invocation("tap").from(zioLikePackages)
-    private[inspections] val `.tapError`     = invocation("tapError").from(zioLikePackages)
+    val `.*>` : Qualified          = invocation("*>").from(zioLikePackages)
+    val `.as`: Qualified           = invocation("as").from(zioLikePackages)
+    val `.map`: Qualified          = invocation("map").from(zioLikePackages)
+    val `.flatMap`: Qualified      = invocation("flatMap").from(zioLikePackages)
+    val `.flatMapError`: Qualified = invocation("flatMapError").from(zioLikePackages)
+    val `.mapError`: Qualified     = invocation("mapError").from(zioLikePackages)
+    val `.orElseFail`: Qualified   = invocation("orElseFail").from(zioLikePackages)
+    val `.catchAll`: Qualified     = invocation("catchAll").from(zioLikePackages)
+    val `.fold`: Qualified         = invocation("fold").from(zioLikePackages)
+    val `.foldCause`: Qualified    = invocation("foldCause").from(zioLikePackages)
+    val `.foldCauseM`: Qualified   = invocation("foldCauseM").from(zioLikePackages)
+    val `.tap`: Qualified          = invocation("tap").from(zioLikePackages)
+    val `.tapError`: Qualified     = invocation("tapError").from(zioLikePackages)
+
+    val `.fork`: Qualified                 = invocation("fork").from(zioLikePackages)
+    val `.forkDaemon`: Qualified           = invocation("forkDaemon").from(zioLikePackages)
+    val `.forkManaged`: Qualified          = invocation("forkManaged").from(zioLikePackages)
+    val `.forkAs`: Qualified               = invocation("forkAs").from(zioLikePackages)
+    val `.forkOn`: Qualified               = invocation("forkOn").from(zioLikePackages)
+    val `.forkWithErrorHandler`: Qualified = invocation("forkWithErrorHandler").from(zioLikePackages)
 
     private[inspections] val `assert` = unqualified("assert").from(zioLikePackages)
   }
@@ -119,6 +126,8 @@ package object inspections {
   val `ZIO.effect`        = new ZIOStaticMemberReference("effect")
   val `ZIO.effectTotal`   = new ZIOStaticMemberReference("effectTotal")
   val `ZIO.access`        = new ZIOStaticMemberReference("access")
+  val `ZIO.forkAll`       = new ZIOStaticMemberReference("forkAll")
+  val `ZIO.forkAll_`      = new ZIOStaticMemberReference("forkAll_")
 
   object unit {
 
