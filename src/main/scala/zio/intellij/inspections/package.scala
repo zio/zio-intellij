@@ -115,6 +115,8 @@ package object inspections {
   val scalaTry    = new TypeReference(Set("scala.util.Try", "scala.util.Success", "scala.util.Failure"))
   val scalaOption = new TypeReference(Set("scala.Option", "scala.Some", "scala.None"))
   val scalaEither = new TypeReference(Set("scala.util.Either", "scala.util.Left", "scala.util.Right"))
+  val scalaLeft   = new TypeReference(Set("scala.util.Left"))
+  val scalaRight  = new TypeReference(Set("scala.util.Right"))
 
   val `ZIO.apply`         = new ZIOStaticMemberReference("apply")
   val `ZIO.unit`          = new ZIOStaticMemberReference("unit")
@@ -208,6 +210,26 @@ package object inspections {
     def unapply(expr: ScExpression): Boolean = expr match {
       case lambda(_, Some(`ZIO.unit`(_))) => true
       case _                              => false
+    }
+  }
+
+  /**
+   * Extractor for some.Type(arg1, ..., argN) and some.Type.apply(arg1, ..., argN)
+   * @param typeQNs a set of qualified names. E.g.: Set("some.Type")
+   */
+  class Apply(typeQNs: Set[String]) {
+
+    def unapplySeq(expr: ScExpression): Option[Seq[ScExpression]] = expr match {
+      case ScMethodCall(ref @ ScReferenceExpression(refExpr), args) if ref.getCanonicalText() == "apply" =>
+        for {
+          containingClass <- refExpr match {
+                              case rp: ScReferencePattern   => Option(rp.containingClass)
+                              case fd: ScFunctionDefinition => Option(fd.containingClass)
+                              case _                        => None
+                            }
+          if typeQNs.contains(containingClass.qualifiedName)
+        } yield args
+      case _ => None
     }
   }
 

@@ -1,0 +1,13 @@
+<html>
+<body>Simplify the following expressions to use <code>.left</code>/<code>.right</code> instead:
+<pre>
+ZIO.succeed(Left(a))    -> ZIO.left(a)
+UIO(Left(a))            -> ZIO.left(a)
+UIO.apply(Left(a))      -> ZIO.left(a)
+
+ZIO.succeed(Right(a))   -> ZIO.right(a)
+UIO(Right(a))           -> ZIO.right(a)
+UIO.apply(Right(a))     -> ZIO.right(a)
+</pre>
+</body>
+</html>
