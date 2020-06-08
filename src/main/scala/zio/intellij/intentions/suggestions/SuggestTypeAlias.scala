@@ -13,7 +13,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTy
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTypeElementFromText
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiManager
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
-import org.jetbrains.plugins.scala.lang.psi.types.api.{ParameterizedType, ScTypeText, UndefinedType}
+import org.jetbrains.plugins.scala.lang.psi.types.api.presentation.ScTypeText
+import org.jetbrains.plugins.scala.lang.psi.types.api.{ParameterizedType, UndefinedType}
 import org.jetbrains.plugins.scala.lang.psi.types.recursiveUpdate.ScSubstitutor
 import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresentationContext}
 import org.jetbrains.plugins.scala.lang.psi.{ScalaPsiUtil, TypeAdjuster}

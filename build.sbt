@@ -2,7 +2,7 @@ lazy val scala212      = "2.12.10"
 lazy val pluginVersion = "2020.1.0.9"
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "2020.1"
+ThisBuild / intellijBuild := "202.5103-EAP-CANDIDATE-SNAPSHOT"
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias(
@@ -18,7 +18,7 @@ lazy val `zio-intellij` = project
     version := pluginVersion,
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2020.1.41".toPlugin
+      "org.intellij.scala:2020.1.36".toPlugin
     ),
     patchPluginXml := pluginXmlOptions { xml =>
       xml.version = version.value
@@ -26,7 +26,6 @@ lazy val `zio-intellij` = project
         Welcome to another release packed with incredible new features!
         <em>A huge thanks to Timur Aliberdov (<a href="https://github.com/timaliberdov">@timaliberdov</a>), as well as Simon Popugaev, Andrés González and others who contributed to this release!</em>
         <ul>
-        <li>A new Dump ZIO Fibers debug action (<a href="https://github.com/zio/zio-intellij/pull/117">#117</a>)</li>
         <li>Add support for <code>@mockable</code> macro (<a href="https://github.com/zio/zio-intellij/pull/120">#120</a>)</li>
         <li>Suggest <code>.toLayer/</code></code>.toLayerMany</code> (<a href="https://github.com/zio/zio-intellij/pull/116">#116</a>)</li>
         <li>Fix <code>@accessible</code> macro generation (<a href="https://github.com/zio/zio-intellij/pull/43">#43</a>)</li>

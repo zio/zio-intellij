@@ -1,23 +1,15 @@
-package zio.intellij.testsupport
+package zio.intellij.testsupport.test
 
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
-import zio.intellij.testsupport.ZTestFramework.testMethods
+import zio.intellij.testsupport.ZSuitePaths
 
 final class ZTestFramework extends AbstractTestFramework {
-  override def suitePaths: Seq[String]      = ZSuitePaths
-  override def getMarkerClassFQName: String = suitePaths.head
-  override def getDefaultSuperClass: String = suitePaths.head
+  override def getMarkerClassFQName: String = ZSuitePaths.head
+  override def getDefaultSuperClass: String = ZSuitePaths.head
   override def testFileTemplateName: String = "ZIO Test Suite"
-  override def getMnemonic: Char            = 'z'
   override def getName: String              = "ZIO Test"
-
-  override protected def getLibraryDependencies(scalaVersion: Option[String]): Seq[String] = Seq.empty
-
-  override protected def getLibraryResolvers(scalaVersion: Option[String]): Seq[String] = Seq.empty
-
-  override protected def getAdditionalBuildCommands(scalaVersion: Option[String]): Seq[String] = Seq.empty
 
   override def isTestMethod(element: PsiElement): Boolean = isTestMethod(element, checkAbstract = false)
 
@@ -26,6 +18,8 @@ final class ZTestFramework extends AbstractTestFramework {
       case sc: ScReferenceExpression => testMethods.contains(sc.refName)
       case _                         => false
     }
+
+  override def baseSuitePaths: Seq[String] = ZSuitePaths
 }
 
 object ZTestFramework {

@@ -1,66 +1,58 @@
-package zio.intellij.testsupport
+package zio.intellij.testsupport.test
 
-import com.intellij.execution.configurations.{JavaCommandLineState, JavaParameters, RunProfileState}
+import com.intellij.execution.configurations.{ConfigurationFactory, JavaCommandLineState, JavaParameters, RunProfileState}
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.runners.{ExecutionEnvironment, ProgramRunner}
-import com.intellij.execution.testDiscovery.JavaAutoRunManager
-import com.intellij.execution.testframework.TestFrameworkRunningModel
-import com.intellij.execution.testframework.autotest.{AbstractAutoTestManager, ToggleAutoTestAction}
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties
-import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
-import com.intellij.execution.testframework.ui.BaseTestsOutputConsoleView
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.{DefaultExecutionResult, ExecutionResult, Executor}
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.OrderRootType
-import com.intellij.openapi.util.{Getter, InvalidDataException}
-import com.intellij.psi.PsiClass
+import com.intellij.openapi.util.InvalidDataException
+import com.intellij.testIntegration.TestFramework
 import org.jetbrains.bsp.BspUtil
 import org.jetbrains.plugins.scala.project.ModuleExt
-import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration
-import org.jetbrains.plugins.scala.testingSupport.test.TestRunConfigurationForm.TestKind._
-import org.jetbrains.plugins.scala.testingSupport.test.actions.AbstractTestRerunFailedTestsAction
+import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration.TestFrameworkRunnerInfo
+import org.jetbrains.plugins.scala.testingSupport.test.sbt.SbtTestRunningSupport
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
+import org.jetbrains.plugins.scala.testingSupport.test.{AbstractTestRunConfiguration, SuiteValidityChecker, TestKind}
+import zio.intellij.testsupport.ZSuitePaths
 
-final class ZTestRunConfiguration(
+class ZTestRunConfiguration2(
   project: Project,
-  name: String,
-  configurationFactory: ZTestRunConfigurationFactory
-) extends AbstractTestRunConfiguration(project, configurationFactory, name, null /* ugh*/ ) { self =>
+  configurationFactory: ConfigurationFactory,
+  name: String
+) extends AbstractTestRunConfiguration(
+      project,
+      configurationFactory,
+      name
+    ) { self =>
+
+  override val suitePaths: List[String] = ZSuitePaths
+
+  override val testFramework: TestFramework = TestFramework.EXTENSION_NAME.findExtension(classOf[ZTestFramework])
+
+  override val configurationProducer: ZTestRunConfigurationProducer = ZTestRunConfigurationProducer.instance
 
   private val ZTestRunnerName = "zio.intellij.testsupport.ZTestRunner"
 
-  override def suitePaths: List[String] = ZSuitePaths
-
-  override def errorMessage: String = "ZIO test is not specified"
-
-  override def allowsSbtUiRun: Boolean = false
-
-  override def testNameKey: String = "-t"
-
-  override def classKey: String = "-s"
-
-  override def isInvalidSuite(clazz: PsiClass): Boolean = false
-
-  override def getActionName: String = getName
-
-  override def reporterClass: String = null
-
-  override def runnerClassName: String =
+  override protected val runnerInfo: TestFrameworkRunnerInfo = TestFrameworkRunnerInfo(
     if (Option(getModule).exists(hasTestRunner)) ZTestRunnerName
     else fromTestConfiguration(testConfigurationData)
+  )
+  override def getActionName: String = getName
 
   private def fromTestConfiguration(data: TestConfigurationData) =
     data match {
       case d: ClassTestData => d.testClassPath
-      case d if d.getKind != CLAZZ || d.getKind != TEST_NAME =>
+      case d if d.getKind != TestKind.CLAZZ || d.getKind != TestKind.TEST_NAME =>
         throw new InvalidDataException(s"Test configuration kind '${d.getKind}' is not supported.")
     }
 
   private[testsupport] def shouldCreateTestConsole: Boolean =
-    runnerClassName == ZTestRunnerName
+    runnerInfo.runnerClass == ZTestRunnerName
 
   private def hasTestRunner(module: Module): Boolean =
     if (BspUtil.isBspModule(module)) {
@@ -98,34 +90,12 @@ final class ZTestRunConfiguration(
           processHandler,
           createActions(consoleView, processHandler, executor): _*
         )
-
-        registerRerunAction(consoleView, res)
+        res
       }
-
-      private def registerRerunAction(
-        consoleView: ConsoleView,
-        res: DefaultExecutionResult
-      ): DefaultExecutionResult =
-        consoleView match {
-          case testConsole: BaseTestsOutputConsoleView =>
-            val rerunFailedTestsAction = new AbstractTestRerunFailedTestsAction(testConsole)
-            rerunFailedTestsAction.init(testConsole.getProperties)
-            rerunFailedTestsAction.setModelProvider(new Getter[TestFrameworkRunningModel] {
-              override def get: TestFrameworkRunningModel =
-                testConsole.asInstanceOf[SMTRunnerConsoleView].getResultsViewer
-            })
-            res.setRestartActions(
-              rerunFailedTestsAction,
-              new ToggleAutoTestAction() {
-                override def isDelayApplicable: Boolean = false
-
-                override def getAutoTestManager(project: Project): AbstractAutoTestManager =
-                  JavaAutoRunManager.getInstance(project)
-              }
-            )
-            res
-          case _ => res
-        }
     }
   }
+
+  override protected def validityChecker = null
+
+  override def sbtSupport = null
 }

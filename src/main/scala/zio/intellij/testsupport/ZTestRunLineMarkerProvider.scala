@@ -1,4 +1,4 @@
-package zio.intellij.testsupport
+package zio.intellij.testsupport.test
 
 import java.util.function.Function
 
@@ -15,7 +15,8 @@ import org.jetbrains.plugins.scala.decompiler.scalasig.ScalaSigPrinter
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
-import org.jetbrains.plugins.scala.testingSupport.test.ScalaTestRunLineMarkerProvider
+import org.jetbrains.plugins.scala.testingSupport.test.ui.ScalaTestRunLineMarkerProvider
+import zio.intellij.testsupport.{IsZioTestElement, testName}
 
 final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
 
