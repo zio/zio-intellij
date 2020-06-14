@@ -5,6 +5,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDeclaration
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
 import org.jetbrains.plugins.scala.lang.psi.types.{PhysicalMethodSignature, TermSignature}
+import zio.intellij.inspections.fromZio
 
 class ModulePatternAccessible extends SyntheticMembersInjector {
 
@@ -21,7 +22,8 @@ class ModulePatternAccessible extends SyntheticMembersInjector {
 
     methods.collect {
       case Field(fid) =>
-        s"val ${fid.name} = zio.ZIO.access[zio.Has[${sco.qualifiedName}.Service]](_.get).flatMap(_.${fid.name})"
+        val mapOrFlatMap = if (fid.`type`().exists(fromZio)) "flatMap" else "map"
+        s"val ${fid.name} = zio.ZIO.service[${sco.qualifiedName}.Service].$mapOrFlatMap(_.${fid.name})"
       case PhysicalMethodSignature(method: ScFunctionDeclaration, _) =>
         val name       = method.name
         val typeParams = method.typeParametersClause.map(_.getText).getOrElse("")
@@ -45,9 +47,10 @@ class ModulePatternAccessible extends SyntheticMembersInjector {
                 .mkString("(", ", ", ")")
             }
             .mkString("")
+        val mapOrFlatMap = if (method.returnType.exists(fromZio)) "flatMap" else "map"
         s"def $name$typeParams$params =" +
-          s" zio.ZIO.access[zio.Has[${sco.qualifiedName}.Service]](_.get)" +
-          s".flatMap(_.$name$typeParameterApplication$parameterApplication)"
+          s" zio.ZIO.service[${sco.qualifiedName}.Service]" +
+          s".$mapOrFlatMap(_.$name$typeParameterApplication$parameterApplication)"
     }
   }
 
