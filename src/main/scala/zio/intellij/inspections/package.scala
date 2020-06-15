@@ -58,7 +58,7 @@ package object inspections {
   def fromZio(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioLikePackages)
 
-  class ZIOStaticMemberReference(refName: String) {
+  sealed abstract class StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String) {
 
     private def matchesRefName(ref: ScReferenceExpression) =
       if (ref.refName == refName) true
@@ -72,28 +72,41 @@ package object inspections {
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
       case ref @ ScReferenceExpression(_) if matchesRefName(ref) =>
         ref.smartQualifier match {
-          case Some(ZIOStaticMemberReference()) => Some(expr)
-          case _                                => None
+          case Some(extractor()) => Some(expr)
+          case _                 => None
         }
       case MethodRepr(_, _, Some(ref), Seq(e)) if matchesRefName(ref) =>
         ref match {
-          case ZIOStaticMemberReference() => Some(e)
-          case _                          => None
+          case extractor() => Some(e)
+          case _           => None
         }
       case _ => None
     }
   }
 
-  object ZIOStaticMemberReference {
-    // todo make me not do this
-    val zioTypes = Set("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
+  final class ZIOStaticMemberReference(refName: String)
+      extends StaticMemberReference(ZIOStaticMemberReferenceExtractor, refName)
+
+  final class ZLayerStaticMemberReference(refName: String)
+      extends StaticMemberReference(ZLayerStaticMemberReferenceExtractor, refName)
+
+  sealed trait StaticMemberReferenceExtractor {
+    def types: Set[String]
 
     def unapply(ref: ScReferenceExpression): Boolean =
       ref.resolve() match {
-        case t: ScTemplateDefinition if zioTypes.contains(t.qualifiedName)                 => true
-        case f: ScFunctionDefinition if zioTypes.contains(f.containingClass.qualifiedName) => true
-        case _                                                                             => false
+        case t: ScTemplateDefinition if types.contains(t.qualifiedName)                 => true
+        case f: ScFunctionDefinition if types.contains(f.containingClass.qualifiedName) => true
+        case _                                                                          => false
       }
+  }
+
+  object ZIOStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
+    override val types = Set("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
+  }
+
+  object ZLayerStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
+    override val types = Set("zio.ZLayer")
   }
 
   class TypeReference(typeFQNs: Set[String]) {
@@ -130,6 +143,9 @@ package object inspections {
   val `ZIO.access`        = new ZIOStaticMemberReference("access")
   val `ZIO.forkAll`       = new ZIOStaticMemberReference("forkAll")
   val `ZIO.forkAll_`      = new ZIOStaticMemberReference("forkAll_")
+
+  val `ZLayer.fromEffect`     = new ZLayerStaticMemberReference("fromEffect")
+  val `ZLayer.fromEffectMany` = new ZLayerStaticMemberReference("fromEffectMany")
 
   object unit {
 
