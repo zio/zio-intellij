@@ -94,6 +94,16 @@
                          groupName="Simplifications"
                          shortName="SimplifyServiceInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyChainToForInspection"
+                         displayName="Convert `*>` chain to for-comprehension and vice versa"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyChainToForInspection" level="INFORMATION"
+                         enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyToLayerInspection"
+                         displayName="Simplify ZLayer.fromEffect(Many) to .toLayer(Many)"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyToLayerInspection" level="WEAK WARNING"
+                         enabledByDefault="true" language="Scala"/>
 
         <localInspection implementationClass="zio.intellij.inspections.mistakes.UnusedZIOExpressionsInspection"
                          displayName="Detects unused ZIO expressions that are mistakenly used like statements"
@@ -118,12 +128,6 @@
                          displayName="Detects Nothing being used in the contravariant position in a ZIO effect"
                          groupPath="Scala,ZIO" groupName="Inspections"
                          shortName="NothingInContravariantPositionInspection" level="WARNING"
-                         enabledByDefault="true" language="Scala"/>
-
-        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyChainToForInspection"
-                         displayName="Convert `*>` chain to for-comprehension and vice versa"
-                         groupPath="Scala,ZIO" groupName="Inspections"
-                         shortName="SimplifyChainToForInspection" level="INFORMATION"
                          enabledByDefault="true" language="Scala"/>
 
         <intentionAction>
