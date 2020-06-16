@@ -1,5 +1,6 @@
 package zio.intellij.synthetic.macros
 
+import org.jetbrains.plugins.scala.lang.psi.PresentationUtil.presentationString
 import org.jetbrains.plugins.scala.lang.psi.api.base.{ScAnnotation, ScFieldId}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDeclaration
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
@@ -26,8 +27,8 @@ class ModulePatternAccessible extends SyntheticMembersInjector {
         s"val ${fid.name} = zio.ZIO.service[${sco.qualifiedName}.Service].$mapOrFlatMap(_.${fid.name})"
       case PhysicalMethodSignature(method: ScFunctionDeclaration, _) =>
         val name       = method.name
-        val typeParams = method.typeParametersClause.map(_.getText).getOrElse("")
-        val params     = method.paramClauses.getText
+        val typeParams = method.typeParametersClause.fold("")(presentationString)
+        val params     = presentationString(method.paramClauses)
         val typeParameterApplication =
           method.typeParametersClause
             .map { tps =>

@@ -48,15 +48,22 @@ package object inspections {
   }
 
   val zioLikePackages: Array[String] = Array("zio._")
+  val zioTypes: Array[String]        = Array("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
 
-  def fromZio(r: ScExpression): Boolean =
+  def fromZioLike(r: ScExpression): Boolean =
     isOfClassFrom(r, zioLikePackages)
 
-  def fromZio(tpe: ScType): Boolean =
+  def fromZioLike(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioLikePackages)
+
+  def fromZio(r: ScExpression): Boolean =
+    isOfClassFrom(r, zioTypes)
+
+  def fromZio(tpe: ScType): Boolean =
+    isOfClassFrom(tpe, zioTypes)
 
   sealed abstract class StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String) {
 
@@ -102,11 +109,11 @@ package object inspections {
   }
 
   object ZIOStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
-    override val types = Set("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
+    override val types: Set[String] = zioTypes.toSet
   }
 
   object ZLayerStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
-    override val types = Set("zio.ZLayer")
+    override val types: Set[String] = Set("zio.ZLayer")
   }
 
   class TypeReference(typeFQNs: Set[String]) {
@@ -160,16 +167,16 @@ package object inspections {
     def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] = expr match {
       case ref @ ScReferenceExpression(_) =>
         ref.resolve() match {
-          case _: ScReferencePattern | _: ScFunctionDefinition if fromZio(expr) => Some((ref, expr))
-          case _                                                                => None
+          case _: ScReferencePattern | _: ScFunctionDefinition if fromZioLike(expr) => Some((ref, expr))
+          case _                                                                    => None
         }
       case MethodRepr(_, _, Some(ref), Seq(e)) =>
         ref.resolve() match {
-          case _ if fromZio(expr) => Some((ref, e))
-          case _                  => None
+          case _ if fromZioLike(expr) => Some((ref, e))
+          case _                      => None
         }
       // multiple argument lists
-      case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if fromZio(expr) =>
+      case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if fromZioLike(expr) =>
         Some((ref, expr))
       case _ => None
     }

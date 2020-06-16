@@ -19,7 +19,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresen
 import org.jetbrains.plugins.scala.lang.psi.{ScalaPsiUtil, TypeAdjuster}
 import org.jetbrains.plugins.scala.project.ProjectContext
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker.checkIntention
-import zio.intellij.inspections.fromZio
+import zio.intellij.inspections.fromZioLike
 import zio.intellij.intentions.ZTypeAnnotationIntention
 
 // borrowed from MakeTypeMoreSpecificIntention
@@ -51,7 +51,7 @@ final class SuggestTypeAlias extends ZTypeAnnotationIntention {
     adjustElementAtOffset(element, editor) match {
       case element: PsiElement if checkIntention(this, element) =>
         element.parentOfType[ScSimpleTypeElement] match {
-          case Some(tpe) if tpe.`type`().toOption.exists(fromZio) =>
+          case Some(tpe) if tpe.`type`().toOption.exists(fromZioLike) =>
             complete(element, descriptionStrategy)
           case _ => false
         }
