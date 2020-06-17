@@ -56,7 +56,7 @@ object ForToChainSimplificationType extends SimplificationType {
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case forExpr: ScFor if forExpr.`type`().exists(fromZio) =>
+      case forExpr: ScFor if forExpr.`type`().exists(fromZioLike) =>
         forExpr.enumerators.flatMap { enumerators =>
           if (enumerators.guards.isEmpty && enumerators.forBindings.isEmpty && enumerators.generators.nonEmpty) {
             forExpr.body match {
