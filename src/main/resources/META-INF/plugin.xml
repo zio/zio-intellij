@@ -159,6 +159,17 @@
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <action id="DumpFibers"
+                class="zio.intellij.actions.FiberDumpAction"
+                text="Get ZIO Fiber Dump"
+                icon="AllIcons.Actions.Dump">
+            <add-to-group group-id="DebuggingActionsGroup" anchor="before" relative-to-action="DumpThreads"/>
+        </action>
+
+        <group id="XDebugger.ToolWindow.DumpFibers">
+            <separator/>
+            <reference ref="DumpFibers"/>
+            <add-to-group group-id="XDebugger.ToolWindow.LeftToolbar" anchor="last"/>
+        </group>
     </actions>
 </idea-plugin>

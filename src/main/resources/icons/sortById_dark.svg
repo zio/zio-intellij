@@ -1,0 +1,22 @@
+<!-- This icon was taken from the intellij-community project and modified -->
+<!-- https://github.com/JetBrains/intellij-community/blob/48036571856fa3482e394e9bec2a33f9876871b0/platform/icons/src/objectBrowser/sortedByUsage_dark.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <g fill="none" fill-rule="evenodd">
+        <rect width="2" height="9" x="4" y="2" fill="#AFB1B3"/>
+        <polygon fill="#AFB1B3" points="5 10 9 14 1 14" transform="matrix(1 0 0 -1 0 24)"/>
+    </g>
+    <text x="8.1459999"
+          y="10.655"
+          fill="#AFB1B3"
+          font-size="8px"
+          font-family="JetBrains Mono">
+        <tspan y="10.655" x="8.1459999">i</tspan>
+    </text>
+    <text x="11.90504"
+          y="10.652343"
+          fill="#AFB1B3"
+          font-size="8px"
+          font-family="JetBrains Mono">
+        <tspan y="10.652343" x="11.90504">d</tspan>
+    </text>
+</svg>

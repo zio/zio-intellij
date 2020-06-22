@@ -23,4 +23,27 @@ package object utils {
       ReferencesSearch.search(element, element.getUseScope).findFirst() != null
     }
 
+  // CompositeOrdering is taken from https://stackoverflow.com/a/14696410
+  final class CompositeOrdering[T](val ord1: Ordering[T], val ord2: Ordering[T]) extends Ordering[T] {
+
+    def compare(x: T, y: T): Int = {
+      val comp = ord1.compare(x, y)
+      if (comp != 0) comp else ord2.compare(x, y)
+    }
+  }
+
+  object CompositeOrdering {
+    def apply[T](orderings: Ordering[T]*): Ordering[T] = orderings.reduceLeft(_.orElse(_))
+  }
+
+  implicit final class OrderingOps[T](private val ord: Ordering[T]) extends AnyVal {
+    def orElse(ord2: Ordering[T]) = new CompositeOrdering[T](ord, ord2)
+  }
+
+  def trimAfterSuffix(str: String, suffix: String): String = {
+    val idx = str.lastIndexOf(suffix)
+    if (idx < 0) str
+    else str.substring(0, idx + suffix.length)
+  }
+
 }
