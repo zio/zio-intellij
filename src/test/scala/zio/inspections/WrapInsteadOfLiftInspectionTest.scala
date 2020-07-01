@@ -59,6 +59,29 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
     val result = z(s"ZIO.fromOption(Option(42))")
     testQuickFix(text, result, hint)
   }
+
+  def test_non_option_getOrElse(): Unit =
+    z(s"""val o: Option[String] = ???
+         |${START}ZIO.effect(o.getOrElse(""))$END""".stripMargin).assertNotHighlighted()
+
+  def test_option_map(): Unit = {
+    z(s"""val o: Option[String] = ???
+         |${START}ZIO.effect(o.map(_ + " foo"))$END""".stripMargin).assertHighlighted()
+    val text   = z(s"""val o: Option[String] = ???
+                    |ZIO.effect(o.map(_ + " foo"))""".stripMargin)
+    val result = z(s"""val o: Option[String] = ???
+                      |ZIO.fromOption(o.map(_ + " foo"))""".stripMargin)
+    testQuickFix(text, result, hint)
+  }
+
+  def test_nested(): Unit = {
+    z(s"${START}ZIO.effect(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)).getOrElse(None))$END")
+      .assertHighlighted()
+
+    val text   = z("ZIO.effect(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)).getOrElse(None))")
+    val result = z("ZIO.fromOption(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)).getOrElse(None))")
+    testQuickFix(text, result, hint)
+  }
 }
 
 class TryWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Try") {
@@ -112,6 +135,15 @@ class TryWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Try") {
     val result = z(s"ZIO.fromTry(Try(42))")
     testQuickFix(text, result, hint)
   }
+
+  def test_nested(): Unit = {
+    z(s"${START}ZIO.effect(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)))$END")
+      .assertHighlighted()
+
+    val text   = z("ZIO.effect(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)))")
+    val result = z("ZIO.fromTry(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)))")
+    testQuickFix(text, result, hint)
+  }
 }
 
 class EitherWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Either") {
@@ -163,6 +195,15 @@ class EitherWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Eith
     z(s"${START}ZIO.effectTotal(Right(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effectTotal(Right(42))")
     val result = z(s"ZIO.fromEither(Right(42))")
+    testQuickFix(text, result, hint)
+  }
+
+  def test_nested(): Unit = {
+    z(s"${START}ZIO.effect(util.Right(util.Try(Option(42))))$END")
+      .assertHighlighted()
+
+    val text   = z("ZIO.effect(util.Right(util.Try(Option(42))))")
+    val result = z("ZIO.fromEither(util.Right(util.Try(Option(42))))")
     testQuickFix(text, result, hint)
   }
 }

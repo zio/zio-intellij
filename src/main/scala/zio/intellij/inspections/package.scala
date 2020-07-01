@@ -116,6 +116,19 @@ package object inspections {
     override val types: Set[String] = Set("zio.ZLayer")
   }
 
+  class ReturnTypeReference(typeFQNs: Set[String]) {
+
+    def unapply(expr: ScExpression): Option[ScExpression] = expr.`type`() match {
+      case Right(t) if isOfClassFrom(t, typeFQNs.toArray) => Some(expr)
+      case _                                              => None
+    }
+  }
+
+  val scalaFuture = new ReturnTypeReference(Set("scala.concurrent.Future"))
+  val scalaTry    = new ReturnTypeReference(Set("scala.util.Try", "scala.util.Success", "scala.util.Failure"))
+  val scalaOption = new ReturnTypeReference(Set("scala.Option", "scala.Some", "scala.None"))
+  val scalaEither = new ReturnTypeReference(Set("scala.util.Either", "scala.util.Left", "scala.util.Right"))
+
   class TypeReference(typeFQNs: Set[String]) {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
@@ -131,10 +144,6 @@ package object inspections {
     }
   }
 
-  val scalaFuture = new TypeReference(Set("scala.concurrent.Future"))
-  val scalaTry    = new TypeReference(Set("scala.util.Try", "scala.util.Success", "scala.util.Failure"))
-  val scalaOption = new TypeReference(Set("scala.Option", "scala.Some", "scala.None"))
-  val scalaEither = new TypeReference(Set("scala.util.Either", "scala.util.Left", "scala.util.Right"))
   val scalaLeft   = new TypeReference(Set("scala.util.Left"))
   val scalaRight  = new TypeReference(Set("scala.util.Right"))
 

@@ -69,7 +69,7 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
   val Option = new ExpressionExtractor(scalaOption)
   val Either = new ExpressionExtractor(scalaEither)
 
-  final class ExpressionExtractor(extractor: TypeReference) {
+  final class ExpressionExtractor(extractor: ReturnTypeReference) {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
       case `ZIO.apply`(extractor(f))       => Some(f)
