@@ -130,12 +130,6 @@
                          shortName="NothingInContravariantPositionInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
-        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyChainToForInspection"
-                         displayName="Convert `*>` chain to for-comprehension and vice versa"
-                         groupPath="Scala,ZIO" groupName="Inspections"
-                         shortName="SimplifyChainToForInspection" level="INFORMATION"
-                         enabledByDefault="true" language="Scala"/>
-
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyFlatmapInspection"
                          displayName="Simplify discarding effect result to .zipRight/*>" groupPath="Scala,ZIO"
                          groupName="Simplifications"
