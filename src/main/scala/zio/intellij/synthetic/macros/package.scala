@@ -1,10 +1,10 @@
 package zio.intellij.synthetic
 
-import org.jetbrains.plugins.scala.lang.psi.PresentationUtil.presentationString
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScFunction, ScFunctionDeclaration}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScTypeParametersOwner
 import org.jetbrains.plugins.scala.lang.psi.types.{PhysicalMethodSignature, TermSignature}
+import zio.intellij.synthetic.macros.utils.presentation._
 
 package object macros {
 
@@ -25,7 +25,7 @@ package object macros {
   }
 
   def typeParametersDefinition(tpo: ScTypeParametersOwner): String =
-    tpo.typeParametersClause.fold("")(presentationString)
+    tpo.typeParametersClause.fold("")(presentationStringForScalaTypeParameters)
 
   def typeParametersApplication(tpo: ScTypeParametersOwner): String =
     tpo.typeParametersClause
@@ -36,7 +36,7 @@ package object macros {
       }
 
   def parametersDefinition(function: ScFunction): String =
-    presentationString(function.paramClauses)
+    presentationStringForScalaParameters(function.paramClauses)
 
   def parametersApplication(function: ScFunction): String =
     function.paramClauses.clauses

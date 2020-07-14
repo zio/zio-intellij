@@ -1,13 +1,13 @@
 package zio.intellij.synthetic.macros
 
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
-import org.jetbrains.plugins.scala.lang.psi.PresentationUtil.presentationString
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScAnnotation
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.{ScParameterizedTypeElement, ScTypeElement}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.{ScParameter, ScTypeParam}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
 import org.jetbrains.plugins.scala.lang.psi.types.{ScParameterizedType, ScType, TermSignature}
+import zio.intellij.synthetic.macros.utils.presentation.defaultPresentationStringForScalaType
 import zio.intellij.utils.{createType, extractTypeArguments, findTypeDefByName, resolveAliases}
 
 /**
@@ -175,7 +175,8 @@ object MockableInjector {
           clause       <- method.paramClauses.clauses
           param        <- clause.parameters
           paramType    <- param.paramType
-          presentation = presentationString(paramType.typeElement)
+          tpe          <- paramType.typeElement.`type`().toOption
+          presentation = defaultPresentationStringForScalaType(tpe)
         } yield presentation
       case _ => Seq.empty
     })
