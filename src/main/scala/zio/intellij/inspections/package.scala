@@ -144,8 +144,8 @@ package object inspections {
     }
   }
 
-  val scalaLeft   = new TypeReference(Set("scala.util.Left"))
-  val scalaRight  = new TypeReference(Set("scala.util.Right"))
+  val scalaLeft  = new TypeReference(Set("scala.util.Left"))
+  val scalaRight = new TypeReference(Set("scala.util.Right"))
 
   val `ZIO.apply`         = new ZIOStaticMemberReference("apply")
   val `ZIO.unit`          = new ZIOStaticMemberReference("unit")
