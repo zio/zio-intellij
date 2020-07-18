@@ -10,6 +10,9 @@ sealed abstract case class Version private (major: Major, minor: Minor, patch: P
 
   override def compare(that: Version): Int =
     Version.versionOrdering.compare(this, that)
+
+  override def toString: String =
+    s"${major.value}.${minor.value}.${patch.value}${rcVersion.fold("")(rc => s"-${rc.toString}")}"
 }
 
 object Version {
@@ -34,6 +37,8 @@ object Version {
 
   final case class RCVersion(major: RCMajor, minor: Option[RCMinor]) extends Ordered[RCVersion] {
     override def compare(that: RCVersion): Int = RCVersion.ordering.compare(this, that)
+
+    override def toString: String = s"RC${major.value}${minor.fold("")(m => s"-${m.value}")}"
   }
 
   object RCVersion {
@@ -71,9 +76,10 @@ object Version {
     parse(str).getOrElse(throw new IllegalArgumentException(s"Could not parse version: $str"))
 
   object ZIO {
-    val RC18: Version = Version.parseUnsafe("1.0.0-RC18")
-    val RC19: Version = Version.parseUnsafe("1.0.0-RC19")
-    val RC21: Version = Version.parseUnsafe("1.0.0-RC21")
+    val RC18: Version     = Version.parseUnsafe("1.0.0-RC18")
+    val RC19: Version     = Version.parseUnsafe("1.0.0-RC19")
+    val RC21: Version     = Version.parseUnsafe("1.0.0-RC21")
+    val `RC21-2`: Version = Version.parseUnsafe("1.0.0-RC21-2")
   }
 
 }

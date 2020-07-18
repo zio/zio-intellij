@@ -1,8 +1,15 @@
 package zio.intellij
 
+import com.intellij.openapi.project.Project
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.{JavaPsiFacade, PsiElement}
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScTypeAliasDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
+import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
+import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScParameterizedType, ScType}
 
 package object utils {
 
@@ -44,6 +51,35 @@ package object utils {
     val idx = str.lastIndexOf(suffix)
     if (idx < 0) str
     else str.substring(0, idx + suffix.length)
+  }
+
+  def findTypeDefByName(project: Project, qualifiedName: String): Option[ScTypeDefinition] =
+    JavaPsiFacade.getInstance(project).findClass(qualifiedName, GlobalSearchScope.projectScope(project)) match {
+      case typeDef: ScTypeDefinition => Some(typeDef)
+      case _                         => None
+    }
+
+  def createType(text: String, context: PsiElement, child: PsiElement = null): Option[ScType] =
+    ScalaPsiElementFactory.createTypeFromText(text, context, child)
+
+  @annotation.tailrec
+  def resolveAliases(tpe: ScType): Option[ScType] =
+    if (!tpe.isAliasType) Some(tpe)
+    else
+      tpe.aliasType match {
+        case Some(AliasType(_: ScTypeAliasDefinition, Right(l), Right(h))) if l == h =>
+          resolveAliases(l)
+        case Some(AliasType(typeDef: ScTypeAliasDefinition, _, _)) =>
+          typeDef.aliasedType match {
+            case Right(aliasedType) => resolveAliases(aliasedType)
+            case Left(_)            => None
+          }
+        case _ => None
+      }
+
+  def extractTypeArguments(tpe: ScType): Option[Seq[ScType]] = tpe match {
+    case parameterizedType: ScParameterizedType => Some(parameterizedType.typeArguments)
+    case _                                      => None
   }
 
 }

@@ -1,40 +1,25 @@
 package zio.macros
 
-import com.intellij.openapi.util.text.StringUtil
-import com.intellij.psi.util.PsiTreeUtil
-import intellij.testfixtures._
-import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestAdapter
+import intellij.testfixtures.RichStr
 import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
-import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScFunctionDefinition, ScPatternDefinition}
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
-import org.jetbrains.plugins.scala.lang.psi.types.{PhysicalMethodSignature, TypePresentationContext}
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.junit.Assert._
 
-class ModulePatternAccessibleTest extends ScalaLightCodeInsightFixtureTestAdapter {
-  private val caret = "<caret>"
+class ModulePatternAccessibleTest extends MacrosTest {
 
   override def librariesLoaders: Seq[LibraryLoader] =
     super.librariesLoaders :+
-      IvyManagedLoader("dev.zio" %% "zio"         % "1.0.0-RC20") :+
-      IvyManagedLoader("dev.zio" %% "zio-streams" % "1.0.0-RC20") :+
-      IvyManagedLoader("dev.zio" %% "zio-macros"  % "1.0.0-RC20")
+      IvyManagedLoader(zioOrg %% "zio-streams" % zioVersion, zioOrg %% "zio-macros" % zioVersion)
 
-  private var extendedObject: ScObject                                  = _
-  implicit private var typePresentationContext: TypePresentationContext = _
-
-  override def setUp(): Unit = {
-    super.setUp()
-
-    val code =
-      s"""
+  override protected val code =
+    s"""
 import zio._
 import zio.blocking.Blocking
 import zio.macros.accessible
 import zio.stream.ZStream
 
 @accessible
-object E${caret}xample {
+object E${CARET}xample {
   type Environment = Blocking
 
   type EIO[+T] = ZIO[Environment, Nothing, T]
@@ -58,38 +43,6 @@ object E${caret}xample {
   }
 }
 """
-    val cleaned  = StringUtil.convertLineSeparators(code)
-    val caretPos = cleaned.indexOf(caret)
-    configureFromFileText(cleaned.replace(caret, ""))
-
-    extendedObject = PsiTreeUtil.findElementOfClassAtOffset(
-      getFile,
-      caretPos,
-      classOf[ScObject],
-      false
-    )
-    typePresentationContext = TypePresentationContext(extendedObject)
-  }
-
-  private def method(name: String): ScFunctionDefinition =
-    extendedObject.allMethods
-      .collectFirst {
-        case PhysicalMethodSignature(fun: ScFunctionDefinition, _) if fun.name == name => fun
-      }
-      .getOrElse(
-        fail(s"Method declaration $name was not found inside object ${extendedObject.name}")
-          .asInstanceOf[ScFunctionDefinition]
-      )
-
-  private def field(name: String): ScPatternDefinition =
-    extendedObject.membersWithSynthetic
-      .collectFirst {
-        case pd: ScPatternDefinition if pd.isSimple && pd.bindings.head.name == name => pd
-      }
-      .getOrElse(
-        fail(s"Field $name was not found inside object ${extendedObject.name}")
-          .asInstanceOf[ScPatternDefinition]
-      )
 
   def test_generates_accessor_value_for_ZIO_field(): Unit = {
     assertEquals(
