@@ -1,4 +1,4 @@
-package zio.intellij.testsupport.test
+package zio.intellij.testsupport
 
 import com.intellij.execution.configurations.{ConfigurationFactory, JavaCommandLineState, JavaParameters, RunProfileState}
 import com.intellij.execution.impl.ConsoleViewImpl
@@ -15,12 +15,10 @@ import com.intellij.testIntegration.TestFramework
 import org.jetbrains.bsp.BspUtil
 import org.jetbrains.plugins.scala.project.ModuleExt
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration.TestFrameworkRunnerInfo
-import org.jetbrains.plugins.scala.testingSupport.test.sbt.SbtTestRunningSupport
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
-import org.jetbrains.plugins.scala.testingSupport.test.{AbstractTestRunConfiguration, SuiteValidityChecker, TestKind}
-import zio.intellij.testsupport.ZSuitePaths
+import org.jetbrains.plugins.scala.testingSupport.test.{AbstractTestRunConfiguration, SuiteValidityCheckerBase, TestKind}
 
-class ZTestRunConfiguration2(
+class ZTestRunConfiguration(
   project: Project,
   configurationFactory: ConfigurationFactory,
   name: String
@@ -95,7 +93,7 @@ class ZTestRunConfiguration2(
     }
   }
 
-  override protected def validityChecker = null
+  override protected def validityChecker = new SuiteValidityCheckerBase {}
 
   override def sbtSupport = null
 }

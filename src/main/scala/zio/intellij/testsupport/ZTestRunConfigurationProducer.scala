@@ -1,4 +1,4 @@
-package zio.intellij.testsupport.test
+package zio.intellij.testsupport
 
 import com.intellij.execution.Location
 import com.intellij.execution.actions.ConfigurationFromContext
@@ -9,9 +9,8 @@ import org.jetbrains.plugins.scala.runner.ScalaApplicationConfigurationProducer
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer.CreateFromContextInfo
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer.CreateFromContextInfo._
-import zio.intellij.testsupport.{IsZioTestElement, ZSuitePaths, testName}
 
-final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProducer[ZTestRunConfiguration2] {
+final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProducer[ZTestRunConfiguration] {
 
   override def getConfigurationFactory: ConfigurationFactory = {
     val configurationType = ConfigurationTypeUtil.findConfigurationType(classOf[ZTestConfigurationType])

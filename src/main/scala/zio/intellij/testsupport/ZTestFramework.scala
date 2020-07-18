@@ -1,9 +1,9 @@
-package zio.intellij.testsupport.test
+package zio.intellij.testsupport
 
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
-import zio.intellij.testsupport.ZSuitePaths
+import zio.intellij.testsupport.ZTestFramework.testMethods
 
 final class ZTestFramework extends AbstractTestFramework {
   override def getMarkerClassFQName: String = ZSuitePaths.head
