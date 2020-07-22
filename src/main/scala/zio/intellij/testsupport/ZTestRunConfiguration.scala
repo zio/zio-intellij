@@ -1,22 +1,26 @@
 package zio.intellij.testsupport
 
-import com.intellij.execution.configurations.{ConfigurationFactory, JavaCommandLineState, JavaParameters, RunProfileState}
+import com.intellij.execution.configurations._
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.runners.{ExecutionEnvironment, ProgramRunner}
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties
 import com.intellij.execution.ui.ConsoleView
-import com.intellij.execution.{DefaultExecutionResult, ExecutionResult, Executor}
+import com.intellij.execution.{DefaultExecutionResult, ExecutionException, ExecutionResult, Executor}
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.util.InvalidDataException
+import com.intellij.psi.PsiClass
 import com.intellij.testIntegration.TestFramework
 import org.jetbrains.bsp.BspUtil
+import org.jetbrains.plugins.scala.ScalaBundle
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.project.ModuleExt
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration.TestFrameworkRunnerInfo
+import org.jetbrains.plugins.scala.testingSupport.test._
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
-import org.jetbrains.plugins.scala.testingSupport.test.{AbstractTestRunConfiguration, SuiteValidityCheckerBase, TestKind}
+import org.jetbrains.plugins.scala.extensions._
 
 class ZTestRunConfiguration(
   project: Project,
@@ -65,35 +69,42 @@ class ZTestRunConfiguration(
     }
 
   override def getState(executor: Executor, env: ExecutionEnvironment): RunProfileState = {
-    val oldState = super.getState(executor, env).asInstanceOf[JavaCommandLineState]
+    val module = getModule
+    if (module == null) throw new ExecutionException(ScalaBundle.message("test.run.config.module.is.not.specified"))
 
-    new JavaCommandLineState(env) {
-      override def createJavaParameters(): JavaParameters = oldState.getJavaParameters
+    new MyShit(env, module)
+  }
 
-      override def execute(executor: Executor, runner: ProgramRunner[_]): ExecutionResult = {
-        val processHandler = startProcess()
+  private class MyShit(env: ExecutionEnvironment, module: Module) extends ScalaTestFrameworkCommandLineState(this, env, testConfigurationData, runnerInfo, sbtSupport)(project, module) {
 
-        val consoleView: ConsoleView =
-          if (shouldCreateTestConsole) {
-            val consoleProperties = new SMTRunnerConsoleProperties(self, "ZIO Test", executor)
-            SMTestRunnerConnectionUtil.createAndAttachConsole("ZIO Test", processHandler, consoleProperties)
-          } else {
-            val console = new ConsoleViewImpl(project, true)
-            console.attachToProcess(processHandler)
-            console
-          }
+    override def execute(executor: Executor, runner: ProgramRunner[_]): ExecutionResult = {
+      val processHandler = startProcess()
 
-        val res = new DefaultExecutionResult(
-          consoleView,
-          processHandler,
-          createActions(consoleView, processHandler, executor): _*
-        )
-        res
-      }
+      val consoleView: ConsoleView =
+        if (shouldCreateTestConsole) {
+          val consoleProperties = new SMTRunnerConsoleProperties(self, "ZIO Test", executor)
+          SMTestRunnerConnectionUtil.createAndAttachConsole("ZIO Test", processHandler, consoleProperties)
+        } else {
+          val console = new ConsoleViewImpl(project, true)
+          console.attachToProcess(processHandler)
+          console
+        }
+
+      val res = new DefaultExecutionResult(
+        consoleView,
+        processHandler,
+        createActions(consoleView, processHandler, executor): _*
+      )
+      res
+
     }
   }
 
-  override protected def validityChecker = new SuiteValidityCheckerBase {}
+
+  override protected def validityChecker = new SuiteValidityCheckerBase {
+    override def isValidClass(clazz: PsiClass): Boolean =
+      clazz.is[ScObject]
+  }
 
   override def sbtSupport = null
 }
