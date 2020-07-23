@@ -25,6 +25,7 @@ lazy val `zio-intellij` = project
       xml.changeNotes = s"""<![CDATA[
         Welcome to another release packed with incredible new features!
         <em>A huge thanks to Timur Aliberdov (<a href="https://github.com/timaliberdov">@timaliberdov</a>), as well as Simon Popugaev, Andrés González and others who contributed to this release!</em>
+        <p><strong>Note:</strong> due to the changes in the test infrastructure, this plugin requires a Nightly build of the Scala plugin (v2020.2.652 or newer).</p>
         <ul>
         <li>Add support for <code>@mockable</code> macro (<a href="https://github.com/zio/zio-intellij/pull/120">#120</a>)</li>
         <li>Suggest <code>.toLayer/</code></code>.toLayerMany</code> (<a href="https://github.com/zio/zio-intellij/pull/116">#116</a>)</li>

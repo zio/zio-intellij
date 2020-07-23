@@ -19,19 +19,13 @@ import com.intellij.openapi.util.InvalidDataException
 import com.intellij.psi.PsiClass
 import com.intellij.testIntegration.TestFramework
 import org.jetbrains.bsp.BspUtil
-import org.jetbrains.plugins.scala.ScalaBundle
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.project.ModuleExt
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration.TestFrameworkRunnerInfo
 import org.jetbrains.plugins.scala.testingSupport.test._
 import org.jetbrains.plugins.scala.testingSupport.test.actions.ScalaRerunFailedTestsAction
-import org.jetbrains.plugins.scala.testingSupport.test.sbt.{
-  SbtCommandsBuilder,
-  SbtCommandsBuilderBase,
-  SbtTestRunningSupport,
-  SbtTestRunningSupportBase
-}
+import org.jetbrains.plugins.scala.testingSupport.test.sbt._
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
 
 import scala.collection.JavaConverters._
@@ -85,7 +79,7 @@ class ZTestRunConfiguration(
 
   override def getState(executor: Executor, env: ExecutionEnvironment): RunProfileState = {
     val module = getModule
-    if (module == null) throw new ExecutionException(ScalaBundle.message("test.run.config.module.is.not.specified"))
+    if (module == null) throw new ExecutionException("Module is not specified")
 
     new ZioTestCommandLineState(env, module)
   }
