@@ -1,5 +1,5 @@
 lazy val scala212      = "2.12.10"
-lazy val pluginVersion = "2020.1.0.8"
+lazy val pluginVersion = "2020.1.0.9"
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "2020.1"
@@ -18,18 +18,21 @@ lazy val `zio-intellij` = project
     version := pluginVersion,
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2020.1.36".toPlugin
+      "org.intellij.scala:2020.1.41".toPlugin
     ),
     patchPluginXml := pluginXmlOptions { xml =>
       xml.version = version.value
       xml.changeNotes = s"""<![CDATA[
         Welcome to another release packed with incredible new features!
-        <em>A huge thanks to Timur Aliberdov (<a href="https://github.com/timaliberdov">@timaliberdov</a>) for contributing many features to this release!</em>
+        <em>A huge thanks to Timur Aliberdov (<a href="https://github.com/timaliberdov">@timaliberdov</a>), as well as Simon Popugaev, Andrés González and others who contributed to this release!</em>
         <ul>
-        <li>Adding <code>.exitCode</code> refactoring for ZIO RC20 (<a href="https://github.com/zio/zio-intellij/pull/105">#105</a>)</li>
-        <li><li>Suggest <code>ZIO.none</code>, <code>ZIO.some</code>, <code>ZIO.left</code> and <code>ZIO.right</code> (<a href="https://github.com/zio/zio-intellij/pull/109">#109</a> - by @timaliberdov)</li>
-        <li>Indicate (with an icon) code that's explicitly being forked (<a href="https://github.com/zio/zio-intellij/pull/110">#110</a> - by @timaliberdov)</li>
-        <li>Convert <code>*></code> chain to for-comprehension and vice versa (<a href="https://github.com/zio/zio-intellij/pull/111">#111</a> - by @timaliberdov)</li>
+        <li>A new Dump ZIO Fibers debug action (<a href="https://github.com/zio/zio-intellij/pull/117">#117</a>)</li>
+        <li>Add support for <code>@mockable</code> macro (<a href="https://github.com/zio/zio-intellij/pull/120">#120</a>)</li>
+        <li>Suggest <code>.toLayer/</code></code>.toLayerMany</code> (<a href="https://github.com/zio/zio-intellij/pull/116">#116</a>)</li>
+        <li>Fix <code>@accessible</code> macro generation (<a href="https://github.com/zio/zio-intellij/pull/43">#43</a>)</li>
+        <li>Add <code>.flatMap</code> to <code>.zipRight</code> inspection (<a href="https://github.com/zio/zio-intellij/pull/114">#114</a>)</li>
+        <li>Fix a wrong suggestion for <code>.fromOption</code> (<a href="https://github.com/zio/zio-intellij/pull/122">#122</a>)</li>
+        <li>Fix a crash in "Create new Test" when used with ZIO Tests (<a href="https://github.com/zio/zio-intellij/pull/125">#125</a>)</li>
         <li>Depending on the latest Scala plugin for compatibility</li>
         <li>Additional bug fixes and tweaks</li>
         <ul>
