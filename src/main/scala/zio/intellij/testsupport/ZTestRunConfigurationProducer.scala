@@ -1,14 +1,10 @@
 package zio.intellij.testsupport
 
 import com.intellij.execution.Location
-import com.intellij.execution.actions.{ConfigurationContext, ConfigurationFromContext}
+import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.{ConfigurationFactory, ConfigurationTypeUtil}
-import com.intellij.openapi.module.Module
-import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
-import com.intellij.psi.search.GlobalSearchScope
-import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiManager
 import org.jetbrains.plugins.scala.runner.ScalaApplicationConfigurationProducer
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer.CreateFromContextInfo
@@ -44,38 +40,6 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
         }
       case _ => None
     }
-
-  override def setupConfigurationFromContext(
-    configuration: ZTestRunConfiguration,
-    context: ConfigurationContext,
-    sourceElement: Ref[PsiElement]
-  ): Boolean = {
-    val contextLocation = context.getLocation
-    val contextModule   = contextLocation.getModule //context.getModule
-
-    if (contextLocation == null || contextModule == null) false
-    else if (sourceElement.isNull) false
-    else if (!hasTestSuitesInModuleDependencies(contextModule)) false
-    else {
-      val maybeTuple = createConfigurationFromContextLocation(contextLocation)
-      maybeTuple.fold(false) {
-        case (testElement, confSettings) =>
-          val config = confSettings.getConfiguration.asInstanceOf[ZTestRunConfiguration]
-          // TODO: should we really check it for configuration (the one we should setup) and not for config (just created)?
-          sourceElement.set(testElement)
-          configuration.initFrom(config)
-          true
-      }
-    }
-
-  }
-
-  private def hasTestSuitesInModuleDependencies(module: Module): Boolean = {
-    val scope      = GlobalSearchScope.moduleWithDependenciesAndLibrariesScope(module, true)
-    val psiManager = ScalaPsiManager.instance(module.getProject)
-    suitePaths.exists(psiManager.getCachedClass(scope, _).isDefined)
-  }
-
 }
 
 object ZTestRunConfigurationProducer {

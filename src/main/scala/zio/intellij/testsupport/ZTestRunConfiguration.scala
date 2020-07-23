@@ -2,9 +2,14 @@ package zio.intellij.testsupport
 
 import com.intellij.execution.configurations._
 import com.intellij.execution.impl.ConsoleViewImpl
+import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.{ExecutionEnvironment, ProgramRunner}
+import com.intellij.execution.testDiscovery.JavaAutoRunManager
+import com.intellij.execution.testframework.autotest.{AbstractAutoTestManager, ToggleAutoTestAction}
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties
+import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
+import com.intellij.execution.testframework.ui.BaseTestsOutputConsoleView
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.{DefaultExecutionResult, ExecutionException, ExecutionResult, Executor}
 import com.intellij.openapi.module.Module
@@ -15,12 +20,22 @@ import com.intellij.psi.PsiClass
 import com.intellij.testIntegration.TestFramework
 import org.jetbrains.bsp.BspUtil
 import org.jetbrains.plugins.scala.ScalaBundle
+import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.project.ModuleExt
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfiguration.TestFrameworkRunnerInfo
 import org.jetbrains.plugins.scala.testingSupport.test._
+import org.jetbrains.plugins.scala.testingSupport.test.actions.ScalaRerunFailedTestsAction
+import org.jetbrains.plugins.scala.testingSupport.test.sbt.{
+  SbtCommandsBuilder,
+  SbtCommandsBuilderBase,
+  SbtTestRunningSupport,
+  SbtTestRunningSupportBase
+}
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
-import org.jetbrains.plugins.scala.extensions._
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 class ZTestRunConfiguration(
   project: Project,
@@ -40,7 +55,7 @@ class ZTestRunConfiguration(
 
   private val ZTestRunnerName = "zio.intellij.testsupport.ZTestRunner"
 
-  override protected val runnerInfo: TestFrameworkRunnerInfo = TestFrameworkRunnerInfo(
+  override protected def runnerInfo: TestFrameworkRunnerInfo = TestFrameworkRunnerInfo(
     if (Option(getModule).exists(hasTestRunner)) ZTestRunnerName
     else fromTestConfiguration(testConfigurationData)
   )
@@ -72,10 +87,36 @@ class ZTestRunConfiguration(
     val module = getModule
     if (module == null) throw new ExecutionException(ScalaBundle.message("test.run.config.module.is.not.specified"))
 
-    new MyShit(env, module)
+    new ZioTestCommandLineState(env, module)
   }
 
-  private class MyShit(env: ExecutionEnvironment, module: Module) extends ScalaTestFrameworkCommandLineState(this, env, testConfigurationData, runnerInfo, sbtSupport)(project, module) {
+  private class ZioTestCommandLineState(env: ExecutionEnvironment, module: Module)
+      extends ScalaTestFrameworkCommandLineState(this, env, testConfigurationData, runnerInfo, sbtSupport)(
+        project,
+        module
+      ) {
+
+    override def createJavaParameters(): JavaParameters = {
+      val javaParameters = super.createJavaParameters()
+      // I'm sorry...
+      val params  = javaParameters.getProgramParametersList
+      val newList = rebuildList(params.getParameters.asScala.toList)
+      params.clearAll()
+      params.addAll(newList.asJava)
+      javaParameters
+    }
+
+    def rebuildList(input: List[String]): List[String] = {
+      val mutableList: ListBuffer[String] = ListBuffer.empty[String]
+      input
+        .sliding(2, 2)
+        .toList
+        .collect {
+          case "-s" :: suite :: _       => mutableList.append("-s", suite)
+          case "-testName" :: test :: _ => mutableList.append("-t", test)
+        }
+      mutableList.toList
+    }
 
     override def execute(executor: Executor, runner: ProgramRunner[_]): ExecutionResult = {
       val processHandler = startProcess()
@@ -90,21 +131,49 @@ class ZTestRunConfiguration(
           console
         }
 
-      val res = new DefaultExecutionResult(
-        consoleView,
-        processHandler,
-        createActions(consoleView, processHandler, executor): _*
-      )
-      res
+      createExecutionResult(consoleView, processHandler)
+    }
 
+    private def createExecutionResult(
+      consoleView: ConsoleView,
+      processHandler: ProcessHandler
+    ): DefaultExecutionResult = {
+      val result         = new DefaultExecutionResult(consoleView, processHandler)
+      val restartActions = createRestartActions(consoleView).toSeq.flatten
+      result.setRestartActions(restartActions: _*)
+      result
+    }
+
+    private def createRestartActions(consoleView: ConsoleView) =
+      consoleView match {
+        case testConsole: BaseTestsOutputConsoleView =>
+          val rerunFailedTestsAction = {
+            val action = new ScalaRerunFailedTestsAction(testConsole)
+            action.init(testConsole.getProperties)
+            action.setModelProvider(() => testConsole.asInstanceOf[SMTRunnerConsoleView].getResultsViewer)
+            action
+          }
+          val toggleAutoTestAction = new ToggleAutoTestAction() {
+            override def isDelayApplicable: Boolean = false
+            override def getAutoTestManager(project: Project): AbstractAutoTestManager =
+              JavaAutoRunManager.getInstance(project)
+          }
+          Some(Seq(rerunFailedTestsAction, toggleAutoTestAction))
+        case _ =>
+          None
+      }
+  }
+
+  override protected def validityChecker: SuiteValidityChecker = new SuiteValidityCheckerBase {
+    override protected def isValidClass(clazz: PsiClass): Boolean           = clazz.is[ScObject]
+    override protected def hasSuitableConstructor(clazz: PsiClass): Boolean = true
+  }
+
+  override def sbtSupport: SbtTestRunningSupport = new SbtTestRunningSupportBase {
+
+    override def commandsBuilder: SbtCommandsBuilder = new SbtCommandsBuilderBase {
+      override def classKey: Option[String]    = Some("-s")
+      override def testNameKey: Option[String] = Some("-t")
     }
   }
-
-
-  override protected def validityChecker = new SuiteValidityCheckerBase {
-    override def isValidClass(clazz: PsiClass): Boolean =
-      clazz.is[ScObject]
-  }
-
-  override def sbtSupport = null
 }

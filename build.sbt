@@ -1,5 +1,5 @@
 lazy val scala212      = "2.12.10"
-lazy val pluginVersion = "2020.1.0.9"
+lazy val pluginVersion = "2020.2.0.9"
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "202.6397-EAP-CANDIDATE-SNAPSHOT"
@@ -18,7 +18,7 @@ lazy val `zio-intellij` = project
     version := pluginVersion,
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2020.2.14".toPlugin
+      "org.intellij.scala:2020.2.652:Nightly".toPlugin
     ),
     patchPluginXml := pluginXmlOptions { xml =>
       xml.version = version.value
