@@ -138,6 +138,12 @@
                          shortName="SimplifyFlatmapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyForeachInspection"
+                         displayName="Simplify .foreach by discarding unused result thus slightly improving performance"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyForeachInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>

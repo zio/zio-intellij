@@ -2,7 +2,7 @@ package zio.intellij
 
 import com.intellij.psi.PsiAnnotation
 import org.jetbrains.plugins.scala.codeInspection.collections.{isOfClassFrom, _}
-import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
+import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScPattern, ScReferencePattern, ScWildcardPattern}
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
@@ -65,9 +65,41 @@ package object inspections {
   def fromZio(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioTypes)
 
-  sealed abstract class StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String) {
+  object methodExtractors {
 
-    private def matchesRefName(ref: ScReferenceExpression) =
+    object uncurry1 {
+
+      def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] =
+        expr match {
+          case MethodRepr(_, _, Some(ref), Seq(e)) => Some((ref, e))
+          case _                                   => None
+        }
+    }
+
+    object uncurry2 {
+
+      def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression, ScExpression)] =
+        expr match {
+          case MethodRepr(_, Some(uncurry1(ref, first)), _, Seq(second)) => Some(ref, first, second)
+          case _                                                         => None
+        }
+    }
+
+    object uncurry3 {
+
+      def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression, ScExpression, ScExpression)] =
+        expr match {
+          case MethodRepr(_, Some(uncurry2(ref, first, second)), _, Seq(third)) => Some(ref, first, second, third)
+          case _                                                                => None
+        }
+    }
+  }
+
+  import methodExtractors._
+
+  sealed abstract class BaseStaticMemberReference(refName: String) {
+
+    protected def matchesRefName(ref: ScReferenceExpression): Boolean =
       if (ref.refName == refName) true
       else
         ref.resolve() match {
@@ -75,6 +107,10 @@ package object inspections {
           case n: ScNamedElement if n.name == refName => true
           case _                                      => false
         }
+  }
+
+  sealed abstract class StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String)
+      extends BaseStaticMemberReference(refName) {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
       case ref @ ScReferenceExpression(_) if matchesRefName(ref) =>
@@ -82,17 +118,50 @@ package object inspections {
           case Some(extractor()) => Some(expr)
           case _                 => None
         }
-      case MethodRepr(_, _, Some(ref), Seq(e)) if matchesRefName(ref) =>
+      case uncurry1(ref, first) if matchesRefName(ref) =>
         ref match {
-          case extractor() => Some(e)
+          case extractor() => Some(first)
           case _           => None
         }
       case _ => None
     }
   }
 
+  sealed abstract class Curried2StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String)
+      extends BaseStaticMemberReference(refName) {
+
+    def unapply(expr: ScExpression): Option[(ScExpression, ScExpression)] = expr match {
+      case uncurry2(ref, first, second) if matchesRefName(ref) =>
+        ref match {
+          case extractor() => Some((first, second))
+          case _           => None
+        }
+      case _ => None
+    }
+  }
+
+  sealed abstract class Curried3StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String)
+      extends BaseStaticMemberReference(refName) {
+
+    def unapply(expr: ScExpression): Option[(ScExpression, ScExpression, ScExpression)] = expr match {
+      case uncurry3(ref, first, second, third) if matchesRefName(ref) =>
+        ref match {
+          case extractor() => Some((first, second, third))
+          case _           => None
+        }
+      case _ => None
+    }
+
+  }
+
   final class ZIOStaticMemberReference(refName: String)
       extends StaticMemberReference(ZIOStaticMemberReferenceExtractor, refName)
+
+  final class ZIOCurried2StaticMemberReference(refName: String)
+      extends Curried2StaticMemberReference(ZIOStaticMemberReferenceExtractor, refName)
+
+  final class ZIOCurried3StaticMemberReference(refName: String)
+      extends Curried3StaticMemberReference(ZIOStaticMemberReferenceExtractor, refName)
 
   final class ZLayerStaticMemberReference(refName: String)
       extends StaticMemberReference(ZLayerStaticMemberReferenceExtractor, refName)
@@ -160,6 +229,12 @@ package object inspections {
   val `ZIO.forkAll`       = new ZIOStaticMemberReference("forkAll")
   val `ZIO.forkAll_`      = new ZIOStaticMemberReference("forkAll_")
 
+  val `ZIO.collectAllParN` = new ZIOCurried2StaticMemberReference("collectAllParN")
+  val `ZIO.foreach`        = new ZIOCurried2StaticMemberReference("foreach")
+  val `ZIO.foreachPar`     = new ZIOCurried2StaticMemberReference("foreachPar")
+
+  val `ZIO.foreachParN` = new ZIOCurried3StaticMemberReference("foreachParN")
+
   val `ZLayer.fromEffect`     = new ZLayerStaticMemberReference("fromEffect")
   val `ZLayer.fromEffectMany` = new ZLayerStaticMemberReference("fromEffectMany")
 
@@ -215,6 +290,17 @@ package object inspections {
     }
   }
 
+  // for comprehension `x <- xx` generator syntax
+  object generator {
+
+    def unapply(expr: ScGenerator): Option[(ScPattern, Option[ScExpression])] =
+      (expr.pattern, expr.expr) match {
+        case (x, res @ Some(_)) =>
+          Some((x, res.map(stripped)))
+        case _ => None
+      }
+  }
+
   object `_ => x` {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
@@ -242,6 +328,14 @@ package object inspections {
     def unapply(expr: ScExpression): Boolean = expr match {
       case lambda(_, Some(`ZIO.unit`(_))) => true
       case _                              => false
+    }
+  }
+
+  object `_ <- x` {
+
+    def unapply(expr: ScGenerator): Option[ScExpression] = expr match {
+      case generator(_: ScWildcardPattern, expr) => expr
+      case _                                     => None
     }
   }
 
