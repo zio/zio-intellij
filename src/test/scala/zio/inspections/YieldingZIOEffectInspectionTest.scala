@@ -12,6 +12,16 @@ class YieldingZIOEffectInspectionTest extends ZScalaInspectionTest[YieldingZIOEf
                                              |} yield ${START}ZIO.effect(2)$END
                                              |""".stripMargin).assertHighlighted()
 
+  def test_yielding_an_curried_2_effect(): Unit = z(s"""for {
+                                                       |  _ <- ZIO.succeed(1)
+                                                       |} yield ${START}ZIO.foreach(List(2))(UIO(_))$END
+                                                       |""".stripMargin).assertHighlighted()
+
+  def test_yielding_an_curried_3_effect(): Unit = z(s"""for {
+                                                       |  _ <- ZIO.succeed(1)
+                                                       |} yield ${START}ZIO.foreachParN(1)(List(2))(UIO(_))$END
+                                                       |""".stripMargin).assertHighlighted()
+
   def test_yielding_a_val_zio_reference_effect(): Unit = z(s"""val x: UIO[Int] = ???
                                                               |for {
                                                               |  _ <- ZIO.succeed(1)

@@ -43,10 +43,8 @@ object CollectAllParNToForeachParNSimplificationType extends SimplificationType 
         .highlightFrom(expr)
 
     expr match {
-      case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(n)), Seq(iterable `.map` func))
-          if fromZio(expr) && ref.refName == "collectAllParN" =>
-        Some(replacement(n, iterable, func))
-      case _ => None
+      case `ZIO.collectAllParN`(n, iterable `.map` func) => Some(replacement(n, iterable, func))
+      case _                                             => None
     }
   }
 }
