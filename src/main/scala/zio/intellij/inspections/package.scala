@@ -201,7 +201,7 @@ package object inspections {
   class TypeReference(typeFQNs: Set[String]) {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case MethodRepr(_, _, Some(ref), Seq(_)) =>
+      case uncurry1(ref, _) =>
         ref.resolve() match {
           case m: ScMember if typeFQNs.contains(m.containingClass.qualifiedName) => Some(expr)
           case _                                                                 => None
@@ -254,15 +254,11 @@ package object inspections {
           case _: ScReferencePattern | _: ScFunctionDefinition if fromZioLike(expr) => Some((ref, expr))
           case _                                                                    => None
         }
-      case MethodRepr(_, _, Some(ref), Seq(e)) =>
-        ref.resolve() match {
-          case _ if fromZioLike(expr) => Some((ref, e))
-          case _                      => None
-        }
+      case uncurry1(ref, e) if fromZioLike(expr) => Some((ref, e))
       // multiple argument lists
-      case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if fromZioLike(expr) =>
-        Some((ref, expr))
-      case _ => None
+      case uncurry2(ref, _, _) if fromZioLike(expr)    => Some((ref, expr))
+      case uncurry3(ref, _, _, _) if fromZioLike(expr) => Some((ref, expr))
+      case _                                           => None
     }
   }
 
