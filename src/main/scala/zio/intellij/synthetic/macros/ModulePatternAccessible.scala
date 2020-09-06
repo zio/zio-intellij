@@ -3,24 +3,40 @@ package zio.intellij.synthetic.macros
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScAnnotation
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
-import zio.intellij.inspections.fromZio
+import org.jetbrains.plugins.scala.lang.psi.types.ScType
+import zio.intellij.inspections.{fromManaged, fromZio}
 
 class ModulePatternAccessible extends SyntheticMembersInjector {
 
   private def members(sco: ScObject): Seq[String] = {
-    val serviceTrait = sco.typeDefinitions.find(_.name == "Service")
-    val methods      = serviceTrait.toSeq.flatMap(td => td.allMethods ++ td.allVals)
+    val serviceTrait       = sco.typeDefinitions.find(_.name == "Service")
+    val methods            = serviceTrait.toSeq.flatMap(td => td.allMethods ++ td.allVals)
+    val serviceApplication = s"${sco.qualifiedName}.Service${serviceTrait.fold("")(typeParametersApplication)}"
+
+    def mapOrFlatMap(tpe: ScType): String = if (fromZio(tpe) || fromManaged(tpe)) "flatMap" else "map"
+    def zioObject(tpe: ScType): String    = if (fromManaged(tpe)) "ZManaged" else "ZIO"
 
     methods.collect {
       case Field(fid) =>
-        val mapOrFlatMap = if (fid.`type`().exists(fromZio)) "flatMap" else "map"
-        s"val ${fid.name} = zio.ZIO.service[${sco.qualifiedName}.Service].$mapOrFlatMap(_.${fid.name})"
+        val isPoly = serviceTrait.exists(_.typeParameters.nonEmpty)
+        val tpe    = fid.`type`().getOrAny
+        val body   = s"zio.${zioObject(tpe)}.service[$serviceApplication].${mapOrFlatMap(tpe)}(_.${fid.name})"
+
+        if (isPoly)
+          s"def ${fid.name}${serviceTrait.fold("")(typeParametersDefinition(_, showVariance = false))} = $body"
+        else s"val ${fid.name} = $body"
+
       case FunctionDeclaration(method) =>
-        val name         = method.name
-        val mapOrFlatMap = if (method.returnType.exists(fromZio)) "flatMap" else "map"
-        s"def $name${typeParametersDefinition(method)}${parametersDefinition(method)} =" +
-          s" zio.ZIO.service[${sco.qualifiedName}.Service]" +
-          s".$mapOrFlatMap(_.$name${typeParametersApplication(method)}${parametersApplication(method)})"
+        val tpe = method.returnType.getOrAny
+        val typeParamsDefinition =
+          typeParametersDefinition(
+            serviceTrait.toSeq.flatMap(_.typeParameters) ++ method.typeParameters,
+            showVariance = false
+          )
+
+        s"def ${method.name}$typeParamsDefinition${parametersDefinition(method)} = " +
+          s"zio.${zioObject(tpe)}.service[$serviceApplication]" +
+          s".${mapOrFlatMap(tpe)}(_.${method.name}${typeParametersApplication(method)}${parametersApplication(method)})"
     }
   }
 

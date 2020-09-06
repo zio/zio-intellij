@@ -49,6 +49,7 @@ package object inspections {
 
   val zioLikePackages: Array[String] = Array("zio._")
   val zioTypes: Array[String]        = Array("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
+  val managedTypes: Array[String]    = Array("zio.ZManaged")
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
@@ -64,6 +65,9 @@ package object inspections {
 
   def fromZio(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioTypes)
+
+  def fromManaged(tpe: ScType): Boolean =
+    isOfClassFrom(tpe, managedTypes)
 
   object methodExtractors {
 

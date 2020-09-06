@@ -35,6 +35,9 @@ object E${CARET}xample {
     def m2[T](s2: String = "")(p: (T, Int))(i2: Int*): UIO[Double]
     def m3[T <: Foo](t: Wrapped[T]): IO[String, List[T]]
 
+    val vManaged: Managed[String, Foo]
+    def mManaged(s: String): ZManaged[Any, Nothing, Bar]
+
     val vNonZIO: Boolean
     def m0NonZIO: Unit
     def m1NonZIO(s: String): Int
@@ -153,6 +156,28 @@ object E${CARET}xample {
     assertEquals(
       Right("Int => ZIO[Has[Example.Service], Nothing, ZStream[Any, String, Int]]"),
       method("stream").`type`().map(_.codeText)
+    )
+  }
+
+  def test_generates_accessor_value_for_managed_field(): Unit = {
+    assertEquals(
+      "val vManaged = zio.ZManaged.service[Example.Service].flatMap(_.vManaged)",
+      field("vManaged").getText
+    )
+    assertEquals(
+      Right("ZManaged[Has[Example.Service], String, Example.Foo]"),
+      field("vManaged").`type`().map(_.codeText)
+    )
+  }
+
+  def test_generates_accessor_function_for_method_returning_managed(): Unit = {
+    assertEquals(
+      "def mManaged(s: String) = zio.ZManaged.service[Example.Service].flatMap(_.mManaged(s))",
+      method("mManaged").getText
+    )
+    assertEquals(
+      Right("String => ZManaged[Has[Example.Service], Nothing, Example.Bar]"),
+      method("mManaged").`type`().map(_.codeText)
     )
   }
 
