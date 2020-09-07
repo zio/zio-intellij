@@ -16,6 +16,6 @@ abstract class OperationsOnCollectionInspectionTest extends ScalaQuickFixTestBas
 
   protected def doTest(selected: String, text: String, result: String): Unit = {
     checkTextHasError(selected)
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 }

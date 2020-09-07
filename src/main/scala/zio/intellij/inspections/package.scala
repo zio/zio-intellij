@@ -297,6 +297,10 @@ package object inspections {
       }
   }
 
+  object guard {
+    def unapply(expr: ScGuard): Option[ScExpression] = expr.expr
+  }
+
   object `_ => x` {
 
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {

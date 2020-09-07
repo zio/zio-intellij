@@ -1,0 +1,45 @@
+<html>
+<body>
+Detects if guards mistakenly used in for-comprehension on ZIO effect causing <code>NoSuchElementException</code>.<br/><br/>
+
+The guard expression in the following code snippet will be highlighted:
+<pre>
+for {
+    _ <- myService.executeSomething() if config.somethingShouldBeExecuted
+} yield ???
+</pre>
+<br/>
+Аnd you will also be prompted to fix it using <code>ZIO.when</code>:
+<pre>
+for {
+    _ <- myService.executeSomething().when(config.somethingShouldBeExecuted)
+} yield ???
+</pre>
+<p>
+    <strong>Note</strong>: the highlighting only applies to values that are:
+<ul>
+    <li>Not assigned to a variable, e.g.:
+    <pre>
+    _ <- myService.executeSomething() if config.somethingShouldBeExecuted
+    </pre>
+        will be highlighted, while
+    <pre>
+    executionResult <- myService.executeSomething() if config.somethingShouldBeExecuted
+    </pre>
+        will not.
+    </li>
+    <br/>
+    <li>A ZIO effect, since
+        <pre>
+            effect if condition
+        </pre>
+        desugars to
+        <pre>
+            effect.withFilter(condition)
+        </pre>
+        which fails with NoSuchElementException if condition is false.
+    </li>
+</ul>
+</p>
+</body>
+</html>

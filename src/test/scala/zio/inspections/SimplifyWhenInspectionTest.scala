@@ -18,7 +18,7 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
     val result = z(s"""|val a = true
                        |val b = ZIO.succeed(42)
                        |b.when(a)""".stripMargin)
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_when_direct_reference(): Unit = {
@@ -28,7 +28,7 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
                      |if (a) ZIO.succeed(42) else ZIO.unit""".stripMargin)
     val result = z(s"""|val a = true
                        |ZIO.succeed(42).when(a)""".stripMargin)
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_when_direct_reference_apply(): Unit = {
@@ -38,7 +38,7 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
                      |if (a) ZIO(42) else ZIO.unit""".stripMargin)
     val result = z(s"""|val a = true
                        |ZIO(42).when(a)""".stripMargin)
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_when_complex_reference(): Unit = {
@@ -52,6 +52,6 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
     z(base(s"${START}if (a) $reference else ZIO.unit$END")).assertHighlighted()
     val text   = z(base(s"if (a) $reference else ZIO.unit"))
     val result = z(base(s"$reference.when(a)"))
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 }
