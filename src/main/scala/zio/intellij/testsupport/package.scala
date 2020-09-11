@@ -1,17 +1,15 @@
 package zio.intellij
 
 import com.intellij.codeInsight.TestFrameworks
+import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.{PsiClass, PsiElement}
 import com.intellij.testIntegration.TestFramework
-import javax.swing.Icon
+import org.jetbrains.plugins.scala.extensions._
+import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenTypes
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScLiteral
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScMethodCall, ScReferenceExpression}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
-import org.jetbrains.plugins.scala.extensions._
-import com.intellij.openapi.util.IconLoader.getIcon
-import com.intellij.psi.impl.source.tree.LeafPsiElement
-import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenTypes
 
 package object testsupport {
   val ZSuitePaths = List("zio.test.RunnableSpec")
@@ -30,8 +28,9 @@ package object testsupport {
     def unapply(expr: ScReferenceExpression): Option[String] =
       expr.parent match {
         case Some(m: ScMethodCall) =>
-          m.argumentExpressions.headOption.collect {
-            case lit: ScLiteral => lit.getValue().toString
+          m.argumentExpressions.headOption.flatMap {
+            case lit: ScLiteral => Option(lit.getValue()).map(_.toString)
+            case _              => None
           }
         case _ => None
       }
