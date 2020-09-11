@@ -14,7 +14,7 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenTypes
 
 package object testsupport {
-  val ZSuitePaths = List("zio.test.DefaultRunnableSpec")
+  val ZSuitePaths = List("zio.test.RunnableSpec")
 
   def parentTypeDefinition(e: PsiElement): Option[ScTypeDefinition] =
     Option(PsiTreeUtil.getParentOfType(e, classOf[ScTypeDefinition], false))
