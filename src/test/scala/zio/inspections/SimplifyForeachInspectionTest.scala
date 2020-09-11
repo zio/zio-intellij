@@ -39,7 +39,7 @@ abstract class SimplifyForeachInspectionTest(
          |  _ <- $zioMethodToReplaceWith
          |} yield ???""".stripMargin
     }
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def testNestedForCompHighlighting(): Unit =
@@ -75,7 +75,7 @@ abstract class SimplifyForeachInspectionTest(
          |  _ <- b
          |} yield ???""".stripMargin
     }
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def testChainHighlighting(): Unit =
@@ -93,7 +93,7 @@ abstract class SimplifyForeachInspectionTest(
       s"""val myIterable: Iterable[String] = ???
          |$zioMethodToReplaceWith *> b""".stripMargin
     }
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def testNestedChainHighlighting(): Unit =
@@ -111,7 +111,7 @@ abstract class SimplifyForeachInspectionTest(
       s"""val myIterable: Iterable[String] = ???
          |b <* b *> b *> $zioMethodToReplaceWith *> b""".stripMargin
     }
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
 }

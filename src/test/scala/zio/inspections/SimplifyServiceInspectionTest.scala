@@ -33,7 +33,7 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.service")))
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_access_get_with_alias(): Unit = {
@@ -45,7 +45,7 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.service")))
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_access_get_lambda(): Unit = {
@@ -57,7 +57,7 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.service")))
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_not_highlighted(): Unit = {
@@ -76,7 +76,7 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
 
     val text   = z(base(reference))
     val result = z(base("ZIO.service[UserRepo.Service]"))
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_generic_access_get_lambda(): Unit = {
@@ -87,7 +87,7 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
 
     val text   = z(base(reference))
     val result = z(base("ZIO.service[UserRepo.Service]"))
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_generic_not_highlighted(): Unit = {
@@ -105,7 +105,7 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
 
     val text   = z(base(reference))
     val result = z(base("ZIO.service[UserRepo.Service]"))
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
 }

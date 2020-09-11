@@ -12,13 +12,13 @@ class SimplifySleepInspectionTest extends ZSimplifyInspectionTest[SimplifySleepI
     z(s"""${START}ZIO.sleep(1.seconds) *> putStrLn("")$END""").assertHighlighted()
     val text   = z(s"""ZIO.sleep(1.seconds) *> putStrLn("")""")
     val result = z(s"""putStrLn("").delay(1.seconds)""")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_flatMap(): Unit = {
     z(s"""${START}ZIO.sleep(1.seconds).flatMap(_ => putStrLn(""))$END""").assertHighlighted()
     val text   = z(s"""ZIO.sleep(1.seconds) *> putStrLn("")""")
     val result = z(s"""putStrLn("").delay(1.seconds)""")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 }

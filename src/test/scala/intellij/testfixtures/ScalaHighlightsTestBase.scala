@@ -6,10 +6,13 @@ import com.intellij.codeInsight.daemon.impl.HighlightInfo
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.codeInspection.ex.ScopeToolState
 import com.intellij.codeInspection.{LocalInspectionEP, LocalInspectionTool}
-import com.intellij.openapi.editor.SelectionModel
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.util.TextRange
 import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.codeStyle.CodeStyleManager
+import com.intellij.testFramework.EditorTestUtil
 import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestAdapter
 import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestAdapter.{findCaretOffset, normalize}
 import org.jetbrains.plugins.scala.extensions.executeWriteActionCommand
@@ -37,9 +40,9 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
   }
 
   protected def checkTextHasError(text: String, allowAdditionalHighlights: Boolean = false): Unit = {
-    val actualRanges  = findRanges(text)
-    val expectedRange = selectedRange(getEditor.getSelectionModel)
-    checkTextHasError(Seq(expectedRange), actualRanges, allowAdditionalHighlights)
+    val expectedRanges = selectedRanges(text)
+    val actualRanges   = findRanges(text)
+    checkTextHasError(expectedRanges, actualRanges, allowAdditionalHighlights)
   }
 
   protected def checkTextHasError(
@@ -99,8 +102,17 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
 
   protected def createTestText(text: String): String = text
 
-  protected def selectedRange(model: SelectionModel): TextRange =
-    new TextRange(model.getSelectionStart, model.getSelectionEnd)
+  protected def selectedRanges(text: String): Seq[TextRange] = {
+    import JavaConverters._
+    val document = EditorFactory.getInstance.createDocument(text)
+    val state    = EditorTestUtil.extractCaretAndSelectionMarkers(document)
+    state.carets.asScala.toList.map(_.selection)
+  }
+
+  protected def reformatFile(file: PsiFile): Unit =
+    executeWriteActionCommand() {
+      CodeStyleManager.getInstance(getProject).reformat(file)
+    }(getProject)
 }
 
 object ScalaHighlightsTestBase {
@@ -119,16 +131,20 @@ abstract class ScalaQuickFixTestBase extends ScalaInspectionTestBase
 abstract class ScalaAnnotatorQuickFixTestBase extends ScalaHighlightsTestBase {
   import ScalaAnnotatorQuickFixTestBase.quickFixes
 
-  protected def testQuickFix(text: String, expected: String, hint: String): Unit = {
-    val maybeAction = findQuickFix(text, hint)
-    assertFalse(s"Quick fix not found: $hint", maybeAction.isEmpty)
+  protected def testQuickFixes(text: String, expected: String, hint: String): Unit = {
+    val actions = findAllQuickFixes(text, hint)
+    assertTrue(s"Quick fixes not found: $hint", actions.nonEmpty)
 
     executeWriteActionCommand() {
-      maybeAction.get.invoke(getProject, getEditor, getFile)
+      actions.foreach(_.invoke(getProject, getEditor, getFile))
     }(getProject)
 
-    val expectedFileText = createTestText(expected)
-    getFixture.checkResult(normalize(expectedFileText), /*stripTrailingSpaces = */ true)
+    val expectedFile = createLightFile(ScalaFileType.INSTANCE, normalize(createTestText(expected)))
+
+    reformatFile(getFile)
+    reformatFile(expectedFile)
+
+    getFixture.checkResult(expectedFile.getText, /*stripTrailingSpaces = */ true)
   }
 
   protected def checkNotFixable(text: String, hint: String): Unit = {
@@ -137,20 +153,23 @@ abstract class ScalaAnnotatorQuickFixTestBase extends ScalaHighlightsTestBase {
   }
 
   protected def checkIsNotAvailable(text: String, hint: String): Unit = {
-    val maybeAction = findQuickFix(text, hint)
-    assertTrue("Quick fix not found.", maybeAction.nonEmpty)
+    val actions = findAllQuickFixes(text, hint)
+    assertTrue("Quick fix not found.", actions.nonEmpty)
     assertTrue(
       "Quick fix is available",
-      maybeAction.forall(action => !action.isAvailable(getProject, getEditor, getFile))
+      actions.forall(action => !action.isAvailable(getProject, getEditor, getFile))
     )
   }
 
   private def findQuickFix(text: String, hint: String): Option[IntentionAction] =
+    findAllQuickFixes(text, hint).headOption
+
+  private def findAllQuickFixes(text: String, hint: String): Seq[IntentionAction] =
     configureByText(text).map(_._1) match {
       case Seq() =>
         fail("Errors not found.")
-        null
-      case seq => seq.flatMap(quickFixes).find(_.getText == hint)
+        Nil
+      case seq => seq.flatMap(quickFixes).filter(_.getText == hint)
     }
 }
 
