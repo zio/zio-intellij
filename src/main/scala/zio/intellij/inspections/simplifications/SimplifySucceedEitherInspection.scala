@@ -17,10 +17,11 @@ sealed abstract class EitherSimplificationType(extractor: TypeReference, zioMeth
       .withText(s"ZIO.$zioMethodName(${eitherArg.getText}")
       .highlightFrom(zioExpr)
 
-  private def getArg(eitherExpr: ScExpression): Option[ScExpression] = eitherExpr match {
-    case MethodRepr(_, _, _, Seq(arg)) => Some(arg)
-    case _                             => None
-  }
+  private def getArg(eitherExpr: ScExpression): Option[ScExpression] =
+    eitherExpr match {
+      case MethodRepr(_, _, _, Seq(arg)) => Some(arg)
+      case _                             => None
+    }
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {

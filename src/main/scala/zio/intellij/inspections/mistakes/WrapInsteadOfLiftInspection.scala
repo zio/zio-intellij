@@ -71,12 +71,13 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
 
   final class ExpressionExtractor(extractor: ReturnTypeReference) {
 
-    def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case `ZIO.apply`(extractor(f))       => Some(f)
-      case `ZIO.effect`(extractor(f))      => Some(f)
-      case `ZIO.effectTotal`(extractor(f)) => Some(f)
-      case _                               => None
-    }
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      expr match {
+        case `ZIO.apply`(extractor(f))       => Some(f)
+        case `ZIO.effect`(extractor(f))      => Some(f)
+        case `ZIO.effectTotal`(extractor(f)) => Some(f)
+        case _                               => None
+      }
   }
 }
 

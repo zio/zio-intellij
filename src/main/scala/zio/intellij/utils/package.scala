@@ -25,10 +25,9 @@ package object utils {
       }
 
       !success || used //want to return true if it was a failure
-    } else {
+    } else
       //need to look for references because file is not highlighted
       ReferencesSearch.search(element, element.getUseScope).findFirst() != null
-    }
 
   // CompositeOrdering is taken from https://stackoverflow.com/a/14696410
   final class CompositeOrdering[T](val ord1: Ordering[T], val ord2: Ordering[T]) extends Ordering[T] {
@@ -77,9 +76,10 @@ package object utils {
         case _ => None
       }
 
-  def extractTypeArguments(tpe: ScType): Option[Seq[ScType]] = tpe match {
-    case parameterizedType: ScParameterizedType => Some(parameterizedType.typeArguments)
-    case _                                      => None
-  }
+  def extractTypeArguments(tpe: ScType): Option[Seq[ScType]] =
+    tpe match {
+      case parameterizedType: ScParameterizedType => Some(parameterizedType.typeArguments)
+      case _                                      => None
+    }
 
 }

@@ -51,10 +51,8 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
       try checkTextHasError(s)
       catch {
         case e: AssertionError => thrownEx = e
-      } finally {
-        if (thrownEx != null) ()
-        else throw new AssertionError("An error from the highlighter was expected to be thrown, but wasn't.")
-      }
+      } finally if (thrownEx != null) ()
+      else throw new AssertionError("An error from the highlighter was expected to be thrown, but wasn't.")
     }
 
   }

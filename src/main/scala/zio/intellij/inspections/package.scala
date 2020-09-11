@@ -76,19 +76,20 @@ package object inspections {
           case _                                      => false
         }
 
-    def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case ref @ ScReferenceExpression(_) if matchesRefName(ref) =>
-        ref.smartQualifier match {
-          case Some(extractor()) => Some(expr)
-          case _                 => None
-        }
-      case MethodRepr(_, _, Some(ref), Seq(e)) if matchesRefName(ref) =>
-        ref match {
-          case extractor() => Some(e)
-          case _           => None
-        }
-      case _ => None
-    }
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      expr match {
+        case ref @ ScReferenceExpression(_) if matchesRefName(ref) =>
+          ref.smartQualifier match {
+            case Some(extractor()) => Some(expr)
+            case _                 => None
+          }
+        case MethodRepr(_, _, Some(ref), Seq(e)) if matchesRefName(ref) =>
+          ref match {
+            case extractor() => Some(e)
+            case _           => None
+          }
+        case _ => None
+      }
   }
 
   final class ZIOStaticMemberReference(refName: String)
@@ -118,10 +119,11 @@ package object inspections {
 
   class ReturnTypeReference(typeFQNs: Set[String]) {
 
-    def unapply(expr: ScExpression): Option[ScExpression] = expr.`type`() match {
-      case Right(t) if isOfClassFrom(t, typeFQNs.toArray) => Some(expr)
-      case _                                              => None
-    }
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      expr.`type`() match {
+        case Right(t) if isOfClassFrom(t, typeFQNs.toArray) => Some(expr)
+        case _                                              => None
+      }
   }
 
   val scalaFuture = new ReturnTypeReference(Set("scala.concurrent.Future"))
@@ -131,17 +133,19 @@ package object inspections {
 
   class TypeReference(typeFQNs: Set[String]) {
 
-    def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case MethodRepr(_, _, Some(ref), Seq(_)) =>
-        ref.resolve() match {
-          case m: ScMember if typeFQNs.contains(m.containingClass.qualifiedName) => Some(expr)
-          case _                                                                 => None
-        }
-      case MethodRepr(_, Some(ref @ ScReferenceExpression(_)), None, Seq(_)) if isOfClassFrom(ref, typeFQNs.toArray) =>
-        Some(expr)
-      case ref @ ScReferenceExpression(_) if isOfClassFrom(expr, typeFQNs.toArray) => Some(ref)
-      case _                                                                       => None
-    }
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      expr match {
+        case MethodRepr(_, _, Some(ref), Seq(_)) =>
+          ref.resolve() match {
+            case m: ScMember if typeFQNs.contains(m.containingClass.qualifiedName) => Some(expr)
+            case _                                                                 => None
+          }
+        case MethodRepr(_, Some(ref @ ScReferenceExpression(_)), None, Seq(_))
+            if isOfClassFrom(ref, typeFQNs.toArray) =>
+          Some(expr)
+        case ref @ ScReferenceExpression(_) if isOfClassFrom(expr, typeFQNs.toArray) => Some(ref)
+        case _                                                                       => None
+      }
   }
 
   val scalaLeft  = new TypeReference(Set("scala.util.Left"))
@@ -165,30 +169,32 @@ package object inspections {
 
   object unit {
 
-    def unapply(expr: ScExpression): Boolean = expr match {
-      case _: ScUnitExpr => true
-      case _             => false
-    }
+    def unapply(expr: ScExpression): Boolean =
+      expr match {
+        case _: ScUnitExpr => true
+        case _             => false
+      }
   }
 
   object zioRef {
 
-    def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] = expr match {
-      case ref @ ScReferenceExpression(_) =>
-        ref.resolve() match {
-          case _: ScReferencePattern | _: ScFunctionDefinition if fromZioLike(expr) => Some((ref, expr))
-          case _                                                                    => None
-        }
-      case MethodRepr(_, _, Some(ref), Seq(e)) =>
-        ref.resolve() match {
-          case _ if fromZioLike(expr) => Some((ref, e))
-          case _                      => None
-        }
-      // multiple argument lists
-      case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if fromZioLike(expr) =>
-        Some((ref, expr))
-      case _ => None
-    }
+    def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] =
+      expr match {
+        case ref @ ScReferenceExpression(_) =>
+          ref.resolve() match {
+            case _: ScReferencePattern | _: ScFunctionDefinition if fromZioLike(expr) => Some((ref, expr))
+            case _                                                                    => None
+          }
+        case MethodRepr(_, _, Some(ref), Seq(e)) =>
+          ref.resolve() match {
+            case _ if fromZioLike(expr) => Some((ref, e))
+            case _                      => None
+          }
+        // multiple argument lists
+        case ScMethodCall(ScMethodCall(ref @ ScReferenceExpression(_), Seq(_)), Seq(_)) if fromZioLike(expr) =>
+          Some((ref, expr))
+        case _ => None
+      }
   }
 
   val exitCodeSuccess = new ExitCode("success")
@@ -196,31 +202,34 @@ package object inspections {
 
   class ExitCode(refName: String) {
 
-    def unapply(expr: ScExpression): Boolean = expr match {
-      case ref @ ScReferenceExpression(_) if ref.refName == refName =>
-        ref.resolve() match {
-          case p: ScReferencePattern if p.containingClass.qualifiedName == "zio.ExitCode" => true
-          case _                                                                          => false
-        }
-      case _ => false
-    }
+    def unapply(expr: ScExpression): Boolean =
+      expr match {
+        case ref @ ScReferenceExpression(_) if ref.refName == refName =>
+          ref.resolve() match {
+            case p: ScReferencePattern if p.containingClass.qualifiedName == "zio.ExitCode" => true
+            case _                                                                          => false
+          }
+        case _ => false
+      }
   }
 
   object lambda {
 
-    def unapply(expr: ScExpression): Option[(Seq[ScParameter], Option[ScExpression])] = expr match {
-      case ScFunctionExpr(params @ Seq(_), res @ Some(_)) =>
-        Some(params, res.map(stripped))
-      case _ => None
-    }
+    def unapply(expr: ScExpression): Option[(Seq[ScParameter], Option[ScExpression])] =
+      expr match {
+        case ScFunctionExpr(params @ Seq(_), res @ Some(_)) =>
+          Some(params, res.map(stripped))
+        case _ => None
+      }
   }
 
   object `_ => x` {
 
-    def unapply(expr: ScExpression): Option[ScExpression] = expr match {
-      case lambda(Seq(x), res) if underscore(x) => res
-      case _                                    => None
-    }
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      expr match {
+        case lambda(Seq(x), res) if underscore(x) => res
+        case _                                    => None
+      }
 
     // todo there must be a better way!
     def underscore(x: ScParameter): Boolean =
@@ -231,18 +240,20 @@ package object inspections {
   // I want to be able somehow select the matched extractor dynamically
   object `_ => ()` {
 
-    def unapply(expr: ScExpression): Boolean = expr match {
-      case lambda(_, Some(unit())) => true
-      case _                       => false
-    }
+    def unapply(expr: ScExpression): Boolean =
+      expr match {
+        case lambda(_, Some(unit())) => true
+        case _                       => false
+      }
   }
 
   object `_ => ZIO.unit` {
 
-    def unapply(expr: ScExpression): Boolean = expr match {
-      case lambda(_, Some(`ZIO.unit`(_))) => true
-      case _                              => false
-    }
+    def unapply(expr: ScExpression): Boolean =
+      expr match {
+        case lambda(_, Some(`ZIO.unit`(_))) => true
+        case _                              => false
+      }
   }
 
   /**
@@ -251,29 +262,31 @@ package object inspections {
    */
   class Apply(typeQNs: Set[String]) {
 
-    def unapplySeq(expr: ScExpression): Option[Seq[ScExpression]] = expr match {
-      case ScMethodCall(ref @ ScReferenceExpression(refExpr), args) if ref.getCanonicalText() == "apply" =>
-        for {
-          containingClass <- refExpr match {
-                              case rp: ScReferencePattern   => Option(rp.containingClass)
-                              case fd: ScFunctionDefinition => Option(fd.containingClass)
-                              case _                        => None
-                            }
-          if typeQNs.contains(containingClass.qualifiedName)
-        } yield args
-      case _ => None
-    }
+    def unapplySeq(expr: ScExpression): Option[Seq[ScExpression]] =
+      expr match {
+        case ScMethodCall(ref @ ScReferenceExpression(refExpr), args) if ref.getCanonicalText() == "apply" =>
+          for {
+            containingClass <- refExpr match {
+                                 case rp: ScReferencePattern   => Option(rp.containingClass)
+                                 case fd: ScFunctionDefinition => Option(fd.containingClass)
+                                 case _                        => None
+                               }
+            if typeQNs.contains(containingClass.qualifiedName)
+          } yield args
+        case _ => None
+      }
   }
 
   object IsDeprecated {
 
-    def unapply(expr: ScExpression): Option[PsiAnnotation] = expr match {
-      case ScMethodCall(ref: ScReferenceExpression, _) =>
-        ref.resolve() match {
-          case fn: ScFunctionDefinition if fn.isDeprecated => Some(fn.findAnnotation("scala.deprecated"))
-          case _                                           => None
-        }
-      case _ => None
-    }
+    def unapply(expr: ScExpression): Option[PsiAnnotation] =
+      expr match {
+        case ScMethodCall(ref: ScReferenceExpression, _) =>
+          ref.resolve() match {
+            case fn: ScFunctionDefinition if fn.isDeprecated => Some(fn.findAnnotation("scala.deprecated"))
+            case _                                           => None
+          }
+        case _ => None
+      }
   }
 }

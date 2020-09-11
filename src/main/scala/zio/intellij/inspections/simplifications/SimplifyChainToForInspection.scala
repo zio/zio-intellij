@@ -20,14 +20,14 @@ object ChainToForSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     (expr, expr.parent) match {
       case (
-          x `.*>` y,
-          Some(
-            _: ScTemplateBody |       // class/trait/etc body
-            _: ScBlock |              // { ... }
-            _: ScPatternDefinition |  // val foo = ...
-            _: ScFunctionDefinition | // def foo = ...
-            _: ScParenthesisedExpr    // (...)
-          )
+            x `.*>` y,
+            Some(
+              _: ScTemplateBody |       // class/trait/etc body
+              _: ScBlock |              // { ... }
+              _: ScPatternDefinition |  // val foo = ...
+              _: ScFunctionDefinition | // def foo = ...
+              _: ScParenthesisedExpr    // (...)
+            )
           ) =>
         val exprs = collectFromChain(x, y :: Nil)
         val text =
@@ -44,10 +44,11 @@ object ChainToForSimplificationType extends SimplificationType {
     }
 
   @annotation.tailrec
-  def collectFromChain(expr: ScExpression, exprs: List[ScExpression]): List[ScExpression] = expr match {
-    case x `.*>` y => collectFromChain(x, y :: exprs)
-    case x         => x :: exprs
-  }
+  def collectFromChain(expr: ScExpression, exprs: List[ScExpression]): List[ScExpression] =
+    expr match {
+      case x `.*>` y => collectFromChain(x, y :: exprs)
+      case x         => x :: exprs
+    }
 
 }
 
@@ -58,7 +59,7 @@ object ForToChainSimplificationType extends SimplificationType {
     expr match {
       case forExpr: ScFor if forExpr.`type`().exists(fromZioLike) =>
         forExpr.enumerators.flatMap { enumerators =>
-          if (enumerators.guards.isEmpty && enumerators.forBindings.isEmpty && enumerators.generators.nonEmpty) {
+          if (enumerators.guards.isEmpty && enumerators.forBindings.isEmpty && enumerators.generators.nonEmpty)
             forExpr.body match {
               case Some(body)
                   if body.textMatches(enumerators.generators.last.pattern) && enumerators.generators.init.forall(
@@ -68,14 +69,15 @@ object ForToChainSimplificationType extends SimplificationType {
                 Some(replace(forExpr).withText(expressions.mkString(" *> ")).highlightFrom(forExpr))
               case _ => None
             }
-          } else None
+          else None
         }
       case _ => None
     }
 
-  private def patternIsWildcardOrNotUsed(forExpr: ScFor)(gen: ScGenerator): Boolean = gen.pattern match {
-    case _: ScWildcardPattern => true
-    case p: ScBindingPattern  => ReferencesSearch.search(p, new LocalSearchScope(forExpr)).findFirst() == null
-    case _                    => false
-  }
+  private def patternIsWildcardOrNotUsed(forExpr: ScFor)(gen: ScGenerator): Boolean =
+    gen.pattern match {
+      case _: ScWildcardPattern => true
+      case p: ScBindingPattern  => ReferencesSearch.search(p, new LocalSearchScope(forExpr)).findFirst() == null
+      case _                    => false
+    }
 }

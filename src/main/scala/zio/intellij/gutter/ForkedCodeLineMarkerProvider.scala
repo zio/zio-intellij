@@ -12,14 +12,16 @@ final class ForkedCodeLineMarkerProvider extends LineMarkerProvider {
   import zio.intellij.gutter.ForkedCodeLineMarkerProvider.createLineMarkerInfo
 
   override def getLineMarkerInfo(element: PsiElement): LineMarkerInfo[_ <: PsiElement] =
-    if (!element.isValid ||
-        element.getNode.getElementType != ScalaTokenTypes.tIDENTIFIER ||
-        // fixme: It is recommended to use leaf elements, such as identifiers.
-        //        But in 'ZIO.forkAll' ZIO considered an identifier as well.
-        //        Thus we need to keep only one marker somehow (for now: by checking 'fork' prefix).
-        !element.getText.startsWith("fork")) {
+    if (
+      !element.isValid ||
+      element.getNode.getElementType != ScalaTokenTypes.tIDENTIFIER ||
+      // fixme: It is recommended to use leaf elements, such as identifiers.
+      //        But in 'ZIO.forkAll' ZIO considered an identifier as well.
+      //        Thus we need to keep only one marker somehow (for now: by checking 'fork' prefix).
+      !element.getText.startsWith("fork")
+    )
       null
-    } else {
+    else
       element.getParent match {
         case _ `.fork` () | _ `.forkDaemon` () | _ `.forkManaged` () => createLineMarkerInfo(element)
         case ref: ScReferenceExpression =>
@@ -30,7 +32,6 @@ final class ForkedCodeLineMarkerProvider extends LineMarkerProvider {
           }
         case _ => null
       }
-    }
 }
 
 object ForkedCodeLineMarkerProvider {

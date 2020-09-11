@@ -27,26 +27,28 @@ package object testsupport {
 
   object testName {
 
-    def unapply(expr: ScReferenceExpression): Option[String] = expr.parent match {
-      case Some(m: ScMethodCall) =>
-        m.argumentExpressions.headOption.collect {
-          case lit: ScLiteral => lit.getValue().toString
-        }
-      case _ => None
-    }
+    def unapply(expr: ScReferenceExpression): Option[String] =
+      expr.parent match {
+        case Some(m: ScMethodCall) =>
+          m.argumentExpressions.headOption.collect {
+            case lit: ScLiteral => lit.getValue().toString
+          }
+        case _ => None
+      }
   }
 
   object IsZioTestElement {
 
-    def unapply(element: PsiElement): Option[(ScTypeDefinition, Option[ScReferenceExpression])] = element match {
-      case leaf: LeafPsiElement if leaf.getElementType == ScalaTokenTypes.tIDENTIFIER =>
-        leaf.parent match {
-          case Some(td: ScTypeDefinition)       => infoForClass(td)
-          case Some(ref: ScReferenceExpression) => infoForExpr(ref)
-          case _                                => None
-        }
-      case _ => None
-    }
+    def unapply(element: PsiElement): Option[(ScTypeDefinition, Option[ScReferenceExpression])] =
+      element match {
+        case leaf: LeafPsiElement if leaf.getElementType == ScalaTokenTypes.tIDENTIFIER =>
+          leaf.parent match {
+            case Some(td: ScTypeDefinition)       => infoForClass(td)
+            case Some(ref: ScReferenceExpression) => infoForExpr(ref)
+            case _                                => None
+          }
+        case _ => None
+      }
 
     private def infoForClass(td: ScTypeDefinition) =
       detectZTestFramework(td).map(_ => (td, None))

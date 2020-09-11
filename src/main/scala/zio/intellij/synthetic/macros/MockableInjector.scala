@@ -60,21 +60,20 @@ object MockableInjector {
     }
 
   def makeTags(typeDefinition: ScTypeDefinition): List[String] =
-    getMembers(typeDefinition)
-      .collect {
-        case (name, info :: Nil) =>
-          makeTag(name, info)
-        case (name, infos) =>
-          val tagName = name.capitalize
-          val overloadedTags =
-            sortOverloads(infos).zipWithIndex.map {
-              case (info, idx) =>
-                makeTag(s"_$idx", info)
-            }
-          s"""object $tagName {
-             |  ${overloadedTags.mkString("\n  ")}
-             |}""".stripMargin
-      }(collection.breakOut)
+    getMembers(typeDefinition).collect {
+      case (name, info :: Nil) =>
+        makeTag(name, info)
+      case (name, infos) =>
+        val tagName = name.capitalize
+        val overloadedTags =
+          sortOverloads(infos).zipWithIndex.map {
+            case (info, idx) =>
+              makeTag(s"_$idx", info)
+          }
+        s"""object $tagName {
+           |  ${overloadedTags.mkString("\n  ")}
+           |}""".stripMargin
+    }(collection.breakOut)
 
   sealed trait Capability extends Product with Serializable
 
@@ -94,12 +93,13 @@ object MockableInjector {
     a: ScType
   ) {
 
-    private def isPoly(tpe: ScType): Boolean = tpe match {
-      case parameterizedType: ScParameterizedType =>
-        typeParams.exists(tp => parameterizedType.typeArguments.exists(_.canonicalText == tp.name))
-      case _ =>
-        typeParams.exists(_.name == tpe.canonicalText)
-    }
+    private def isPoly(tpe: ScType): Boolean =
+      tpe match {
+        case parameterizedType: ScParameterizedType =>
+          typeParams.exists(tp => parameterizedType.typeArguments.exists(_.canonicalText == tp.name))
+        case _ =>
+          typeParams.exists(_.name == tpe.canonicalText)
+      }
 
     val polyI: Boolean = isPoly(i)
     val polyE: Boolean = isPoly(e)
@@ -119,17 +119,17 @@ object MockableInjector {
         for {
           tpe      <- optionalType
           resolved <- resolveAliases(tpe)
-          fullName = resolved.extractClass.fold(resolved.canonicalText)(_.qualifiedName)
+          fullName  = resolved.extractClass.fold(resolved.canonicalText)(_.qualifiedName)
           input    <- optionalInput
           (capability, eOpt, aOpt) = (extractTypeArguments(resolved), fullName) match {
-            case (Some(Seq(r, e, a)), "zio.ZIO") =>
-              (Capability.Effect(r, e, a), Some(e), Some(a))
-            case (Some(Seq(r, e, a)), "zio.stream.ZStream") =>
-              (Capability.Stream(r, e, a), Some(e), Some(a))
-            case _ =>
-              val eOpt = createType(text = "scala.Throwable", context = ts.namedElement)
-              (Capability.Method(tpe), eOpt, Some(tpe))
-          }
+                                       case (Some(Seq(r, e, a)), "zio.ZIO") =>
+                                         (Capability.Effect(r, e, a), Some(e), Some(a))
+                                       case (Some(Seq(r, e, a)), "zio.stream.ZStream") =>
+                                         (Capability.Stream(r, e, a), Some(e), Some(a))
+                                       case _ =>
+                                         val eOpt = createType(text = "scala.Throwable", context = ts.namedElement)
+                                         (Capability.Method(tpe), eOpt, Some(tpe))
+                                     }
           e <- eOpt
           a <- aOpt
         } yield new MemberInfo(ts, capability, params, typeParams, input, e, a)
@@ -159,11 +159,10 @@ object MockableInjector {
   }
 
   private def getMembers(typeDefinition: ScTypeDefinition): Map[String, List[MemberInfo]] =
-    (typeDefinition.allVals ++ typeDefinition.allMethods).toList
-      .filter {
-        case FunctionDeclaration(_) | Field(_) => true
-        case _                                 => false
-      }
+    (typeDefinition.allVals ++ typeDefinition.allMethods).toList.filter {
+      case FunctionDeclaration(_) | Field(_) => true
+      case _                                 => false
+    }
       .flatMap(MemberInfo.apply(_))
       .groupBy(_.signature.name)
 
@@ -172,10 +171,10 @@ object MockableInjector {
     infos.sortBy(_.signature)(Ordering[Seq[String]].on {
       case FunctionDeclaration(method) =>
         for {
-          clause       <- method.paramClauses.clauses
-          param        <- clause.parameters
-          paramType    <- param.paramType
-          tpe          <- paramType.typeElement.`type`().toOption
+          clause      <- method.paramClauses.clauses
+          param       <- clause.parameters
+          paramType   <- param.paramType
+          tpe         <- paramType.typeElement.`type`().toOption
           presentation = defaultPresentationStringForScalaType(tpe)
         } yield presentation
       case _ => Seq.empty

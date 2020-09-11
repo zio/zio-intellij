@@ -20,8 +20,8 @@ class NothingInContravariantPositionInspection extends AbstractRegisteredInspect
   )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
     (element.parent, element) match {
       case (
-          Some(_: ScTypeAliasDefinition | _: ScFunctionDefinition | _: ScPatternDefinition),
-          p @ ScParameterizedTypeElement(_, params)
+            Some(_: ScTypeAliasDefinition | _: ScFunctionDefinition | _: ScPatternDefinition),
+            p @ ScParameterizedTypeElement(_, params)
           ) =>
         p.`type`().toOption match {
           case Some(tpe) if isOfClassFrom(tpe, zioLikePackages) =>

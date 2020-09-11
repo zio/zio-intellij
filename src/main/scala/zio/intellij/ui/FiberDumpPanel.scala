@@ -93,7 +93,7 @@ class FiberDumpPanel(
       if (text.isEmpty) {
         fiberDump.foreach(model.addElement)
         0
-      } else {
+      } else
         fiberDump.zipWithIndex.foldLeft(0) {
           case (acc, (dump, dumpIdx)) =>
             val renderedFiberInfo = FiberDumpRenderer.renderFiberInfo(dump)
@@ -102,11 +102,9 @@ class FiberDumpPanel(
               if (selection == dump) dumpIdx else acc
             } else acc
         }
-      }
 
-    if (!model.isEmpty) {
+    if (!model.isEmpty)
       fibers.setSelectedIndex(selectedIndex)
-    }
     fibers.revalidate()
     fibers.repaint()
   }
@@ -167,17 +165,19 @@ class FiberDumpPanel(
         case _         => BY_STATUS
       }
 
-    private def getIcon: Icon = ORDERING match {
-      case BY_STATUS => AllIcons.ObjectBrowser.SortByType
-      case BY_ID     => icons.SortByIdIcon
-      case _         => AllIcons.ObjectBrowser.Sorted
-    }
+    private def getIcon: Icon =
+      ORDERING match {
+        case BY_STATUS => AllIcons.ObjectBrowser.SortByType
+        case BY_ID     => icons.SortByIdIcon
+        case _         => AllIcons.ObjectBrowser.Sorted
+      }
 
-    private def getLabel: String = ORDERING match {
-      case BY_STATUS => FiberDumpPanel.SORT_BY_STATUS_LABEL
-      case BY_ID     => FiberDumpPanel.SORT_BY_ID_LABEL
-      case _         => FiberDumpPanel.SORT_BY_NAME_LABEL
-    }
+    private def getLabel: String =
+      ORDERING match {
+        case BY_STATUS => FiberDumpPanel.SORT_BY_STATUS_LABEL
+        case BY_ID     => FiberDumpPanel.SORT_BY_ID_LABEL
+        case _         => FiberDumpPanel.SORT_BY_NAME_LABEL
+      }
   }
 
 }
@@ -202,12 +202,13 @@ object FiberDumpPanel {
   val SORT_BY_NAME_LABEL   = "Sort fibers by name"
   val SORT_BY_ID_LABEL     = "Sort fibers by id"
 
-  def getFiberStatusIcon(fiber: FiberInfo): Icon = fiber.status match {
-    case _: FiberStatus.Running   => AllIcons.Actions.Execute
-    case _: FiberStatus.Suspended => AllIcons.Actions.Pause
-    case _: FiberStatus.Finishing => AllIcons.Actions.Exit
-    case FiberStatus.Done         => AllIcons.Actions.Cancel
-  }
+  def getFiberStatusIcon(fiber: FiberInfo): Icon =
+    fiber.status match {
+      case _: FiberStatus.Running   => AllIcons.Actions.Execute
+      case _: FiberStatus.Suspended => AllIcons.Actions.Pause
+      case _: FiberStatus.Finishing => AllIcons.Actions.Exit
+      case FiberStatus.Done         => AllIcons.Actions.Cancel
+    }
 
   def printTrace(consoleView: ConsoleView, fiberInfo: Option[FiberInfo]): Unit = {
     ApplicationManager.getApplication.assertIsDispatchThread()

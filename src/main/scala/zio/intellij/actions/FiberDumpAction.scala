@@ -44,7 +44,7 @@ final class FiberDumpAction extends DumbAwareAction with AnAction.TransparentUpd
         library <- module.libraries
         url     <- library.getUrls(OrderRootType.CLASSES)
         if url.contains("/dev/zio/zio_")
-        trimmedUrl = utils.trimAfterSuffix(url, ".jar")
+        trimmedUrl  = utils.trimAfterSuffix(url, ".jar")
         versionStr <- LibraryExt.runtimeVersion(trimmedUrl)
         version    <- Version.parse(versionStr)
       } yield version).headOption
@@ -56,13 +56,12 @@ final class FiberDumpAction extends DumbAwareAction with AnAction.TransparentUpd
           .getOrElse(ScalaLanguageLevel.getDefault)
 
       zioVersion.fold(notifyAboutAbsentZioDependency(project)) { implicit version =>
-        if (version >= Version.ZIO.RC21) {
+        if (version >= Version.ZIO.RC21)
           notifyAboutNotImplementedFunctionalityForRecentZIOVersions(project)
-        } else if (version < Version.ZIO.RC18) {
+        else if (version < Version.ZIO.RC18)
           notifyAboutNotImplementedFunctionalityForOldZIOVersions(project)
-        } else {
+        else
           invokeDumpAllFibers(project)
-        }
       }
     }
   }
@@ -70,9 +69,9 @@ final class FiberDumpAction extends DumbAwareAction with AnAction.TransparentUpd
   override def update(event: AnActionEvent): Unit = {
     val presentation = event.getPresentation
     val project      = event.getProject
-    if (project == null) {
+    if (project == null)
       presentation.setEnabled(false)
-    } else {
+    else {
       val debuggerSession = DebuggerManagerEx.getInstanceEx(project).getContext.getDebuggerSession
       presentation.setEnabled(debuggerSession != null && debuggerSession.isAttached)
     }
@@ -128,9 +127,8 @@ final class FiberDumpAction extends DumbAwareAction with AnAction.TransparentUpd
                 ApplicationManager.getApplication.invokeLater(
                   () => {
                     val xSession = session.getXDebugSession
-                    if (xSession != null) {
+                    if (xSession != null)
                       FiberDumpAction.addFiberDump(project, dump, xSession.getUI, session.getSearchScope)
-                    }
                   },
                   ModalityState.NON_MODAL
                 )

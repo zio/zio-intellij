@@ -65,14 +65,13 @@ object SimplifyTapInspection {
 
   private def replaceWithUnderscore(e: ScFunctionExpr): ScFunctionExpr = {
     val params = e.parameters.filterNot(p => p.isWildcard || p.isImplicitParameter)
-    params
-      .collectFirst {
-        case named: ScNamedElement if !isElementUsed(named, false) =>
-          val wildcard = createWildcardNode(e.getProject).getPsi
-          named.nameId.replace(wildcard)
-          e
-        case _ => e
-      }
+    params.collectFirst {
+      case named: ScNamedElement if !isElementUsed(named, false) =>
+        val wildcard = createWildcardNode(e.getProject).getPsi
+        named.nameId.replace(wildcard)
+        e
+      case _ => e
+    }
       .getOrElse(e)
   }
 }

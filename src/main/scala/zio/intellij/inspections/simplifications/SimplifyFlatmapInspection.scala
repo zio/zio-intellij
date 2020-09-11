@@ -25,10 +25,11 @@ object ZipRightOperatorSimplificationType extends SimplificationType {
 
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
 
-    def replacement(qual: ScExpression, x: ScExpression) = x match {
-      case _: ScInfixExpr => replace(expr).withText(s"${qual.getText} *> (${x.getText})")
-      case _              => replace(expr).withText(s"${qual.getText} *> ${x.getText}")
-    }
+    def replacement(qual: ScExpression, x: ScExpression) =
+      x match {
+        case _: ScInfixExpr => replace(expr).withText(s"${qual.getText} *> (${x.getText})")
+        case _              => replace(expr).withText(s"${qual.getText} *> ${x.getText}")
+      }
 
     expr match {
       case qual `.flatMap` `_ => x`(x) => Some(replacement(qual, x))

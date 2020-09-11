@@ -40,30 +40,26 @@ abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestAdapter {
   }
 
   protected def method(name: String, obj: ScObject = extendedObject): ScFunctionDefinition =
-    obj.allMethods
-      .collectFirst {
-        case PhysicalMethodSignature(fun: ScFunctionDefinition, _) if fun.name == name => fun
-      }
-      .getOrElse {
-        fail(s"Method declaration $name was not found inside object ${obj.name}")
-          .asInstanceOf[ScFunctionDefinition]
-      }
+    obj.allMethods.collectFirst {
+      case PhysicalMethodSignature(fun: ScFunctionDefinition, _) if fun.name == name => fun
+    }.getOrElse {
+      fail(s"Method declaration $name was not found inside object ${obj.name}")
+        .asInstanceOf[ScFunctionDefinition]
+    }
 
   protected def field(name: String, obj: ScObject = extendedObject): ScPatternDefinition =
-    obj.membersWithSynthetic
-      .collectFirst {
-        case pd: ScPatternDefinition if pd.isSimple && pd.bindings.head.name == name => pd
-      }
+    obj.membersWithSynthetic.collectFirst {
+      case pd: ScPatternDefinition if pd.isSimple && pd.bindings.head.name == name => pd
+    }
       .getOrElse(
         fail(s"Field $name was not found inside object ${obj.name}")
           .asInstanceOf[ScPatternDefinition]
       )
 
   protected def innerObject(name: String, obj: ScObject = extendedObject): ScObject =
-    obj.membersWithSynthetic
-      .collectFirst {
-        case o: ScObject if o.name == name => o
-      }
+    obj.membersWithSynthetic.collectFirst {
+      case o: ScObject if o.name == name => o
+    }
       .getOrElse(
         fail(s"Inner object $name was not found inside object ${obj.name}")
           .asInstanceOf[ScObject]

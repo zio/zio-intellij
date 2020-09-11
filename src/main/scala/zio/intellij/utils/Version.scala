@@ -6,7 +6,7 @@ import scala.util.matching.Regex
 
 sealed abstract case class Version private (major: Major, minor: Minor, patch: Patch, rcVersion: Option[RCVersion])
     extends Ordered[Version] {
-  def === (that: Version): Boolean = Version.versionOrdering.equiv(this, that)
+  def ===(that: Version): Boolean = Version.versionOrdering.equiv(this, that)
 
   override def compare(that: Version): Int =
     Version.versionOrdering.compare(this, that)
@@ -59,18 +59,19 @@ object Version {
 
   val versionRegex: Regex = """(\d+).(\d+).(\d+)(?:(?:-(?:(?:RC)|(?:rc))(\d+))(?:-(\d+))?)?""".r
 
-  def parse(str: String): Option[Version] = str match {
-    case versionRegex(majorStr, minorStr, patchStr, rcMajorStr, rcMinorStr) =>
-      val major        = Major(majorStr.toInt)
-      val minor        = Minor(minorStr.toInt)
-      val patch        = Patch(patchStr.toInt)
-      val rcMajorOpt   = Option(rcMajorStr).map(rcMajorStr => RCMajor(rcMajorStr.toInt))
-      val rcMinorOpt   = Option(rcMinorStr).map(rcMinorStr => RCMinor(rcMinorStr.toInt))
-      val rcVersionOpt = rcMajorOpt.map(RCVersion(_, rcMinorOpt))
+  def parse(str: String): Option[Version] =
+    str match {
+      case versionRegex(majorStr, minorStr, patchStr, rcMajorStr, rcMinorStr) =>
+        val major        = Major(majorStr.toInt)
+        val minor        = Minor(minorStr.toInt)
+        val patch        = Patch(patchStr.toInt)
+        val rcMajorOpt   = Option(rcMajorStr).map(rcMajorStr => RCMajor(rcMajorStr.toInt))
+        val rcMinorOpt   = Option(rcMinorStr).map(rcMinorStr => RCMinor(rcMinorStr.toInt))
+        val rcVersionOpt = rcMajorOpt.map(RCVersion(_, rcMinorOpt))
 
-      Some(new Version(major, minor, patch, rcVersionOpt) {})
-    case _ => None
-  }
+        Some(new Version(major, minor, patch, rcVersionOpt) {})
+      case _ => None
+    }
 
   def parseUnsafe(str: String): Version =
     parse(str).getOrElse(throw new IllegalArgumentException(s"Could not parse version: $str"))

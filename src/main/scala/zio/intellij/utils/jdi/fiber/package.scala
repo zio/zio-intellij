@@ -12,72 +12,79 @@ package object fiber {
 
   def convertFiberInfoWithChildren(
     value: Value
-  )(implicit zioVersion: Version, languageLevel: ScalaLanguageLevel): Option[RawFiberInfo] = value match {
-    case dump: ObjectReference if dump.`type`().name() == DumpRef.DumpName =>
-      for {
-        fiberId   <- convertFiberId(getFieldValue(dump, DumpRef.FiberIdField))
-        fiberName = convertOption(getFieldValue(dump, DumpRef.FiberNameField))(convertStringValue)
-        status    <- convertFiberStatus(getFieldValue(dump, DumpRef.StatusField))
-        if status != FiberStatus.Done
-        // in versions < rc19 there are no children and trace is not optional
-        (children, trace) = if (zioVersion < Version.ZIO.RC19) {
-          (Nil, convertZTrace(fiberId)(getFieldValue(dump, DumpRef.TraceField)))
-        } else {
-          val children = convertScalaSeq(getFieldValue(dump, DumpRef.ChildrenField))
-          val trace    = convertOption(getFieldValue(dump, DumpRef.TraceField))(convertZTrace(fiberId))
-          (children, trace)
+  )(implicit zioVersion: Version, languageLevel: ScalaLanguageLevel): Option[RawFiberInfo] =
+    value match {
+      case dump: ObjectReference if dump.`type`().name() == DumpRef.DumpName =>
+        for {
+          fiberId  <- convertFiberId(getFieldValue(dump, DumpRef.FiberIdField))
+          fiberName = convertOption(getFieldValue(dump, DumpRef.FiberNameField))(convertStringValue)
+          status   <- convertFiberStatus(getFieldValue(dump, DumpRef.StatusField))
+          if status != FiberStatus.Done
+          // in versions < rc19 there are no children and trace is not optional
+          (children, trace) = if (zioVersion < Version.ZIO.RC19)
+                                (Nil, convertZTrace(fiberId)(getFieldValue(dump, DumpRef.TraceField)))
+                              else {
+                                val children = convertScalaSeq(getFieldValue(dump, DumpRef.ChildrenField))
+                                val trace =
+                                  convertOption(getFieldValue(dump, DumpRef.TraceField))(convertZTrace(fiberId))
+                                (children, trace)
+                              }
+        } yield RawFiberInfo(FiberInfo(fiberId, fiberName, status, trace), children)
+      case _ => None
+    }
+
+  def convertFiberId(value: Value): Option[FiberId] =
+    value match {
+      case fiberId: ObjectReference if fiberId.`type`().name() == FiberIdRef.FiberIdName =>
+        for {
+          startTimeMillis <- convertLongValue(getFieldValue(fiberId, FiberIdRef.StartTimeMillisField))
+          seqNumber       <- convertLongValue(getFieldValue(fiberId, FiberIdRef.SeqNumberField))
+        } yield FiberId(startTimeMillis = startTimeMillis, seqNumber = seqNumber)
+      case _ => None
+    }
+
+  def convertFiberStatus(value: Value)(implicit languageLevel: ScalaLanguageLevel): Option[FiberStatus] =
+    value match {
+      case status: ObjectReference =>
+        status.`type`().name() match {
+          case FiberStatus.DoneName => Some(FiberStatus.Done)
+          case FiberStatus.RunningName =>
+            val interrupting = convertBooleanValue(getFieldValue(status, FiberStatusRef.RunningRef.InterruptingField))
+            interrupting.map(FiberStatus.Running)
+          case FiberStatus.FinishingName =>
+            val interrupting = convertBooleanValue(getFieldValue(status, FiberStatusRef.FinishingRef.InterruptingField))
+            interrupting.map(FiberStatus.Finishing)
+          case FiberStatus.SuspendedName =>
+            for {
+              interruptible <- convertBooleanValue(
+                                 getFieldValue(status, FiberStatusRef.SuspendedRef.InterruptibleField)
+                               )
+              epoch <- convertLongValue(getFieldValue(status, FiberStatusRef.SuspendedRef.EpochField))
+              blockingOn = convertScalaSeq(getFieldValue(status, FiberStatusRef.SuspendedRef.BlockingOnField))
+                             .flatMap(convertFiberId)
+              asyncTrace = convertOption(getFieldValue(status, FiberStatusRef.SuspendedRef.AsyncTraceField))(
+                             convertZTraceElement
+                           )
+            } yield FiberStatus.Suspended(interruptible, epoch, blockingOn, asyncTrace)
+          case _ => None
         }
-      } yield RawFiberInfo(FiberInfo(fiberId, fiberName, status, trace), children)
-    case _ => None
-  }
+      case _ => None
+    }
 
-  def convertFiberId(value: Value): Option[FiberId] = value match {
-    case fiberId: ObjectReference if fiberId.`type`().name() == FiberIdRef.FiberIdName =>
-      for {
-        startTimeMillis <- convertLongValue(getFieldValue(fiberId, FiberIdRef.StartTimeMillisField))
-        seqNumber       <- convertLongValue(getFieldValue(fiberId, FiberIdRef.SeqNumberField))
-      } yield FiberId(startTimeMillis = startTimeMillis, seqNumber = seqNumber)
-    case _ => None
-  }
-
-  def convertFiberStatus(value: Value)(implicit languageLevel: ScalaLanguageLevel): Option[FiberStatus] = value match {
-    case status: ObjectReference =>
-      status.`type`().name() match {
-        case FiberStatus.DoneName => Some(FiberStatus.Done)
-        case FiberStatus.RunningName =>
-          val interrupting = convertBooleanValue(getFieldValue(status, FiberStatusRef.RunningRef.InterruptingField))
-          interrupting.map(FiberStatus.Running)
-        case FiberStatus.FinishingName =>
-          val interrupting = convertBooleanValue(getFieldValue(status, FiberStatusRef.FinishingRef.InterruptingField))
-          interrupting.map(FiberStatus.Finishing)
-        case FiberStatus.SuspendedName =>
-          for {
-            interruptible <- convertBooleanValue(getFieldValue(status, FiberStatusRef.SuspendedRef.InterruptibleField))
-            epoch         <- convertLongValue(getFieldValue(status, FiberStatusRef.SuspendedRef.EpochField))
-            blockingOn = convertScalaSeq(getFieldValue(status, FiberStatusRef.SuspendedRef.BlockingOnField))
-              .flatMap(convertFiberId)
-            asyncTrace = convertOption(getFieldValue(status, FiberStatusRef.SuspendedRef.AsyncTraceField))(
-              convertZTraceElement
-            )
-          } yield FiberStatus.Suspended(interruptible, epoch, blockingOn, asyncTrace)
-        case _ => None
-      }
-    case _ => None
-  }
-
-  def convertZTraceElement(value: Value): Option[ZTraceElement] = value match {
-    case srcLoc: ObjectReference if srcLoc.`type`().name() == ZTraceElementRef.SourceLocationName =>
-      for {
-        file   <- convertStringValue(getFieldValue(srcLoc, ZTraceElementRef.SourceLocationRef.FileField))
-        clazz  <- convertStringValue(getFieldValue(srcLoc, ZTraceElementRef.SourceLocationRef.ClazzField))
-        method <- convertStringValue(getFieldValue(srcLoc, ZTraceElementRef.SourceLocationRef.MethodField))
-        line   <- convertIntegerValue(getFieldValue(srcLoc, ZTraceElementRef.SourceLocationRef.LineField))
-      } yield SourceLocation(file, clazz, method, line)
-    case noLoc: ObjectReference if noLoc.`type`().name() == ZTraceElementRef.NoLocationName =>
-      val error = convertStringValue(getFieldValue(noLoc, ZTraceElementRef.NoLocationRef.ErrorField))
-      error.map(NoLocation)
-    case _ => None
-  }
+  def convertZTraceElement(value: Value): Option[ZTraceElement] =
+    value match {
+      case srcLoc: ObjectReference if srcLoc.`type`().name() == ZTraceElementRef.SourceLocationName =>
+        for {
+          file   <- convertStringValue(getFieldValue(srcLoc, ZTraceElementRef.SourceLocationRef.FileField))
+          clazz  <- convertStringValue(getFieldValue(srcLoc, ZTraceElementRef.SourceLocationRef.ClazzField))
+          method <- convertStringValue(getFieldValue(srcLoc, ZTraceElementRef.SourceLocationRef.MethodField))
+          line   <- convertIntegerValue(getFieldValue(srcLoc, ZTraceElementRef.SourceLocationRef.LineField))
+        } yield SourceLocation(file, clazz, method, line)
+      case noLoc: ObjectReference if noLoc.`type`().name() == ZTraceElementRef.NoLocationName =>
+        val error = convertStringValue(getFieldValue(noLoc, ZTraceElementRef.NoLocationRef.ErrorField))
+        error.map(NoLocation)
+      case _ => None
+    }
 
   def convertZTrace(fiberId: FiberId)(value: Value)(implicit languageLevel: ScalaLanguageLevel): Option[ZTrace] =
     value match {

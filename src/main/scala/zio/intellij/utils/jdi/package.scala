@@ -11,26 +11,30 @@ package object jdi {
   def getFieldValue(obj: ObjectReference, fieldName: String): Value =
     obj.getValue(obj.referenceType().fieldByName(fieldName))
 
-  def convertBooleanValue(value: Value): Option[Boolean] = value match {
-    case b: BooleanValue => Some(b.value())
-    case _               => None
-  }
+  def convertBooleanValue(value: Value): Option[Boolean] =
+    value match {
+      case b: BooleanValue => Some(b.value())
+      case _               => None
+    }
 
-  def convertIntegerValue(value: Value): Option[Int] = value match {
-    case l: IntegerValue => Some(l.value())
-    case _               => None
-  }
+  def convertIntegerValue(value: Value): Option[Int] =
+    value match {
+      case l: IntegerValue => Some(l.value())
+      case _               => None
+    }
 
-  def convertLongValue(value: Value): Option[Long] = value match {
-    case l: LongValue => Some(l.value())
-    case _            => None
-  }
+  def convertLongValue(value: Value): Option[Long] =
+    value match {
+      case l: LongValue => Some(l.value())
+      case _            => None
+    }
 
-  def convertStringValue(value: Value): Option[String] = value match {
-    case string: StringReference =>
-      Some(string.value())
-    case _ => None
-  }
+  def convertStringValue(value: Value): Option[String] =
+    value match {
+      case string: StringReference =>
+        Some(string.value())
+      case _ => None
+    }
 
   def convertOption[T](optionValue: Value)(inner: Value => Option[T]): Option[T] =
     optionValue match {
@@ -42,13 +46,14 @@ package object jdi {
 
   def convertScalaSeq(value: Value)(implicit languageLevel: ScalaLanguageLevel): List[Value] = {
     @tailrec
-    def convertList(value: Value, acc: List[Value]): List[Value] = value match {
-      case obj: ObjectReference if obj.`type`().name() == ListRef.ConsName =>
-        val head = getFieldValue(obj, ListRef.HeadField)
-        val tail = getFieldValue(obj, ListRef.TailField)
-        convertList(tail, head :: acc)
-      case _ => acc.reverse
-    }
+    def convertList(value: Value, acc: List[Value]): List[Value] =
+      value match {
+        case obj: ObjectReference if obj.`type`().name() == ListRef.ConsName =>
+          val head = getFieldValue(obj, ListRef.HeadField)
+          val tail = getFieldValue(obj, ListRef.TailField)
+          convertList(tail, head :: acc)
+        case _ => acc.reverse
+      }
 
     value match {
       case obj: ObjectReference if obj.`type`().name() == ListRef.ConsName => convertList(value, Nil)

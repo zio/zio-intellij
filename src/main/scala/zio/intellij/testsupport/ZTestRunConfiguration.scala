@@ -49,10 +49,11 @@ class ZTestRunConfiguration(
 
   private val ZTestRunnerName = "zio.intellij.testsupport.ZTestRunner"
 
-  override protected def runnerInfo: TestFrameworkRunnerInfo = TestFrameworkRunnerInfo(
-    if (Option(getModule).exists(hasTestRunner)) ZTestRunnerName
-    else fromTestConfiguration(testConfigurationData)
-  )
+  override protected def runnerInfo: TestFrameworkRunnerInfo =
+    TestFrameworkRunnerInfo(
+      if (Option(getModule).exists(hasTestRunner)) ZTestRunnerName
+      else fromTestConfiguration(testConfigurationData)
+    )
   override def getActionName: String = getName
 
   private def fromTestConfiguration(data: TestConfigurationData) =
@@ -73,9 +74,8 @@ class ZTestRunConfiguration(
         .toSet
 
       allFiles.exists(_.contains("zio-test-intellij"))
-    } else {
+    } else
       module.libraries.map(_.getName).exists(_.contains("zio-test-intellij"))
-    }
 
   override def getState(executor: Executor, env: ExecutionEnvironment): RunProfileState = {
     val module = getModule
@@ -158,16 +158,19 @@ class ZTestRunConfiguration(
       }
   }
 
-  override protected def validityChecker: SuiteValidityChecker = new SuiteValidityCheckerBase {
-    override protected def isValidClass(clazz: PsiClass): Boolean           = clazz.is[ScObject]
-    override protected def hasSuitableConstructor(clazz: PsiClass): Boolean = true
-  }
-
-  override def sbtSupport: SbtTestRunningSupport = new SbtTestRunningSupportBase {
-
-    override def commandsBuilder: SbtCommandsBuilder = new SbtCommandsBuilderBase {
-      override def classKey: Option[String]    = Some("-s")
-      override def testNameKey: Option[String] = Some("-t")
+  override protected def validityChecker: SuiteValidityChecker =
+    new SuiteValidityCheckerBase {
+      override protected def isValidClass(clazz: PsiClass): Boolean           = clazz.is[ScObject]
+      override protected def hasSuitableConstructor(clazz: PsiClass): Boolean = true
     }
-  }
+
+  override def sbtSupport: SbtTestRunningSupport =
+    new SbtTestRunningSupportBase {
+
+      override def commandsBuilder: SbtCommandsBuilder =
+        new SbtCommandsBuilderBase {
+          override def classKey: Option[String]    = Some("-s")
+          override def testNameKey: Option[String] = Some("-t")
+        }
+    }
 }

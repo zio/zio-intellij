@@ -88,115 +88,137 @@ class MockableInjectorTest extends MacrosTest {
     assertTrue(actualType.conforms(expectedType))
   }
 
-  def test_impure_method_without_args(): Unit = assertEquals(
-    "extends Method[Unit, Throwable, Int]",
-    innerObject("M1").extendsBlock.getText
-  )
+  def test_impure_method_without_args(): Unit =
+    assertEquals(
+      "extends Method[Unit, Throwable, Int]",
+      innerObject("M1").extendsBlock.getText
+    )
 
-  def test_impure_method_with_one_argument(): Unit = assertEquals(
-    "extends Method[String, Throwable, Boolean]",
-    innerObject("M2").extendsBlock.getText
-  )
+  def test_impure_method_with_one_argument(): Unit =
+    assertEquals(
+      "extends Method[String, Throwable, Boolean]",
+      innerObject("M2").extendsBlock.getText
+    )
 
-  def test_impure_method_with_multiple_argument_lists_and_varargs(): Unit = assertEquals(
-    "extends Method[(Int, Boolean, Seq[String]), Throwable, Option[(Int, Double)]]",
-    innerObject("M3").extendsBlock.getText
-  )
+  def test_impure_method_with_multiple_argument_lists_and_varargs(): Unit =
+    assertEquals(
+      "extends Method[(Int, Boolean, Seq[String]), Throwable, Option[(Int, Double)]]",
+      innerObject("M3").extendsBlock.getText
+    )
 
-  def test_impure_value(): Unit = assertEquals(
-    "extends Method[Unit, Throwable, Int]",
-    innerObject("V1").extendsBlock.getText
-  )
+  def test_impure_value(): Unit =
+    assertEquals(
+      "extends Method[Unit, Throwable, Int]",
+      innerObject("V1").extendsBlock.getText
+    )
 
-  def test_impure_method_with_polymorphic_input(): Unit = assertEquals(
-    "extends Poly.Method.Input[Throwable, Boolean]",
-    innerObject("PolyM1").extendsBlock.getText
-  )
+  def test_impure_method_with_polymorphic_input(): Unit =
+    assertEquals(
+      "extends Poly.Method.Input[Throwable, Boolean]",
+      innerObject("PolyM1").extendsBlock.getText
+    )
 
-  def test_impure_method_with_polymorphic_output(): Unit = assertEquals(
-    "extends Poly.Method.Output[Option[String], Throwable]",
-    innerObject("PolyM2").extendsBlock.getText
-  )
+  def test_impure_method_with_polymorphic_output(): Unit =
+    assertEquals(
+      "extends Poly.Method.Output[Option[String], Throwable]",
+      innerObject("PolyM2").extendsBlock.getText
+    )
 
-  def test_impure_method_with_polymorphic_input_and_output(): Unit = assertEquals(
-    "extends Poly.Method.InputOutput[Throwable]",
-    innerObject("PolyM3").extendsBlock.getText
-  )
+  def test_impure_method_with_polymorphic_input_and_output(): Unit =
+    assertEquals(
+      "extends Poly.Method.InputOutput[Throwable]",
+      innerObject("PolyM3").extendsBlock.getText
+    )
 
-  def test_uio_method_with_one_argument(): Unit = assertEquals(
-    "extends Effect[String, Nothing, Int]",
-    innerObject("E1").extendsBlock.getText
-  )
+  def test_uio_method_with_one_argument(): Unit =
+    assertEquals(
+      "extends Effect[String, Nothing, Int]",
+      innerObject("E1").extendsBlock.getText
+    )
 
-  def test_task_method(): Unit = assertEquals(
-    "extends Effect[Unit, Throwable, Long]",
-    innerObject("E2").extendsBlock.getText
-  )
+  def test_task_method(): Unit =
+    assertEquals(
+      "extends Effect[Unit, Throwable, Long]",
+      innerObject("E2").extendsBlock.getText
+    )
 
-  def test_io_method(): Unit = assertEquals(
-    "extends Effect[Unit, String, Long]",
-    innerObject("E3").extendsBlock.getText
-  )
+  def test_io_method(): Unit =
+    assertEquals(
+      "extends Effect[Unit, String, Long]",
+      innerObject("E3").extendsBlock.getText
+    )
 
-  def test_urio_method(): Unit = assertEquals(
-    "extends Effect[Unit, Nothing, Long]",
-    innerObject("E4").extendsBlock.getText
-  )
+  def test_urio_method(): Unit =
+    assertEquals(
+      "extends Effect[Unit, Nothing, Long]",
+      innerObject("E4").extendsBlock.getText
+    )
 
-  def test_uio_value(): Unit = assertEquals(
-    "extends Effect[Unit, Nothing, Either[Int, String]]",
-    innerObject("V2").extendsBlock.getText
-  )
+  def test_uio_value(): Unit =
+    assertEquals(
+      "extends Effect[Unit, Nothing, Either[Int, String]]",
+      innerObject("V2").extendsBlock.getText
+    )
 
-  def test_pure_method_with_polymorphic_input(): Unit = assertEquals(
-    "extends Poly.Effect.Input[Nothing, Double]",
-    innerObject("Poly1").extendsBlock.getText
-  )
+  def test_pure_method_with_polymorphic_input(): Unit =
+    assertEquals(
+      "extends Poly.Effect.Input[Nothing, Double]",
+      innerObject("Poly1").extendsBlock.getText
+    )
 
-  def test_pure_method_with_polymorphic_error(): Unit = assertEquals(
-    "extends Poly.Effect.Error[Unit, String]",
-    innerObject("Poly2").extendsBlock.getText
-  )
+  def test_pure_method_with_polymorphic_error(): Unit =
+    assertEquals(
+      "extends Poly.Effect.Error[Unit, String]",
+      innerObject("Poly2").extendsBlock.getText
+    )
 
-  def test_pure_method_with_polymorphic_output(): Unit = assertEquals(
-    "extends Poly.Effect.Output[Unit, Nothing]",
-    innerObject("Poly3").extendsBlock.getText
-  )
+  def test_pure_method_with_polymorphic_output(): Unit =
+    assertEquals(
+      "extends Poly.Effect.Output[Unit, Nothing]",
+      innerObject("Poly3").extendsBlock.getText
+    )
 
-  def test_pure_method_with_polymorphic_input_and_error(): Unit = assertEquals(
-    "extends Poly.Effect.InputError[Boolean]",
-    innerObject("Poly4").extendsBlock.getText
-  )
+  def test_pure_method_with_polymorphic_input_and_error(): Unit =
+    assertEquals(
+      "extends Poly.Effect.InputError[Boolean]",
+      innerObject("Poly4").extendsBlock.getText
+    )
 
-  def test_pure_method_with_polymorphic_input_and_output(): Unit = assertEquals(
-    "extends Poly.Effect.InputOutput[Int]",
-    innerObject("Poly5").extendsBlock.getText
-  )
+  def test_pure_method_with_polymorphic_input_and_output(): Unit =
+    assertEquals(
+      "extends Poly.Effect.InputOutput[Int]",
+      innerObject("Poly5").extendsBlock.getText
+    )
 
-  def test_pure_method_with_polymorphic_error_and_output(): Unit = assertEquals(
-    "extends Poly.Effect.ErrorOutput[Unit]",
-    innerObject("Poly6").extendsBlock.getText
-  )
+  def test_pure_method_with_polymorphic_error_and_output(): Unit =
+    assertEquals(
+      "extends Poly.Effect.ErrorOutput[Unit]",
+      innerObject("Poly6").extendsBlock.getText
+    )
 
-  def test_pure_method_with_polymorphic_input_error_and_output(): Unit = assertEquals(
-    "extends Poly.Effect.InputErrorOutput",
-    innerObject("Poly7").extendsBlock.getText
-  )
+  def test_pure_method_with_polymorphic_input_error_and_output(): Unit =
+    assertEquals(
+      "extends Poly.Effect.InputErrorOutput",
+      innerObject("Poly7").extendsBlock.getText
+    )
 
-  def test_pure_method_with_mixed_polymorphic_output(): Unit = assertEquals(
-    "extends Poly.Effect.Output[Unit, Nothing]",
-    innerObject("Poly8").extendsBlock.getText
-  )
+  def test_pure_method_with_mixed_polymorphic_output(): Unit =
+    assertEquals(
+      "extends Poly.Effect.Output[Unit, Nothing]",
+      innerObject("Poly8").extendsBlock.getText
+    )
 
-  def test_pure_method_with_bounded_polymorphic_output(): Unit = assertEquals(
-    "extends Poly.Effect.Output[Unit, Nothing]",
-    innerObject("Poly9").extendsBlock.getText
-  )
+  def test_pure_method_with_bounded_polymorphic_output(): Unit =
+    assertEquals(
+      "extends Poly.Effect.Output[Unit, Nothing]",
+      innerObject("Poly9").extendsBlock.getText
+    )
 
-  def test_pure_method_with_polymorphic_output_and_wrapped_polymorphic_input(): Unit = assertEquals(
-    "extends Poly.Effect.InputOutput[Nothing]",
-    innerObject("Poly10").extendsBlock.getText
-  )
+  def test_pure_method_with_polymorphic_output_and_wrapped_polymorphic_input(): Unit =
+    assertEquals(
+      "extends Poly.Effect.InputOutput[Nothing]",
+      innerObject("Poly10").extendsBlock.getText
+    )
 
   def test_overloaded_methods(): Unit = {
     val overloaded = innerObject("Overloaded")
@@ -214,79 +236,94 @@ class MockableInjectorTest extends MacrosTest {
     )
   }
 
-  def test_stream_value(): Unit = assertEquals(
-    "extends Stream[Unit, String, Int]",
-    innerObject("StaticStream").extendsBlock.getText
-  )
+  def test_stream_value(): Unit =
+    assertEquals(
+      "extends Stream[Unit, String, Int]",
+      innerObject("StaticStream").extendsBlock.getText
+    )
 
-  def test_stream_method_without_arguments(): Unit = assertEquals(
-    "extends Stream[Unit, String, Int]",
-    innerObject("ZeroParamsStream").extendsBlock.getText
-  )
+  def test_stream_method_without_arguments(): Unit =
+    assertEquals(
+      "extends Stream[Unit, String, Int]",
+      innerObject("ZeroParamsStream").extendsBlock.getText
+    )
 
-  def test_stream_method_without_arguments_and_with_parens(): Unit = assertEquals(
-    "extends Stream[Unit, String, Int]",
-    innerObject("ZeroParamsWithParensStream").extendsBlock.getText
-  )
+  def test_stream_method_without_arguments_and_with_parens(): Unit =
+    assertEquals(
+      "extends Stream[Unit, String, Int]",
+      innerObject("ZeroParamsWithParensStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_one_argument(): Unit = assertEquals(
-    "extends Stream[Int, String, Int]",
-    innerObject("SingleParamStream").extendsBlock.getText
-  )
+  def test_stream_method_with_one_argument(): Unit =
+    assertEquals(
+      "extends Stream[Int, String, Int]",
+      innerObject("SingleParamStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_multiple_arguments(): Unit = assertEquals(
-    "extends Stream[(Int, String, Long), String, Int]",
-    innerObject("ManyParamsStream").extendsBlock.getText
-  )
+  def test_stream_method_with_multiple_arguments(): Unit =
+    assertEquals(
+      "extends Stream[(Int, String, Long), String, Int]",
+      innerObject("ManyParamsStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_multiple_argument_lists(): Unit = assertEquals(
-    "extends Stream[(Int, String, Long), String, Int]",
-    innerObject("ManyParamListsStream").extendsBlock.getText
-  )
+  def test_stream_method_with_multiple_argument_lists(): Unit =
+    assertEquals(
+      "extends Stream[(Int, String, Long), String, Int]",
+      innerObject("ManyParamListsStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_polymorphic_input(): Unit = assertEquals(
-    "extends Poly.Stream.Input[String, Int]",
-    innerObject("PolyInputStream").extendsBlock.getText
-  )
+  def test_stream_method_with_polymorphic_input(): Unit =
+    assertEquals(
+      "extends Poly.Stream.Input[String, Int]",
+      innerObject("PolyInputStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_polymorphic_error(): Unit = assertEquals(
-    "extends Poly.Stream.Error[Long, Int]",
-    innerObject("PolyErrorStream").extendsBlock.getText
-  )
+  def test_stream_method_with_polymorphic_error(): Unit =
+    assertEquals(
+      "extends Poly.Stream.Error[Long, Int]",
+      innerObject("PolyErrorStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_polymorphic_output(): Unit = assertEquals(
-    "extends Poly.Stream.Output[Long, String]",
-    innerObject("PolyOutputStream").extendsBlock.getText
-  )
+  def test_stream_method_with_polymorphic_output(): Unit =
+    assertEquals(
+      "extends Poly.Stream.Output[Long, String]",
+      innerObject("PolyOutputStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_polymorphic_input_and_error(): Unit = assertEquals(
-    "extends Poly.Stream.InputError[Int]",
-    innerObject("PolyInputErrorStream").extendsBlock.getText
-  )
+  def test_stream_method_with_polymorphic_input_and_error(): Unit =
+    assertEquals(
+      "extends Poly.Stream.InputError[Int]",
+      innerObject("PolyInputErrorStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_polymorphic_input_and_output(): Unit = assertEquals(
-    "extends Poly.Stream.InputOutput[String]",
-    innerObject("PolyInputOutputStream").extendsBlock.getText
-  )
+  def test_stream_method_with_polymorphic_input_and_output(): Unit =
+    assertEquals(
+      "extends Poly.Stream.InputOutput[String]",
+      innerObject("PolyInputOutputStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_polymorphic_error_and_output(): Unit = assertEquals(
-    "extends Poly.Stream.ErrorOutput[Long]",
-    innerObject("PolyErrorOutputStream").extendsBlock.getText
-  )
+  def test_stream_method_with_polymorphic_error_and_output(): Unit =
+    assertEquals(
+      "extends Poly.Stream.ErrorOutput[Long]",
+      innerObject("PolyErrorOutputStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_polymorphic_input_error_and_output(): Unit = assertEquals(
-    "extends Poly.Stream.InputErrorOutput",
-    innerObject("PolyInputErrorOutputStream").extendsBlock.getText
-  )
+  def test_stream_method_with_polymorphic_input_error_and_output(): Unit =
+    assertEquals(
+      "extends Poly.Stream.InputErrorOutput",
+      innerObject("PolyInputErrorOutputStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_mixed_polymorphic_output(): Unit = assertEquals(
-    "extends Poly.Stream.Output[Unit, String]",
-    innerObject("PolyMixedStream").extendsBlock.getText
-  )
+  def test_stream_method_with_mixed_polymorphic_output(): Unit =
+    assertEquals(
+      "extends Poly.Stream.Output[Unit, String]",
+      innerObject("PolyMixedStream").extendsBlock.getText
+    )
 
-  def test_stream_method_with_bounded_polymorphic_output(): Unit = assertEquals(
-    "extends Poly.Stream.Output[Unit, String]",
-    innerObject("PolyBoundedStream").extendsBlock.getText
-  )
+  def test_stream_method_with_bounded_polymorphic_output(): Unit =
+    assertEquals(
+      "extends Poly.Stream.Output[Unit, String]",
+      innerObject("PolyBoundedStream").extendsBlock.getText
+    )
 
 }

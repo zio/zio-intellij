@@ -22,12 +22,13 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
   override def shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean =
     other.isProducedBy(classOf[ScalaApplicationConfigurationProducer])
 
-  override protected def configurationName(contextInfo: CreateFromContextInfo): String = contextInfo match {
-    case AllInPackage(_, packageName) =>
-      s"ZIO Tests in $packageName"
-    case ClassWithTestName(testClass, testName) =>
-      StringUtil.getShortName(testClass.qualifiedName) + testName.fold("")("::" + _)
-  }
+  override protected def configurationName(contextInfo: CreateFromContextInfo): String =
+    contextInfo match {
+      case AllInPackage(_, packageName) =>
+        s"ZIO Tests in $packageName"
+      case ClassWithTestName(testClass, testName) =>
+        StringUtil.getShortName(testClass.qualifiedName) + testName.fold("")("::" + _)
+    }
 
   override def getTestClassWithTestName(location: Location[_ <: PsiElement]): Option[ClassWithTestName] =
     location.getPsiElement match {

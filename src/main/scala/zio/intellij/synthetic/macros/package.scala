@@ -18,10 +18,11 @@ package object macros {
 
   object FunctionDeclaration {
 
-    def unapply(ts: TermSignature): Option[ScFunctionDeclaration] = ts match {
-      case PhysicalMethodSignature(method: ScFunctionDeclaration, _) => Some(method)
-      case _                                                         => None
-    }
+    def unapply(ts: TermSignature): Option[ScFunctionDeclaration] =
+      ts match {
+        case PhysicalMethodSignature(method: ScFunctionDeclaration, _) => Some(method)
+        case _                                                         => None
+      }
   }
 
   def typeParametersDefinition(tpo: ScTypeParametersOwner): String =
@@ -39,15 +40,13 @@ package object macros {
     presentationStringForScalaParameters(function.paramClauses)
 
   def parametersApplication(function: ScFunction): String =
-    function.paramClauses.clauses
-      .map { clause =>
-        clause.parameters
-          .map { parameter =>
-            if (parameter.isVarArgs()) s"${parameter.name}: _*"
-            else parameter.name
-          }
-          .mkString("(", ", ", ")")
+    function.paramClauses.clauses.map { clause =>
+      clause.parameters.map { parameter =>
+        if (parameter.isVarArgs()) s"${parameter.name}: _*"
+        else parameter.name
       }
+        .mkString("(", ", ", ")")
+    }
       .mkString("")
 
 }

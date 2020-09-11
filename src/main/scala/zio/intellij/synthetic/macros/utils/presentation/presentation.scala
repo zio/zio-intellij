@@ -19,9 +19,8 @@ package object presentation {
 
   private[macros] def presentationStringForScalaParameterClause(clause: ScParameterClause): String = {
     val buffer = new StringBuilder("(")
-    if (clause.isImplicit) {
+    if (clause.isImplicit)
       buffer.append("implicit ")
-    }
     buffer.append(clause.parameters.map(presentationStringForScalaParameter).mkString(", "))
     buffer.append(")")
     buffer.result
@@ -79,9 +78,8 @@ package object presentation {
     buffer.append(defaultPresentationStringForScalaType(typ))
 
     val arguments = annotation.annotationExpr.getAnnotationParameters
-    if (arguments.nonEmpty) {
+    if (arguments.nonEmpty)
       buffer.append(arguments.iterator.map(a => escape(a.getText)).mkString("(", ", ", ")"))
-    }
 
     buffer.result
   }

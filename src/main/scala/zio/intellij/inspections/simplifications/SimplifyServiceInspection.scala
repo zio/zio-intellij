@@ -14,8 +14,8 @@ class SimplifyServiceInspection extends ZInspection(AccessGetSimplificationType)
 object AccessGetSimplificationType extends SimplificationType {
   override def hint: String = "Replace with ZIO.service"
 
-  private def replacement(accessExpr: ScExpression, accessTypeArg: Option[ScTypeElement] = None)(
-    implicit ctx: TypePresentationContext = TypePresentationContext(accessExpr)
+  private def replacement(accessExpr: ScExpression, accessTypeArg: Option[ScTypeElement] = None)(implicit
+    ctx: TypePresentationContext = TypePresentationContext(accessExpr)
   ): Option[Simplification] = {
     val serviceTypeArg = for {
       arg           <- accessTypeArg
@@ -32,17 +32,18 @@ object AccessGetSimplificationType extends SimplificationType {
     Some(simplification)
   }
 
-  override def getSimplification(expr: ScExpression): Option[Simplification] = expr match {
-    // match both (_.get) and (h => h.get)
-    case ScMethodCall(accessCall, Seq(_ `.get` () | lambda(_, Some(_ `.get` ())))) =>
-      accessCall match {
-        // ZIO.access(...)
-        case `ZIO.access`(_) => replacement(expr)
-        // ZIO.access[TypeParam](...)
-        case ScGenericCall(`ZIO.access`(_), Seq(accessTypeArg)) =>
-          replacement(expr, Some(accessTypeArg))
-        case _ => None
-      }
-    case _ => None
-  }
+  override def getSimplification(expr: ScExpression): Option[Simplification] =
+    expr match {
+      // match both (_.get) and (h => h.get)
+      case ScMethodCall(accessCall, Seq(_ `.get` () | lambda(_, Some(_ `.get` ())))) =>
+        accessCall match {
+          // ZIO.access(...)
+          case `ZIO.access`(_) => replacement(expr)
+          // ZIO.access[TypeParam](...)
+          case ScGenericCall(`ZIO.access`(_), Seq(accessTypeArg)) =>
+            replacement(expr, Some(accessTypeArg))
+          case _ => None
+        }
+      case _ => None
+    }
 }
