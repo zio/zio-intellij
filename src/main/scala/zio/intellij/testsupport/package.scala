@@ -12,7 +12,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScMethodCall, ScReferenceE
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 
 package object testsupport {
-  val ZSuitePaths = List("zio.test.DefaultRunnableSpec")
+  val ZSuitePaths = List("zio.test.RunnableSpec")
 
   def parentTypeDefinition(e: PsiElement): Option[ScTypeDefinition] =
     Option(PsiTreeUtil.getParentOfType(e, classOf[ScTypeDefinition], false))

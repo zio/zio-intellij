@@ -30,8 +30,6 @@ final class ZTestFramework extends AbstractTestFramework {
       case _                         => false
     }
 
-  override def baseSuitePaths: Seq[String] = ZSuitePaths
-
   private def resolvesToTestMethod(sc: ScReferenceExpression): Boolean =
     sc match {
       case ResolvesTo(f: ScFunctionDefinition) =>
@@ -46,6 +44,7 @@ final class ZTestFramework extends AbstractTestFramework {
 }
 
 object ZTestFramework {
+
   private[ZTestFramework] val testMethodTypes = Map(
     "suite" -> "_root_.zio.test.Spec[R, E, T]",
     "testM" -> "_root_.zio.test.Spec[R, _root_.zio.test.TestFailure[E], _root_.zio.test.TestSuccess]",
