@@ -34,14 +34,22 @@ package object presentation {
     buffer.result
   }
 
-  private[macros] def presentationStringForScalaTypeParameters(tpClause: ScTypeParamClause): String =
-    tpClause.typeParameters.map(presentationStringForScalaTypeParam).mkString("[", ", ", "]")
+  private[macros] def presentationStringForScalaTypeParameters(
+    tpClause: ScTypeParamClause,
+    showVariance: Boolean
+  ): String = presentationStringForScalaTypeParameters(tpClause.typeParameters, showVariance)
 
-  private[macros] def presentationStringForScalaTypeParam(param: ScTypeParam): String = {
-    val initialText =
+  private[macros] def presentationStringForScalaTypeParameters(
+    tParams: Seq[ScTypeParam],
+    showVariance: Boolean
+  ): String = tParams.map(presentationStringForScalaTypeParam(_, showVariance)).mkString("[", ", ", "]")
+
+  private[macros] def presentationStringForScalaTypeParam(param: ScTypeParam, showVariance: Boolean): String = {
+    val initialText = if (showVariance) {
       if (param.isContravariant) "-"
       else if (param.isCovariant) "+"
       else ""
+    } else ""
 
     val buffer = new StringBuilder(initialText)
     buffer.append(param.name)

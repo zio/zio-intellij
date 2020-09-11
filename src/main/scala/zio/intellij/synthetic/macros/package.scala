@@ -1,6 +1,7 @@
 package zio.intellij.synthetic
 
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
+import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScTypeParam
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScFunction, ScFunctionDeclaration}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScTypeParametersOwner
 import org.jetbrains.plugins.scala.lang.psi.types.{PhysicalMethodSignature, TermSignature}
@@ -25,8 +26,12 @@ package object macros {
       }
   }
 
-  def typeParametersDefinition(tpo: ScTypeParametersOwner): String =
-    tpo.typeParametersClause.fold("")(presentationStringForScalaTypeParameters)
+  def typeParametersDefinition(tpo: ScTypeParametersOwner, showVariance: Boolean): String =
+    tpo.typeParametersClause.fold("")(presentationStringForScalaTypeParameters(_, showVariance))
+
+  def typeParametersDefinition(tParams: Seq[ScTypeParam], showVariance: Boolean): String =
+    if (tParams.isEmpty) ""
+    else presentationStringForScalaTypeParameters(tParams, showVariance)
 
   def typeParametersApplication(tpo: ScTypeParametersOwner): String =
     tpo.typeParametersClause

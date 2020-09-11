@@ -9,11 +9,10 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.lang.psi.types.{PhysicalMethodSignature, TypePresentationContext}
 import org.junit.Assert.fail
-import zio.intellij.utils.Version
 
 abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestAdapter {
   protected val zioOrg     = "dev.zio"
-  protected val zioVersion = Version.ZIO.`RC21-2`.toString
+  protected val zioVersion = "latest.integration"
 
   protected var extendedObject: ScObject                                  = _
   implicit protected var typePresentationContext: TypePresentationContext = _
