@@ -47,9 +47,10 @@ package object inspections {
     private[inspections] val `.get` = invocation("get").from(zioHasLikeClasses)
   }
 
-  val zioLikePackages: Array[String] = Array("zio._")
   val zioTypes: Array[String]        = Array("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
   val managedTypes: Array[String]    = Array("zio.ZManaged")
+  val zioTest: Array[String]         = Array("zio.test._")
+  val zioLikePackages: Array[String] = zioTypes ++ managedTypes ++ zioTest
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
