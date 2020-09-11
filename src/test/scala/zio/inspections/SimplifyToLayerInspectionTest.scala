@@ -20,7 +20,7 @@ sealed abstract class BaseToLayerInspectionTest(methodToReplace: String, methodT
   def testReplacement(): Unit = {
     val text   = z(base(zLayerExpr))
     val result = z(base(s"serviceEffect.$methodToReplaceWith"))
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 }
 

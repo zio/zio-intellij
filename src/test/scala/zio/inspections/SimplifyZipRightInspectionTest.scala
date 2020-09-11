@@ -13,7 +13,7 @@ class SimplifyFlatmapWithZipRightTest extends FlatmapInspectionTest(".zipRight")
     z(s"""ZIO.succeed("Remedios Varo").${START}flatMap(_ => x)$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Remedios Varo").flatMap(_ => x)""")
     val result = z("""ZIO.succeed("Remedios Varo").zipRight(x)""")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_flatMap_not_discarding_should_not_highlight(): Unit =
@@ -27,14 +27,14 @@ class SimplifyFlatmapWithZipRightOperatorTest extends FlatmapInspectionTest("*>"
     z(s"""ZIO.succeed("Xul Solar").${START}flatMap(_ => x)$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Xul Solar").flatMap(_ => ZIO succeed x)""")
     val result = z("""ZIO.succeed("Xul Solar") *> (ZIO succeed x)""")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_flatMap_to_*>(): Unit = {
     z(s"""ZIO.succeed("Frida Kahlo").${START}flatMap(_ => x)$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Frida Kahlo").flatMap(_ => ZIO.succeed(x))""")
     val result = z("""ZIO.succeed("Frida Kahlo") *> ZIO.succeed(x)""")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_flatMap_not_discarding_should_not_highlight(): Unit =

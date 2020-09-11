@@ -119,7 +119,6 @@
                          shortName="WrapInsteadOfLiftInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
-
         <localInspection implementationClass="zio.intellij.inspections.mistakes.YieldingZIOEffectInspection"
                          displayName="Detects if a value returned from the yield part of a for comprehension is explicitly wrapped in a ZIO effect"
                          groupPath="Scala,ZIO" groupName="Inspections"
@@ -142,6 +141,12 @@
                          displayName="Simplify .foreach by discarding unused result thus slightly improving performance"
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyForeachInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.IfGuardInsteadOfWhenInspection"
+                         displayName="Detects if guards mistakenly used in for-comprehension on ZIO effect causing NoSuchElementException."
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="IfGuardInsteadOfWhenInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
         <intentionAction>

@@ -24,7 +24,7 @@ abstract class CollectAllInspectionTest(methodToReplace: String, methodToReplace
       s"""val myIterable: Iterable[String] = ???
          |ZIO.$methodToReplaceWith$nParamList(myIterable)(f)""".stripMargin
     )
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 }
 

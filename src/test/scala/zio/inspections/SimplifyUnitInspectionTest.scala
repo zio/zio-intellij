@@ -12,28 +12,28 @@ class SimplifyUnitInspectionTest extends ZSimplifyInspectionTest[SimplifyUnitIns
     z(s"ZIO.succeed(42).$START*>(ZIO.unit)$END").assertHighlighted()
     val text   = z("ZIO.succeed(42).*>(ZIO.unit)")
     val result = z("ZIO.succeed(42).unit")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_zipRight_infix(): Unit = {
     z(s"ZIO.succeed(42) $START*> ZIO.unit$END").assertHighlighted()
     val text   = z("ZIO.succeed(42) *> ZIO.unit")
     val result = z("ZIO.succeed(42).unit")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_as_unit(): Unit = {
     z(s"ZIO.succeed(42).${START}as(())$END").assertHighlighted()
     val text   = z("ZIO.succeed(42).as(())")
     val result = z("ZIO.succeed(42).unit")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_map_to_unit(): Unit = {
     z(s"ZIO.succeed(42).${START}map(_ => ())$END").assertHighlighted()
     val text   = z("ZIO.succeed(42).map(_ => ())")
     val result = z("ZIO.succeed(42).unit")
-    testQuickFix(text, result, hint)
+    testQuickFixes(text, result, hint)
   }
 
   def test_does_not_highlight_unit_member(): Unit =
