@@ -34,6 +34,7 @@ lazy val `zio-intellij` = project
         <li>Fixes incorrect test method detection (<a href="https://github.com/zio/zio-intellij/pull/139">#139</a>)</li>
         <li>Fix NPE when processing an incomplete test/suite string literal definition (<a href="https://github.com/zio/zio-intellij/pull/141">#141</a>)</li>
         <li>Fixes erroneous suggestions to non-effect types, such as <code>Chunk</code> (<a href="https://github.com/zio/zio-intellij/pull/142">#142</a>)</li>
+        <li>Fixed not recognizing methods with default implementation when using <code>@accessible</code> (<a href="https://github.com/zio/zio-intellij/pull/144">#144</a>)</li>
         <li>Depending on the latest Scala plugin for compatibility</li>
         <li>Additional bug fixes and tweaks</li>
         <ul>
