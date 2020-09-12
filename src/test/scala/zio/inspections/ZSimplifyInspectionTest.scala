@@ -14,8 +14,8 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
   override protected def librariesLoaders: Seq[LibraryLoader] =
     base.librariesLoaders :+
       IvyManagedLoader(
-        "dev.zio" %% "zio"      % "1.0.1",
-        "dev.zio" %% "zio-test" % "1.0.1"
+        "dev.zio" %% "zio"      % "latest.integration",
+        "dev.zio" %% "zio-test" % "latest.integration"
       )
 
   def z(s: String): String =
