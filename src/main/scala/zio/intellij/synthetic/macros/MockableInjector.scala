@@ -60,21 +60,20 @@ object MockableInjector {
     }
 
   def makeTags(typeDefinition: ScTypeDefinition): List[String] =
-    getMembers(typeDefinition)
-      .collect {
-        case (name, info :: Nil) =>
-          makeTag(name, info)
-        case (name, infos) =>
-          val tagName = name.capitalize
-          val overloadedTags =
-            sortOverloads(infos).zipWithIndex.map {
-              case (info, idx) =>
-                makeTag(s"_$idx", info)
-            }
-          s"""object $tagName {
-             |  ${overloadedTags.mkString("\n  ")}
-             |}""".stripMargin
-      }(collection.breakOut)
+    getMembers(typeDefinition).collect {
+      case (name, info :: Nil) =>
+        makeTag(name, info)
+      case (name, infos) =>
+        val tagName = name.capitalize
+        val overloadedTags =
+          sortOverloads(infos).zipWithIndex.map {
+            case (info, idx) =>
+              makeTag(s"_$idx", info)
+          }
+        s"""object $tagName {
+           |  ${overloadedTags.mkString("\n  ")}
+           |}""".stripMargin
+    }(collection.breakOut)
 
   sealed trait Capability extends Product with Serializable
 
@@ -94,12 +93,13 @@ object MockableInjector {
     a: ScType
   ) {
 
-    private def isPoly(tpe: ScType): Boolean = tpe match {
-      case parameterizedType: ScParameterizedType =>
-        typeParams.exists(tp => parameterizedType.typeArguments.exists(_.canonicalText == tp.name))
-      case _ =>
-        typeParams.exists(_.name == tpe.canonicalText)
-    }
+    private def isPoly(tpe: ScType): Boolean =
+      tpe match {
+        case parameterizedType: ScParameterizedType =>
+          typeParams.exists(tp => parameterizedType.typeArguments.exists(_.canonicalText == tp.name))
+        case _ =>
+          typeParams.exists(_.name == tpe.canonicalText)
+      }
 
     val polyI: Boolean = isPoly(i)
     val polyE: Boolean = isPoly(e)
@@ -119,7 +119,7 @@ object MockableInjector {
         for {
           tpe      <- optionalType
           resolved <- resolveAliases(tpe)
-          fullName = resolved.extractClass.fold(resolved.canonicalText)(_.qualifiedName)
+          fullName  = resolved.extractClass.fold(resolved.canonicalText)(_.qualifiedName)
           input    <- optionalInput
           (capability, eOpt, aOpt) = (extractTypeArguments(resolved), fullName) match {
             case (Some(Seq(r, e, a)), "zio.ZIO") =>
@@ -135,7 +135,7 @@ object MockableInjector {
         } yield new MemberInfo(ts, capability, params, typeParams, input, e, a)
 
       ts match {
-        case FunctionDeclaration(method) =>
+        case Method(method) =>
           val params     = method.paramClauses.clauses.flatMap(_.parameters).toList
           val typeParams = method.typeParametersClause.map(_.typeParameters.toList).getOrElse(Nil)
           val input =
@@ -151,31 +151,30 @@ object MockableInjector {
               }
 
           buildMemberInfo(method.returnType.toOption, input, params, typeParams)
-        case Field(fId) =>
-          buildMemberInfo(fId.`type`().toOption, createType(text = "Unit", context = fId))
+        case Field(field) =>
+          buildMemberInfo(field.`type`().toOption, createType(text = "Unit", context = field))
         case _ => None
       }
     }
   }
 
   private def getMembers(typeDefinition: ScTypeDefinition): Map[String, List[MemberInfo]] =
-    (typeDefinition.allVals ++ typeDefinition.allMethods).toList
-      .filter {
-        case FunctionDeclaration(_) | Field(_) => true
-        case _                                 => false
-      }
+    (typeDefinition.allVals ++ typeDefinition.allMethods).toList.filter {
+      case Method(_) | Field(_) => true
+      case _                    => false
+    }
       .flatMap(MemberInfo.apply(_))
       .groupBy(_.signature.name)
 
   private def sortOverloads(infos: Seq[MemberInfo]): Seq[MemberInfo] = {
     import scala.math.Ordering.Implicits.seqDerivedOrdering
     infos.sortBy(_.signature)(Ordering[Seq[String]].on {
-      case FunctionDeclaration(method) =>
+      case Method(method) =>
         for {
-          clause       <- method.paramClauses.clauses
-          param        <- clause.parameters
-          paramType    <- param.paramType
-          tpe          <- paramType.typeElement.`type`().toOption
+          clause      <- method.paramClauses.clauses
+          param       <- clause.parameters
+          paramType   <- param.paramType
+          tpe         <- paramType.typeElement.`type`().toOption
           presentation = defaultPresentationStringForScalaType(tpe)
         } yield presentation
       case _ => Seq.empty
