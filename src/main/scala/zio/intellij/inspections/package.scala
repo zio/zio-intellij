@@ -176,10 +176,21 @@ package object inspections {
   sealed trait StaticMemberReferenceExtractor {
     def types: Set[String]
 
+    private def isOverloaded(expr: ScReferenceExpression) =
+      expr.multiResolveScala(false) match {
+        case result if result.isEmpty => false
+        case result =>
+          result.flatMap(_.fromType).distinct match {
+            case Array(n) => isOfClassFrom(n, types.toArray)
+            case _        => false
+          }
+      }
+
     def unapply(ref: ScReferenceExpression): Boolean =
       ref.resolve() match {
         case t: ScTemplateDefinition if types.contains(t.qualifiedName)                 => true
         case f: ScFunctionDefinition if types.contains(f.containingClass.qualifiedName) => true
+        case null if isOverloaded(ref)                                                  => true
         case _                                                                          => false
       }
   }
