@@ -17,16 +17,16 @@ class ModulePatternAccessible extends SyntheticMembersInjector {
     def zioObject(tpe: ScType): String    = if (fromManaged(tpe)) "ZManaged" else "ZIO"
 
     methods.collect {
-      case Field(fid) =>
+      case Field(field) =>
         val isPoly = serviceTrait.exists(_.typeParameters.nonEmpty)
-        val tpe    = fid.`type`().getOrAny
-        val body   = s"zio.${zioObject(tpe)}.service[$serviceApplication].${mapOrFlatMap(tpe)}(_.${fid.name})"
+        val tpe    = field.`type`().getOrAny
+        val body   = s"zio.${zioObject(tpe)}.service[$serviceApplication].${mapOrFlatMap(tpe)}(_.${field.name})"
 
         if (isPoly)
-          s"def ${fid.name}${serviceTrait.fold("")(typeParametersDefinition(_, showVariance = false))} = $body"
-        else s"val ${fid.name} = $body"
+          s"def ${field.name}${serviceTrait.fold("")(typeParametersDefinition(_, showVariance = false))} = $body"
+        else s"val ${field.name} = $body"
 
-      case FunctionDeclaration(method) =>
+      case Method(method) =>
         val tpe = method.returnType.getOrAny
         val typeParamsDefinition =
           typeParametersDefinition(
