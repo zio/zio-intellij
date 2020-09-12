@@ -135,7 +135,7 @@ object MockableInjector {
         } yield new MemberInfo(ts, capability, params, typeParams, input, e, a)
 
       ts match {
-        case FunctionDeclaration(method) =>
+        case Method(method) =>
           val params     = method.paramClauses.clauses.flatMap(_.parameters).toList
           val typeParams = method.typeParametersClause.map(_.typeParameters.toList).getOrElse(Nil)
           val input =
@@ -151,8 +151,8 @@ object MockableInjector {
               }
 
           buildMemberInfo(method.returnType.toOption, input, params, typeParams)
-        case Field(fId) =>
-          buildMemberInfo(fId.`type`().toOption, createType(text = "Unit", context = fId))
+        case Field(field) =>
+          buildMemberInfo(field.`type`().toOption, createType(text = "Unit", context = field))
         case _ => None
       }
     }
@@ -160,8 +160,8 @@ object MockableInjector {
 
   private def getMembers(typeDefinition: ScTypeDefinition): Map[String, List[MemberInfo]] =
     (typeDefinition.allVals ++ typeDefinition.allMethods).toList.filter {
-      case FunctionDeclaration(_) | Field(_) => true
-      case _                                 => false
+      case Method(_) | Field(_) => true
+      case _                    => false
     }
       .flatMap(MemberInfo.apply(_))
       .groupBy(_.signature.name)
@@ -169,7 +169,7 @@ object MockableInjector {
   private def sortOverloads(infos: Seq[MemberInfo]): Seq[MemberInfo] = {
     import scala.math.Ordering.Implicits.seqDerivedOrdering
     infos.sortBy(_.signature)(Ordering[Seq[String]].on {
-      case FunctionDeclaration(method) =>
+      case Method(method) =>
         for {
           clause      <- method.paramClauses.clauses
           param       <- clause.parameters

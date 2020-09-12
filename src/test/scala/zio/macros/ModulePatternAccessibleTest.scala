@@ -35,6 +35,9 @@ object E${CARET}xample {
     def m2[T](s2: String = "")(p: (T, Int))(i2: Int*): UIO[Double]
     def m3[T <: Foo](t: Wrapped[T]): IO[String, List[T]]
 
+    val defaultPureValue: EIO[Boolean] = v
+    def defaultPureMethod(s: String): EIO[Int] = m1
+
     val vManaged: Managed[String, Foo]
     def mManaged(s: String): ZManaged[Any, Nothing, Bar]
 
@@ -43,6 +46,9 @@ object E${CARET}xample {
     def m1NonZIO(s: String): Int
     def m2NonZIO[T](s2: String = "")(p: (T, Int))(i2: Int*): Double
     def stream(n: Int): ZStream[Any, String, Int]
+
+    val defaultImpureValue: Boolean = vNonZIO
+    def defaultImpureMethod(s: String): Int = m1NonZIO(s)
   }
 }
 """
@@ -103,6 +109,28 @@ object E${CARET}xample {
     )
   }
 
+  def test_generates_accessor_value_for_ZIO_field_with_default_implementation(): Unit = {
+    assertEquals(
+      "val defaultPureValue = zio.ZIO.service[Example.Service].flatMap(_.defaultPureValue)",
+      field("defaultPureValue").getText
+    )
+    assertEquals(
+      Right("ZIO[Example.Environment with Has[Example.Service], Nothing, Boolean]"),
+      field("defaultPureValue").`type`().map(_.codeText)
+    )
+  }
+
+  def test_generates_accessor_function_for_ZIO_method_with_argument_with_default_implementation(): Unit = {
+    assertEquals(
+      "def defaultPureMethod(s: String) = zio.ZIO.service[Example.Service].flatMap(_.defaultPureMethod(s))",
+      method("defaultPureMethod").getText
+    )
+    assertEquals(
+      Right("String => ZIO[Example.Environment with Has[Example.Service], Nothing, Int]"),
+      method("defaultPureMethod").`type`().map(_.codeText)
+    )
+  }
+
   def test_generates_accessor_value_for_non_ZIO_field(): Unit = {
     assertEquals(
       "val vNonZIO = zio.ZIO.service[Example.Service].map(_.vNonZIO)",
@@ -156,6 +184,28 @@ object E${CARET}xample {
     assertEquals(
       Right("Int => ZIO[Has[Example.Service], Nothing, ZStream[Any, String, Int]]"),
       method("stream").`type`().map(_.codeText)
+    )
+  }
+
+  def test_generates_accessor_value_for_non_ZIO_field_with_default_implementation(): Unit = {
+    assertEquals(
+      "val defaultImpureValue = zio.ZIO.service[Example.Service].map(_.defaultImpureValue)",
+      field("defaultImpureValue").getText
+    )
+    assertEquals(
+      Right("ZIO[Has[Example.Service], Nothing, Boolean]"),
+      field("defaultImpureValue").`type`().map(_.codeText)
+    )
+  }
+
+  def test_generates_accessor_function_for_non_ZIO_method_with_argument_with_default_implementation(): Unit = {
+    assertEquals(
+      "def defaultImpureMethod(s: String) = zio.ZIO.service[Example.Service].map(_.defaultImpureMethod(s))",
+      method("defaultImpureMethod").getText
+    )
+    assertEquals(
+      Right("String => ZIO[Has[Example.Service], Nothing, Int]"),
+      method("defaultImpureMethod").`type`().map(_.codeText)
     )
   }
 
