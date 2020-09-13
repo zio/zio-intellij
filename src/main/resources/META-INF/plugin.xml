@@ -58,6 +58,10 @@
                          displayName="Simplify condition to .when" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyWhenInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyUnlessInspection"
+                         displayName="Simplify condition to .unless" groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyUnlessInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedEitherInspection"
                          displayName="Simplify Either values to .left/.right" groupPath="Scala,ZIO"
                          groupName="Simplifications"
