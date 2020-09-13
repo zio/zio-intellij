@@ -11,6 +11,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.{createE
 import zio.intellij.inspections.zioMethods._
 import zio.intellij.inspections.{ZInspection, _}
 import zio.intellij.utils.isElementUsed
+import zio.intellij.utils.StringUtils._
 
 class SimplifyTapInspection
     extends ZInspection(
@@ -111,7 +112,7 @@ object TapBothSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression, tapError: ScExpression, tap: ScExpression) =
       replace(expr)
-        .withText(invocationText(qual, s"tapBoth(${tapError.getText}, ${tap.getText})"))
+        .withText(invocationText(qual, s"tapBoth(${tapError.getBracedText}, ${tap.getBracedText})"))
         .highlightFrom(qual)
 
     expr match {

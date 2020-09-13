@@ -16,6 +16,31 @@ class SimplifyMapTest extends MapInspectionTest(".as") {
     val result = z("ZIO.succeed(42).as(x)")
     testQuickFixes(text, result, hint)
   }
+
+  def test_block_map_to_x(): Unit = {
+    z {
+      s"""ZIO.succeed(42).${START}map { _ =>
+         |  x
+         |  x
+         |  x
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      """ZIO.succeed(42).map { _ =>
+        |  x
+        |  x
+        |  x
+        |}""".stripMargin
+    }
+    val result = z {
+      """ZIO.succeed(42).as {
+        |  x
+        |  x
+        |  x
+        |}""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
 }
 
 class SimplifyMapErrorTest extends MapInspectionTest(".orElseFail") {
@@ -25,6 +50,31 @@ class SimplifyMapErrorTest extends MapInspectionTest(".orElseFail") {
     z(s"ZIO.succeed(42).${START}mapError(_ => x)$END").assertHighlighted()
     val text   = z("ZIO.succeed(42).mapError(_ => x)")
     val result = z("ZIO.succeed(42).orElseFail(x)")
+    testQuickFixes(text, result, hint)
+  }
+
+  def test_block_mapError_to_x(): Unit = {
+    z {
+      s"""ZIO.succeed(42).${START}mapError { _ =>
+         |  x
+         |  x
+         |  x
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      """ZIO.succeed(42).mapError { _ =>
+        |  x
+        |  x
+        |  x
+        |}""".stripMargin
+    }
+    val result = z {
+      """ZIO.succeed(42).orElseFail {
+        |  x
+        |  x
+        |  x
+        |}""".stripMargin
+    }
     testQuickFixes(text, result, hint)
   }
 }

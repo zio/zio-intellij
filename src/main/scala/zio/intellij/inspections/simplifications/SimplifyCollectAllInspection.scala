@@ -1,9 +1,10 @@
 package zio.intellij.inspections.simplifications
 
 import org.jetbrains.plugins.scala.codeInspection.collections._
-import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScMethodCall, ScReferenceExpression}
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
 import zio.intellij.inspections.collectionMethods.`.map`
+import zio.intellij.utils.StringUtils._
 
 class SimplifyCollectAllInspection
     extends ZInspection(
@@ -18,7 +19,7 @@ sealed abstract class BaseCollectAllSimplificationType(methodName: String, metho
 
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(iterable: ScExpression, func: ScExpression) =
-      replace(expr).withText(s"ZIO.$methodName(${iterable.getText})(${func.getText})").highlightFrom(expr)
+      replace(expr).withText(s"ZIO.$methodName${iterable.getWrappedText}${func.getWrappedText}").highlightAll
 
     expr match {
       case methodExtractor(xs `.map` f) => Some(replacement(xs, f))
@@ -39,8 +40,8 @@ object CollectAllParNToForeachParNSimplificationType extends SimplificationType 
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(n: ScExpression, iterable: ScExpression, func: ScExpression) =
       replace(expr)
-        .withText(s"ZIO.foreachParN(${n.getText})(${iterable.getText})(${func.getText})")
-        .highlightFrom(expr)
+        .withText(s"ZIO.foreachParN${n.getWrappedText}${iterable.getWrappedText}${func.getWrappedText}")
+        .highlightAll
 
     expr match {
       case `ZIO.collectAllParN`(n, iterable `.map` func) => Some(replacement(n, iterable, func))

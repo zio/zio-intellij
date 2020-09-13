@@ -43,6 +43,35 @@ class SucceedSomeInspectionTest extends SimplifyOptionInspectionTest("ZIO.some")
     testQuickFixes(text, result, hint)
   }
 
+  def test_block_succeed_Some(): Unit = {
+    z {
+      s"""${START}ZIO.succeed {
+         |  Some {
+         |    a
+         |    a
+         |    a
+         |  }
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      """ZIO.succeed {
+        |  Some {
+        |    a
+        |    a
+        |    a
+        |  }
+        |}""".stripMargin
+    }
+    val result = z {
+      """ZIO.some {
+        |  a
+        |  a
+        |  a
+        |}""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
   def test_UIO_Some(): Unit = {
     z(s"${START}UIO(Some(a))$END").assertHighlighted()
     val text   = z("UIO(Some(a))")

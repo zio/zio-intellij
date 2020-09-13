@@ -3,6 +3,7 @@ package zio.intellij.inspections.simplifications
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
+import zio.intellij.utils.StringUtils._
 
 class SimplifySucceedEitherInspection extends ZInspection(LeftSimplificationType, RightSimplificationType)
 
@@ -14,8 +15,8 @@ sealed abstract class EitherSimplificationType(extractor: TypeReference, zioMeth
 
   private def replacement(zioExpr: ScExpression, eitherArg: ScExpression): Simplification =
     replace(zioExpr)
-      .withText(s"ZIO.$zioMethodName(${eitherArg.getText}")
-      .highlightFrom(zioExpr)
+      .withText(s"ZIO.$zioMethodName${eitherArg.getWrappedText}")
+      .highlightAll
 
   private def getArg(eitherExpr: ScExpression): Option[ScExpression] =
     eitherExpr match {

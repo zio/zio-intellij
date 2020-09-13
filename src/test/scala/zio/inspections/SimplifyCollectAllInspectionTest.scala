@@ -26,6 +26,40 @@ abstract class CollectAllInspectionTest(methodToReplace: String, methodToReplace
     )
     testQuickFixes(text, result, hint)
   }
+
+  def testBlockHighlighting(): Unit =
+    z {
+      s"""val myIterable: Iterable[String] = ???
+         |${START}URIO.$methodToReplace$nParamList(myIterable.map { it =>
+         |  b
+         |  b
+         |  b
+         |  f(it)
+         |})$END""".stripMargin
+    }.assertHighlighted()
+
+  def testBlockReplacement(): Unit = {
+    val text = z {
+      s"""val myIterable: Iterable[String] = ???
+         |URIO.$methodToReplace$nParamList(myIterable.map { it =>
+         |  b
+         |  b
+         |  b
+         |  f(it)
+         |})""".stripMargin
+    }
+    val result = z {
+      s"""val myIterable: Iterable[String] = ???
+         |ZIO.$methodToReplaceWith$nParamList(myIterable) {
+         |  it =>
+         |    b
+         |    b
+         |    b
+         |    f(it)
+         |}""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
 }
 
 class SimplifyCollectAllToForeachTest

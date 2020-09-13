@@ -4,6 +4,7 @@ import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
 import zio.intellij.inspections.simplifications.SimplifySucceedOptionInspection.UIOApply
+import zio.intellij.utils.StringUtils._
 
 class SimplifySucceedOptionInspection extends ZInspection(NoneSimplificationType, SomeSimplificationType)
 
@@ -13,7 +14,7 @@ object NoneSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
       case `ZIO.succeed`(scalaNone()) | UIOApply(scalaNone()) =>
-        Some(replace(expr).withText("ZIO.none").highlightFrom(expr))
+        Some(replace(expr).withText("ZIO.none").highlightAll)
       case _ => None
     }
 }
@@ -22,7 +23,7 @@ object SomeSimplificationType extends SimplificationType {
   override def hint: String = "Replace with ZIO.some"
 
   private def replacement(expr: ScExpression, a: ScExpression): Simplification =
-    replace(expr).withText(s"ZIO.some(${a.getText}").highlightFrom(expr)
+    replace(expr).withText(s"ZIO.some${a.getWrappedText}").highlightAll
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
