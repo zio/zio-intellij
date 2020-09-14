@@ -2,6 +2,7 @@
 <body>Simplify the following expressions to use <code>.when</code> instead:
 <pre>
 if (someCond) x else IO.unit -> x.when(someCond)
+if (!someCond) IO.unit else x -> x.when(someCond)
 </pre>
 </body>
 </html>
