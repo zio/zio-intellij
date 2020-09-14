@@ -4,6 +4,7 @@ import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFor}
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods.`.*>`
+import zio.intellij.utils.StringUtils._
 
 class SimplifyForeachInspection
     extends ZInspection(
@@ -20,7 +21,7 @@ sealed abstract class BaseForeachSimplificationType(methodName: String) extends 
   override def hint: String = s"Replace with ZIO.$methodName"
 
   protected def replacement(expr: ScExpression, iterable: ScExpression, func: ScExpression): Simplification =
-    replace(expr).withText(s"ZIO.$methodName(${iterable.getText})(${func.getText})").highlightFrom(expr)
+    replace(expr).withText(s"ZIO.$methodName${iterable.getWrappedText}${func.getWrappedText}").highlightAll
 }
 
 sealed abstract class BaseForeachParNSimplificationType extends SimplificationType {
@@ -30,7 +31,9 @@ sealed abstract class BaseForeachParNSimplificationType extends SimplificationTy
   override def hint: String = s"Replace with ZIO.$methodName"
 
   def replacement(expr: ScExpression, n: ScExpression, iterable: ScExpression, func: ScExpression): Simplification =
-    replace(expr).withText(s"ZIO.$methodName(${n.getText})(${iterable.getText})(${func.getText})").highlightFrom(expr)
+    replace(expr)
+      .withText(s"ZIO.$methodName${n.getWrappedText}${iterable.getWrappedText}${func.getWrappedText}")
+      .highlightAll
 }
 
 sealed abstract class BaseForeachForCompSimplificationType(
