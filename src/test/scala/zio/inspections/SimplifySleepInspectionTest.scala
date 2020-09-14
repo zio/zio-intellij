@@ -15,10 +15,60 @@ class SimplifySleepInspectionTest extends ZSimplifyInspectionTest[SimplifySleepI
     testQuickFixes(text, result, hint)
   }
 
+  def test_block_zipRight(): Unit = {
+    z {
+      s"""${START}ZIO.sleep {
+         |  1.seconds
+         |  1.seconds
+         |  1.seconds
+         |} *> putStrLn("")$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      s"""ZIO.sleep {
+         |  1.seconds
+         |  1.seconds
+         |  1.seconds
+         |} *> putStrLn("")""".stripMargin
+    }
+    val result = z {
+      s"""putStrLn("").delay {
+         |  1.seconds
+         |  1.seconds
+         |  1.seconds
+         |}""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
   def test_flatMap(): Unit = {
     z(s"""${START}ZIO.sleep(1.seconds).flatMap(_ => putStrLn(""))$END""").assertHighlighted()
-    val text   = z(s"""ZIO.sleep(1.seconds) *> putStrLn("")""")
+    val text   = z(s"""ZIO.sleep(1.seconds).flatMap(_ => putStrLn(""))""")
     val result = z(s"""putStrLn("").delay(1.seconds)""")
+    testQuickFixes(text, result, hint)
+  }
+
+  def test_block_flatMap(): Unit = {
+    z {
+      s"""${START}ZIO.sleep {
+         |  1.seconds
+         |  1.seconds
+         |  1.seconds
+         |}.flatMap(_ => putStrLn(""))$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      s"""ZIO.sleep {
+         |  1.seconds
+         |  1.seconds
+         |  1.seconds
+         |}.flatMap(_ => putStrLn(""))""".stripMargin
+    }
+    val result = z {
+      s"""putStrLn("").delay {
+         |  1.seconds
+         |  1.seconds
+         |  1.seconds
+         |}""".stripMargin
+    }
     testQuickFixes(text, result, hint)
   }
 }

@@ -5,6 +5,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
+import zio.intellij.utils.StringUtils._
 
 class SimplifyBimapInspection extends ZInspection(BimapSimplificationType)
 
@@ -14,7 +15,7 @@ object BimapSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression, a: ScExpression, b: ScExpression) =
       replace(expr)
-        .withText(invocationText(qual, s"bimap(${b.getText}, ${a.getText})"))
+        .withText(invocationText(qual, s"bimap(${b.getBracedText}, ${a.getBracedText})"))
         .highlightFrom(qual)
 
     def toFunctionExpr(e: ScExpression): ScExpression =

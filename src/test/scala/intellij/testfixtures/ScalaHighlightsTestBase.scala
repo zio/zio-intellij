@@ -40,7 +40,7 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
   }
 
   protected def checkTextHasError(text: String, allowAdditionalHighlights: Boolean = false): Unit = {
-    val expectedRanges = selectedRanges(text)
+    val expectedRanges = selectedRanges(normalize(text))
     val actualRanges   = findRanges(text)
     checkTextHasError(expectedRanges, actualRanges, allowAdditionalHighlights)
   }

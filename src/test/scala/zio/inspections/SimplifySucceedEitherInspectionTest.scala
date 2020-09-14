@@ -18,10 +18,68 @@ class SucceedLeftInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO
     testQuickFixes(text, result, hint)
   }
 
+  def test_block_succeed_Left(): Unit = {
+    z {
+      s"""${START}ZIO.succeed {
+         |  Left {
+         |    a
+         |    a
+         |    a
+         |  }
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      """ZIO.succeed {
+        |  Left {
+        |    a
+        |    a
+        |    a
+        |  }
+        |}""".stripMargin
+    }
+    val result = z {
+      """ZIO.left {
+        |  a
+        |  a
+        |  a
+        |}""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
   def test_succeed_util_Left(): Unit = {
     z(s"${START}ZIO.succeed(util.Left(a))$END").assertHighlighted()
     val text   = z("ZIO.succeed(util.Left(a))")
     val result = z("ZIO.left(a)")
+    testQuickFixes(text, result, hint)
+  }
+
+  def test_block_succeed_util_Left(): Unit = {
+    z {
+      s"""${START}ZIO.succeed {
+         |  util.Left {
+         |    a
+         |    a
+         |    a
+         |  }
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      """ZIO.succeed {
+        | util.Left {
+        |    a
+        |    a
+        |    a
+        |  }
+        |}""".stripMargin
+    }
+    val result = z {
+      """ZIO.left {
+        |  a
+        |  a
+        |  a
+        |}""".stripMargin
+    }
     testQuickFixes(text, result, hint)
   }
 
@@ -64,10 +122,68 @@ class SucceedRightInspectionTest extends SimplifySucceedEitherInspectionTest("ZI
     testQuickFixes(text, result, hint)
   }
 
+  def test_block_succeed_Right(): Unit = {
+    z {
+      s"""${START}ZIO.succeed {
+         |  Right {
+         |    a
+         |    a
+         |    a
+         |  }
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      """ZIO.succeed {
+        |  Right {
+        |    a
+        |    a
+        |    a
+        |  }
+        |}""".stripMargin
+    }
+    val result = z {
+      """ZIO.right {
+        |  a
+        |  a
+        |  a
+        |}""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
   def test_succeed_util_Right(): Unit = {
     z(s"${START}ZIO.succeed(util.Right(a))$END").assertHighlighted()
     val text   = z("ZIO.succeed(util.Right(a))")
     val result = z("ZIO.right(a)")
+    testQuickFixes(text, result, hint)
+  }
+
+  def test_block_succeed_util_Right(): Unit = {
+    z {
+      s"""${START}ZIO.succeed {
+         |  util.Right {
+         |    a
+         |    a
+         |    a
+         |  }
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      """ZIO.succeed {
+        | util.Right {
+        |    a
+        |    a
+        |    a
+        |  }
+        |}""".stripMargin
+    }
+    val result = z {
+      """ZIO.right {
+        |  a
+        |  a
+        |  a
+        |}""".stripMargin
+    }
     testQuickFixes(text, result, hint)
   }
 

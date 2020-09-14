@@ -16,6 +16,23 @@ abstract class SimplifyForeachInspectionTest(
   private val zioMethodToReplace     = s"""URIO.$methodToReplace$nParamList(myIterable)(f)"""
   private val zioMethodToReplaceWith = s"""ZIO.$methodToReplaceWith$nParamList(myIterable)(f)"""
 
+  private val zioBlockMethodToReplace =
+    s"""URIO.$methodToReplace$nParamList(myIterable) { it =>
+       |  println(it)
+       |  for {
+       |    _ <- ZIO.fail(???)
+       |  } yield ()
+       |}""".stripMargin
+
+  private val zioBlockMethodToReplaceWith =
+    s"""ZIO.$methodToReplaceWith$nParamList(myIterable) {
+       |  it =>
+       |    println(it)
+       |    for {
+       |      _ <- ZIO.fail(???)
+       |    } yield ()
+       |}""".stripMargin
+
   override protected val hint: String = s"Replace with ZIO.$methodToReplaceWith"
 
   def testForCompHighlighting(): Unit =
@@ -37,6 +54,30 @@ abstract class SimplifyForeachInspectionTest(
       s"""val myIterable: Iterable[String] = ???
          |for {
          |  _ <- $zioMethodToReplaceWith
+         |} yield ???""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
+  def testForCompBlockHighlighting(): Unit =
+    z {
+      s"""val myIterable: Iterable[String] = ???
+         |for {
+         |  _ <- $START$zioBlockMethodToReplace$END
+         |} yield ???""".stripMargin
+    }.assertHighlighted()
+
+  def testForCompBlockReplacement(): Unit = {
+    val text = z {
+      s"""val myIterable: Iterable[String] = ???
+         |for {
+         |  _ <- $zioBlockMethodToReplace
+         |} yield ???""".stripMargin
+    }
+    val result = z {
+      s"""val myIterable: Iterable[String] = ???
+         |for {
+         |  _ <- $zioBlockMethodToReplaceWith
          |} yield ???""".stripMargin
     }
     testQuickFixes(text, result, hint)
@@ -78,6 +119,42 @@ abstract class SimplifyForeachInspectionTest(
     testQuickFixes(text, result, hint)
   }
 
+  def testNestedBlockForCompHighlighting(): Unit =
+    z {
+      s"""val myIterable: Iterable[String] = ???
+         |for {
+         |  _ <- b
+         |  _ <- $zioMethodToReplaceWith
+         |  _ <- b
+         |  _ <- $START$zioBlockMethodToReplace$END
+         |  _ <- b
+         |} yield ???""".stripMargin
+    }.assertHighlighted()
+
+  def testNestedBlockForCompReplacement(): Unit = {
+    val text = z {
+      s"""val myIterable: Iterable[String] = ???
+         |for {
+         |  _ <- b
+         |  _ <- $zioMethodToReplaceWith
+         |  _ <- b
+         |  _ <- $zioBlockMethodToReplace
+         |  _ <- b
+         |} yield ???""".stripMargin
+    }
+    val result = z {
+      s"""val myIterable: Iterable[String] = ???
+         |for {
+         |  _ <- b
+         |  _ <- $zioMethodToReplaceWith
+         |  _ <- b
+         |  _ <- $zioBlockMethodToReplaceWith
+         |  _ <- b
+         |} yield ???""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
   def testChainHighlighting(): Unit =
     z {
       s"""val myIterable: Iterable[String] = ???
@@ -96,6 +173,24 @@ abstract class SimplifyForeachInspectionTest(
     testQuickFixes(text, result, hint)
   }
 
+  def testBlockChainHighlighting(): Unit =
+    z {
+      s"""val myIterable: Iterable[String] = ???
+         |$START$zioBlockMethodToReplace$END *> b""".stripMargin
+    }.assertHighlighted()
+
+  def testBlockChainReplacement(): Unit = {
+    val text = z {
+      s"""val myIterable: Iterable[String] = ???
+         |$zioBlockMethodToReplace *> b""".stripMargin
+    }
+    val result = z {
+      s"""val myIterable: Iterable[String] = ???
+         |$zioBlockMethodToReplaceWith *> b""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
   def testNestedChainHighlighting(): Unit =
     z {
       s"""val myIterable: Iterable[String] = ???
@@ -110,6 +205,24 @@ abstract class SimplifyForeachInspectionTest(
     val result = z {
       s"""val myIterable: Iterable[String] = ???
          |b <* b *> b *> $zioMethodToReplaceWith *> b""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
+  def testNestedBlockChainHighlighting(): Unit =
+    z {
+      s"""val myIterable: Iterable[String] = ???
+         |b <* b *> b *> $START$zioBlockMethodToReplace$END *> b""".stripMargin
+    }.assertHighlighted()
+
+  def testNestedBlockChainReplacement(): Unit = {
+    val text = z {
+      s"""val myIterable: Iterable[String] = ???
+         |b <* b *> b *> $zioBlockMethodToReplace *> b""".stripMargin
+    }
+    val result = z {
+      s"""val myIterable: Iterable[String] = ???
+         |b <* b *> b *> $zioBlockMethodToReplaceWith *> b""".stripMargin
     }
     testQuickFixes(text, result, hint)
   }

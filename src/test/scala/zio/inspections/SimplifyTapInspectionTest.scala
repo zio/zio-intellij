@@ -16,10 +16,88 @@ class SimplifyTapBothInspectionTest extends BaseSimplifyTapInspectionTest(".tapB
     testQuickFixes(text, result, hint)
   }
 
+  def test_block_tap_tapError(): Unit = {
+    z {
+      s"""ZIO.unit.${START}tap { _ =>
+         |  ZIO.unit
+         |  ZIO.unit
+         |  ZIO.unit
+         |}.tapError { t =>
+         |  logError(t)
+         |  logError(t)
+         |  logError(t)
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      s"""ZIO.unit.tap { _ =>
+         |  ZIO.unit
+         |  ZIO.unit
+         |  ZIO.unit
+         |}.tapError { t =>
+         |  logError(t)
+         |  logError(t)
+         |  logError(t)
+         |}""".stripMargin
+    }
+    val result = z {
+      s"""ZIO.unit.tapBoth({
+         |  t =>
+         |    logError(t)
+         |    logError(t)
+         |    logError(t)
+         |}, {
+         |  _ =>
+         |    ZIO.unit
+         |    ZIO.unit
+         |    ZIO.unit
+         |})""".stripMargin
+    }
+    testQuickFixes(text, result, hint)
+  }
+
   def test_tapError_tap(): Unit = {
     z(s"ZIO.unit.${START}tapError(t => logError(t)).tap(_ => ZIO.unit)$END").assertHighlighted()
     val text   = z(s"ZIO.unit.tapError(t => logError(t)).tap(_ => ZIO.unit)")
     val result = z(s"ZIO.unit.tapBoth(t => logError(t), _ => ZIO.unit)")
+    testQuickFixes(text, result, hint)
+  }
+
+  def test_block_tapError_tap(): Unit = {
+    z {
+      s"""ZIO.unit.${START}tapError { t =>
+         |  logError(t)
+         |  logError(t)
+         |  logError(t)
+         |}.tap { _ =>
+         |  ZIO.unit
+         |  ZIO.unit
+         |  ZIO.unit
+         |}$END""".stripMargin
+    }.assertHighlighted()
+    val text = z {
+      s"""ZIO.unit.tapError { t =>
+         |  logError(t)
+         |  logError(t)
+         |  logError(t)
+         |}.tap { _ =>
+         |  ZIO.unit
+         |  ZIO.unit
+         |  ZIO.unit
+         |}""".stripMargin
+    }
+    val result = z {
+      s"""ZIO.unit.tapBoth({
+         |  t =>
+         |    logError(t)
+         |    logError(t)
+         |    logError(t)
+         |}, {
+         |  _ =>
+         |    ZIO.unit
+         |    ZIO.unit
+         |    ZIO.unit
+         |})""".stripMargin
+    }
     testQuickFixes(text, result, hint)
   }
 }
