@@ -161,6 +161,8 @@
         <codeInsight.lineMarkerProvider implementationClass="zio.intellij.gutter.ForkedCodeLineMarkerProvider"
                                         language="Scala"/>
 
+        <referencesSearch implementation="zio.intellij.searchers.ZioAccessorUsagesSearcher"/>
+
         <!-- test runner -->
         <configurationType implementation="zio.intellij.testsupport.ZTestConfigurationType"/>
         <runConfigurationProducer implementation="zio.intellij.testsupport.ZTestRunConfigurationProducer"/>

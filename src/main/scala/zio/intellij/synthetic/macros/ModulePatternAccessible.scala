@@ -4,7 +4,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.base.ScAnnotation
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
-import zio.intellij.inspections.{fromManaged, fromZio}
+import zio.intellij.utils.TypeCheckUtils._
+import zio.intellij.utils._
 
 class ModulePatternAccessible extends SyntheticMembersInjector {
 

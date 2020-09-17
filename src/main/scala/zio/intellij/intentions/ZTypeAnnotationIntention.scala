@@ -9,7 +9,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScUnderscoreSection
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
-import zio.intellij.inspections._
+import zio.intellij.utils.TypeCheckUtils._
 
 abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention with ZIcon {
   final override def getText: String = getFamilyName
