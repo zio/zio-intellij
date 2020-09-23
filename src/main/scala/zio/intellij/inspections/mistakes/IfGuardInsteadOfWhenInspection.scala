@@ -11,6 +11,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createEl
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
 import zio.intellij.inspections._
 import zio.intellij.inspections.mistakes.IfGuardInsteadOfWhenInspection.createFix
+import zio.intellij.utils.TypeCheckUtils._
 
 class IfGuardInsteadOfWhenInspection extends AbstractRegisteredInspection {
 

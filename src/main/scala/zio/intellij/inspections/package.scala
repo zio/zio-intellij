@@ -8,7 +8,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScTemplateDefinition}
-import org.jetbrains.plugins.scala.lang.psi.types.ScType
+import zio.intellij.utils.TypeCheckUtils._
 
 package object inspections {
 
@@ -47,29 +47,8 @@ package object inspections {
     private[inspections] val `.get` = invocation("get").from(zioHasLikeClasses)
   }
 
-  val zioTypes        = Array("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
-  val managedTypes    = Array("zio.ZManaged")
-  val extraTypes      = Array("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
-  val zioTest         = Array("zio.test._")
-  val zioLikePackages = zioTypes ++ managedTypes ++ extraTypes ++ zioTest
-
   def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
-
-  def fromZioLike(r: ScExpression): Boolean =
-    isOfClassFrom(r, zioLikePackages)
-
-  def fromZioLike(tpe: ScType): Boolean =
-    isOfClassFrom(tpe, zioLikePackages)
-
-  def fromZio(r: ScExpression): Boolean =
-    isOfClassFrom(r, zioTypes)
-
-  def fromZio(tpe: ScType): Boolean =
-    isOfClassFrom(tpe, zioTypes)
-
-  def fromManaged(tpe: ScType): Boolean =
-    isOfClassFrom(tpe, managedTypes)
 
   object methodExtractors {
 

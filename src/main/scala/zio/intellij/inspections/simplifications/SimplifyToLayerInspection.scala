@@ -3,6 +3,7 @@ package zio.intellij.inspections.simplifications
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
+import zio.intellij.utils.TypeCheckUtils._
 
 class SimplifyToLayerInspection
     extends ZInspection(ZLayerFromEffectToLayerSimplificationType, ZLayerFromEffectManyToLayerManySimplificationType)

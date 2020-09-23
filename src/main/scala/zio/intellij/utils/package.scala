@@ -5,11 +5,24 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.{JavaPsiFacade, PsiElement}
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
-import org.jetbrains.plugins.scala.lang.psi.api.statements.ScTypeAliasDefinition
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
+import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
+import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
+import org.jetbrains.plugins.scala.lang.psi.api.statements.{
+  ScFunction,
+  ScFunctionDeclaration,
+  ScFunctionDefinition,
+  ScTypeAliasDefinition
+}
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
-import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScParameterizedType, ScType}
+import org.jetbrains.plugins.scala.lang.psi.types.{
+  AliasType,
+  PhysicalMethodSignature,
+  ScParameterizedType,
+  ScType,
+  TermSignature
+}
 
 package object utils {
 
@@ -81,5 +94,24 @@ package object utils {
       case parameterizedType: ScParameterizedType => Some(parameterizedType.typeArguments)
       case _                                      => None
     }
+
+  object Field {
+
+    def unapply(ts: TermSignature): Option[ScTypedDefinition] =
+      Some(ts.namedElement).collect {
+        case fid: ScFieldId          => fid
+        case ref: ScReferencePattern => ref
+      }
+  }
+
+  object Method {
+
+    def unapply(ts: TermSignature): Option[ScFunction] =
+      ts match {
+        case PhysicalMethodSignature(method: ScFunctionDeclaration, _) => Some(method)
+        case PhysicalMethodSignature(method: ScFunctionDefinition, _)  => Some(method)
+        case _                                                         => None
+      }
+  }
 
 }

@@ -8,7 +8,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinitio
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
 import org.jetbrains.plugins.scala.lang.psi.types.{ScParameterizedType, ScType, TermSignature}
 import zio.intellij.synthetic.macros.utils.presentation.defaultPresentationStringForScalaType
-import zio.intellij.utils.{createType, extractTypeArguments, findTypeDefByName, resolveAliases}
+import zio.intellij.utils._
 
 /**
  * @see https://github.com/zio/zio/blob/fa998a4ba8415bf9b6bb6b76db0eb42801ed4e5a/test/shared/src/main/scala-2.x/zio/test/mock/MockableMacro.scala

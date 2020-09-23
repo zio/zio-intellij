@@ -20,8 +20,8 @@ import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresen
 import org.jetbrains.plugins.scala.lang.psi.{ScalaPsiUtil, TypeAdjuster}
 import org.jetbrains.plugins.scala.project.ProjectContext
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker.checkIntention
-import zio.intellij.inspections.fromZioLike
 import zio.intellij.intentions.ZTypeAnnotationIntention
+import zio.intellij.utils.TypeCheckUtils.fromZioLike
 
 // borrowed from MakeTypeMoreSpecificIntention
 

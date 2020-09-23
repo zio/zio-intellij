@@ -8,7 +8,7 @@ import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScParameterizedTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScTypeParametersOwner
-import zio.intellij.inspections.zioLikePackages
+import zio.intellij.utils.TypeCheckUtils.zioLikePackages
 
 class NothingInContravariantPositionInspection extends AbstractRegisteredInspection {
 

@@ -11,6 +11,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.templates.ScTemplateBod
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods.`.*>`
+import zio.intellij.utils.TypeCheckUtils._
 
 class SimplifyChainToForInspection extends ZInspection(ChainToForSimplificationType, ForToChainSimplificationType)
 
