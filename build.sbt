@@ -1,8 +1,8 @@
 lazy val scala212      = "2.12.10"
-lazy val pluginVersion = "2020.2.1.1"
+lazy val pluginVersion = "2020.3.1.0"
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "202"
+ThisBuild / intellijBuild := "203"
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias(
@@ -18,7 +18,7 @@ lazy val `zio-intellij` = project
     version := pluginVersion,
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2020.2.25".toPlugin
+      "org.intellij.scala:2020.3.353".toPlugin
     ),
     patchPluginXml := pluginXmlOptions { xml =>
       xml.version = version.value
