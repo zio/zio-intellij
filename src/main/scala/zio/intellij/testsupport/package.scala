@@ -19,8 +19,8 @@ package object testsupport {
 
   def detectZTestFramework(c: PsiClass): Option[TestFramework] =
     Option(TestFrameworks.detectFramework(c)) match {
-      case Some(framework) if framework.isTestClass(c) => Some(framework)
-      case _                                           => None
+      case Some(framework: ZTestFramework) if framework.isTestClass(c) => Some(framework)
+      case _                                                           => None
     }
 
   object testName {
