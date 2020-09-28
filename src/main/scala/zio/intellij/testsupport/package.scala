@@ -18,9 +18,8 @@ package object testsupport {
     Option(PsiTreeUtil.getParentOfType(e, classOf[ScTypeDefinition], false))
 
   def detectZTestFramework(c: PsiClass): Option[TestFramework] =
-    Option(TestFrameworks.detectFramework(c)) match {
-      case Some(framework) if framework.isTestClass(c) => Some(framework)
-      case _                                           => None
+    Option(TestFrameworks.detectFramework(c)) collect {
+      case framework: ZTestFramework if framework.isTestClass(c) => framework
     }
 
   object testName {
