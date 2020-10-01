@@ -8,6 +8,8 @@ import zio.intellij.utils.types.ZioTypes
 object TypeCheckUtils {
 
   val zioTypes        = ZioTypes.values.map(_.fqName).toArray
+  val zioSinkTypes    = Array("zio.stream.ZSink")
+  val zioStreamTypes  = Array("zio.stream.ZStream")
   val managedTypes    = Array("zio.ZManaged")
   val extraTypes      = Array("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
   val zioTest         = Array("zio.test._")
@@ -27,5 +29,11 @@ object TypeCheckUtils {
 
   def fromManaged(tpe: ScType): Boolean =
     isOfClassFrom(tpe, managedTypes)
+
+  def fromZioSink(tpe: ScType): Boolean =
+    isOfClassFrom(tpe, zioSinkTypes)
+
+  def fromZioStream(tpe: ScType): Boolean =
+    isOfClassFrom(tpe, zioStreamTypes)
 
 }
