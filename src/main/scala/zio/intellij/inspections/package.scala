@@ -9,6 +9,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScTemplateDefinition}
 import zio.intellij.utils.TypeCheckUtils._
+import zio.intellij.utils.fqnIfIsOfClassFrom
+import zio.intellij.utils.types._
 
 package object inspections {
 
@@ -82,7 +84,8 @@ package object inspections {
 
   import methodExtractors._
 
-  sealed abstract class BaseStaticMemberReference(refName: String) {
+  sealed abstract class BaseStaticMemberReference[T <: Type](refName: String) {
+    protected def typeCompanion: TypeCompanion[T]
 
     protected def matchesRefName(ref: ScReferenceExpression): Boolean =
       if (ref.refName == refName) true
@@ -94,46 +97,50 @@ package object inspections {
         }
   }
 
-  sealed abstract class StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String)
-      extends BaseStaticMemberReference(refName) {
+  sealed abstract class StaticMemberReference[T <: Type](extractor: StaticMemberReferenceExtractor, refName: String)
+      extends BaseStaticMemberReference[T](refName) {
 
-    def unapply(expr: ScExpression): Option[ScExpression] =
+    def unapply(expr: ScExpression): Option[(T, ScExpression)] =
       expr match {
         case ref @ ScReferenceExpression(_) if matchesRefName(ref) =>
           ref.smartQualifier match {
-            case Some(extractor()) => Some(expr)
-            case _                 => None
+            case Some(extractor(fqn)) => Some((typeCompanion.fromFQName(fqn), expr))
+            case _                    => None
           }
         case uncurry1(ref, first) if matchesRefName(ref) =>
           ref match {
-            case extractor() => Some(first)
-            case _           => None
+            case extractor(fqn) => Some((typeCompanion.fromFQName(fqn), first))
+            case _              => None
           }
         case _ => None
       }
   }
 
-  sealed abstract class Curried2StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String)
-      extends BaseStaticMemberReference(refName) {
+  sealed abstract class Curried2StaticMemberReference[T <: Type](
+    extractor: StaticMemberReferenceExtractor,
+    refName: String
+  ) extends BaseStaticMemberReference[T](refName) {
 
-    def unapply(expr: ScExpression): Option[(ScExpression, ScExpression)] = expr match {
+    def unapply(expr: ScExpression): Option[(T, ScExpression, ScExpression)] = expr match {
       case uncurry2(ref, first, second) if matchesRefName(ref) =>
         ref match {
-          case extractor() => Some((first, second))
-          case _           => None
+          case extractor(fqn) => Some((typeCompanion.fromFQName(fqn), first, second))
+          case _              => None
         }
       case _ => None
     }
   }
 
-  sealed abstract class Curried3StaticMemberReference(extractor: StaticMemberReferenceExtractor, refName: String)
-      extends BaseStaticMemberReference(refName) {
+  sealed abstract class Curried3StaticMemberReference[T <: Type](
+    extractor: StaticMemberReferenceExtractor,
+    refName: String
+  ) extends BaseStaticMemberReference[T](refName) {
 
-    def unapply(expr: ScExpression): Option[(ScExpression, ScExpression, ScExpression)] = expr match {
+    def unapply(expr: ScExpression): Option[(T, ScExpression, ScExpression, ScExpression)] = expr match {
       case uncurry3(ref, first, second, third) if matchesRefName(ref) =>
         ref match {
-          case extractor() => Some((first, second, third))
-          case _           => None
+          case extractor(fqn) => Some((typeCompanion.fromFQName(fqn), first, second, third))
+          case _              => None
         }
       case _ => None
     }
@@ -141,36 +148,45 @@ package object inspections {
   }
 
   final class ZIOStaticMemberReference(refName: String)
-      extends StaticMemberReference(ZIOStaticMemberReferenceExtractor, refName)
+      extends StaticMemberReference[ZioType](ZIOStaticMemberReferenceExtractor, refName) {
+    override protected val typeCompanion: TypeCompanion[ZioType] = ZioTypes
+  }
 
   final class ZIOCurried2StaticMemberReference(refName: String)
-      extends Curried2StaticMemberReference(ZIOStaticMemberReferenceExtractor, refName)
+      extends Curried2StaticMemberReference[ZioType](ZIOStaticMemberReferenceExtractor, refName) {
+    override protected val typeCompanion: TypeCompanion[ZioType] = ZioTypes
+  }
 
   final class ZIOCurried3StaticMemberReference(refName: String)
-      extends Curried3StaticMemberReference(ZIOStaticMemberReferenceExtractor, refName)
+      extends Curried3StaticMemberReference[ZioType](ZIOStaticMemberReferenceExtractor, refName) {
+    override protected val typeCompanion: TypeCompanion[ZioType] = ZioTypes
+  }
 
   final class ZLayerStaticMemberReference(refName: String)
-      extends StaticMemberReference(ZLayerStaticMemberReferenceExtractor, refName)
+      extends StaticMemberReference[ZLayerType](ZLayerStaticMemberReferenceExtractor, refName) {
+    override protected val typeCompanion: TypeCompanion[ZLayerType] = ZLayerTypes
+  }
 
   sealed trait StaticMemberReferenceExtractor {
     def types: Set[String]
 
-    private def isOverloaded(expr: ScReferenceExpression) =
-      expr.multiResolveScala(false) match {
-        case result if result.isEmpty => false
+    private def findOverloaded(expr: ScReferenceExpression) =
+      expr.multiResolveScala(incomplete = false) match {
+        case result if result.isEmpty => None
         case result =>
           result.flatMap(_.fromType).distinct match {
-            case Array(n) => isOfClassFrom(n, types.toArray)
-            case _        => false
+            case Array(tpe) => fqnIfIsOfClassFrom(tpe, types.toArray)
+            case _          => None
           }
       }
 
-    def unapply(ref: ScReferenceExpression): Boolean =
+    def unapply(ref: ScReferenceExpression): Option[String] =
       ref.resolve() match {
-        case t: ScTemplateDefinition if types.contains(t.qualifiedName)                 => true
-        case f: ScFunctionDefinition if types.contains(f.containingClass.qualifiedName) => true
-        case null if isOverloaded(ref)                                                  => true
-        case _                                                                          => false
+        case t: ScTemplateDefinition if types.contains(t.qualifiedName) => Some(t.qualifiedName)
+        case f: ScFunctionDefinition if types.contains(f.containingClass.qualifiedName) =>
+          Some(f.containingClass.qualifiedName)
+        case null => findOverloaded(ref)
+        case _    => None
       }
   }
 
@@ -179,7 +195,7 @@ package object inspections {
   }
 
   object ZLayerStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
-    override val types: Set[String] = Set("zio.ZLayer")
+    override val types: Set[String] = ZLayerTypes.values.map(_.fqName).toSet
   }
 
   class ReturnTypeReference(typeFQNs: Set[String]) {
@@ -339,27 +355,6 @@ package object inspections {
       case generator(_: ScWildcardPattern, expr) => expr
       case _                                     => None
     }
-  }
-
-  /**
-   * Extractor for some.Type(arg1, ..., argN) and some.Type.apply(arg1, ..., argN)
-   * @param typeQNs a set of qualified names. E.g.: Set("some.Type")
-   */
-  class Apply(typeQNs: Set[String]) {
-
-    def unapplySeq(expr: ScExpression): Option[Seq[ScExpression]] =
-      expr match {
-        case ScMethodCall(ref @ ScReferenceExpression(refExpr), args) if ref.getCanonicalText() == "apply" =>
-          for {
-            containingClass <- refExpr match {
-                                 case rp: ScReferencePattern   => Option(rp.containingClass)
-                                 case fd: ScFunctionDefinition => Option(fd.containingClass)
-                                 case _                        => None
-                               }
-            if typeQNs.contains(containingClass.qualifiedName)
-          } yield args
-        case _ => None
-      }
   }
 
   object IsDeprecated {

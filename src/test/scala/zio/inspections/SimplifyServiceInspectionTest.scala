@@ -26,25 +26,25 @@ class SimplifyServiceInspectionTest extends ZSimplifyInspectionTest[SimplifyServ
 
   def test_access_get(): Unit = {
     def assignment(expr: String) = s"val res: URIO[Has[UserRepo.Service], UserRepo.Service] = $expr"
-    val reference                = "ZIO.access(_.get)"
+    val reference                = "RIO.access(_.get)"
 
     z(base(assignment(s"$START$reference$END")))
       .assertHighlighted()
 
     val text   = z(base(assignment(reference)))
-    val result = z(base(assignment("ZIO.service")))
+    val result = z(base(assignment("RIO.service")))
     testQuickFixes(text, result, hint)
   }
 
   def test_access_get_with_alias(): Unit = {
     def assignment(expr: String) = s"val res: URIO[UserRepo, UserRepo.Service] = $expr"
-    val reference                = "ZIO.access(_.get)"
+    val reference                = "URIO.access(_.get)"
 
     z(base(assignment(s"$START$reference$END")))
       .assertHighlighted()
 
     val text   = z(base(assignment(reference)))
-    val result = z(base(assignment("ZIO.service")))
+    val result = z(base(assignment("URIO.service")))
     testQuickFixes(text, result, hint)
   }
 

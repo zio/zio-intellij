@@ -22,7 +22,7 @@ abstract class CollectAllInspectionTest(methodToReplace: String, methodToReplace
     )
     val result = z(
       s"""val myIterable: Iterable[String] = ???
-         |ZIO.$methodToReplaceWith$nParamList(myIterable)(f)""".stripMargin
+         |URIO.$methodToReplaceWith$nParamList(myIterable)(f)""".stripMargin
     )
     testQuickFixes(text, result, hint)
   }
@@ -50,7 +50,7 @@ abstract class CollectAllInspectionTest(methodToReplace: String, methodToReplace
     }
     val result = z {
       s"""val myIterable: Iterable[String] = ???
-         |ZIO.$methodToReplaceWith$nParamList(myIterable) {
+         |URIO.$methodToReplaceWith$nParamList(myIterable) {
          |  it =>
          |    b
          |    b

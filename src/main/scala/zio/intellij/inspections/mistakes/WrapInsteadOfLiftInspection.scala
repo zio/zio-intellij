@@ -13,6 +13,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createEx
 import zio.intellij.inspections._
 import zio.intellij.inspections.mistakes.WrapInsteadOfLiftInspection.messageFormat
 import zio.intellij.utils._
+import zio.intellij.utils.types.{ZioType, ZioTypes}
 
 import scala.annotation.tailrec
 
@@ -51,14 +52,21 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
         ProblemHighlightType.WEAK_WARNING
       )
 
+    def hasEffectMethod(zioType: ZioType): Boolean =
+      zioType != ZioTypes.UIO && zioType != ZioTypes.URIO
+
     element match {
       case expr: ScExpression =>
         expr match {
-          case Future(f) if !isUsed(expr.parent) => Some(createFix(new QuickFix(expr, f, "Future", "implicit ec => ")))
-          case Try(f) if !isUsed(expr.parent)    => Some(createFix(new QuickFix(expr, f, "Try")))
-          case Option(f) if !isUsed(expr.parent) => Some(createFix(new QuickFix(expr, f, "Option")))
-          case Either(f) if !isUsed(expr.parent) => Some(createFix(new QuickFix(expr, f, "Either")))
-          case _                                 => None
+          case Future(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
+            Some(createFix(new QuickFix(zioType, expr, f, "Future", "implicit ec => ")))
+          case Try(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
+            Some(createFix(new QuickFix(zioType, expr, f, "Try")))
+          case Option(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
+            Some(createFix(new QuickFix(zioType, expr, f, "Option")))
+          case Either(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
+            Some(createFix(new QuickFix(zioType, expr, f, "Either")))
+          case _ => None
         }
       case _ => None
     }
@@ -71,17 +79,18 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
 
   final class ExpressionExtractor(extractor: ReturnTypeReference) {
 
-    def unapply(expr: ScExpression): Option[ScExpression] =
+    def unapply(expr: ScExpression): Option[(ZioType, ScExpression)] =
       expr match {
-        case `ZIO.apply`(extractor(f))       => Some(f)
-        case `ZIO.effect`(extractor(f))      => Some(f)
-        case `ZIO.effectTotal`(extractor(f)) => Some(f)
-        case _                               => None
+        case `ZIO.apply`(zioType, extractor(f))       => Some((zioType, f))
+        case `ZIO.effect`(zioType, extractor(f))      => Some((zioType, f))
+        case `ZIO.effectTotal`(zioType, extractor(f)) => Some((zioType, f))
+        case _                                        => None
       }
   }
 }
 
 final class QuickFix(
+  zioType: ZioType,
   val toReplace: ScExpression,
   val replaceWith: ScExpression,
   val wrappedEffect: String,
@@ -89,7 +98,7 @@ final class QuickFix(
 ) extends AbstractFixOnPsiElement(s"Replace with ZIO.from$wrappedEffect", toReplace) {
 
   override protected def doApplyFix(element: ScExpression)(implicit project: Project): Unit =
-    element.replace(createExpressionFromText(s"ZIO.from$wrappedEffect($prefix${replaceWith.getText}"))
+    element.replace(createExpressionFromText(s"${zioType.name}.from$wrappedEffect($prefix${replaceWith.getText}"))
 }
 
 object WrapInsteadOfLiftInspection {

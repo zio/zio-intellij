@@ -86,28 +86,28 @@ class SucceedLeftInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO
   def test_UIO_Left(): Unit = {
     z(s"${START}UIO(Left(a))$END").assertHighlighted()
     val text   = z("UIO(Left(a))")
-    val result = z("ZIO.left(a)")
+    val result = z("UIO.left(a)")
     testQuickFixes(text, result, hint)
   }
 
   def test_UIO_util_Left(): Unit = {
     z(s"${START}UIO(util.Left(a))$END").assertHighlighted()
     val text   = z("UIO(util.Left(a))")
-    val result = z("ZIO.left(a)")
+    val result = z("UIO.left(a)")
     testQuickFixes(text, result, hint)
   }
 
   def test_UIO_apply_Left(): Unit = {
     z(s"${START}UIO.apply(Left(a))$END").assertHighlighted()
     val text   = z("UIO.apply(Left(a))")
-    val result = z("ZIO.left(a)")
+    val result = z("UIO.left(a)")
     testQuickFixes(text, result, hint)
   }
 
   def test_UIO_apply_util_Left(): Unit = {
     z(s"${START}UIO.apply(util.Left(a))$END").assertHighlighted()
     val text   = z("UIO.apply(util.Left(a))")
-    val result = z("ZIO.left(a)")
+    val result = z("UIO.left(a)")
     testQuickFixes(text, result, hint)
   }
 }
@@ -190,28 +190,28 @@ class SucceedRightInspectionTest extends SimplifySucceedEitherInspectionTest("ZI
   def test_UIO_Right(): Unit = {
     z(s"${START}UIO(Right(a))$END").assertHighlighted()
     val text   = z("UIO(Right(a))")
-    val result = z("ZIO.right(a)")
+    val result = z("UIO.right(a)")
     testQuickFixes(text, result, hint)
   }
 
   def test_UIO_util_Right(): Unit = {
     z(s"${START}UIO(util.Right(a))$END").assertHighlighted()
     val text   = z("UIO(util.Right(a))")
-    val result = z("ZIO.right(a)")
+    val result = z("UIO.right(a)")
     testQuickFixes(text, result, hint)
   }
 
   def test_UIO_apply_Right(): Unit = {
     z(s"${START}UIO.apply(Right(a))$END").assertHighlighted()
     val text   = z("UIO.apply(Right(a))")
-    val result = z("ZIO.right(a)")
+    val result = z("UIO.right(a)")
     testQuickFixes(text, result, hint)
   }
 
   def test_UIO_apply_util_Right(): Unit = {
     z(s"${START}UIO.apply(util.Right(a))$END").assertHighlighted()
     val text   = z("UIO.apply(util.Right(a))")
-    val result = z("ZIO.right(a)")
+    val result = z("UIO.right(a)")
     testQuickFixes(text, result, hint)
   }
 }

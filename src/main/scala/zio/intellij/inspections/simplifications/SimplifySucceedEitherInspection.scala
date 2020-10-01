@@ -4,18 +4,19 @@ import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
 import zio.intellij.utils.StringUtils._
+import zio.intellij.utils.types.ZioType
+import zio.intellij.utils.types.ZioTypes.{UIO, URIO}
 
 class SimplifySucceedEitherInspection extends ZInspection(LeftSimplificationType, RightSimplificationType)
 
 sealed abstract class EitherSimplificationType(extractor: TypeReference, zioMethodName: String)
     extends SimplificationType {
-  private val UIOApply = new Apply(Set("zio.UIO"))
 
   override def hint: String = s"Replace with ZIO.$zioMethodName"
 
-  private def replacement(zioExpr: ScExpression, eitherArg: ScExpression): Simplification =
+  private def replacement(zioType: ZioType, zioExpr: ScExpression, eitherArg: ScExpression): Simplification =
     replace(zioExpr)
-      .withText(s"ZIO.$zioMethodName${eitherArg.getWrappedText}")
+      .withText(s"${zioType.name}.$zioMethodName${eitherArg.getWrappedText}")
       .highlightAll
 
   private def getArg(eitherExpr: ScExpression): Option[ScExpression] =
@@ -26,9 +27,10 @@ sealed abstract class EitherSimplificationType(extractor: TypeReference, zioMeth
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case `ZIO.succeed`(extractor(eitherExpr)) => getArg(eitherExpr).map(replacement(expr, _))
-      case UIOApply(extractor(eitherExpr))      => getArg(eitherExpr).map(replacement(expr, _))
-      case _                                    => None
+      case `ZIO.succeed`(zioType, extractor(eitherExpr)) => getArg(eitherExpr).map(replacement(zioType, expr, _))
+      case `ZIO.apply`(zioType @ (UIO | URIO), extractor(eitherExpr)) =>
+        getArg(eitherExpr).map(replacement(zioType, expr, _))
+      case _ => None
     }
 }
 

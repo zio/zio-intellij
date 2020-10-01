@@ -5,6 +5,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFor}
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods.`.*>`
 import zio.intellij.utils.StringUtils._
+import zio.intellij.utils.types.ZioType
 
 class SimplifyForeachInspection
     extends ZInspection(
@@ -20,8 +21,13 @@ sealed abstract class BaseForeachSimplificationType(methodName: String) extends 
 
   override def hint: String = s"Replace with ZIO.$methodName"
 
-  protected def replacement(expr: ScExpression, iterable: ScExpression, func: ScExpression): Simplification =
-    replace(expr).withText(s"ZIO.$methodName${iterable.getWrappedText}${func.getWrappedText}").highlightAll
+  protected def replacement(
+    zioType: ZioType,
+    expr: ScExpression,
+    iterable: ScExpression,
+    func: ScExpression
+  ): Simplification =
+    replace(expr).withText(s"${zioType.name}.$methodName${iterable.getWrappedText}${func.getWrappedText}").highlightAll
 }
 
 sealed abstract class BaseForeachParNSimplificationType extends SimplificationType {
@@ -30,9 +36,15 @@ sealed abstract class BaseForeachParNSimplificationType extends SimplificationTy
 
   override def hint: String = s"Replace with ZIO.$methodName"
 
-  def replacement(expr: ScExpression, n: ScExpression, iterable: ScExpression, func: ScExpression): Simplification =
+  def replacement(
+    zioType: ZioType,
+    expr: ScExpression,
+    n: ScExpression,
+    iterable: ScExpression,
+    func: ScExpression
+  ): Simplification =
     replace(expr)
-      .withText(s"ZIO.$methodName${n.getWrappedText}${iterable.getWrappedText}${func.getWrappedText}")
+      .withText(s"${zioType.name}.$methodName${n.getWrappedText}${iterable.getWrappedText}${func.getWrappedText}")
       .highlightAll
 }
 
@@ -45,7 +57,7 @@ sealed abstract class BaseForeachForCompSimplificationType(
     expr match {
       case ScFor(enumerators, _) =>
         enumerators.generators.collect {
-          case `_ <- x`(expr @ methodExtractor(iterable, func)) => replacement(expr, iterable, func)
+          case `_ <- x`(expr @ methodExtractor(zioType, iterable, func)) => replacement(zioType, expr, iterable, func)
         }
       case _ => Nil
     }
@@ -63,7 +75,8 @@ object ForeachParNForCompSimplificationType extends BaseForeachParNSimplificatio
     expr match {
       case ScFor(enumerators, _) =>
         enumerators.generators.collect {
-          case `_ <- x`(expr @ `ZIO.foreachParN`(n, iterable, func)) => replacement(expr, n, iterable, func)
+          case `_ <- x`(expr @ `ZIO.foreachParN`(zioType, n, iterable, func)) =>
+            replacement(zioType, expr, n, iterable, func)
         }
       case _ => Nil
     }
@@ -76,9 +89,10 @@ sealed abstract class BaseForeachChainSimplificationType(
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case (expr @ methodExtractor(iterable, func)) `.*>` _         => Some(replacement(expr, iterable, func))
-      case _ `.*>` (expr @ methodExtractor(iterable, func)) `.*>` _ => Some(replacement(expr, iterable, func))
-      case _                                                        => None
+      case (expr @ methodExtractor(zioType, iterable, func)) `.*>` _ => Some(replacement(zioType, expr, iterable, func))
+      case _ `.*>` (expr @ methodExtractor(zioType, iterable, func)) `.*>` _ =>
+        Some(replacement(zioType, expr, iterable, func))
+      case _ => None
     }
 }
 
@@ -92,8 +106,10 @@ object ForeachParNChainSimplificationType extends BaseForeachParNSimplificationT
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case (expr @ `ZIO.foreachParN`(n, iterable, func)) `.*>` _         => Some(replacement(expr, n, iterable, func))
-      case _ `.*>` (expr @ `ZIO.foreachParN`(n, iterable, func)) `.*>` _ => Some(replacement(expr, n, iterable, func))
-      case _                                                             => None
+      case (expr @ `ZIO.foreachParN`(zioType, n, iterable, func)) `.*>` _ =>
+        Some(replacement(zioType, expr, n, iterable, func))
+      case _ `.*>` (expr @ `ZIO.foreachParN`(zioType, n, iterable, func)) `.*>` _ =>
+        Some(replacement(zioType, expr, n, iterable, func))
+      case _ => None
     }
 }

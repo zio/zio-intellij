@@ -256,7 +256,7 @@ class FutureWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Futu
   def test_zio_alias_task(): Unit = {
     z(s"${START}Task.effectTotal(Future(42))$END").assertHighlighted()
     val text   = z(s"Task.effectTotal(Future(42))")
-    val result = z(s"ZIO.fromFuture(implicit ec => Future(42))")
+    val result = z(s"Task.fromFuture(implicit ec => Future(42))")
     testQuickFixes(text, result, hint)
   }
 }
