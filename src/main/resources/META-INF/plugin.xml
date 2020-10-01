@@ -135,10 +135,16 @@
                          shortName="NothingInContravariantPositionInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
-        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyFlatmapInspection"
-                         displayName="Simplify discarding effect result to .zipRight/*>" groupPath="Scala,ZIO"
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyZipRightInspection"
+                         displayName="Simplify discarding effect result to .zipRight/*&gt;" groupPath="Scala,ZIO"
                          groupName="Simplifications"
-                         shortName="SimplifyFlatmapInspection" level="WARNING"
+                         shortName="SimplifyZipRightInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyZipLeftInspection"
+                         displayName="Simplify discarding effect result to .zipLeft/&lt;*" groupPath="Scala,ZIO"
+                         groupName="Simplifications"
+                         shortName="SimplifyZipLeftInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyForeachInspection"
