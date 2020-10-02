@@ -14,7 +14,7 @@ abstract class SimplifyForeachInspectionTest(
   private val nParamList = if (isParN) "(n)" else ""
 
   private val zioMethodToReplace     = s"""URIO.$methodToReplace$nParamList(myIterable)(f)"""
-  private val zioMethodToReplaceWith = s"""ZIO.$methodToReplaceWith$nParamList(myIterable)(f)"""
+  private val zioMethodToReplaceWith = s"""URIO.$methodToReplaceWith$nParamList(myIterable)(f)"""
 
   private val zioBlockMethodToReplace =
     s"""URIO.$methodToReplace$nParamList(myIterable) { it =>
@@ -25,7 +25,7 @@ abstract class SimplifyForeachInspectionTest(
        |}""".stripMargin
 
   private val zioBlockMethodToReplaceWith =
-    s"""ZIO.$methodToReplaceWith$nParamList(myIterable) {
+    s"""URIO.$methodToReplaceWith$nParamList(myIterable) {
        |  it =>
        |    println(it)
        |    for {

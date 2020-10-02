@@ -14,7 +14,7 @@ sealed abstract class BaseToLayerSimplificationType(methodName: String, methodEx
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case methodExtractor(effect) if fromZio(effect) =>
+      case methodExtractor(_, effect) if fromZio(effect) =>
         Some(replace(expr).withText(invocationText(effect, methodName)).highlightFrom(expr))
       case _ => None
     }

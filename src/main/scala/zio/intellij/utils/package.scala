@@ -5,6 +5,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.{JavaPsiFacade, PsiElement}
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
+import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{
@@ -13,8 +14,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.{
   ScFunctionDefinition,
   ScTypeAliasDefinition
 }
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types.{
   AliasType,
@@ -23,6 +24,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.{
   ScType,
   TermSignature
 }
+import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
 
 package object utils {
 
@@ -94,6 +96,12 @@ package object utils {
       case parameterizedType: ScParameterizedType => Some(parameterizedType.typeArguments)
       case _                                      => None
     }
+
+  def fqnIfIsOfClassFrom(tpe: ScType, patterns: Array[String]): Option[String] =
+    tpe.tryExtractDesignatorSingleton.extractClass
+      .flatMap(Option(_))
+      .flatMap(c => Option(c.qualifiedName))
+      .find(ScalaNamesUtil.nameFitToPatterns(_, patterns, strict = false))
 
   object Field {
 

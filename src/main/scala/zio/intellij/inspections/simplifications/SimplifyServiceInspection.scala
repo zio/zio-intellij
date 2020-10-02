@@ -7,6 +7,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.TypePresentationContext
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import zio.intellij.inspections._
 import zio.intellij.inspections.hasMethods.`.get`
+import zio.intellij.utils.types.ZioType
 import zio.intellij.utils.{extractTypeArguments, resolveAliases}
 
 class SimplifyServiceInspection extends ZInspection(AccessGetSimplificationType)
@@ -14,8 +15,8 @@ class SimplifyServiceInspection extends ZInspection(AccessGetSimplificationType)
 object AccessGetSimplificationType extends SimplificationType {
   override def hint: String = "Replace with ZIO.service"
 
-  private def replacement(accessExpr: ScExpression, accessTypeArg: Option[ScTypeElement] = None)(implicit
-    ctx: TypePresentationContext = TypePresentationContext(accessExpr)
+  private def replacement(zioType: ZioType, accessExpr: ScExpression, accessTypeArg: Option[ScTypeElement] = None)(
+    implicit ctx: TypePresentationContext = TypePresentationContext(accessExpr)
   ): Option[Simplification] = {
     val serviceTypeArg = for {
       arg           <- accessTypeArg
@@ -26,7 +27,7 @@ object AccessGetSimplificationType extends SimplificationType {
     } yield innerTypeArgs.head
 
     val simplification = replace(accessExpr)
-      .withText(s"ZIO.service${serviceTypeArg.fold("")(t => s"[${t.codeText}]")}")
+      .withText(s"${zioType.name}.service${serviceTypeArg.fold("")(t => s"[${t.codeText}]")}")
       .highlightFrom(accessExpr)
 
     Some(simplification)
@@ -38,10 +39,10 @@ object AccessGetSimplificationType extends SimplificationType {
       case ScMethodCall(accessCall, Seq(_ `.get` () | lambda(_, Some(_ `.get` ())))) =>
         accessCall match {
           // ZIO.access(...)
-          case `ZIO.access`(_) => replacement(expr)
+          case `ZIO.access`(zioType, _) => replacement(zioType, expr)
           // ZIO.access[TypeParam](...)
-          case ScGenericCall(`ZIO.access`(_), Seq(accessTypeArg)) =>
-            replacement(expr, Some(accessTypeArg))
+          case ScGenericCall(`ZIO.access`(zioType, _), Seq(accessTypeArg)) =>
+            replacement(zioType, expr, Some(accessTypeArg))
           case _ => None
         }
       case _ => None

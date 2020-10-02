@@ -3,10 +3,11 @@ package zio.intellij.utils
 import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
+import zio.intellij.utils.types.ZioTypes
 
 object TypeCheckUtils {
 
-  val zioTypes        = Array("zio.ZIO", "zio.UIO", "zio.RIO", "zio.URIO", "zio.IO", "zio.Task")
+  val zioTypes        = ZioTypes.values.map(_.fqName).toArray
   val managedTypes    = Array("zio.ZManaged")
   val extraTypes      = Array("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
   val zioTest         = Array("zio.test._")
