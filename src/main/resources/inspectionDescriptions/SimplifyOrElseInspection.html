@@ -1,0 +1,19 @@
+<html>
+<body>Simplify the following expressions to use <code>.orElseFail</code> instead:
+<pre>
+x.orElse(ZIO.fail(new Exception("error"))) -> x.orElseFail(new Exception("error"))
+
+x.orElse {
+    val a = 1
+    val b = 2
+    ZIO.fail(new Exception(s"error ${a + b}"))
+}
+->
+x.orElseFail {
+    val a = 1
+    val b = 2
+    new Exception(s"error ${a + b}")
+}
+</pre>
+</body>
+</html>

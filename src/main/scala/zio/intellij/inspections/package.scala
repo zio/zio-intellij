@@ -25,6 +25,7 @@ package object inspections {
     val `.flatMap`: Qualified      = invocation("flatMap").from(zioLikePackages)
     val `.flatMapError`: Qualified = invocation("flatMapError").from(zioLikePackages)
     val `.mapError`: Qualified     = invocation("mapError").from(zioLikePackages)
+    val `.orElse`: Qualified       = invocation("orElse").from(zioLikePackages)
     val `.orElseFail`: Qualified   = invocation("orElseFail").from(zioLikePackages)
     val `.catchAll`: Qualified     = invocation("catchAll").from(zioLikePackages)
     val `.fold`: Qualified         = invocation("fold").from(zioLikePackages)
@@ -32,6 +33,7 @@ package object inspections {
     val `.foldCauseM`: Qualified   = invocation("foldCauseM").from(zioLikePackages)
     val `.tap`: Qualified          = invocation("tap").from(zioLikePackages)
     val `.tapError`: Qualified     = invocation("tapError").from(zioLikePackages)
+    val `.orDie`: Qualified        = invocation("orDie").from(zioLikePackages)
 
     val `.fork`: Qualified                 = invocation("fork").from(zioLikePackages)
     val `.forkDaemon`: Qualified           = invocation("forkDaemon").from(zioLikePackages)
