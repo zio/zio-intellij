@@ -26,7 +26,7 @@ final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
     def buildInfo(td: ScTypeDefinition, tm: Option[ScReferenceExpression]) =
       tm match {
         case Some(method) if method.refName == "suite" =>
-          buildLineInfo(buildUrl(td, tm), td.getProject, true)
+          buildLineInfo(buildUrl(td, tm), td.getProject, isClass = true)
         case _ =>
           buildLineInfo(buildUrl(td, tm), td.getProject, tm.isEmpty)
       }
