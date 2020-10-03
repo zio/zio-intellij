@@ -20,6 +20,8 @@ lazy val `zio-intellij` = project
       "com.intellij.java".toPlugin,
       "org.intellij.scala:2020.2.25".toPlugin
     ),
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
+    testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
     patchPluginXml := pluginXmlOptions { xml =>
       xml.version = version.value
       xml.changeNotes = s"""<![CDATA[
