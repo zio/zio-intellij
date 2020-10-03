@@ -27,7 +27,7 @@ import org.jetbrains.plugins.scala.testingSupport.test._
 import org.jetbrains.plugins.scala.testingSupport.test.actions.ScalaRerunFailedTestsAction
 import org.jetbrains.plugins.scala.testingSupport.test.sbt._
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
-
+import zio.intellij.utils._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -67,15 +67,7 @@ class ZTestRunConfiguration(
     runnerInfo.runnerClass == ZTestRunnerName
 
   private def hasTestRunner(module: Module): Boolean =
-    if (BspUtil.isBspModule(module)) {
-      // todo there must be a better way!
-      val allFiles = module.libraries
-        .flatMap(_.getUrls(OrderRootType.CLASSES))
-        .toSet
-
-      allFiles.exists(_.contains("zio-test-intellij"))
-    } else
-      module.libraries.map(_.getName).exists(_.contains("zio-test-intellij"))
+    module.findLibrary(_.contains("zio-test-intellij")).isDefined
 
   override def getState(executor: Executor, env: ExecutionEnvironment): RunProfileState = {
     val module = getModule
