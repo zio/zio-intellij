@@ -153,6 +153,18 @@
                          shortName="IfGuardInsteadOfWhenInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyFailInspection"
+                         displayName="Simplify ZIO.fail.orDie to ZIO.die"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyFailInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyOrElseInspection"
+                         displayName="Simplify .orElse(ZIO.fail) to .orElseFail"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyOrElseInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
