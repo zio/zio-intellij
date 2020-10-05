@@ -1,13 +1,13 @@
 package zio.inspections
 
 import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
-import zio.intellij.inspections.simplifications.SimplifyFlatmapInspection
+import zio.intellij.inspections.simplifications.SimplifyZipRightInspection
 
-abstract class FlatmapInspectionTest(s: String) extends ZSimplifyInspectionTest[SimplifyFlatmapInspection] {
+abstract class ZipRightInspectionTest(s: String) extends ZSimplifyInspectionTest[SimplifyZipRightInspection] {
   override protected val hint = s"Replace with $s"
 }
 
-class SimplifyFlatmapWithZipRightTest extends FlatmapInspectionTest(".zipRight") {
+class SimplifyFlatmapWithZipRightTest extends ZipRightInspectionTest(".zipRight") {
 
   def test_flatMap_to_zipRight(): Unit = {
     z(s"""ZIO.succeed("Remedios Varo").${START}flatMap(_ => x)$END""").assertHighlighted()
@@ -47,7 +47,7 @@ class SimplifyFlatmapWithZipRightTest extends FlatmapInspectionTest(".zipRight")
 
 }
 
-class SimplifyFlatmapWithZipRightOperatorTest extends FlatmapInspectionTest("*>") {
+class SimplifyFlatmapWithZipRightOperatorTest extends ZipRightInspectionTest("*>") {
 
   def test_infix_flatMap_to_*>(): Unit = {
     z(s"""ZIO.succeed("Xul Solar").${START}flatMap(_ => x)$END""").assertHighlighted()
