@@ -1,5 +1,5 @@
 lazy val scala212      = "2.12.10"
-lazy val pluginVersion = "2020.1.1.1"
+lazy val pluginVersion = "2020.1.1.2"
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "2020.1"
@@ -23,11 +23,9 @@ lazy val `zio-intellij` = project
     patchPluginXml := pluginXmlOptions { xml =>
       xml.version = version.value
       xml.changeNotes = s"""<![CDATA[
-        <em>A huge thanks to Timur Aliberdov (<a href="https://github.com/timaliberdov">@timaliberdov</a>), as well as Nikita Myazin, and others who contributed to this release!</em>
         <strong>Note: This is the last release for 2020.1.x. Please upgrade to 2020.2.x to continue receiving updates!</strong>
         <ul>
-        <li>Fixing an issue where certain refactorings erroneously deleted code blocks (<a href="https://github.com/zio/zio-intellij/pull/147">#147</a>)</li>
-        <li>Added simplification for <code>ZIO.unless</code>, tweaked <code>ZIO.when</code> (<a href="https://github.com/zio/zio-intellij/pull/148">#148</a>)</li>
+        <li>ZIO Test suggestions erroneously appear in other frameworks, such as specs2 (<a href="https://github.com/zio/zio-intellij/pull/158">#158</a>)</li>
         <ul>
         ]]>"""
     }
