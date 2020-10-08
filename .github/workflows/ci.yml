@@ -1,20 +1,29 @@
 name: CI
+
 on:
   push:
-    branches: [ idea201.x, idea202.x, idea203.x ]
+    branches:
+      - idea201.x
+      - idea202.x
+      - idea203.x
   pull_request:
+
 jobs:
   check:
     strategy:
       fail-fast: false
       matrix:
-        runner: [ ubuntu-latest, macos-latest, windows-latest ]
-    runs-on: ${{ matrix.runner }}
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: olafurpg/setup-scala@v7
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Scala
+        uses: olafurpg/setup-scala@v7
         with:
           java-version: "adopt@1.8"
+
       - name: Run tests
         run: sbt test
         shell: bash
