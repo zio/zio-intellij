@@ -1,0 +1,89 @@
+name: Publish zio-intellij to eap release channel
+
+on:
+  workflow_dispatch:
+  schedule:
+    # run every day at midnight UTC±00:00
+    - cron: '0 0 * * *'
+
+jobs:
+  generate-build-number:
+    runs-on: ubuntu-latest
+    outputs:
+      build_number: ${{ steps.buildnumber.outputs.build_number }}
+    steps:
+      - name: Generate build number
+        id: buildnumber
+        uses: einaregilsson/build-number@v2
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+
+  fetch-commit-hashes:
+    runs-on: ubuntu-latest
+    outputs:
+      latest-commit: ${{ steps.fetch-latest-commits.outputs.latest-commit }}
+      latest-tagged-commit: ${{ steps.fetch-latest-commits.outputs.latest-tagged-commit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # 0 indicates all history for all branches and tags.
+          fetch-depth: 0
+
+      - name: Fetch latest commits
+        id: fetch-latest-commits
+        run: |
+          echo "::set-output name=latest-commit::$(git log -n 1 --format=format:%H)"
+          echo "::set-output name=latest-tagged-commit::$(git show-ref --tags | grep eap | awk '{print $1}')"
+
+      - name: Print latest commits
+        run: |
+          echo "latest-commit: ${{ steps.fetch-latest-commits.outputs.latest-commit }}"
+          echo "latest-tagged-commit: ${{ steps.fetch-latest-commits.outputs.latest-tagged-commit }}"
+
+  publish:
+    needs:
+      - generate-build-number
+      - fetch-commit-hashes
+    runs-on: ubuntu-latest
+    if: needs.fetch-commit-hashes.outputs.latest-commit != needs.fetch-commit-hashes.outputs.latest-tagged-commit
+    env:
+      ZIO_INTELLIJ_BUILD_NUMBER: ${{ needs.generate-build-number.outputs.build_number }}
+      ZIO_INTELLIJ_CHANGE_NOTES: '—'
+      IJ_PLUGIN_REPO_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Scala
+        uses: olafurpg/setup-scala@v7
+        with:
+          java-version: "adopt@1.8"
+
+      - name: Package plugin
+        # The first packageArtifact creates the files (including plugin.xml).
+        # The second packageArtifactZip allows the patchPluginXML task to run
+        #   on those files and patch the plugin.xml.
+        # Then it packages files into a single zip archive.
+        run: sbt clean && sbt packageArtifact && sbt packageArtifactZip
+
+      - name: Publish plugin
+        run: sbt publishPlugin eap
+
+  tag-latest-commit:
+    needs:
+      - publish
+      - fetch-commit-hashes
+    runs-on: ubuntu-latest
+    if: needs.fetch-commit-hashes.outputs.latest-commit != needs.fetch-commit-hashes.outputs.latest-tagged-commit
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Update tag
+        run: |
+          commit_tag='eap'
+          git tag -d ${commit_tag} 2> /dev/null || true
+          git tag ${commit_tag} ${{ needs.fetch-commit-hashes.outputs.latest-commit }}
+          remote_repo="https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
+          git push ${remote_repo} ${commit_tag} -f
