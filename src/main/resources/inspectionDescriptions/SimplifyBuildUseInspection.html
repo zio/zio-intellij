@@ -1,0 +1,9 @@
+<html>
+<body>Simplify the following expressions to use <code>.provideLayer</code> instead:
+<pre>
+layer.build.use(effect.provide)         -> effect.provideLayer(layer)
+layer.build.use(effect.provide(_))      -> effect.provideLayer(layer)
+layer.build.use(l => effect.provide(l)) -> effect.provideLayer(layer)
+</pre>
+</body>
+</html>

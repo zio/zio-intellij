@@ -89,7 +89,7 @@ sealed abstract class BaseRefactoringType(invocation: Qualified, replaceWith: St
         .highlightFrom(qual)
 
     expr match {
-      case qual invocation lambda(Seq(param), Some(body) /* once told me */ ) =>
+      case qual invocation lambda(Seq(param), body) =>
         body match {
           // .flatMap*(a => expr(e).as(a))
           case ref `.as` ScReferenceExpression(a) if a == param => Some(replacement(qual, param, ref))

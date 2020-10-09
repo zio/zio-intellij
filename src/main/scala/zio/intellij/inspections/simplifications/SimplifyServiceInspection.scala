@@ -36,7 +36,7 @@ object AccessGetSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
       // match both (_.get) and (h => h.get)
-      case ScMethodCall(accessCall, Seq(_ `.get` () | lambda(_, Some(_ `.get` ())))) =>
+      case ScMethodCall(accessCall, Seq(_ `.get` () | lambda(_, _ `.get` ()))) =>
         accessCall match {
           // ZIO.access(...)
           case `ZIO.access`(zioType, _) => replacement(zioType, expr)
