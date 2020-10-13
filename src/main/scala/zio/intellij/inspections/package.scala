@@ -193,11 +193,11 @@ package object inspections {
 
     def unapply(ref: ScReferenceExpression): Option[String] =
       ref.resolve() match {
+        case null                                                       => findOverloaded(ref)
         case t: ScTemplateDefinition if types.contains(t.qualifiedName) => Some(t.qualifiedName)
-        case f: ScFunctionDefinition if types.contains(f.containingClass.qualifiedName) =>
-          Some(f.containingClass.qualifiedName)
-        case null => findOverloaded(ref)
-        case _    => None
+        case f: ScFunctionDefinition =>
+          Option(f.containingClass).map(_.qualifiedName).filter(types.contains)
+        case _ => None
       }
   }
 
