@@ -15,9 +15,9 @@ object SleepSimplificationType extends SimplificationType {
     def replacement(qual: ScExpression, duration: ScExpression) =
       replace(expr).withText(invocationText(qual, s"delay${duration.getWrappedText}")).highlightAll
     expr match {
-      case `ZIO.sleep`(_, duration) `.*>` io                       => Some(replacement(io, duration))
-      case `ZIO.sleep`(_, duration) `.flatMap` lambda(_, Some(io)) => Some(replacement(io, duration))
-      case _                                                       => None
+      case `ZIO.sleep`(_, duration) `.*>` io                 => Some(replacement(io, duration))
+      case `ZIO.sleep`(_, duration) `.flatMap` lambda(_, io) => Some(replacement(io, duration))
+      case _                                                 => None
     }
   }
 }

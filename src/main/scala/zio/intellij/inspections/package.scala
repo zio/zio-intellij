@@ -34,6 +34,7 @@ package object inspections {
     val `.tap`: Qualified          = invocation("tap").from(zioLikePackages)
     val `.tapError`: Qualified     = invocation("tapError").from(zioLikePackages)
     val `.orDie`: Qualified        = invocation("orDie").from(zioLikePackages)
+    val `.provide`: Qualified      = invocation("provide").from(zioLikePackages)
 
     val `.fork`: Qualified                 = invocation("fork").from(zioLikePackages)
     val `.forkDaemon`: Qualified           = invocation("forkDaemon").from(zioLikePackages)
@@ -49,6 +50,14 @@ package object inspections {
     val zioHasLikeClasses: Array[String] = Array("zio.Has", "zio.Has._")
 
     private[inspections] val `.get` = invocation("get").from(zioHasLikeClasses)
+  }
+
+  object layerMethods {
+    val `.build`: Qualified = invocation("build").from(zioLayerTypes)
+  }
+
+  object managedMethods {
+    val `.use`: Qualified = invocation("use").from(managedTypes)
   }
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
@@ -197,7 +206,7 @@ package object inspections {
   }
 
   object ZLayerStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
-    override val types: Set[String] = ZLayerTypes.values.map(_.fqName).toSet
+    override val types: Set[String] = zioLayerTypes.toSet
   }
 
   class ReturnTypeReference(typeFQNs: Set[String]) {
@@ -297,9 +306,9 @@ package object inspections {
 
   object lambda {
 
-    def unapply(expr: ScExpression): Option[(Seq[ScParameter], Option[ScExpression])] = expr match {
-      case ScFunctionExpr(params @ Seq(_), res @ Some(_)) =>
-        Some(params, res.map(stripped))
+    def unapply(expr: ScExpression): Option[(Seq[ScParameter], ScExpression)] = expr match {
+      case ScFunctionExpr(params @ Seq(_), Some(res)) =>
+        Some(params, stripped(res))
       case _ => None
     }
   }
@@ -323,7 +332,7 @@ package object inspections {
 
     def unapply(expr: ScExpression): Option[ScExpression] =
       expr match {
-        case lambda(Seq(x), res) if underscore(x) => res
+        case lambda(Seq(x), res) if underscore(x) => Some(res)
         case _                                    => None
       }
 
@@ -338,16 +347,16 @@ package object inspections {
 
     def unapply(expr: ScExpression): Boolean =
       expr match {
-        case lambda(_, Some(unit())) => true
-        case _                       => false
+        case lambda(_, unit()) => true
+        case _                 => false
       }
   }
 
   object `_ => ZIO.unit` {
 
     def unapply(expr: ScExpression): Boolean = expr match {
-      case lambda(_, Some(`ZIO.unit`(_))) => true
-      case _                              => false
+      case lambda(_, `ZIO.unit`(_)) => true
+      case _                        => false
     }
   }
 

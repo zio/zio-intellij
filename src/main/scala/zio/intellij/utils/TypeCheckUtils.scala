@@ -3,11 +3,12 @@ package zio.intellij.utils
 import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
-import zio.intellij.utils.types.ZioTypes
+import zio.intellij.utils.types.{ZLayerTypes, ZioTypes}
 
 object TypeCheckUtils {
 
   val zioTypes        = ZioTypes.values.map(_.fqName).toArray
+  val zioLayerTypes   = ZLayerTypes.values.map(_.fqName).toArray
   val zioSinkTypes    = Array("zio.stream.ZSink")
   val zioStreamTypes  = Array("zio.stream.ZStream")
   val managedTypes    = Array("zio.ZManaged")

@@ -171,6 +171,12 @@
                          shortName="SimplifyOrElseInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyBuildUseInspection"
+                         displayName="Simplify .build.use to .provideLayer"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyBuildUseInspection" level="WEAK WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
