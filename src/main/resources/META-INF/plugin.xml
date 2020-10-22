@@ -177,6 +177,30 @@
                          shortName="SimplifyBuildUseInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection"
+                         displayName="Effect cannot fail; operation on error is impossible"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="InfallibleEffectRecoveryInspection" level="ERROR"
+                         enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyErrorModificationInspection"
+                         displayName="Simplify expression by discarding operation on error since effect cannot fail"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyErrorModificationInspection" level="ERROR"
+                         enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyErrorRecoveryInspection"
+                         displayName="Simplify expression by discarding recovery since effect cannot fail"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyErrorRecoveryInspection" level="ERROR"
+                         enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyErrorSeparationInspection"
+                         displayName="Simplify expression by discarding operation on error since effect cannot fail"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyErrorSeparationInspection" level="ERROR"
+                         enabledByDefault="true" language="Scala"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>

@@ -8,8 +8,9 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScTemplateDefinition}
+import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import zio.intellij.utils.TypeCheckUtils._
-import zio.intellij.utils.fqnIfIsOfClassFrom
+import zio.intellij.utils._
 import zio.intellij.utils.types._
 
 package object inspections {
@@ -19,22 +20,31 @@ package object inspections {
   }
 
   object zioMethods {
-    val `.*>` : Qualified          = invocation("*>").from(zioLikePackages)
-    val `.as`: Qualified           = invocation("as").from(zioLikePackages)
-    val `.map`: Qualified          = invocation("map").from(zioLikePackages)
-    val `.flatMap`: Qualified      = invocation("flatMap").from(zioLikePackages)
-    val `.flatMapError`: Qualified = invocation("flatMapError").from(zioLikePackages)
-    val `.mapError`: Qualified     = invocation("mapError").from(zioLikePackages)
-    val `.orElse`: Qualified       = invocation("orElse").from(zioLikePackages)
-    val `.orElseFail`: Qualified   = invocation("orElseFail").from(zioLikePackages)
-    val `.catchAll`: Qualified     = invocation("catchAll").from(zioLikePackages)
-    val `.fold`: Qualified         = invocation("fold").from(zioLikePackages)
-    val `.foldCause`: Qualified    = invocation("foldCause").from(zioLikePackages)
-    val `.foldCauseM`: Qualified   = invocation("foldCauseM").from(zioLikePackages)
-    val `.tap`: Qualified          = invocation("tap").from(zioLikePackages)
-    val `.tapError`: Qualified     = invocation("tapError").from(zioLikePackages)
-    val `.orDie`: Qualified        = invocation("orDie").from(zioLikePackages)
-    val `.provide`: Qualified      = invocation("provide").from(zioLikePackages)
+    val `.*>` : Qualified               = invocation("*>").from(zioLikePackages)
+    val `.as`: Qualified                = invocation("as").from(zioLikePackages)
+    val `.map`: Qualified               = invocation("map").from(zioLikePackages)
+    val `.flatMap`: Qualified           = invocation("flatMap").from(zioLikePackages)
+    val `.flatMapError`: Qualified      = invocation("flatMapError").from(zioLikePackages)
+    val `.mapError`: Qualified          = invocation("mapError").from(zioLikePackages)
+    val `.bimap`: Qualified             = invocation("bimap").from(zioLikePackages)
+    val `.orElse`: Qualified            = invocation("orElse").from(zioLikePackages)
+    val `.orElseFail`: Qualified        = invocation("orElseFail").from(zioLikePackages)
+    val `.orElseEither`: Qualified      = invocation("orElseEither").from(zioLikePackages)
+    val `.<+>` : Qualified              = invocation("<+>").from(zioLikePackages)
+    val `.retryOrElseEither`: Qualified = invocation("retryOrElseEither").from(zioLikePackages)
+    val `.catchAll`: Qualified          = invocation("catchAll").from(zioLikePackages)
+    val `.fold`: Qualified              = invocation("fold").from(zioLikePackages)
+    val `.foldM`: Qualified             = invocation("foldM").from(zioLikePackages)
+    val `.foldCause`: Qualified         = invocation("foldCause").from(zioLikePackages)
+    val `.foldCauseM`: Qualified        = invocation("foldCauseM").from(zioLikePackages)
+    val `.foldTraceM`: Qualified        = invocation("foldTraceM").from(zioLikePackages)
+    val `.tap`: Qualified               = invocation("tap").from(zioLikePackages)
+    val `.tapError`: Qualified          = invocation("tapError").from(zioLikePackages)
+    val `.tapBoth`: Qualified           = invocation("tapBoth").from(zioLikePackages)
+    val `.orDie`: Qualified             = invocation("orDie").from(zioLikePackages)
+    val `.provide`: Qualified           = invocation("provide").from(zioLikePackages)
+    val `.option`: Qualified            = invocation("option").from(zioLikePackages)
+    val `.either`: Qualified            = invocation("either").from(zioLikePackages)
 
     val `.fork`: Qualified                 = invocation("fork").from(zioLikePackages)
     val `.forkDaemon`: Qualified           = invocation("forkDaemon").from(zioLikePackages)
@@ -254,11 +264,18 @@ package object inspections {
   val `ZIO.forkAll`       = new ZIOStaticMemberReference("forkAll")
   val `ZIO.forkAll_`      = new ZIOStaticMemberReference("forkAll_")
 
-  val `ZIO.collectAllParN` = new ZIOCurried2StaticMemberReference("collectAllParN")
-  val `ZIO.foreach`        = new ZIOCurried2StaticMemberReference("foreach")
-  val `ZIO.foreachPar`     = new ZIOCurried2StaticMemberReference("foreachPar")
+  val `ZIO.collectAllParN`   = new ZIOCurried2StaticMemberReference("collectAllParN")
+  val `ZIO.foreach`          = new ZIOCurried2StaticMemberReference("foreach")
+  val `ZIO.foreachPar`       = new ZIOCurried2StaticMemberReference("foreachPar")
+  val `ZIO.partition`        = new ZIOCurried2StaticMemberReference("partition")
+  val `ZIO.partitionPar`     = new ZIOCurried2StaticMemberReference("partitionPar")
+  val `ZIO.validate`         = new ZIOCurried2StaticMemberReference("validate")
+  val `ZIO.validatePar`      = new ZIOCurried2StaticMemberReference("validatePar")
+  val `ZIO.validateFirst`    = new ZIOCurried2StaticMemberReference("validateFirst")
+  val `ZIO.validateFirstPar` = new ZIOCurried2StaticMemberReference("validateFirstPar")
 
-  val `ZIO.foreachParN` = new ZIOCurried3StaticMemberReference("foreachParN")
+  val `ZIO.foreachParN`   = new ZIOCurried3StaticMemberReference("foreachParN")
+  val `ZIO.partitionParN` = new ZIOCurried3StaticMemberReference("partitionParN")
 
   val `ZLayer.fromEffect`     = new ZLayerStaticMemberReference("fromEffect")
   val `ZLayer.fromEffectMany` = new ZLayerStaticMemberReference("fromEffectMany")
@@ -378,6 +395,25 @@ package object inspections {
             case _                                           => None
           }
         case _ => None
+      }
+  }
+
+  object `ZIO[R, E, A]` {
+    private def unapplyInner(tpe: ScType): Option[(ScType, ScType, ScType)] =
+      resolveAliases(tpe.tryExtractDesignatorSingleton).flatMap(extractTypeArguments).flatMap {
+        case Seq(r, e, a) => Some(r, e, a)
+        case _            => None
+      }
+
+    def unapply(tpe: ScType): Option[(ScType, ScType, ScType)] =
+      if (fromZio(tpe)) unapplyInner(tpe) else None
+  }
+
+  object `URIO[R, A]` {
+    def unapply(tpe: ScType): Option[(ScType, ScType)] =
+      tpe match {
+        case `ZIO[R, E, A]`(r, e, a) if e.isNothing => Some(r, a)
+        case _                                      => None
       }
   }
 }

@@ -9,7 +9,7 @@ for {
 } yield ???
 </pre>
 <br/>
-Аnd you will also be prompted to fix it using <code>ZIO.when</code>:
+And you will also be prompted to fix it using <code>ZIO.when</code>:
 <pre>
 for {
     _ <- myService.executeSomething().when(config.somethingShouldBeExecuted)
