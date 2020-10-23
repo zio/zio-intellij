@@ -1,12 +1,14 @@
 package zio.intellij.testsupport
 
 import com.intellij.psi.PsiElement
+import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.extensions.ResolvesTo
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
-import org.jetbrains.plugins.scala.lang.psi.types.ScalaType
+import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.ScClassImpl
+import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
-import zio.intellij.testsupport.ZTestFramework.testMethodTypes
+import zio.intellij.testsupport.ZTestFramework.expandsToTestMethod
 
 final class ZTestFramework extends AbstractTestFramework {
   override def getMarkerClassFQName: String = ZSuitePaths.head
@@ -28,9 +30,8 @@ final class ZTestFramework extends AbstractTestFramework {
     sc match {
       case ResolvesTo(f: ScFunctionDefinition) =>
         f.returnType match {
-          case Right(returnType) =>
-            val ret = ScalaType.expandAliases(returnType).getOrElse(returnType)
-            testMethodTypes.get(sc.refName).contains(ret.canonicalText)
+          case Right(returnType) if isOfClassFrom(returnType, Array("zio.test._")) =>
+            expandsToTestMethod(returnType)
           case _ => false
         }
       case _ => false
@@ -38,9 +39,19 @@ final class ZTestFramework extends AbstractTestFramework {
 }
 
 object ZTestFramework {
-  private[ZTestFramework] val testMethodTypes = Map(
-    "suite" -> "_root_.zio.test.Spec[R, E, T]",
-    "testM" -> "_root_.zio.test.Spec[R, _root_.zio.test.TestFailure[E], _root_.zio.test.TestSuccess]",
-    "test"  -> "_root_.zio.test.Spec[Any, _root_.zio.test.TestFailure[Nothing], _root_.zio.test.TestSuccess]"
+  private[ZTestFramework] val testMethodTypes = Set(
+    "_root_.zio.test.Spec[R, E, T]",
+    "_root_.zio.test.Spec[R, _root_.zio.test.TestFailure[E], _root_.zio.test.TestSuccess]",
+    "_root_.zio.test.Spec[Any, _root_.zio.test.TestFailure[Nothing], _root_.zio.test.TestSuccess]"
   )
+
+  private def expandsToTestMethod(tpe: ScType) =
+    tpe.extractClass.collect {
+      case c: ScClassImpl =>
+        val qname = c.qualifiedName
+        val canonical = (if (qname == null || qname == c.name) c.name
+                         else "_root_." + qname) + c.typeParamString
+        testMethodTypes.contains(canonical)
+    }.getOrElse(false)
+
 }
