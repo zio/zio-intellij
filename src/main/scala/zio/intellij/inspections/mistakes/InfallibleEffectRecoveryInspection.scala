@@ -10,8 +10,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
-import zio.intellij.inspections._
 import zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection._
+import zio.intellij.utils.TypeCheckUtils.isInfallibleEffect
 import zio.intellij.utils.{OptionUtils => OptionOps, _}
 
 class InfallibleEffectRecoveryInspection extends AbstractRegisteredInspection {
@@ -23,12 +23,6 @@ class InfallibleEffectRecoveryInspection extends AbstractRegisteredInspection {
     element match {
       case Typeable(ParameterizedType(designator, _)) => canFailDesignator(element).exists(_.equiv(designator))
       case _                                          => false
-    }
-
-  private def isInfallibleEffect(zio: ScExpression): Boolean =
-    zio match {
-      case Typeable(`URIO[R, A]`(_, _)) => true
-      case _                            => false
     }
 
   override protected def problemDescriptor(

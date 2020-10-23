@@ -3,58 +3,59 @@ package zio.inspections
 import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 import zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection
 
-class InfallibleEffectRecoveryInspectionTest extends ZScalaInspectionTest[InfallibleEffectRecoveryInspection] {
+abstract class InfallibleEffectRecoveryInspectionTest(fromEffect: String => String)
+    extends ZScalaInspectionTest[InfallibleEffectRecoveryInspection] {
   private val faultyMethod = "orElse"
 
   override protected val description = InfallibleEffectRecoveryInspection.description(faultyMethod)
   private val hint                   = InfallibleEffectRecoveryInspection.hint(faultyMethod)
 
   def testInlineHighlighting(): Unit =
-    z(s"${START}UIO(1).$faultyMethod(b)$END").assertHighlighted()
+    z(s"$START${fromEffect("UIO(1)")}.$faultyMethod(???)$END").assertHighlighted()
 
   def testInlineReplacement(): Unit = {
-    val text   = z(s"UIO(1).$faultyMethod(b)")
-    val result = z("UIO(1)")
+    val text   = z(s"${fromEffect("UIO(1)")}.$faultyMethod(???)")
+    val result = z(fromEffect("UIO(1)"))
     testQuickFixes(text, result, hint)
   }
 
   def testValHighlighting(): Unit = z {
-    s"""val foo = UIO(1)
-       |${START}foo.$faultyMethod(b)$END""".stripMargin
+    s"""val foo = ${fromEffect("UIO(1)")}
+       |${START}foo.$faultyMethod(???)$END""".stripMargin
   }.assertHighlighted()
 
   def testValReplacement(): Unit = {
     val text = z {
-      s"""val foo = UIO(1)
-         |foo.$faultyMethod(b)""".stripMargin
+      s"""val foo = ${fromEffect("UIO(1)")}
+         |foo.$faultyMethod(???)""".stripMargin
     }
     val result = z {
-      """val foo = UIO(1)
-        |foo""".stripMargin
+      s"""val foo = ${fromEffect("UIO(1)")}
+         |foo""".stripMargin
     }
     testQuickFixes(text, result, hint)
   }
 
   def testDefHighlighting(): Unit = z {
-    s"""def foo = UIO(1)
-       |${START}foo.$faultyMethod(b)$END""".stripMargin
+    s"""def foo = ${fromEffect("UIO(1)")}
+       |${START}foo.$faultyMethod(???)$END""".stripMargin
   }.assertHighlighted()
 
   def testDefReplacement(): Unit = {
     val text = z {
-      s"""def foo = UIO(1)
-         |foo.$faultyMethod(b)""".stripMargin
+      s"""def foo = ${fromEffect("UIO(1)")}
+         |foo.$faultyMethod(???)""".stripMargin
     }
     val result = z {
-      """def foo = UIO(1)
-        |foo""".stripMargin
+      s"""def foo = ${fromEffect("UIO(1)")}
+         |foo""".stripMargin
     }
     testQuickFixes(text, result, hint)
   }
 
   def testInlineBlockHighlighting(): Unit =
     z {
-      s"""${START}UIO(1).$faultyMethod {
+      s"""$START${fromEffect("UIO(1)")}.$faultyMethod {
          |  val a = 1
          |  b
          |}$END""".stripMargin
@@ -62,62 +63,68 @@ class InfallibleEffectRecoveryInspectionTest extends ZScalaInspectionTest[Infall
 
   def testInlineBlockReplacement(): Unit = {
     val text = z {
-      s"""UIO(1).$faultyMethod {
+      s"""${fromEffect("UIO(1)")}.$faultyMethod {
          |  val a = 1
-         |  b
+         |  ???
          |}""".stripMargin
     }
-    val result = z("UIO(1)")
+    val result = z(s"${fromEffect("UIO(1)")}")
     testQuickFixes(text, result, hint)
   }
 
   def testValBlockHighlighting(): Unit =
     z {
-      s"""val foo = UIO(1)
+      s"""val foo = ${fromEffect("UIO(1)")}
          |${START}foo.$faultyMethod {
          |  val a = 1
-         |  b
+         |  ???
          |}$END""".stripMargin
     }.assertHighlighted()
 
   def testValBlockReplacement(): Unit = {
     val text = z {
-      s"""val foo = UIO(1)
+      s"""val foo = ${fromEffect("UIO(1)")}
          |foo.$faultyMethod {
          |  val a = 1
-         |  b
+         |  ???
          |}""".stripMargin
     }
     val result = z {
-      """val foo = UIO(1)
-        |foo""".stripMargin
+      s"""val foo = ${fromEffect("UIO(1)")}
+         |foo""".stripMargin
     }
     testQuickFixes(text, result, hint)
   }
 
   def testDefBlockHighlighting(): Unit = z {
-    s"""def foo = UIO(1)
+    s"""def foo = ${fromEffect("UIO(1)")}
        |${START}foo.$faultyMethod {
        |  val a = 1
-       |  b
+       |  ???
        |}$END""".stripMargin
   }.assertHighlighted()
 
   def testDefBlockReplacement(): Unit = {
     val text = z {
-      s"""def foo = UIO(1)
+      s"""def foo = ${fromEffect("UIO(1)")}
          |foo.$faultyMethod {
          |  val a = 1
-         |  b
+         |  ???
          |}""".stripMargin
     }
     val result = z {
-      """def foo = UIO(1)
-        |foo""".stripMargin
+      s"""def foo = ${fromEffect("UIO(1)")}
+         |foo""".stripMargin
     }
     testQuickFixes(text, result, hint)
   }
 
   def testFallibleEffectNoHighlighting(): Unit =
-    z(s"${START}Task(1).$faultyMethod(b)$END").assertNotHighlighted()
+    z(s"$START${fromEffect("Task(1)")}.$faultyMethod(???)$END").assertNotHighlighted()
 }
+
+class InfallibleZIORecoveryInspectionTest extends InfallibleEffectRecoveryInspectionTest(identity)
+class InfallibleZManagedRecoveryInspectionTest
+    extends InfallibleEffectRecoveryInspectionTest(effect => s"ZManaged.fromEffect($effect)")
+class InfallibleZStreamRecoveryInspectionTest
+    extends InfallibleEffectRecoveryInspectionTest(effect => s"ZStream.fromEffect($effect)")
