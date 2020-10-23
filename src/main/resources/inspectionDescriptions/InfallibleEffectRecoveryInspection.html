@@ -1,0 +1,26 @@
+<html>
+Detects usages of methods that require `CanFail` evidence on infallible effects.
+For example
+<pre>
+    val task: Task[Int] = Task(1)
+    val uio: UIO[Int]   = UIO(1)
+
+    task.option      // 1
+    uio.option       // 2
+
+    task.orElse(uio) // 3
+    uio.orElse(task) // 4
+</pre>
+Lines 1 and 3 will not be highlighted since it is a valid code.
+<br/>
+Lines 2 and 4 will be highlighted since uio can't fail, which means `.option` and `.orElse` doesn't make sense and this
+code will not compile.
+<br/>
+Faulty operations can be discarded automatically (see <a href="https://zio.dev/docs/can_fail">ZIO documentation</a>),
+e.g.
+<pre>
+    uio.option            => uio
+    uio.orElse(task)      => uio
+    uio.flatMapError(???) => uio
+</pre>
+</html>

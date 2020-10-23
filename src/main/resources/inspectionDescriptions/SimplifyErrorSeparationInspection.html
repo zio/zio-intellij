@@ -1,0 +1,18 @@
+<html>
+Detects operations that will separate successes and failures when working with collections and suggest simplification
+that does not use errors. Note that these simplifications may change the behavior and may differ in return type.
+<pre>
+    val n: Int = 1
+    val list: List[Int] = Nil
+    val func(i: Int): UIO[Int] = UIO(i)
+
+    ZIO.partition(list)(func)        => ZIO.foreach(list)(func)
+    ZIO.partitionPar(list)(func)     => ZIO.foreachPar(list)(func)
+    ZIO.partitionParN(n)(list)(func) => ZIO.foreachParN(n)(list)(func)
+    ZIO.validate(list)(func)         => ZIO.foreach(list)(func)
+    ZIO.validatePar(list)(func)      => ZIO.foreachPar(list)(func)
+    ZIO.validateFirst(list)(func)    => ZIO.foreach(list)(func)
+    ZIO.validateFirstPar(list)(func) => ZIO.foreachPar(list)(func)
+</pre>
+See <a href="https://zio.dev/docs/can_fail">ZIO documentation</a> for explanation and more examples.
+</html>

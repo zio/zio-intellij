@@ -8,6 +8,7 @@ import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
@@ -64,6 +65,9 @@ package object utils {
 
   def createType(text: String, context: PsiElement, child: PsiElement = null): Option[ScType] =
     ScalaPsiElementFactory.createTypeFromText(text, context, child)
+
+  def createExpression(text: String, context: PsiElement): Option[ScExpression] =
+    ScalaPsiElementFactory.safe(_.createExpressionFromText(text, context))
 
   @annotation.tailrec
   def resolveAliases(tpe: ScType): Option[ScType] =

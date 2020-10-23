@@ -1,0 +1,14 @@
+<html>
+Detects operations on both value and error if the effect cannot fail and suggest simplification that will keep only
+operation on value.
+<pre>
+    val uio: UIO[Int] = UIO(1)
+
+    uio.bimap(e => f(e), v => g(v))      => uio.map(v => g(v))
+    uio.tapBoth(e => f(e), v => g(v))    => uio.tap(v => g(v))
+    uio.fold(e => f(e), v => g(v))       => uio.map(v => g(v))
+    uio.foldM(e => f(e), v => g(v))      => uio.flatMap(v => g(v))
+    uio.foldTraceM(e => f(e), v => g(v)) => uio.flatMap(v => g(v))
+</pre>
+See <a href="https://zio.dev/docs/can_fail">ZIO documentation</a> for explanation and more examples.
+</html>

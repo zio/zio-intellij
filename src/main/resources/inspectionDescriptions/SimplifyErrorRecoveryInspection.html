@@ -1,0 +1,15 @@
+<html>
+Detects recovery from error if the effect cannot fail and suggest simplification that will keep the same type without
+recovery.
+<pre>
+    val uio: UIO[Int]   = UIO(1)
+    val task: Task[Int] = Task(1)
+
+    uio.option                      => uio.map(Some(_))
+    uio.either                      => uio.map(Right(_))
+    uio.orElseEither(task)          => uio.map(Left(_))
+    uio <+> task                    => uio.map(Left(_))
+    uio.retryOrElseEither(???, ???) => uio.map(Right(_))
+</pre>
+See <a href="https://zio.dev/docs/can_fail">ZIO documentation</a> for explanation and more examples.
+</html>
