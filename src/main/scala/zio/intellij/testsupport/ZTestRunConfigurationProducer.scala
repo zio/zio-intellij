@@ -1,7 +1,7 @@
 package zio.intellij.testsupport
 
 import com.intellij.execution.Location
-import com.intellij.execution.actions.ConfigurationFromContext
+import com.intellij.execution.actions.{ConfigurationContext, ConfigurationFromContext}
 import com.intellij.execution.configurations.{ConfigurationFactory, ConfigurationTypeUtil}
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
