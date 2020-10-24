@@ -1,6 +1,8 @@
 package zio.intellij
 
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.{OrderRootType, ProjectRootManager}
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.{JavaPsiFacade, PsiElement}
@@ -15,6 +17,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScType
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
+import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
+import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt}
 
 package object utils {
 
@@ -115,4 +119,25 @@ package object utils {
       }
   }
 
+  implicit class ModuleSyntax(private val module: Module) extends AnyVal {
+    def findLibrary(p: String => Boolean): Option[Version] =
+      (for {
+        library <- module.libraries
+        url     <- library.getUrls(OrderRootType.CLASSES)
+        if p(url)
+        trimmedUrl  = utils.trimAfterSuffix(url, ".jar")
+        versionStr <- LibraryExt.runtimeVersion(trimmedUrl)
+        version    <- Version.parse(versionStr)
+      } yield version).headOption
+
+    def zioVersion: Option[Version] = findLibrary(lib => lib.contains("/dev/zio/zio_") || lib.contains("/dev.zio/zio_"))
+  }
+
+  implicit class TraverseAtHome[A](private val list: List[A]) extends AnyVal {
+    def map2[A, B, C](oa: Option[A], ob: Option[B])(f: (A, B) => C): Option[C] =
+      oa.flatMap(a => ob.map(b => f(a, b)))
+
+    def traverse[B](f: A => Option[B]): Option[List[B]] =
+      list.foldRight[Option[List[B]]](Some(Nil))((h, t) => map2(f(h), t)(_ :: _))
+  }
 }

@@ -17,7 +17,7 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
     highlightType: ProblemHighlightType
   )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
     element match {
-      case expr: ScExpression if IntentionAvailabilityChecker.checkInspection(this, expr.getParent) =>
+      case expr: ScExpression =>
         (expr, Option(expr.getNextSiblingNotWhitespace)) match {
           case (zioRef(_, _), Some(zioRef(_, _))) =>
             Some(

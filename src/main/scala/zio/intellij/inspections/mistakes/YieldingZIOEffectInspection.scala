@@ -46,7 +46,7 @@ class YieldingZIOEffectInspection extends AbstractRegisteredInspection {
     highlightType: ProblemHighlightType
   )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
     element match {
-      case expr: ScFor if IntentionAvailabilityChecker.checkInspection(this, expr.getParent) =>
+      case expr: ScFor =>
         expr.body match {
           case Some(body @ zioRef(_, _)) if hasGeneratorFromSameClass(expr, body) =>
             Some(createDescriptor(body))

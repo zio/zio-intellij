@@ -9,7 +9,6 @@ import com.intellij.notification.NotificationGroup
 import com.intellij.openapi.actionSystem.{AnAction, AnActionEvent, DefaultActionGroup}
 import com.intellij.openapi.application.{ApplicationManager, ModalityState}
 import com.intellij.openapi.project.{DumbAwareAction, Project}
-import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.Disposer
 import com.intellij.psi.search.GlobalSearchScope
@@ -20,13 +19,12 @@ import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
 import com.intellij.xdebugger.impl.ui.tree.nodes.XEvaluationCallbackBase
 import com.sun.jdi._
 import org.jetbrains.plugins.scala.ScalaLanguage
-import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectExt, ScalaLanguageLevel}
+import org.jetbrains.plugins.scala.project.{ModuleExt, ProjectExt, ScalaLanguageLevel}
 import zio.intellij.ui.FiberDumpPanel
-import zio.intellij.utils
-import zio.intellij.utils.Version
 import zio.intellij.utils.jdi._
 import zio.intellij.utils.jdi.fiber._
 import zio.intellij.utils.jdi.fiber.model.FiberInfo
+import zio.intellij.utils.{ModuleSyntax, TraverseAtHome, Version}
 
 import scala.annotation.tailrec
 
@@ -36,18 +34,11 @@ final class FiberDumpAction extends DumbAwareAction with AnAction.TransparentUpd
 
     val project = event.getProject
     if (project != null) {
-      val sourceModules = project.modulesWithScala.filter(_.isSourceModule)
+      val sourceModules = project.modulesWithScala.filter(_.isSourceModule).toList
 
-      // should work for non-sbt projects
-      val zioVersion = (for {
-        module  <- sourceModules
-        library <- module.libraries
-        url     <- library.getUrls(OrderRootType.CLASSES)
-        if url.contains("/dev/zio/zio_")
-        trimmedUrl  = utils.trimAfterSuffix(url, ".jar")
-        versionStr <- LibraryExt.runtimeVersion(trimmedUrl)
-        version    <- Version.parse(versionStr)
-      } yield version).headOption
+      val zioVersion = sourceModules
+        .traverse(_.zioVersion)
+        .flatMap(_.headOption)
 
       implicit val scalaLanguageLevel: ScalaLanguageLevel =
         sourceModules
