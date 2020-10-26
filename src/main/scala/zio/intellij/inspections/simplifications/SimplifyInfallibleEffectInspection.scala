@@ -8,11 +8,11 @@ import org.jetbrains.plugins.scala.codeInspection.collections.{
 }
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScReferenceExpression}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunction
-import org.jetbrains.plugins.scala.lang.psi.types.ScType
-import org.jetbrains.plugins.scala.lang.psi.types.result.{TypeResult, Typeable}
+import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
 import zio.intellij.utils.StringUtils.ScExpressionExt
+import zio.intellij.utils.TypeCheckUtils.isInfallibleEffect
 import zio.intellij.utils._
 import zio.intellij.utils.types.ZioType
 
@@ -46,32 +46,20 @@ class SimplifyErrorSeparationInspection
     )
 
 sealed abstract class BaseInfallibleEffectSimplificationType extends SimplificationType {
-  final protected def isURIO(tpe: ScType): Boolean =
-    tpe match {
-      case `URIO[R, A]`(_, _) => true
-      case _                  => false
-    }
-
-  final protected def isURIO(tpe: TypeResult): Boolean =
-    isURIO(tpe.getOrAny)
-
-  final protected def isURIO(zio: ScExpression): Boolean =
-    isURIO(zio.`type`)
-
-  final protected def isURIOFunc(func: ScExpression): Boolean =
+  final protected def isInfallibleFunc(func: ScExpression): Boolean =
     func match {
       // zio.flatMap(foo)
-      case ScReferenceExpression(f: ScFunction) => isURIO(f.returnType)
+      case ScReferenceExpression(f: ScFunction) => isInfallibleEffect(f.returnType)
       /* workaround for
           val foo: Any => UIO[Any] = ???
           zio.flatMap(foo)
        */
       case ScReferenceExpression(Typeable(funcType)) =>
-        extractTypeArguments(funcType).flatMap(_.lastOption).exists(isURIO)
+        extractTypeArguments(funcType).flatMap(_.lastOption).exists(isInfallibleEffect)
       // zio.flatMap(el => foo(el))
-      case lambda(_, res) => isURIO(res.`type`)
+      case lambda(_, res) => isInfallibleEffect(res)
       // zio.flatMap(foo(_))
-      case expr => isURIO(expr.getNonValueType(fromUnderscore = true))
+      case expr => isInfallibleEffect(expr.getNonValueType(fromUnderscore = true))
     }
 }
 
@@ -85,8 +73,8 @@ sealed abstract class BaseErrorModificationSimplificationType(qual: Qualified, m
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case qual(zio, _, g) if isURIO(zio) => Some(replacement(expr, zio, g))
-      case _                              => None
+      case qual(zio, _, g) if isInfallibleEffect(zio) => Some(replacement(expr, zio, g))
+      case _                                          => None
     }
 
 }
@@ -109,8 +97,8 @@ sealed abstract class BaseErrorRecoverySimplificationType(qual: Qualified, metho
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case qual(zio, _*) if isURIO(zio) => replacement(expr, zio)
-      case _                            => None
+      case qual(zio, _*) if isInfallibleEffect(zio) => replacement(expr, zio)
+      case _                                        => None
     }
 
 }
@@ -141,8 +129,8 @@ sealed abstract class BaseErrorSeparationSimplificationType(
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case qual(zioType, iterable, func) if isURIOFunc(func) => Some(replacement(zioType, expr, iterable, func))
-      case _                                                 => None
+      case qual(zioType, iterable, func) if isInfallibleFunc(func) => Some(replacement(zioType, expr, iterable, func))
+      case _                                                       => None
     }
 
 }
@@ -181,7 +169,7 @@ object PartitionParNErrorSeparationSimplificationType extends BaseInfallibleEffe
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case qual(zioType, n, iterable, func) if isURIOFunc(func) =>
+      case qual(zioType, n, iterable, func) if isInfallibleFunc(func) =>
         Some(replacement(zioType, expr, n, iterable, func))
       case _ => None
     }

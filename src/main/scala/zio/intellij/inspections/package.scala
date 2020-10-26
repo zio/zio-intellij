@@ -8,7 +8,6 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScTemplateDefinition}
-import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils._
 import zio.intellij.utils.types._
@@ -398,22 +397,4 @@ package object inspections {
       }
   }
 
-  object `ZIO[R, E, A]` {
-    private def unapplyInner(tpe: ScType): Option[(ScType, ScType, ScType)] =
-      resolveAliases(tpe.tryExtractDesignatorSingleton).flatMap(extractTypeArguments).flatMap {
-        case Seq(r, e, a) => Some(r, e, a)
-        case _            => None
-      }
-
-    def unapply(tpe: ScType): Option[(ScType, ScType, ScType)] =
-      if (fromZio(tpe)) unapplyInner(tpe) else None
-  }
-
-  object `URIO[R, A]` {
-    def unapply(tpe: ScType): Option[(ScType, ScType)] =
-      tpe match {
-        case `ZIO[R, E, A]`(r, e, a) if e.isNothing => Some(r, a)
-        case _                                      => None
-      }
-  }
 }

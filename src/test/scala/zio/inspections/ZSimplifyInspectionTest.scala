@@ -14,14 +14,16 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
   override protected def librariesLoaders: Seq[LibraryLoader] =
     base.librariesLoaders :+
       IvyManagedLoader(
-        "dev.zio" %% "zio"      % "latest.integration",
-        "dev.zio" %% "zio-test" % "latest.integration"
+        "dev.zio" %% "zio"         % "latest.integration",
+        "dev.zio" %% "zio-streams" % "latest.integration",
+        "dev.zio" %% "zio-test"    % "latest.integration"
       )
 
   def z(s: String): String =
     s"""import zio._
        |import zio.console._
        |import zio.duration._
+       |import zio.stream._
        |import zio.test._
        |import zio.test.Assertion._
        |import scala.concurrent.Future
