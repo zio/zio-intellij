@@ -2,7 +2,7 @@ package zio.intellij
 
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.{OrderRootType, ProjectRootManager}
+import com.intellij.openapi.roots.OrderRootType
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.{JavaPsiFacade, PsiElement}
@@ -10,15 +10,18 @@ import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
+import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
+import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
-import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
 import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt}
+
+import scala.annotation.tailrec
 
 package object utils {
 
@@ -69,6 +72,14 @@ package object utils {
 
   def createType(text: String, context: PsiElement, child: PsiElement = null): Option[ScType] =
     ScalaPsiElementFactory.createTypeFromText(text, context, child)
+
+  def createTypeElement(text: String, context: PsiElement, child: PsiElement = null): Option[ScTypeElement] =
+    ScalaPsiElementFactory.safe(_.createTypeElementFromText(text, context, child))
+
+  def createTypeElement(tpe: ScType, context: PsiElement)(implicit
+    tpc: TypePresentationContext
+  ): Option[ScTypeElement] =
+    createTypeElement(tpe.codeText, context)
 
   def createExpression(text: String, context: PsiElement): Option[ScExpression] =
     ScalaPsiElementFactory.safe(_.createExpressionFromText(text, context))
@@ -140,4 +151,28 @@ package object utils {
     def traverse[B](f: A => Option[B]): Option[List[B]] =
       list.foldRight[Option[List[B]]](Some(Nil))((h, t) => map2(f(h), t)(_ :: _))
   }
+
+  implicit final class ListSyntax[A](private val list: List[A]) extends AnyVal {
+
+    // Similar to .minBy, but returns all minimal elements from original list
+    def minsBy[B](f: A => B)(implicit ord: Ordering[B]): List[A] = {
+      @tailrec
+      def loop(currMin: B, list: List[A], acc: List[A]): List[A] =
+        list match {
+          case Nil => acc.reverse
+          case head :: tail =>
+            val currRes = f(head)
+
+            if (ord.lt(currRes, currMin)) loop(currRes, tail, List(head))
+            else if (ord.equiv(currRes, currMin)) loop(currMin, tail, head +: acc)
+            else loop(currMin, tail, acc)
+        }
+
+      list match {
+        case Nil          => Nil
+        case head :: tail => loop(f(head), tail, List(head))
+      }
+    }
+  }
+
 }
