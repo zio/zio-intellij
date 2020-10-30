@@ -10,19 +10,32 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
-import zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection._
-import zio.intellij.utils.TypeCheckUtils.isInfallibleEffect
+import zio.intellij.inspections.mistakes.UnnecessaryEnvProvisionInspection.createFix
+import zio.intellij.utils.TypeCheckUtils.isAnyEnvEffect
 import zio.intellij.utils.{OptionUtils => OptionOps, _}
 
-class InfallibleEffectRecoveryInspection extends AbstractRegisteredInspection {
+class UnnecessaryEnvProvisionInspection extends AbstractRegisteredInspection {
 
-  private def canFailDesignator(context: PsiElement): Option[ScType] =
-    createType("_root_.zio.CanFail", context)
+  private def needsEnvDesignator(context: PsiElement): Option[ScType] =
+    createType("_root_.zio.NeedsEnv", context)
 
-  private def isCanFailEv(element: PsiElement): Boolean =
+  private def isNeedsEnvEv(element: PsiElement): Boolean =
     element match {
-      case Typeable(ParameterizedType(designator, _)) => canFailDesignator(element).exists(_.equiv(designator))
+      case Typeable(ParameterizedType(designator, _)) => needsEnvDesignator(element).exists(_.equiv(designator))
       case _                                          => false
+    }
+
+  private def createPossibleFix(
+    expr: ScExpression,
+    base: ScExpression,
+    ref: ScReference,
+    descriptionTemplate: String,
+    highlightType: ProblemHighlightType
+  )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
+    expr.findImplicitArguments.flatMap { args =>
+      OptionOps.when(args.map(_.element).exists(isNeedsEnvEv)) {
+        createFix(expr, base, ref, descriptionTemplate, highlightType)
+      }
     }
 
   override protected def problemDescriptor(
@@ -32,35 +45,34 @@ class InfallibleEffectRecoveryInspection extends AbstractRegisteredInspection {
     highlightType: ProblemHighlightType
   )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
     element match {
-      case MethodRepr(expr, Some(base), Some(ref), _) if isInfallibleEffect(base) =>
-        expr.findImplicitArguments.flatMap { args =>
-          OptionOps.when(args.map(_.element).exists(isCanFailEv))(createFix(expr, base, ref, highlightType))
-        }
+      case MethodRepr(expr, Some(base), Some(ref), _) if isAnyEnvEffect(base) =>
+        createPossibleFix(expr, base, ref, descriptionTemplate, highlightType)
+      // effect.provideSomeLayer
+      case MethodRepr(expr, Some(MethodRepr(_, Some(base), Some(ref), _)), _, _) if isAnyEnvEffect(base) =>
+        createPossibleFix(expr, base, ref, descriptionTemplate, highlightType)
       case _ => None
     }
 }
 
-object InfallibleEffectRecoveryInspection {
-  def hint(toDelete: String) = s"Remove unreachable .$toDelete"
-
-  def description(toDelete: String) =
-    s"Effect cannot fail; operation .$toDelete is impossible"
+object UnnecessaryEnvProvisionInspection {
+  def hint(toDelete: String) = s"Remove unnecessary .$toDelete"
 
   def createFix(
     expr: ScExpression,
     base: ScExpression,
     toDelete: ScReference,
+    description: String,
     highlightType: ProblemHighlightType
   )(implicit manager: InspectionManager, isOnTheFly: Boolean): ProblemDescriptor =
     manager.createProblemDescriptor(
       expr,
-      description(toDelete.refName),
+      description,
       isOnTheFly,
-      Array[LocalQuickFix](new RecoveryQuickFix(expr, base, toDelete.refName)),
+      Array[LocalQuickFix](new ProvideQuickFix(expr, base, toDelete.refName)),
       highlightType
     )
 
-  final private class RecoveryQuickFix(expr: ScExpression, base: ScExpression, toDelete: String)
+  final private class ProvideQuickFix(expr: ScExpression, base: ScExpression, toDelete: String)
       extends AbstractFixOnPsiElement(hint(toDelete), expr) {
     override protected def doApplyFix(expr: ScExpression)(implicit project: Project): Unit =
       expr.replace(stripped(base))

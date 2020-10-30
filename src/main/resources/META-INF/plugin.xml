@@ -206,6 +206,12 @@
                          shortName="SuggestTypeAliasInspection" level="INFORMATION"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.UnnecessaryEnvProvisionInspection"
+                         displayName="Effect doesn't require environment; there is no need to provide it"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="UnnecessaryEnvProvisionInspection" level="ERROR"
+                         enabledByDefault="true" language="Scala"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
