@@ -7,17 +7,16 @@ import com.intellij.psi.search.GlobalSearchScope
 import org.jetbrains.plugins.scala.codeInsight.intention.types.AbstractTypeAnnotationIntention.complete
 import org.jetbrains.plugins.scala.codeInsight.intention.types.{startTemplate, ChooseTypeTextExpression}
 import org.jetbrains.plugins.scala.extensions._
+import org.jetbrains.plugins.scala.lang.psi.ScalaPsiUtil
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.{ScSimpleTypeElement, ScTypeElement}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScTypeAlias, ScTypeAliasDefinition}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
-import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTypeElementFromText
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiManager
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
 import org.jetbrains.plugins.scala.lang.psi.types.api.presentation.ScTypeText
 import org.jetbrains.plugins.scala.lang.psi.types.api.{ParameterizedType, UndefinedType}
 import org.jetbrains.plugins.scala.lang.psi.types.recursiveUpdate.ScSubstitutor
 import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresentationContext}
-import org.jetbrains.plugins.scala.lang.psi.{ScalaPsiUtil, TypeAdjuster}
 import org.jetbrains.plugins.scala.project.ProjectContext
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker.checkIntention
 import zio.intellij.intentions.ZTypeAnnotationIntention
@@ -27,26 +26,19 @@ import zio.intellij.utils.TypeCheckUtils.fromZioLike
 
 final class SuggestTypeAlias extends ZTypeAnnotationIntention {
 
-  override def getFamilyName: String = "Choose a more specific type alias"
+  override def getFamilyName: String = "Choose another type alias"
 
   override protected def invoke(te: ScTypeElement, declaredType: ScType, editor: Editor): Boolean = {
-    val aliases = SuggestTypeAlias.findMatchingAliases(te, declaredType)
-    if (aliases.size == 1) {
-      val replaced = te.replace(createTypeElementFromText(aliases.head.canonicalText, te.getContext, te))
-      TypeAdjuster.markToAdjust(replaced)
-    } else {
-      implicit val tpc: TypePresentationContext = TypePresentationContext(te)
-      val texts                                 = aliases.sortBy(_.presentableText.length).map(ScTypeText(_))
-      val expr                                  = new ChooseTypeTextExpression(texts, ScTypeText(declaredType))
-      startTemplate(te, te.getParent, expr, editor)
-    }
+    implicit val tpc: TypePresentationContext = TypePresentationContext(te)
+    val aliases                               = SuggestTypeAlias.findMatchingAliases(te, declaredType)
+    val texts                                 = aliases.sortBy(_.presentableText.length).map(ScTypeText(_))
+    val expr                                  = new ChooseTypeTextExpression(texts, ScTypeText(declaredType))
+    startTemplate(te, te.getParent, expr, editor)
     true
   }
 
-  override protected def shouldSuggest(te: ScTypeElement, declaredType: ScType): Boolean = {
-    val aliases = SuggestTypeAlias.findMatchingAliases(te, declaredType)
-    aliases.length > 1 && aliases.head != declaredType
-  }
+  override protected def shouldSuggest(te: ScTypeElement, declaredType: ScType): Boolean =
+    SuggestTypeAlias.findMatchingAliases(te, declaredType).length > 1
 
   override def isAvailable(project: Project, editor: Editor, element: PsiElement): Boolean =
     adjustElementAtOffset(element, editor) match {
@@ -94,15 +86,14 @@ object SuggestTypeAlias {
                 case tpe: ScType if declaredType.conforms(tpe) => tpe
               }
           )
-    }.flatten ++ topLevelType(te)).distinct
+      // fixme distinct doesn't work
+      // should compare by `equiv` instead of `==`
+    }.flatten :+ topLevelType(declaredType)).distinct
 
-  def topLevelType(te: ScTypeElement): List[ScType] =
-    te.`type`().toOption match {
-      case Some(tpe) =>
-        tpe.aliasType match {
-          case Some(AliasType(_, _, Right(value))) => List(value)
-          case _                                   => List(tpe)
-        }
-      case _ => Nil
+  def topLevelType(tpe: ScType): ScType =
+    tpe.aliasType match {
+      case Some(AliasType(_, _, Right(value))) => value
+      case _                                   => tpe
     }
+
 }
