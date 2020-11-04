@@ -1,24 +1,55 @@
 package zio.intellij.synthetic.macros
 
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScAnnotation
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScTypeAliasDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTypeElementFromText
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
-import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.lang.psi.types.api.StdTypes
+import org.jetbrains.plugins.scala.lang.psi.types.{ScParameterizedType, ScType}
 import zio.intellij.synthetic.macros.utils.presentation.defaultPresentationStringForScalaType
 import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils._
 
 class ModulePatternAccessible extends SyntheticMembersInjector {
 
+  private val hasDesignator = "zio.Has"
+
   private def members(sco: ScObject): Seq[String] = {
-    val serviceTrait       = sco.typeDefinitions.find(_.name == "Service")
-    val methods            = serviceTrait.toSeq.flatMap(td => td.allMethods ++ td.allVals)
-    val serviceApplication = s"${sco.qualifiedName}.Service${serviceTrait.fold("")(typeParametersApplication)}"
+    val serviceName  = s"${sco.qualifiedName}.Service"
+    val aliasName    = s"${sco.qualifiedName}.${sco.name}"
+    val serviceTrait = sco.typeDefinitions.find(_.name == "Service")
+    val methods      = serviceTrait.toSeq.flatMap(td => td.allMethods ++ td.allVals)
+
+    def withTypeParams(srv: String): String =
+      s"$srv${serviceTrait.fold("")(typeParametersApplication)}"
+
+    val serviceApplication = withTypeParams(serviceName)
+    val aliasApplication   = withTypeParams(aliasName)
+
+    val hasHasAlias = {
+      val possibleAliasTpe =
+        sco.aliases
+          .find(_.name == sco.name)
+          .collect { case ad: ScTypeAliasDefinition => ad }
+          .flatMap(_.aliasedType.toOption)
+
+      // direct call `createType("Has[Service]")` might throw a StackOverflow exception
+      val hasServiceTpe = for {
+        has        <- createType(hasDesignator, sco)
+        service    <- findTypeDefByName(sco.getProject, serviceName)
+        serviceTpe <- service.`type`.toOption
+      } yield ScParameterizedType(has, Seq(serviceTpe))
+
+      possibleAliasTpe.exists(alias => hasServiceTpe.exists(_.equiv(alias)))
+    }
+
+    val requiredEnv =
+      if (hasHasAlias) aliasApplication
+      else s"$hasDesignator[$serviceApplication]"
 
     def returnType(typeInfo: TypeInfo) =
-      s"${typeInfo.zioObject}[zio.Has[$serviceApplication]" +
+      s"${typeInfo.zioObject}[$requiredEnv" +
         s"${if (typeInfo.rTypeParam.isAny) ""
         else s" with ${defaultPresentationStringForScalaType(typeInfo.rTypeParam)}"}, " +
         s"${typeInfo.otherTypeParams.map(defaultPresentationStringForScalaType).mkString(", ")}]"
