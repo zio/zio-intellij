@@ -5,8 +5,7 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.AbstractRegisteredInspection
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
-import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
-import zio.intellij.inspections.zioRef
+import zio.intellij.inspections.zioLike
 
 class YieldingZIOEffectInspection extends AbstractRegisteredInspection {
 
@@ -48,14 +47,14 @@ class YieldingZIOEffectInspection extends AbstractRegisteredInspection {
     element match {
       case expr: ScFor =>
         expr.body match {
-          case Some(body @ zioRef(_, _)) if hasGeneratorFromSameClass(expr, body) =>
-            Some(createDescriptor(body))
           case Some(e: ScBlock) =>
             e.exprs.lastOption match {
-              case Some(body @ zioRef(_, _)) if hasGeneratorFromSameClass(expr, body) =>
+              case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
                 Some(createDescriptor(body))
               case _ => None
             }
+          case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
+            Some(createDescriptor(body))
           case _ => None
         }
       case _ => None

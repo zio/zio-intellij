@@ -53,4 +53,11 @@ class YieldingZIOEffectInspectionTest extends ZScalaInspectionTest[YieldingZIOEf
                                             |}
                                             |""".stripMargin).assertHighlighted()
 
+  def test_yielding_a_method_call_with_multiple_params(): Unit =
+    z(s"""def x(one: Int, two: Int, three: Int): UIO[Int] = ???
+         |for {
+         |  _ <- ZIO.succeed(1)
+         |} yield ${START}x(1, 2, 3)$END
+         |""".stripMargin).assertHighlighted()
+
 }

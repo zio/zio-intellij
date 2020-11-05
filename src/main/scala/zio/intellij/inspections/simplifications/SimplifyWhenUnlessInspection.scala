@@ -38,9 +38,9 @@ sealed abstract class WhenUnlessSimplificationTypeBase(replacementMethod: String
 object WhenSimplificationType extends WhenUnlessSimplificationTypeBase("when") {
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case ifStmt @ IfStmt(condition, body @ zioRef(_, _), `ZIO.unit`(_)) =>
+      case ifStmt @ IfStmt(condition, body @ zioLike(_), `ZIO.unit`(_)) =>
         replacement(ifStmt, body, condition, shouldHaveNegation = false)
-      case ifStmt @ IfStmt(condition, `ZIO.unit`(_), body @ zioRef(_, _)) =>
+      case ifStmt @ IfStmt(condition, `ZIO.unit`(_), body @ zioLike(_)) =>
         replacement(ifStmt, body, condition, shouldHaveNegation = true)
       case _ => None
     }
@@ -49,9 +49,9 @@ object WhenSimplificationType extends WhenUnlessSimplificationTypeBase("when") {
 object UnlessSimplificationType extends WhenUnlessSimplificationTypeBase("unless") {
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case ifStmt @ IfStmt(condition, body @ zioRef(_, _), `ZIO.unit`(_)) =>
+      case ifStmt @ IfStmt(condition, body @ zioLike(_), `ZIO.unit`(_)) =>
         replacement(ifStmt, body, condition, shouldHaveNegation = true)
-      case ifStmt @ IfStmt(condition, `ZIO.unit`(_), body @ zioRef(_, _)) =>
+      case ifStmt @ IfStmt(condition, `ZIO.unit`(_), body @ zioLike(_)) =>
         replacement(ifStmt, body, condition, shouldHaveNegation = false)
       case _ => None
     }

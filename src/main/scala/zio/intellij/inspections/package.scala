@@ -288,20 +288,10 @@ package object inspections {
       }
   }
 
-  object zioRef {
+  object zioLike {
 
-    def unapply(expr: ScExpression): Option[(ScReferenceExpression, ScExpression)] = expr match {
-      case ref @ ScReferenceExpression(_) =>
-        ref.resolve() match {
-          case _: ScReferencePattern | _: ScFunctionDefinition if fromZioLike(expr) => Some((ref, expr))
-          case _                                                                    => None
-        }
-      case uncurry1(ref, e) if fromZioLike(expr) => Some((ref, e))
-      // multiple argument lists
-      case uncurry2(ref, _, _) if fromZioLike(expr)    => Some((ref, expr))
-      case uncurry3(ref, _, _, _) if fromZioLike(expr) => Some((ref, expr))
-      case _                                           => None
-    }
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      Some(expr).filter(fromZioLike)
   }
 
   val exitCodeSuccess = new ExitCode("success")
