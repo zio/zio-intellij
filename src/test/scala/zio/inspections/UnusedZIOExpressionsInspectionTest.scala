@@ -27,4 +27,10 @@ class UnusedZIOExpressionsInspectionTest extends ZScalaInspectionTest[UnusedZIOE
          |ZIO.succeed(42)
          |""".stripMargin).assertHighlighted()
 
+  def test_unused_method_call_with_multiple_params(): Unit =
+    z(s"""def x(one: Int, two: Int, three: Int): UIO[Int] = ???
+         |${START}x(1, 2, 3)$END
+         |UIO(1)
+         |""".stripMargin).assertHighlighted()
+
 }

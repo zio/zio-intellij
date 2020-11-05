@@ -92,6 +92,28 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
     }
   }
 
+  def test_when_method_call_with_multiple_params(): Unit = {
+    def base(expr: String): String =
+      s"""|val a = true
+          |def b(one: Int, two: Int, three: Int) = ZIO.succeed(42)
+          |$expr""".stripMargin
+    val methodCall = "b(1, 2, 3)"
+
+    locally {
+      z(base(s"${START}if (a) $methodCall else ZIO.unit$END")).assertHighlighted()
+      val text   = z(base(s"if (a) $methodCall else ZIO.unit"))
+      val result = z(base(s"$methodCall.when(a)"))
+      testQuickFixes(text, result, hint)
+    }
+
+    locally {
+      z(base(s"${START}if (!a) ZIO.unit else $methodCall$END")).assertHighlighted()
+      val text   = z(base(s"if (!a) ZIO.unit else $methodCall"))
+      val result = z(base(s"$methodCall.when(a)"))
+      testQuickFixes(text, result, hint)
+    }
+  }
+
   // ¯\_(ツ)_/¯
   def test_when_with_multiple_negation(): Unit = {
     def base(expr: String): String =

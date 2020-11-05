@@ -5,8 +5,7 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.AbstractRegisteredInspection
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
-import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
-import zio.intellij.inspections.zioRef
+import zio.intellij.inspections.zioLike
 
 class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
 
@@ -18,8 +17,8 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
   )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
     element match {
       case expr: ScExpression =>
-        (expr, Option(expr.getNextSiblingNotWhitespace)) match {
-          case (zioRef(_, _), Some(zioRef(_, _))) =>
+        (expr, expr.nextSiblingNotWhitespace) match {
+          case (zioLike(_), Some(zioLike(_))) =>
             Some(
               manager.createProblemDescriptor(
                 expr,
