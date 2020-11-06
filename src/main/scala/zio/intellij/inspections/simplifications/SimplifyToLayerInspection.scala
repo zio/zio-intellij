@@ -1,9 +1,10 @@
 package zio.intellij.inspections.simplifications
 
 import org.jetbrains.plugins.scala.codeInspection.collections._
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFor}
 import zio.intellij.inspections._
 import zio.intellij.utils.TypeCheckUtils._
+import org.jetbrains.plugins.scala.extensions._
 
 class SimplifyToLayerInspection
     extends ZInspection(ZLayerFromEffectToLayerSimplificationType, ZLayerFromEffectManyToLayerManySimplificationType)
@@ -15,7 +16,11 @@ sealed abstract class BaseToLayerSimplificationType(methodName: String, methodEx
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
       case methodExtractor(_, effect) if fromZio(effect) =>
-        Some(replace(expr).withText(invocationText(effect, methodName)).highlightFrom(expr))
+        val replacementText = effect match {
+          case _: ScFor => s"${effect.getText.parenthesize(true)}.$methodName"
+          case _        => invocationText(effect, methodName)
+        }
+        Some(replace(expr).withText(replacementText).highlightFrom(expr))
       case _ => None
     }
 }

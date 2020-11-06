@@ -22,6 +22,22 @@ sealed abstract class BaseToLayerInspectionTest(methodToReplace: String, methodT
     val result = z(base(s"serviceEffect.$methodToReplaceWith"))
     testQuickFixes(text, result, hint)
   }
+
+  def testForComprehension(): Unit = {
+    val text   = z(base(s"""
+                        |ZLayer.$methodToReplace {
+                        |  for {
+                        |    s <- serviceEffect
+                        |  } yield s
+                        |}
+                        |""".stripMargin))
+    val result = z(base(s"""
+                           |(for {
+                           |  s <- serviceEffect
+                           |} yield s).$methodToReplaceWith
+                           |""".stripMargin))
+    testQuickFixes(text, result, hint)
+  }
 }
 
 class SimplifyToLayerInspectionTest
