@@ -179,5 +179,5 @@ object E${CARET}xample {
 
 }
 
-class ModulePatternAccessibleTest extends ModulePatternAccessibleTestBase(injectAlias = false)
+class ModulePatternAccessibleTest      extends ModulePatternAccessibleTestBase(injectAlias = false)
 class ModulePatternAccessibleAliasTest extends ModulePatternAccessibleTestBase(injectAlias = true)

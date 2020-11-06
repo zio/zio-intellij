@@ -114,5 +114,5 @@ abstract class ModulePatternAccessiblePolyTestBase(injectAlias: Boolean) extends
 
 }
 
-class ModulePatternAccessiblePolyTest extends ModulePatternAccessiblePolyTestBase(injectAlias = false)
+class ModulePatternAccessiblePolyTest      extends ModulePatternAccessiblePolyTestBase(injectAlias = false)
 class ModulePatternAccessiblePolyAliasTest extends ModulePatternAccessiblePolyTestBase(injectAlias = true)

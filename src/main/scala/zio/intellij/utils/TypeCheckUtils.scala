@@ -65,6 +65,14 @@ object TypeCheckUtils {
       }
   }
 
+  object `IO[E, A]` {
+    def unapply(tpe: ScType): Option[(ScType, ScType)] =
+      tpe match {
+        case `ZIO[R, E, A]`(r, e, a) if r.isAny => Some(e, a)
+        case _                                  => None
+      }
+  }
+
   object `ZManaged[R, E, A]` extends TypeArgs3Extractor {
     override protected def fromTarget(tpe: ScType): Boolean = fromManaged(tpe)
   }
@@ -77,6 +85,14 @@ object TypeCheckUtils {
       }
   }
 
+  object `Managed[E, A]` {
+    def unapply(tpe: ScType): Option[(ScType, ScType)] =
+      tpe match {
+        case `ZManaged[R, E, A]`(r, e, a) if r.isAny => Some(e, a)
+        case _                                       => None
+      }
+  }
+
   object `ZStream[R, E, O]` extends TypeArgs3Extractor {
     override protected def fromTarget(tpe: ScType): Boolean = fromZioStream(tpe)
   }
@@ -86,6 +102,14 @@ object TypeCheckUtils {
       tpe match {
         case `ZStream[R, E, O]`(r, e, a) if e.isNothing => Some(r, a)
         case _                                          => None
+      }
+  }
+
+  object `Stream[E, O]` {
+    def unapply(tpe: ScType): Option[(ScType, ScType)] =
+      tpe match {
+        case `ZStream[R, E, O]`(r, e, a) if r.isAny => Some(e, a)
+        case _                                      => None
       }
   }
 
@@ -102,5 +126,13 @@ object TypeCheckUtils {
 
   def isInfallibleEffect(zio: ScExpression): Boolean =
     isInfallibleEffect(zio.`type`)
+
+  def isAnyEnvEffect(zio: ScExpression): Boolean =
+    zio.`type`().getOrAny match {
+      case `IO[E, A]`(_, _)      => true
+      case `Managed[E, A]`(_, _) => true
+      case `Stream[E, O]`(_, _)  => true
+      case _                     => false
+    }
 
 }

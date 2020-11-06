@@ -18,11 +18,10 @@ abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOn
 
   protected def isAvailable(zioVersion: Version): Boolean = zioVersion >= Version.ZIO.`1.0.0`
 
-  private def isInspectionAvailable(inspection: ZInspection, element: PsiElement): Boolean = {
+  private def isInspectionAvailable(inspection: ZInspection, element: PsiElement): Boolean =
     Option(ScalaPsiUtil.getModule(element))
       .flatMap(_.zioVersion)
       .exists(zioVersion => inspection.isAvailable(zioVersion))
-  }
 
   protected override def actionFor(implicit
     holder: ProblemsHolder,

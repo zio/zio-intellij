@@ -1,0 +1,25 @@
+<html>
+Detects usages of methods that require `NeedsEnv` evidence on effects that do not require environment.
+For example
+<pre>
+    val urio: URIO[Int, Int] = ZIO.environment[Int]
+    val uio: UIO[Int]        = UIO(1)
+
+    urio.provide(1) // 1
+    uio.provide(1)  // 2
+
+</pre>
+Line 1 will not be highlighted since it is a valid code.
+<br/>
+Line 2 will be highlighted since uio doesn't require environment, which means `.provide` doesn't make sense and this
+code will not compile.
+<br/>
+Faulty operations can be discarded automatically,
+e.g.
+<pre>
+    uio.provide(???)          => uio
+    uio.provideSome(???)      => uio
+    uio.provideLayer(???)     => uio
+    uio.provideSomeLayer(???) => uio
+</pre>
+</html>
