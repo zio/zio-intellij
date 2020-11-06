@@ -31,6 +31,11 @@
         <syntheticMemberInjector implementation="zio.intellij.synthetic.macros.MockableInjector"/>
     </extensions>
 
+    <applicationListeners>
+        <listener topic="com.intellij.openapi.project.ProjectManagerListener"
+                  class="zio.intellij.testsupport.runner.TestRunnerProjectListener"/>
+    </applicationListeners>
+
     <extensions defaultExtensionNs="com.intellij">
         <!-- simplifications -->
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyUnitInspection"
@@ -228,6 +233,8 @@
         <runLineMarkerContributor implementationClass="zio.intellij.testsupport.ZTestRunLineMarkerProvider"
                                   language="Scala" order="first"/>
         <testFramework implementation="zio.intellij.testsupport.ZTestFramework" order="first"/>
+
+        <applicationService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
     </extensions>
 
     <actions>

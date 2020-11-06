@@ -6,8 +6,9 @@ import com.intellij.openapi.roots.OrderRootType
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.{JavaPsiFacade, PsiElement}
+import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
-import org.jetbrains.plugins.scala.extensions.PsiClassExt
+import org.jetbrains.plugins.scala.extensions.{executeOnPooledThread, PsiClassExt}
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
@@ -19,7 +20,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
-import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt}
+import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectExt, ScalaLanguageLevel}
 
 import scala.annotation.tailrec
 
@@ -142,6 +143,13 @@ package object utils {
       } yield version).headOption
 
     def zioVersion: Option[Version] = findLibrary(lib => lib.contains("/dev/zio/zio_") || lib.contains("/dev.zio/zio_"))
+
+    def scalaVersion =
+      for {
+        scalaSdk     <- module.scalaSdk
+        compiler     <- scalaSdk.compilerVersion
+        scalaVersion <- ScalaVersion.fromString(compiler)
+      } yield scalaVersion
   }
 
   implicit class TraverseAtHome[A](private val list: List[A]) extends AnyVal {
