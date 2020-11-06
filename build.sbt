@@ -1,5 +1,5 @@
 lazy val scala212      = "2.12.10"
-lazy val pluginVersion = "2020.2.1.3" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
+lazy val pluginVersion = "2020.2.2.0" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "202"
@@ -27,11 +27,17 @@ lazy val `zio-intellij` = project
       xml.changeNotes = sys.env.getOrElse(
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
-        Welcome to another exciting release of the ZIO IntelliJ Plugin! Huge thanks to all the contributors who made this release possible!<br/>
-        Here are the highlights:
+        Welcome to another exciting release of the ZIO IntelliJ Plugin!<br/>
+        I'd like to thank Nikita Myazin, Timur Aliberdov, and others for contributing tons of features and bugfixes to this release!<br/>
+        Here are the highlights:<br/>
         <ul>
-        <li>Add simplification from <code>layer.build.use</code> to <code>zio.provideLayer</code> (<a href="https://github.com/zio/zio-intellij/pull/172">#172</a>)</li>
-        <li>Miscellaneous bug fixes</li>
+        <li>Simplification from <code>layer.build.use</code> to <code>zio.provideLayer</code> (<a href="https://github.com/zio/zio-intellij/pull/172">#172</a>)</li>
+        <li>Improved test method detection (<a href="https://github.com/zio/zio-intellij/pull/177">#177</a>)</li>
+        <li>Detecting of <code>CanFail</code> modes to prevent erroneously handling errors on unfailing effects (<a href="https://github.com/zio/zio-intellij/pull/178">#178</a>, <a href="https://github.com/zio/zio-intellij/pull/180">#180</a>)</li>
+        <li>Detecting of <code>NeedEnv</code> modes to prevent erroneously providing requirements to effects that don't require anything (<a href="https://github.com/zio/zio-intellij/pull/189">#189</a>)</li>
+        <li>New refactoring: Suggest type alias (<a href="https://github.com/zio/zio-intellij/pull/183">#183</a>)</li>
+        <li>Integrated ZIO Test runner support (experimental) (<a href="https://github.com/zio/zio-intellij/pull/179">#179</a>)</li>
+        <li>Many many bug fixes and small improvements</li>
         <ul>
         ]]>"""
       )
