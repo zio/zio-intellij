@@ -20,7 +20,7 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
     val sourceModules = project.modulesWithScala.filter(_.isSourceModule).toList
 
     sourceModules.view
-      .flatMap(m => (m.zioVersion zip m.scalaVersion).headOption)
+      .flatMap(m => m.zioVersion zip m.scalaVersion)
       .headOption
   }
 

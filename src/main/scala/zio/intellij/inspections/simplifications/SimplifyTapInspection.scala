@@ -94,8 +94,8 @@ sealed abstract class BaseRefactoringType(invocation: Qualified, replaceWith: St
           // .flatMap*(a => expr(e).as(a))
           case ref `.as` ScReferenceExpression(a) if a == param => Some(replacement(qual, param, ref))
           // .catchAll(e => expr(e) *> ZIO.fail(e))
-          case ScInfixExpr(ref, _, `ZIO.fail`(_)) => Some(replacement(qual, param, ref))
-          case _                                  => None
+          case ScInfixExpr(ref, _, `ZIO.fail`(_, _)) => Some(replacement(qual, param, ref))
+          case _                                     => None
         }
       case _ => None
     }

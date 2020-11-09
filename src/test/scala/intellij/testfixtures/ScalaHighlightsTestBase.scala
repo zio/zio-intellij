@@ -19,6 +19,7 @@ import org.jetbrains.plugins.scala.extensions.executeWriteActionCommand
 import org.junit.Assert._
 
 import scala.collection.JavaConverters
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestAdapter {
   self: ScalaLightCodeInsightFixtureTestAdapter =>
@@ -27,7 +28,7 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
 
   protected val description: String
 
-  protected val fileType: LanguageFileType = ScalaFileType.INSTANCE
+  protected lazy val fileType: LanguageFileType = ScalaFileType.INSTANCE
 
   protected def descriptionMatches(s: String): Boolean = s == normalize(description)
 
@@ -60,7 +61,7 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
       )
       val duplicatedHighlights = actualHighlightRanges
         .groupBy(identity)
-        .mapValues(_.length)
+        .view.mapValues(_.length)
         .toSeq
         .collect { case (highlight, count) if count > 1 => highlight }
 
@@ -90,7 +91,6 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
     val fixture = getFixture
     fixture.configureByText(fileType, normalizedText)
 
-    import JavaConverters._
     val highlightInfos = fixture
       .doHighlighting()
       .asScala
@@ -98,12 +98,11 @@ abstract class ScalaHighlightsTestBase extends ScalaLightCodeInsightFixtureTestA
     highlightInfos
       .map(info => (info, highlightedRange(info)))
       .filter(checkOffset(_, offset))
-  }
+  }.toSeq
 
   protected def createTestText(text: String): String = text
 
   protected def selectedRanges(text: String): Seq[TextRange] = {
-    import JavaConverters._
     val document = EditorFactory.getInstance.createDocument(text)
     val state    = EditorTestUtil.extractCaretAndSelectionMarkers(document)
     state.carets.asScala.toList.map(_.selection)
@@ -176,7 +175,6 @@ abstract class ScalaAnnotatorQuickFixTestBase extends ScalaHighlightsTestBase {
 object ScalaAnnotatorQuickFixTestBase {
 
   private def quickFixes(info: HighlightInfo): Seq[IntentionAction] = {
-    import JavaConverters._
     Option(info.quickFixActionRanges).toSeq
       .flatMap(_.asScala)
       .flatMap(pair => Option(pair))
