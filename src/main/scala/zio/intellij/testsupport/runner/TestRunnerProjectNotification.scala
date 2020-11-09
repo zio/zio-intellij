@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NonNls
 import org.jetbrains.plugins.scala.project.{ModuleExt, ProjectExt}
 import zio.intellij.ZioIcon
 import zio.intellij.testsupport.runner.TestRunnerNotifications.displayInfo
-import zio.intellij.utils.{ModuleSyntax, TraverseAtHome}
+import zio.intellij.utils.ModuleSyntax
 
 private[runner] final class TestRunnerProjectNotification(private val project: Project) {
   def init(): Unit =
@@ -19,11 +19,9 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
   private def versions(project: Project) = {
     val sourceModules = project.modulesWithScala.filter(_.isSourceModule).toList
 
-    sourceModules
-      // but we already have traverse at home...
-      // (converts a pair of options to option of pair)
-      .traverse(m => (m.zioVersion zip m.scalaVersion).headOption)
-      .flatMap(_.headOption)
+    sourceModules.view
+      .flatMap(m => (m.zioVersion zip m.scalaVersion).headOption)
+      .headOption
   }
 
   private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
