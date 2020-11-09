@@ -12,7 +12,7 @@ import zio.intellij.utils.{ModuleSyntax, TraverseAtHome}
 
 private[runner] final class TestRunnerProjectNotification(private val project: Project) {
   def init(): Unit =
-    if (!findTestRunner(project)) {
+    if (shouldSuggestTestRunner(project)) {
       createNotification.notify(project)
     }
 
@@ -26,13 +26,13 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
       .flatMap(_.headOption)
   }
 
-  private def findTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
+  private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
     versions(project).fold(false) {
       case (version, scalaVersion) =>
         TestRunnerResolveService.instance
           .resolve(version, scalaVersion, downloadIfMissing)
           .toOption
-          .isDefined
+          .isEmpty
     }
 
   //noinspection HardCodedStringLiteral
