@@ -28,6 +28,8 @@ lazy val `zio-intellij` = project
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
         Welcome to another exciting release of the ZIO IntelliJ Plugin!<br/>
+        <strong>Note:</strong> This is a hotfix update that fixes the test runner notification popup appearing in non-ZIO projects</br>
+        <br/>
         I'd like to thank Nikita Myazin, Timur Aliberdov, and others for contributing tons of features and bugfixes to this release!<br/>
         Here are the highlights:<br/>
         <ul>
