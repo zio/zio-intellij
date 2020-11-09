@@ -13,7 +13,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScMethodCall, ScReferenceE
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScFunctionDefinition, ScPatternDefinition}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 package object testsupport {
   val ZSuitePaths = List("zio.test.RunnableSpec")

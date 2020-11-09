@@ -1,8 +1,8 @@
-lazy val scala212      = "2.12.10"
-lazy val pluginVersion = "2020.2.2.1" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
+lazy val scala213      = "2.13.2"
+lazy val pluginVersion = "2020.3.2.1" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "202"
+ThisBuild / intellijBuild := "203.5600.34"
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias(
@@ -10,15 +10,17 @@ addCommandAlias(
   "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"
 )
 
+scalacOptions += "-deprecation"
+
 lazy val `zio-intellij` = project
   .in(file("."))
   .enablePlugins(SbtIdeaPlugin)
   .settings(
-    scalaVersion := scala212,
+    scalaVersion := scala213,
     version := pluginVersion,
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2020.2.27".toPlugin
+      "org.intellij.scala:2020.3.12".toPlugin
     ),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
@@ -28,8 +30,8 @@ lazy val `zio-intellij` = project
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
         Welcome to another exciting release of the ZIO IntelliJ Plugin!<br/>
-        <strong>Note:</strong> This is a hotfix update that fixes the test runner notification popup appearing in non-ZIO projects</br>
-        <br/>
+        This is the initial release supporting IntelliJ 2020.3. Please report any issues you might find!</br>
+        </br>
         I'd like to thank Nikita Myazin, Timur Aliberdov, and others for contributing tons of features and bugfixes to this release!<br/>
         Here are the highlights:<br/>
         <ul>

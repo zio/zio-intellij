@@ -60,7 +60,7 @@ object MockableInjector {
     }
 
   def makeTags(typeDefinition: ScTypeDefinition): List[String] =
-    getMembers(typeDefinition).collect {
+    getMembers(typeDefinition).view.collect {
       case (name, info :: Nil) =>
         makeTag(name, info)
       case (name, infos) =>
@@ -73,7 +73,7 @@ object MockableInjector {
         s"""object $tagName {
            |  ${overloadedTags.mkString("\n  ")}
            |}""".stripMargin
-    }(collection.breakOut)
+    }.to(List)
 
   sealed trait Capability extends Product with Serializable
 
@@ -167,7 +167,9 @@ object MockableInjector {
       .groupBy(_.signature.name)
 
   private def sortOverloads(infos: Seq[MemberInfo]): Seq[MemberInfo] = {
-    import scala.math.Ordering.Implicits.seqDerivedOrdering
+    import scala.math.Ordering.Implicits.seqOrdering
+    import scala.collection.Seq
+
     infos.sortBy(_.signature)(Ordering[Seq[String]].on {
       case Method(method) =>
         for {

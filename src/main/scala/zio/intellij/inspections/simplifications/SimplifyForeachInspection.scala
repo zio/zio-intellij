@@ -58,7 +58,7 @@ sealed abstract class BaseForeachForCompSimplificationType(
       case ScFor(enumerators, _) =>
         enumerators.generators.collect {
           case `_ <- x`(expr @ methodExtractor(zioType, iterable, func)) => replacement(zioType, expr, iterable, func)
-        }
+        }.toSeq
       case _ => Nil
     }
 }
@@ -77,7 +77,7 @@ object ForeachParNForCompSimplificationType extends BaseForeachParNSimplificatio
         enumerators.generators.collect {
           case `_ <- x`(expr @ `ZIO.foreachParN`(zioType, n, iterable, func)) =>
             replacement(zioType, expr, n, iterable, func)
-        }
+        }.toSeq
       case _ => Nil
     }
 }

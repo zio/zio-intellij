@@ -21,7 +21,7 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
       val resolvedDependencies = resolver.resolve(dependencies(version.toString): _*)
       val jars: Seq[Path]      = resolvedDependencies.map(_.file.toPath)
       val urls                 = jars.map(_.toUri.toURL).toArray
-      Right(DownloadSuccess(version, scalaVersion, urls))
+      Right(DownloadSuccess(version, scalaVersion, urls.toIndexedSeq))
     } catch {
       case e: ProcessCanceledException => throw e
       case NonFatal(e)                 => Left(DownloadFailure(version, scalaVersion, e))

@@ -4,7 +4,7 @@ import com.sun.jdi._
 import org.jetbrains.plugins.scala.project.ScalaLanguageLevel
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 package object jdi {
 

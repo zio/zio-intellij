@@ -24,7 +24,7 @@ import scala.util._
 // Borrowed from ScalafmtDynamicServiceImpl and friends
 
 @State(name = "TestRunnerResolveService", storages = Array(new Storage("zio_testrunner_resolve_cache.xml")))
-private[runner] final class TestRunnerResolveService
+private[testsupport] final class TestRunnerResolveService
     extends PersistentStateComponent[TestRunnerResolveService.ServiceState] {
 
   private val testRunnerVersions: mutable.Map[Version, ResolveStatus] = ScalaCollectionsUtil.newConcurrentMap
@@ -48,7 +48,7 @@ private[runner] final class TestRunnerResolveService
     case _ =>
       if (state.resolvedVersions.containsKey(version.toString)) {
         val jarUrls = state.resolvedVersions.get(version.toString).map(new URL(_))
-        resolveClassPath(version, scalaVersion, jarUrls) match {
+        resolveClassPath(version, scalaVersion, jarUrls.toIndexedSeq) match {
           case r @ Right(_)                 => r
           case Left(_) if downloadIfMissing => downloadAndResolve(version, scalaVersion, progressListener)
           case _                            => Left(ResolveError.NotFound(version, scalaVersion))

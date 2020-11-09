@@ -5,8 +5,9 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.ScTypeAliasDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTypeElementFromText
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
-import org.jetbrains.plugins.scala.lang.psi.types.api.StdTypes
 import org.jetbrains.plugins.scala.lang.psi.types.{ScParameterizedType, ScType}
+import org.jetbrains.plugins.scala.lang.psi.types.api.StdTypes
+import zio.intellij.synthetic.macros.ModulePatternAccessible.TypeInfo
 import zio.intellij.synthetic.macros.utils.presentation.defaultPresentationStringForScalaType
 import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils._
@@ -94,8 +95,10 @@ class ModulePatternAccessible extends SyntheticMembersInjector {
       case _ =>
         Nil
     }
+}
 
-  private final case class TypeInfo(
+object ModulePatternAccessible {
+  final case class TypeInfo private (
     zioObject: String,
     accessMethod: String,
     rTypeParam: ScType,

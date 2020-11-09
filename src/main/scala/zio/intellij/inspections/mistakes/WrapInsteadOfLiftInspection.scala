@@ -38,8 +38,8 @@ class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
           v.hasExplicitType || v.declaredElements.exists(_isUsed)
         case Some(r: ScReferencePattern) =>
           r.bindings.filterNot(_.isWildcard).exists(_isUsed)
-        case Some(ScGenerator(p)) => isUsed(p.toOption.map(_._1))
-        case _                    => false
+        case Some(ScGenerator(p, _)) => isUsed(p.toOption)
+        case _                       => false
       }
     }
 

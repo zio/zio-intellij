@@ -87,7 +87,8 @@ class ZioAccessorUsagesSearcher extends QueryExecutor[PsiReference, ReferencesSe
 
   private def isAccessorMethod(method: ScFunction, candidate: PhysicalMethodSignature): Boolean = candidate match {
     case Method(acc) =>
-      acc.name == method.name && fromZio(acc.returnType.getOrAny) && areParamsSame(acc.parameters, method.parameters)
+      acc.name == method.name && fromZio(acc.returnType.getOrAny) &&
+        areParamsSame(acc.parameters.toSeq, method.parameters.toSeq)
     case _ => false
   }
 

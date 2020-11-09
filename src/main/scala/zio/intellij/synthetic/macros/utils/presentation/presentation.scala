@@ -27,7 +27,7 @@ package object presentation {
   }
 
   private[macros] def presentationStringForScalaParameter(parameter: ScParameter): String = {
-    val buffer = StringBuilder.newBuilder
+    val buffer = new StringBuilder
     buffer.append(parameterAnnotations(parameter))
     buffer.append(escape(parameter.name))
     buffer.append(parameterTypeAnnotations(parameter))
@@ -106,7 +106,7 @@ package object presentation {
   }
 
   private def decoratedParameterType(param: ScParameter, typeText: String): String = {
-    val buffer = StringBuilder.newBuilder
+    val buffer = new StringBuilder
 
     if (param.isCallByNameParameter) {
       buffer.append(ScalaPsiUtil.functionArrow(param.getProject))

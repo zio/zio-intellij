@@ -68,7 +68,7 @@ jobs:
         run: sbt clean && sbt packageArtifact && sbt packageArtifactZip
 
       - name: Publish plugin
-        run: sbt "publishPlugin eap"
+        run: sbt "publishPlugin EAP"
 
   tag-latest-commit:
     needs:
