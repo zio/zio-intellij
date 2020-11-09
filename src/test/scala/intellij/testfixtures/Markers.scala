@@ -56,7 +56,7 @@ trait Markers {
       addRange(startMarker, endMarker)
     for (i <- 0 until index) addRange(startMarker(i), endMarker(i))
 
-    input -> textRanges
+    input -> textRanges.toSeq
   }
 
   def extractSequentialMarkers(inputText: String): (String, Seq[TextRange]) =

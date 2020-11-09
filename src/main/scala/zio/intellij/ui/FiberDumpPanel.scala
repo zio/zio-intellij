@@ -6,7 +6,7 @@ import java.awt.datatransfer.StringSelection
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.{ConsoleView, ConsoleViewContentType}
 import com.intellij.icons.AllIcons
-import com.intellij.notification.NotificationGroup
+import com.intellij.notification.{NotificationGroup, NotificationGroupManager}
 import com.intellij.openapi.actionSystem._
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ide.CopyPasteManager
@@ -126,7 +126,7 @@ class FiberDumpPanel(
 
   private class CopyFiberDumpToClipboardAction
       extends DumbAwareAction("Copy to Clipboard", "Copy whole thread dump to clipboard", PlatformIcons.COPY_ICON) {
-    private val GROUP = NotificationGroup.toolWindowGroup("Analyze fiber dump", ToolWindowId.RUN, false)
+    private val GROUP = NotificationGroupManager.getInstance().getNotificationGroup("Analyze fiber dump")
 
     override def actionPerformed(e: AnActionEvent): Unit = {
       val separator = "\n\n"

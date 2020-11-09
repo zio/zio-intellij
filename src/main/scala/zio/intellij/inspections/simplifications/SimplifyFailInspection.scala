@@ -17,8 +17,8 @@ object FailOrDieSimplificationType extends SimplificationType {
       replace(expr).withText(s"${zioType.name}.die${error.getWrappedText}").highlightAll
 
     expr match {
-      case `ZIO.fail`(zioType, error) `.orDie` () => Some(replacement(zioType, error))
-      case _                                      => None
+      case `.orDie`(`ZIO.fail`(zioType, error)) => Some(replacement(zioType, error))
+      case _                                    => None
     }
   }
 }

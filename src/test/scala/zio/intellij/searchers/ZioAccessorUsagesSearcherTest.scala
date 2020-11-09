@@ -8,7 +8,7 @@ import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, Librar
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.util.Markers
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdapter with Markers {
 

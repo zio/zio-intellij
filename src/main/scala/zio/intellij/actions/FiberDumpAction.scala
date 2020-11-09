@@ -5,7 +5,7 @@ import com.intellij.debugger.engine.JavaValue
 import com.intellij.execution.filters.{ExceptionFilters, TextConsoleBuilderFactory}
 import com.intellij.execution.ui.RunnerLayoutUi
 import com.intellij.execution.ui.layout.impl.RunnerContentUi
-import com.intellij.notification.NotificationGroup
+import com.intellij.notification.{NotificationGroup, NotificationGroupManager}
 import com.intellij.openapi.actionSystem.{AnAction, AnActionEvent, DefaultActionGroup}
 import com.intellij.openapi.application.{ApplicationManager, ModalityState}
 import com.intellij.openapi.project.{DumbAwareAction, Project}
@@ -116,10 +116,12 @@ final class FiberDumpAction extends DumbAwareAction with AnAction.TransparentUpd
               try {
                 val dump = buildFiberDump(result)
                 ApplicationManager.getApplication.invokeLater(
-                  () => {
-                    val xSession = session.getXDebugSession
-                    if (xSession != null)
-                      FiberDumpAction.addFiberDump(project, dump, xSession.getUI, session.getSearchScope)
+                  new Runnable {
+                    override def run(): Unit = {
+                      val xSession = session.getXDebugSession
+                      if (xSession != null)
+                        FiberDumpAction.addFiberDump(project, dump, xSession.getUI, session.getSearchScope)
+                    }
                   },
                   ModalityState.NON_MODAL
                 )
@@ -173,7 +175,8 @@ final class FiberDumpAction extends DumbAwareAction with AnAction.TransparentUpd
 
 object FiberDumpAction {
 
-  val NOTIFICATION_GROUP: NotificationGroup = NotificationGroup.balloonGroup("Fiber Dump Notifications")
+  val NOTIFICATION_GROUP: NotificationGroup =
+    NotificationGroupManager.getInstance.getNotificationGroup("Fiber Dump Notifications")
 
   def addFiberDump(
     project: Project,

@@ -13,13 +13,13 @@
         <li>Integrated test runner</li>
         <li>And much more!</li>
         </ul>
-
+        <br/>
         Contribute to the plugin at <a href="https://github.com/zio/zio-intellij">https://github.com/zio/zio-intellij</a>
         ]]></description>
 
     <change-notes>replaced-by-build</change-notes>
 
-    <idea-version since-build="202" until-build="202.*"/>
+    <idea-version since-build="203.5981.41" until-build="203.*"/>
 
     <depends>org.intellij.scala</depends>
     <depends>com.intellij.modules.java</depends>
@@ -180,6 +180,11 @@
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyBuildUseInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
+			 
+        <!-- Fiber dump -->
+        <notificationGroup id="Fiber Dump Notifications" displayType="balloon"/>
+        <notificationGroup id="Analyze fiber dump" displayType="toolWindow" toolWindowId="Run" isLogByDefault="false"/>
+        <!-- -->
 
         <localInspection implementationClass="zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection"
                          displayName="Effect cannot fail; operation on error is impossible"

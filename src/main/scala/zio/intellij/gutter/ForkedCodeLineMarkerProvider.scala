@@ -23,10 +23,11 @@ final class ForkedCodeLineMarkerProvider extends LineMarkerProvider {
       null
     else
       element.getParent match {
-        case _ `.fork` () | _ `.forkDaemon` () | _ `.forkManaged` () => createLineMarkerInfo(element)
+        case `.fork`(_) | `.forkDaemon`(_) | `.forkManaged`(_) => createLineMarkerInfo(element)
         case ref: ScReferenceExpression =>
           ref.getParent match {
-            case _ `.forkAs` _ | _ `.forkOn` _ | _ `.forkWithErrorHandler` _ | `ZIO.forkAll`(_) | `ZIO.forkAll_`(_) =>
+            case `.forkAs`(_) | `.forkOn`(_) | `.forkWithErrorHandler`(_) | `ZIO.forkAll`(_, _) |
+                `ZIO.forkAll_`(_, _) =>
               createLineMarkerInfo(element)
             case _ => null
           }
@@ -43,6 +44,8 @@ object ForkedCodeLineMarkerProvider {
       fiberIcon,
       (_: PsiElement) => s"Effect is explicitly forked via '${element.getText}'",
       null, // the handler executed when the gutter icon is clicked
-      Alignment.LEFT
+      Alignment.LEFT,
+      () => s"Effect is explicitly forked via '${element.getText}'"
     )
+
 }

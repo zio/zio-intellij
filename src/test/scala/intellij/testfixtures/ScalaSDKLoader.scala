@@ -6,10 +6,12 @@ import java.io.File
 import java.{util => ju}
 
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar
 import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibraryEditor
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.{JarFileSystem, VirtualFile}
 import com.intellij.testFramework.PsiTestUtil
+import org.jetbrains.plugins.scala.extensions.ObjectExt
 import org.jetbrains.plugins.scala.project.{ModuleExt, ScalaLanguageLevel, ScalaLibraryProperties, ScalaLibraryType, template}
 import org.junit.Assert._
 
@@ -83,18 +85,25 @@ case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryL
     }
 
     val classesRoots = {
-      import scala.collection.JavaConverters._
+      import scala.jdk.CollectionConverters._
       compilerClasspath.map(findJarFile).asJava
     }
 
-    val library = PsiTestUtil.addProjectLibrary(
+    val libraryTable = LibraryTablesRegistrar.getInstance.getLibraryTable(module.getProject)
+    val scalaSdkName = s"scala-sdk-${version.minor}"
+
+    def createNewLibrary = PsiTestUtil.addProjectLibrary(
       module,
-      s"scala-sdk-${version.minor}",
+      scalaSdkName,
       classesRoots,
       ju.Collections.singletonList(sourceRoot)
     )
 
-    Disposer.register(module, library)
+    val library =
+      libraryTable.getLibraryByName(scalaSdkName)
+        .toOption
+        .getOrElse(createNewLibrary)
+
     inWriteAction {
       val version = Artifact.ScalaCompiler.versionOf(compilerFile)
       val properties = ScalaLibraryProperties(version, compilerClasspath)
