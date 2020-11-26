@@ -1,5 +1,5 @@
 lazy val scala212      = "2.12.10"
-lazy val pluginVersion = "2020.2.2.1" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
+lazy val pluginVersion = "2020.2.2.2" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "202"
