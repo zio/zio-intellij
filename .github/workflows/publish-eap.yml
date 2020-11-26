@@ -7,17 +7,6 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  generate-build-number:
-    runs-on: ubuntu-latest
-    outputs:
-      build_number: ${{ steps.buildnumber.outputs.build_number }}
-    steps:
-      - name: Generate build number
-        id: buildnumber
-        uses: einaregilsson/build-number@v3
-        with:
-          token: ${{secrets.GITHUB_TOKEN}}
-
   fetch-commit-hashes:
     runs-on: ubuntu-latest
     outputs:
@@ -43,12 +32,11 @@ jobs:
 
   publish:
     needs:
-      - generate-build-number
       - fetch-commit-hashes
     runs-on: ubuntu-latest
     if: needs.fetch-commit-hashes.outputs.latest-commit != needs.fetch-commit-hashes.outputs.latest-tagged-commit
     env:
-      ZIO_INTELLIJ_BUILD_NUMBER: ${{ needs.generate-build-number.outputs.build_number }}
+      ZIO_INTELLIJ_BUILD_NUMBER: ${{ github.run_number }}
       ZIO_INTELLIJ_CHANGE_NOTES: '—'
       IJ_PLUGIN_REPO_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE }}
     steps:
@@ -56,7 +44,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Scala
-        uses: olafurpg/setup-scala@v7
+        uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
 
