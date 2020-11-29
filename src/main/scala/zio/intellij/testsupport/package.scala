@@ -53,7 +53,7 @@ package object testsupport {
         case leaf: LeafPsiElement if leaf.getElementType == ScalaTokenTypes.tIDENTIFIER =>
           leaf.parent match {
             case Some(td: ScTypeDefinition)       => infoForClass(td)
-            case Some(ref: ScReferenceExpression) => infoForLocalExpr(ref) orElse infoForExprFromAnotherClass(ref)
+            case Some(ref: ScReferenceExpression) => infoForLocalExpr(ref) // orElse infoForExprFromAnotherClass(ref)
             case _                                => None
           }
         case _ => None
