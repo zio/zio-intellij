@@ -7,20 +7,16 @@ import zio.intellij.synthetic.macros.utils.presentation._
 
 package object macros {
 
-  def typeParametersDefinition(tpo: ScTypeParametersOwner, showVariance: Boolean): String =
-    tpo.typeParametersClause.fold("")(presentationStringForScalaTypeParameters(_, showVariance))
-
   def typeParametersDefinition(tParams: Seq[ScTypeParam], showVariance: Boolean): String =
     if (tParams.isEmpty) ""
     else presentationStringForScalaTypeParameters(tParams, showVariance)
 
   def typeParametersApplication(tpo: ScTypeParametersOwner): String =
-    tpo.typeParametersClause
-      .fold("") { tps =>
-        tps.typeParameters
-          .map(_.name)
-          .mkString("[", ", ", "]")
-      }
+    typeParametersApplication(tpo.typeParameters.map(_.name))
+
+  def typeParametersApplication(tParamsName: Seq[String]): String =
+    if (tParamsName.isEmpty) ""
+    else tParamsName.mkString("[", ", ", "]")
 
   def parametersDefinition(function: ScFunction): String =
     presentationStringForScalaParameters(function.paramClauses)
