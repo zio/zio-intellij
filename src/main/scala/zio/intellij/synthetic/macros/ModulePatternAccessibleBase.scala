@@ -8,6 +8,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTy
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
 import org.jetbrains.plugins.scala.lang.psi.types.api.StdTypes
 import org.jetbrains.plugins.scala.lang.psi.types.{ScParameterizedType, ScType}
+import zio.intellij.intentions.suggestions.SuggestTypeAlias
 import zio.intellij.synthetic.macros.utils.presentation.defaultPresentationStringForScalaType
 import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils._
@@ -42,7 +43,6 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
           sco.aliases
             .find(_.name == sco.name)
             .collect { case ad: ScTypeAliasDefinition => ad }
-            .flatMap(_.aliasedType.toOption)
 
         // direct call `createType("Has[Service]")` might throw a StackOverflow exception
         val hasServiceTpe = for {
@@ -51,7 +51,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
           serviceTpe <- service.`type`.toOption
         } yield ScParameterizedType(has, Seq(serviceTpe))
 
-        possibleAliasTpe.exists(alias => hasServiceTpe.exists(_.equiv(alias)))
+        possibleAliasTpe.exists(alias => hasServiceTpe.exists(SuggestTypeAlias.equiv(alias, _).isDefined))
       }
 
       val requiredEnv =

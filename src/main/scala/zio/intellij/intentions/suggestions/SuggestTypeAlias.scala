@@ -74,20 +74,7 @@ object SuggestTypeAlias {
 
   def findMatchingAliases(te: ScTypeElement, declaredType: ScType): List[ScType] =
     (allAliasesFor(declaredType, te.projectContext, te.resolveScope).collect {
-      case alias: ScTypeAliasDefinition =>
-        val undefParams = alias.typeParameters.map(UndefinedType(_))
-        val undefSubst  = ScSubstitutor.bind(alias.typeParameters, undefParams)
-        alias.aliasedType.toOption
-          .flatMap(aliasType =>
-            undefSubst(aliasType)
-              .conformanceSubstitutor(declaredType)
-              .map(subst => subst.apply(ParameterizedType(ScDesignatorType(alias), undefParams)))
-              .collect {
-                case tpe: ScType if declaredType.conforms(tpe) => tpe
-              }
-          )
-      // fixme distinct doesn't work
-      // should compare by `equiv` instead of `==`
+      case alias: ScTypeAliasDefinition => conforms(alias, declaredType)
     }.flatten :+ topLevelType(declaredType)).distinct
 
   def topLevelType(tpe: ScType): ScType =
@@ -96,4 +83,23 @@ object SuggestTypeAlias {
       case _                                   => tpe
     }
 
+  def equiv(alias: ScTypeAliasDefinition, tpe: ScType) =
+    check(alias, tpe)(_.equiv(tpe))
+
+  def conforms(alias: ScTypeAliasDefinition, tpe: ScType) =
+    check(alias, tpe)(_.conforms(tpe))
+
+  private def check(alias: ScTypeAliasDefinition, tpe: ScType)(checker: ScType => Boolean) = {
+    val undefParams = alias.typeParameters.map(UndefinedType(_))
+    val undefSubst  = ScSubstitutor.bind(alias.typeParameters, undefParams)
+    alias.aliasedType.toOption
+      .flatMap(aliasType =>
+        undefSubst(aliasType)
+          .conformanceSubstitutor(tpe)
+          .map(subst => subst.apply(ParameterizedType(ScDesignatorType(alias), undefParams)))
+          .collect {
+            case t: ScType if checker(t) => t
+          }
+      )
+  }
 }
