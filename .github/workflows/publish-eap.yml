@@ -68,9 +68,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Branch name
+        uses: nelonoel/branch-name@v1.0.1
+
       - name: Update tag
         run: |
-          commit_tag='eap'
+          commit_tag="eap-${BRANCH_NAME}"
           git tag -d ${commit_tag} 2> /dev/null || true
           git tag ${commit_tag} ${{ needs.fetch-commit-hashes.outputs.latest-commit }}
           remote_repo="https://${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
