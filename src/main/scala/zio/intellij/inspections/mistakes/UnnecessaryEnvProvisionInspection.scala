@@ -11,6 +11,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import zio.intellij.inspections.mistakes.UnnecessaryEnvProvisionInspection.createFix
+import zio.intellij.inspections.zioMethods.`.provideSomeLayer`
 import zio.intellij.utils.TypeCheckUtils.isAnyEnvEffect
 import zio.intellij.utils.{OptionUtils => OptionOps, _}
 
@@ -47,8 +48,8 @@ class UnnecessaryEnvProvisionInspection extends AbstractRegisteredInspection {
     element match {
       case MethodRepr(expr, Some(base), Some(ref), _) if isAnyEnvEffect(base) =>
         createPossibleFix(expr, base, ref, descriptionTemplate, highlightType)
-      // effect.provideSomeLayer
-      case MethodRepr(expr, Some(MethodRepr(_, Some(base), Some(ref), _)), _, _) if isAnyEnvEffect(base) =>
+      case MethodRepr(expr @ `.provideSomeLayer`(_, _), Some(MethodRepr(_, Some(base), Some(ref), _)), _, _)
+          if isAnyEnvEffect(base) =>
         createPossibleFix(expr, base, ref, descriptionTemplate, highlightType)
       case _ => None
     }

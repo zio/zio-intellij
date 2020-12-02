@@ -130,6 +130,10 @@ abstract class UnnecessaryEnvProvisionInspectionTest(fromEffect: String => Strin
 
   def testFallibleEffectNoHighlighting(): Unit =
     z(s"$START${fromEffect("ZIO.environment[Int]")}.$faultyMethod(???)$END").assertNotHighlighted()
+
+  def testMethodChainNoHighlighting(): Unit =
+    z(s"$START${fromEffect("UIO(1)")}.fork.repeat(Schedule.spaced(5.second).forever).provide(???)$END")
+      .assertNotHighlighted()
 }
 
 class ZIOUnnecessaryEnvProvisionInspectionTest extends UnnecessaryEnvProvisionInspectionTest(identity)
