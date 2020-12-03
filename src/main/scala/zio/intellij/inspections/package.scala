@@ -42,6 +42,7 @@ package object inspections {
     val `.tapBoth`: Qualified           = invocation("tapBoth").from(zioLikePackages)
     val `.orDie`: Qualified             = invocation("orDie").from(zioLikePackages)
     val `.provide`: Qualified           = invocation("provide").from(zioLikePackages)
+    val `.provideSomeLayer`: Qualified  = invocation("provideSomeLayer").from(zioLikePackages)
     val `.option`: Qualified            = invocation("option").from(zioLikePackages)
     val `.either`: Qualified            = invocation("either").from(zioLikePackages)
 
