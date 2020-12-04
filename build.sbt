@@ -1,5 +1,5 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2020.3.3.0" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
+lazy val pluginVersion = "2020.3.3.1" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "203"
@@ -29,7 +29,10 @@ lazy val `zio-intellij` = project
       xml.changeNotes = sys.env.getOrElse(
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
-        <strong>Note:</strong> This is a hotfix release that fixes a performance problem which might cause IntelliJ to become unresponsive when opening files in external libraries.
+        <ul>
+          <li>Fixed an issue with <code>NeedsEnv</code> detection in certain cases (<a href="https://github.com/zio/zio-intellij/pull/200">#200</a>)</li>
+          <li>Performance and stability fixes</li>
+        </ul>
         ]]>"""
       )
     }

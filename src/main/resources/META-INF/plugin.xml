@@ -5,8 +5,8 @@
     <version>replaced-by-build</version>
 
     <description><![CDATA[
-        Suggestions, refactorings, and other enhancements for the ZIO library ecosystem.
-        The plugin enhances ZIO with features, such as:
+        Suggestions, refactorings, and other enhancements for Scala's <a href="https://zio.dev/">ZIO</a> ecosystem.
+        The plugin enhances the ZIO library with features, such as:
         <ul>
         <li>Refactorings and suggestions</li>
         <li>Support for zio-macros (e.g. <code>@accessible</code>)</li>
