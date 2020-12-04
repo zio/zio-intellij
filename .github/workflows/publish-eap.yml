@@ -26,8 +26,8 @@ jobs:
         id: fetch-latest-commits
         run: |
           commit_tag="eap-${BRANCH_NAME}"
-          echo "::set-output name=latest-commit::$(git log -n 1 --format=format:%H)"
-          echo "::set-output name=latest-tagged-commit::$(git show-ref --tags | grep ${commit_tag} | awk '{print $1}')"
+          echo "::set-output name=latest-commit::$(git log -n 1 --format=format:%H ${BRANCH_NAME})"
+          echo "::set-output name=latest-tagged-commit::$(git rev-list -n 1 ${commit_tag})"
 
       - name: Print latest commits
         run: |
