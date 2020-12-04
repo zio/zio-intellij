@@ -18,12 +18,16 @@ jobs:
         with:
           # 0 indicates all history for all branches and tags.
           fetch-depth: 0
+          
+      - name: Branch name
+        uses: nelonoel/branch-name@v1.0.1
 
       - name: Fetch latest commits
         id: fetch-latest-commits
         run: |
+          commit_tag="eap-${BRANCH_NAME}"
           echo "::set-output name=latest-commit::$(git log -n 1 --format=format:%H)"
-          echo "::set-output name=latest-tagged-commit::$(git show-ref --tags | grep eap | awk '{print $1}')"
+          echo "::set-output name=latest-tagged-commit::$(git show-ref --tags | grep ${commit_tag} | awk '{print $1}')"
 
       - name: Print latest commits
         run: |
