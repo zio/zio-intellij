@@ -42,9 +42,3 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
       case _ => None
     }
 }
-
-object ZTestRunConfigurationProducer {
-  // TODO this is copied from the Scala plugin
-  // It should probably be created by the platform
-  val instance = new ZTestRunConfigurationProducer
-}

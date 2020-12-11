@@ -27,7 +27,7 @@ import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
 final class ZTestRunConfiguration(project: Project, configurationFactory: ConfigurationFactory, name: String)
-  extends AbstractTestRunConfiguration(project, configurationFactory, name) { self =>
+    extends AbstractTestRunConfiguration(project, configurationFactory, name) { self =>
 
   override val testFramework: ZTestFramework = TestFramework.EXTENSION_NAME.findExtension(classOf[ZTestFramework])
 
@@ -74,8 +74,11 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
     module.findLibrary(_.contains("zio-test-intellij")).isDefined ||
       resolveTestRunner(module).isDefined
 
-  class ZioTestCommandLineState(env: ExecutionEnvironment, failedTests: Option[Seq[(String, String)]], testRunnerJars: Option[Seq[URL]])
-    extends ScalaTestFrameworkCommandLineState(self, env, failedTests, runnerInfo) {
+  class ZioTestCommandLineState(
+    env: ExecutionEnvironment,
+    failedTests: Option[Seq[(String, String)]],
+    testRunnerJars: Option[Seq[URL]]
+  ) extends ScalaTestFrameworkCommandLineState(self, env, failedTests, runnerInfo) {
 
     override def createJavaParameters(): JavaParameters = {
       val javaParameters = super.createJavaParameters()

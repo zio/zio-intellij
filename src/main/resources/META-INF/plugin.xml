@@ -182,7 +182,7 @@
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyBuildUseInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
-			 
+
         <!-- Fiber dump -->
         <notificationGroup id="Fiber Dump Notifications" displayType="balloon"/>
         <notificationGroup id="Analyze fiber dump" displayType="toolWindow" toolWindowId="Run" isLogByDefault="false"/>
@@ -242,6 +242,9 @@
         <testFramework implementation="zio.intellij.testsupport.ZTestFramework" order="first"/>
 
         <applicationService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
+
+        <!-- Project template -->
+        <projectTemplatesFactory implementation="zio.intellij.project.ZioProjectTemplateFactory" order="last"/>
     </extensions>
 
     <actions>
