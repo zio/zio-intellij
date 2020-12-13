@@ -21,7 +21,8 @@ import org.jetbrains.sbt.project.settings.SbtProjectSettings
 import org.jetbrains.sbt.project.template.SbtModuleBuilderUtil.{doSetupModule, getOrCreateContentRootDir}
 import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderUtil}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
-import zio.intellij.ZioIcon
+import zio.intellij.{utils, ZioIcon}
+import zio.intellij.testsupport.runner.{TestRunnerDownloader, TestRunnerResolveService}
 
 import java.awt.FlowLayout
 import java.io.File
@@ -45,9 +46,9 @@ private[zio] class ZioProjectBuilder
     packagePrefix = None
   )
 
-  private lazy val scalaVersions                = ScalaKind()
-  private lazy val sbtVersions                  = SbtKind()
-  private lazy val contentRootDir: Option[File] = getOrCreateContentRootDir(getContentEntryPath)
+  private lazy val scalaVersions = ScalaKind()
+  private lazy val sbtVersions   = SbtKind()
+  private lazy val zioVersions   = loadZioVersions(ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13))
 
   {
     val settings = getExternalProjectSettings
@@ -91,6 +92,14 @@ private[zio] class ZioProjectBuilder
           settings.setResolveClassifiers(selections.resolveClassifiers)
           settings.setResolveSbtClassifiers(selections.resolveSbtClassifiers)
         }
+
+        TestRunnerResolveService.instance
+          .resolve(
+            utils.Version.parseUnsafe(selections.zioVersion),
+            ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13),
+            downloadIfMissing = true
+          )
+          .get()
 
         createProjectTemplateIn(
           root,
@@ -167,7 +176,7 @@ private[zio] class ZioProjectBuilder
       selections.scalaVersion = scalaVersionComboBox.getSelectedItem.asInstanceOf[String]
     }
     zioVersionComboBox.addActionListenerEx {
-      selections.scalaVersion = scalaVersionComboBox.getSelectedItem.asInstanceOf[String]
+      selections.zioVersion = zioVersionComboBox.getSelectedItem.asInstanceOf[String]
     }
     resolveClassifiersCheckBox.addActionListenerEx {
       selections.resolveClassifiers = resolveClassifiersCheckBox.isSelected
@@ -290,9 +299,8 @@ private[zio] class ZioProjectBuilder
   }
 
   private def setupZioVersionItems(cbx: SComboBox): Unit = {
-    val versions = loadZioVersions(ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13))
+    val versions = zioVersions
     cbx.setItems(versions)
-    selections.zioVersion = versions.headOption.orNull
 
     selections.zioVersion match {
       case version if versions.contains(version) =>
