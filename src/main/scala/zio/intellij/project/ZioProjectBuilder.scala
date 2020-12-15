@@ -74,12 +74,14 @@ private[zio] class ZioProjectBuilder
       versionStrings.map(Version(_))
     }
 
-    extensions
+    val versions = extensions
       .withProgressSynchronously("Fetching available ZIO versions")(loadVersions)
       .sorted
       .reverse
       .map(_.presentation)
       .toArray
+
+    Versions(versions.headOption.getOrElse(hardcodedVersions.head), versions)
   }
 
   override def getModuleType: ModuleType[_ <: ModuleBuilder] = JavaModuleType.getModuleType
@@ -130,6 +132,7 @@ private[zio] class ZioProjectBuilder
     {
       selections(ScalaKind) = scalaVersions
       selections(SbtKind) = sbtVersions
+      selections.zioVersion = zioVersions.defaultVersion
     }
 
     val sbtVersionComboBox = applyTo(new SComboBox())(
@@ -299,7 +302,7 @@ private[zio] class ZioProjectBuilder
   }
 
   private def setupZioVersionItems(cbx: SComboBox): Unit = {
-    val versions = zioVersions
+    val versions = zioVersions.versions
     cbx.setItems(versions)
 
     selections.zioVersion match {
