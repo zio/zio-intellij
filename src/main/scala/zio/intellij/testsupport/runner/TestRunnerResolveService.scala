@@ -27,7 +27,7 @@ import scala.util._
 private[testsupport] final class TestRunnerResolveService
     extends PersistentStateComponent[TestRunnerResolveService.ServiceState] {
 
-  private val testRunnerVersions: mutable.Map[Version, ResolveStatus] = ScalaCollectionsUtil.newConcurrentMap
+  private val testRunnerVersions: mutable.Map[(Version, String), ResolveStatus] = ScalaCollectionsUtil.newConcurrentMap
 
   private val state: TestRunnerResolveService.ServiceState = new TestRunnerResolveService.ServiceState
 
@@ -41,13 +41,14 @@ private[testsupport] final class TestRunnerResolveService
     downloadIfMissing: Boolean,
     resolveFast: Boolean = false,
     progressListener: DownloadProgressListener = NoopProgressListener
-  ): ResolveResult = testRunnerVersions.get(version) match {
+  ): ResolveResult = testRunnerVersions.get((version, scalaVersion.major)) match {
     case Some(ResolveStatus.Resolved(jarPaths)) => Right(jarPaths)
     case _ if resolveFast                       => Left(ResolveError.NotFound(version, scalaVersion))
     case Some(ResolveStatus.DownloadInProgress) => Left(ResolveError.DownloadInProgress(version, scalaVersion))
     case _ =>
-      if (state.resolvedVersions.containsKey(version.toString)) {
-        val jarUrls = state.resolvedVersions.get(version.toString).map(new URL(_))
+      val key = s"${version.toString}###${scalaVersion.major}"
+      if (state.resolvedVersions.containsKey(key)) {
+        val jarUrls = state.resolvedVersions.get(key).map(new URL(_))
         resolveClassPath(version, scalaVersion, jarUrls.toIndexedSeq) match {
           case r @ Right(_)                 => r
           case Left(_) if downloadIfMissing => downloadAndResolve(version, scalaVersion, progressListener)
@@ -63,7 +64,7 @@ private[testsupport] final class TestRunnerResolveService
     project: Project,
     onResolved: ResolveResult => Unit = _ => ()
   ): Unit =
-    testRunnerVersions.get(version) match {
+    testRunnerVersions.get((version, scalaVersion.major)) match {
       case Some(ResolveStatus.Resolved(fmt)) =>
         invokeLater(onResolved(Right(fmt)))
       case Some(ResolveStatus.DownloadInProgress) =>
@@ -104,8 +105,9 @@ private[testsupport] final class TestRunnerResolveService
     val urls: Array[URL] = jarUrls.toArray
     Try(new URLClassLoader(urls, null).loadClass(ZTestRunnerName + "$")) match {
       case Success(_) =>
-        state.resolvedVersions.put(version.toString, jarUrls.toArray.map(_.toString))
-        testRunnerVersions(version) = ResolveStatus.Resolved(jarUrls)
+        val key = s"${version.toString}###${scalaVersion.major}"
+        state.resolvedVersions.put(key, jarUrls.toArray.map(_.toString))
+        testRunnerVersions((version, scalaVersion.major)) = ResolveStatus.Resolved(jarUrls)
         Right(jarUrls)
       case Failure(e) =>
         Left(ResolveError.UnknownError(version, scalaVersion, e))
