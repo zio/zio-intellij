@@ -2,13 +2,14 @@ package zio.intellij.testsupport.runner
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.notification.{Notification, NotificationGroup, NotificationListener, NotificationType}
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import javax.swing.event.HyperlinkEvent
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.plugins.scala.project.{ModuleExt, ProjectExt}
 import zio.intellij.ZioIcon
-import zio.intellij.testsupport.runner.TestRunnerNotifications.displayInfo
 import zio.intellij.utils.ModuleSyntax
+
+import javax.swing.event.HyperlinkEvent
 
 private[runner] final class TestRunnerProjectNotification(private val project: Project) {
   def init(): Unit =
@@ -19,15 +20,15 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
   private def versions(project: Project) = {
     val sourceModules = project.modulesWithScala.filter(_.isSourceModule).toList
 
-    sourceModules.view
+    sourceModules
       .flatMap(m => m.zioVersion zip m.scalaVersion)
-      .headOption
+      .distinct
   }
 
   private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
-    versions(project).fold(false) {
-      case (version, scalaVersion) =>
-        TestRunnerResolveService.instance
+    versions(project).foldLeft(false) {
+      case (flag, (version, scalaVersion)) =>
+        flag | TestRunnerResolveService.instance
           .resolve(version, scalaVersion, downloadIfMissing)
           .toOption
           .isEmpty
@@ -48,8 +49,10 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
                 scalaVersion,
                 project,
                 onResolved = {
-                  case Right(_) => displayInfo("ZIO Test runner was downloaded successfully!")
-                  case _        => // relying on error reporting in resolve method
+                  case Right(_) =>
+                    val logger = Logger.getInstance("ZIO plugin for IntelliJ")
+                    logger.info(s"ZIO Test runner for $version (${scalaVersion.major}) was downloaded successfully!")
+                  case _ => // relying on error reporting in resolve method
                 }
               )
         }
