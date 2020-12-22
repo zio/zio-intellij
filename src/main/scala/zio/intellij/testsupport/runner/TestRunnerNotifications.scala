@@ -4,6 +4,7 @@ import com.intellij.notification._
 import com.intellij.openapi.project.Project
 import org.jetbrains.plugins.scala.util.ScalaCollectionsUtil
 
+import javax.swing.Icon
 import scala.collection.mutable
 import scala.ref.WeakReference
 
@@ -21,7 +22,8 @@ private[runner] object TestRunnerNotifications {
     message: String,
     notificationType: NotificationType,
     actions: Seq[NotificationAction] = Nil,
-    listener: Option[NotificationListener] = None
+    listener: Option[NotificationListener] = None,
+    icon: Option[Icon] = None
   )(implicit project: Project): Unit = {
     updateShownMessagesCache(message)
     if (messagesShown.contains(message)) return
@@ -34,6 +36,7 @@ private[runner] object TestRunnerNotifications {
       }
     listener.foreach(notification.setListener)
     actions.foreach(notification.addAction)
+    icon.foreach(notification.setIcon)
     notification.notify(project)
 
     messagesShown(message) = WeakReference(notification)
@@ -56,21 +59,24 @@ private[runner] object TestRunnerNotifications {
   def displayInfo(
     message: String,
     actions: Seq[NotificationAction] = Nil,
-    listener: Option[NotificationListener] = None
+    listener: Option[NotificationListener] = None,
+    icon: Option[Icon] = None
   )(implicit project: Project = null): Unit =
-    displayNotification(message, NotificationType.INFORMATION, actions, listener)
+    displayNotification(message, NotificationType.INFORMATION, actions, listener, icon)
 
   def displayWarning(
     message: String,
     actions: Seq[NotificationAction] = Nil,
-    listener: Option[NotificationListener] = None
+    listener: Option[NotificationListener] = None,
+    icon: Option[Icon] = None
   )(implicit project: Project = null): Unit =
-    displayNotification(message, NotificationType.WARNING, actions, listener)
+    displayNotification(message, NotificationType.WARNING, actions, listener, icon)
 
   def displayError(
     message: String,
     actions: Seq[NotificationAction] = Nil,
-    listener: Option[NotificationListener] = None
+    listener: Option[NotificationListener] = None,
+    icon: Option[Icon] = None
   )(implicit project: Project = null): Unit =
-    displayNotification(message, NotificationType.ERROR, actions, listener)
+    displayNotification(message, NotificationType.ERROR, actions, listener, icon)
 }
