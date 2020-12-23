@@ -8,7 +8,9 @@ import scala.concurrent.{Future, Promise}
 import scala.util.Try
 
 object BackgroundTask {
-  def apply[A](project: Project, @NonNls title: String, @NonNls cancelText: String)(f: ProgressIndicator => A): Future[A] = {
+  def apply[A](project: Project, @NonNls title: String, @NonNls cancelText: String)(
+    f: ProgressIndicator => A
+  ): Future[A] = {
     val p = Promise[A]()
 
     new Task.Backgroundable(project, title, true, PerformInBackgroundOption.ALWAYS_BACKGROUND) {

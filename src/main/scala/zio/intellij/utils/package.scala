@@ -26,6 +26,11 @@ import scala.annotation.tailrec
 
 package object utils {
 
+  implicit class StringBuilderSyntax(private val builder: StringBuilder) extends AnyVal {
+    def appendLine: StringBuilder              = builder.append(System.lineSeparator())
+    def appendLine(str: String): StringBuilder = builder.append(str).appendLine
+  }
+
   // taken from ScalaUnusedSymbolInspection
   def isElementUsed(element: ScNamedElement, isOnTheFly: Boolean): Boolean =
     if (isOnTheFly) {

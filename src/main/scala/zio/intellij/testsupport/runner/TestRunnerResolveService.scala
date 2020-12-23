@@ -59,13 +59,13 @@ private[testsupport] final class TestRunnerResolveService
       else Left(ResolveError.NotFound(version, scalaVersion))
   }
 
-  private val appExecutorService = AppExecutorUtil.getAppExecutorService
+  private val appExecutorService                   = AppExecutorUtil.getAppExecutorService
   implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(appExecutorService)
 
   def resolveAsync(
     version: Version,
     scalaVersion: ScalaVersion,
-    project: Project,
+    project: Project
   ): Future[ResolveResult] =
     testRunnerVersions.get((version, scalaVersion.major)) match {
       case Some(ResolveStatus.Resolved(fmt)) =>
@@ -74,9 +74,10 @@ private[testsupport] final class TestRunnerResolveService
         Future.successful(Left(ResolveError.DownloadInProgress(version, scalaVersion)))
       case _ =>
         @NonNls val title = s"Downloading the ZIO Test runner for ZIO $version"
-        val task = BackgroundTask(project, title = title, cancelText = "Cancel downloading ZIO Test runner...") { indicator =>
-          val progressListener = new ProgressIndicatorDownloadListener(indicator, title)
-          resolve(version, scalaVersion, downloadIfMissing = true, progressListener = progressListener)
+        val task = BackgroundTask(project, title = title, cancelText = "Cancel downloading ZIO Test runner...") {
+          indicator =>
+            val progressListener = new ProgressIndicatorDownloadListener(indicator, title)
+            resolve(version, scalaVersion, downloadIfMissing = true, progressListener = progressListener)
         }
         task.recover {
           case pce: ProcessCanceledException =>
