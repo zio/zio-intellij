@@ -1,10 +1,10 @@
 package zio.intellij.testsupport.runner
 
 import java.net.{URL, URLClassLoader}
-
 import com.intellij.openapi.components.{PersistentStateComponent, ServiceManager, State, Storage}
 import com.intellij.openapi.progress.{ProcessCanceledException, ProgressIndicator, Task}
 import com.intellij.openapi.project.Project
+import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.{Nls, NonNls}
 import org.jetbrains.plugins.scala.ScalaVersion
@@ -15,10 +15,11 @@ import zio.intellij.testsupport.runner.TestRunnerDownloader.DownloadResult.{Down
 import zio.intellij.testsupport.runner.TestRunnerDownloader.{DownloadProgressListener, NoopProgressListener}
 import zio.intellij.testsupport.runner.TestRunnerResolveService.ResolveError.DownloadError
 import zio.intellij.testsupport.runner.TestRunnerResolveService._
-import zio.intellij.utils.Version
+import zio.intellij.utils.{BackgroundTask, Version}
 
 import scala.beans.BeanProperty
 import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.util._
 
 // Borrowed from ScalafmtDynamicServiceImpl and friends
@@ -58,36 +59,30 @@ private[testsupport] final class TestRunnerResolveService
       else Left(ResolveError.NotFound(version, scalaVersion))
   }
 
+  private val appExecutorService                   = AppExecutorUtil.getAppExecutorService
+  implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(appExecutorService)
+
   def resolveAsync(
     version: Version,
     scalaVersion: ScalaVersion,
-    project: Project,
-    onResolved: ResolveResult => Unit = _ => ()
-  ): Unit =
+    project: Project
+  ): Future[ResolveResult] =
     testRunnerVersions.get((version, scalaVersion.major)) match {
       case Some(ResolveStatus.Resolved(fmt)) =>
-        invokeLater(onResolved(Right(fmt)))
+        Future.successful(Right(fmt))
       case Some(ResolveStatus.DownloadInProgress) =>
-        invokeLater(onResolved(Left(ResolveError.DownloadInProgress(version, scalaVersion))))
+        Future.successful(Left(ResolveError.DownloadInProgress(version, scalaVersion)))
       case _ =>
         @NonNls val title = s"Downloading the ZIO Test runner for ZIO $version"
-        val backgroundTask = new Task.Backgroundable(project, title, true) {
-          override def run(indicator: ProgressIndicator): Unit = {
-            indicator.setIndeterminate(true)
+        val task = BackgroundTask(project, title = title, cancelText = "Cancel downloading ZIO Test runner...") {
+          indicator =>
             val progressListener = new ProgressIndicatorDownloadListener(indicator, title)
-            val result =
-              try {
-                resolve(version, scalaVersion, downloadIfMissing = true, progressListener = progressListener)
-              } catch {
-                case pce: ProcessCanceledException =>
-                  Left(DownloadError(version, scalaVersion, pce))
-              }
-            onResolved(result)
-          }
+            resolve(version, scalaVersion, downloadIfMissing = true, progressListener = progressListener)
         }
-
-        backgroundTask.setCancelText("Cancel downloading ZIO Test runner...")
-        backgroundTask.queue()
+        task.recover {
+          case pce: ProcessCanceledException =>
+            Left(DownloadError(version, scalaVersion, pce))
+        }
     }
 
   private def downloadAndResolve(
