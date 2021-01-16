@@ -28,7 +28,7 @@ final class ZTestFramework extends AbstractTestFramework {
 
   private def resolvesToTestMethod(sc: ScReferenceExpression): Boolean =
     sc match {
-      case ResolvesTo(f: ScFunctionDefinition) =>
+      case ResolvesTo(f: ScFunctionDefinition) if !excluded(f) =>
         f.returnType match {
           case Right(returnType) if isOfClassFrom(returnType, Array("zio.test._")) =>
             expandsToTestMethod(returnType)
@@ -36,13 +36,20 @@ final class ZTestFramework extends AbstractTestFramework {
         }
       case _ => false
     }
+
+  private def excluded(fd: ScFunctionDefinition): Boolean =
+    // TODO hack. Figure out a good way to filter
+    // (e.g. via the argument (TestAspect) or the return type)
+    fd.name == "@@"
 }
 
 object ZTestFramework {
   private[ZTestFramework] val testMethodTypes = Set(
     "_root_.zio.test.Spec[R, E, T]",
     "_root_.zio.test.Spec[R, _root_.zio.test.TestFailure[E], _root_.zio.test.TestSuccess]",
-    "_root_.zio.test.Spec[Any, _root_.zio.test.TestFailure[Nothing], _root_.zio.test.TestSuccess]"
+    "_root_.zio.test.Spec[Any, _root_.zio.test.TestFailure[Nothing], _root_.zio.test.TestSuccess]",
+    "_root_.zio.test.MutableRunnableSpec.SuiteBuilder",
+    "_root_.zio.test.MutableRunnableSpec.TestBuilder"
   )
 
   private def expandsToTestMethod(tpe: ScType) =
