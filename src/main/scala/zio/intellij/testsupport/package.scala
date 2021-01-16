@@ -72,6 +72,8 @@ package object testsupport {
     private def infoForLocalExpr(expr: ScReferenceExpression) =
       infoForReferencedExpr(expr, expr)
 
+    // TODO support this when we figure out how to cache this information
+    // without performing additional expensive lookups on every element
     private def infoForExprFromAnotherClass(expr: ScReferenceExpression) = {
       val refs = referencesOfPatternDef(expr)
         .orElse(referencesOfFunctionDef(expr))

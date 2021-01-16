@@ -42,7 +42,9 @@ object ZTestFramework {
   private[ZTestFramework] val testMethodTypes = Set(
     "_root_.zio.test.Spec[R, E, T]",
     "_root_.zio.test.Spec[R, _root_.zio.test.TestFailure[E], _root_.zio.test.TestSuccess]",
-    "_root_.zio.test.Spec[Any, _root_.zio.test.TestFailure[Nothing], _root_.zio.test.TestSuccess]"
+    "_root_.zio.test.Spec[Any, _root_.zio.test.TestFailure[Nothing], _root_.zio.test.TestSuccess]",
+    "_root_.zio.test.MutableRunnableSpec.SuiteBuilder",
+    "_root_.zio.test.MutableRunnableSpec.TestBuilder"
   )
 
   private def expandsToTestMethod(tpe: ScType) =
