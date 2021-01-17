@@ -2,13 +2,15 @@ package zio.intellij.testsupport
 
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
-import org.jetbrains.plugins.scala.extensions.ResolvesTo
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
+import org.jetbrains.plugins.scala.extensions.{PsiElementExt, ResolvesTo}
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScInfixExpr, ScMethodCall, ScPostfixExpr, ScReferenceExpression}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.ScClassImpl
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
 import zio.intellij.testsupport.ZTestFramework.expandsToTestMethod
+
+import scala.annotation.tailrec
 
 final class ZTestFramework extends AbstractTestFramework {
   override def getMarkerClassFQName: String = ZSuitePaths.head
@@ -28,7 +30,7 @@ final class ZTestFramework extends AbstractTestFramework {
 
   private def resolvesToTestMethod(sc: ScReferenceExpression): Boolean =
     sc match {
-      case ResolvesTo(f: ScFunctionDefinition) if !excluded(f) =>
+      case ResolvesTo(f: ScFunctionDefinition) if !nested(sc) =>
         f.returnType match {
           case Right(returnType) if isOfClassFrom(returnType, Array("zio.test._")) =>
             expandsToTestMethod(returnType)
@@ -37,10 +39,29 @@ final class ZTestFramework extends AbstractTestFramework {
       case _ => false
     }
 
-  private def excluded(fd: ScFunctionDefinition): Boolean =
-    // TODO hack. Figure out a good way to filter
-    // (e.g. via the argument (TestAspect) or the return type)
-    fd.name == "@@"
+  private def nested(ref: ScReferenceExpression): Boolean = {
+    // TODO hack. I don't know how to do this any better
+    // Handles either an infix @@/other after the test (e.g. test(...) @@ ignore)
+    // or any chained methods (e.g. test(...).provide(...))
+    // by checking that the previous expression was a ZIO test. In that case -
+    // it's a nested "test-like" method and is not considered for a line marker
+
+    @tailrec
+    def hasParentTestMethod(elem: Option[PsiElement]): Boolean =
+      elem match {
+        case Some(mc: ScMethodCall) if mc.`type`().exists(expandsToTestMethod) => true
+        case Some(other)                                                       => hasParentTestMethod(other.firstChild)
+        case None                                                              => false
+      }
+
+    val nestedElem = ref.parent.collect {
+      case i: ScInfixExpr   => i.firstChild
+      case p: ScPostfixExpr => p.firstChild
+      case _: ScMethodCall  => ref.firstChild
+    }.flatten
+
+    hasParentTestMethod(nestedElem)
+  }
 }
 
 object ZTestFramework {
