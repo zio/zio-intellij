@@ -9,6 +9,17 @@ addCommandAlias(
   "check",
   "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"
 )
+// See https://github.com/JetBrains/sbt-idea-plugin/issues/76 for
+// why this contrived sequence of actions exists ...
+addCommandAlias(
+  "packagePlugin",
+  Seq(
+    "project root",
+    "packageArtifact",
+    "doPatchPluginXml",
+    "packageArtifactZip"
+  ).mkString(";", ";", "")
+)
 
 scalacOptions += "-deprecation"
 
