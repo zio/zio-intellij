@@ -36,7 +36,7 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
   private def excluded(elem: Option[PsiElement]) =
     elem match {
       case Some(_: ScPrefixExpr) => true
-      case None                  => false
+      case _                     => false
     }
 }
 
