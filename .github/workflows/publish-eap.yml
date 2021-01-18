@@ -53,7 +53,11 @@ jobs:
           java-version: "adopt@1.8"
 
       - name: Package plugin
-        run: sbt packagePlugin
+        # The first packageArtifact creates the files (including plugin.xml).
+        # The second packageArtifactZip allows the patchPluginXML task to run
+        #   on those files and patch the plugin.xml.
+        # Then it packages files into a single zip archive.
+        run: sbt clean && sbt packageArtifact && sbt packageArtifactZip
 
       - name: Publish plugin
         run: sbt "publishPlugin EAP"

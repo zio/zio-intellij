@@ -9,25 +9,13 @@ addCommandAlias(
   "check",
   "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"
 )
-// See https://github.com/JetBrains/sbt-idea-plugin/issues/76 for
-// why this contrived sequence of actions exists ...
-addCommandAlias(
-  "packagePlugin",
-  Seq(
-    "project root",
-    "packageArtifact",
-    "doPatchPluginXml",
-    "packageArtifactZip"
-  ).mkString(";", ";", "")
-)
 
 scalacOptions += "-deprecation"
 
-lazy val root = project
+lazy val `zio-intellij` = project
   .in(file("."))
   .enablePlugins(SbtIdeaPlugin)
   .settings(
-    name := "zio-intellij",
     scalaVersion := scala213,
     version := pluginVersion,
     intellijPlugins := Seq(
@@ -41,9 +29,13 @@ lazy val root = project
       xml.changeNotes = sys.env.getOrElse(
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
+        Welcome to another exciting release of the ZIO plugin for IntelliJ!<br/>
+        Lots of bug fixes and improvements in this release, thanks a lot to everyone who reported issues!
         <ul>
-          <li>Fixed an issue with <code>NeedsEnv</code> detection in certain cases (<a href="https://github.com/zio/zio-intellij/pull/200">#200</a>)</li>
-          <li>Performance and stability fixes</li>
+          <li>A new template for creating ZIO projects with File -> New Project (<a href="https://github.com/zio/zio-intellij/pull/206">#206</a>)</li>
+          <li>Correctly handling projects with multiple Scala versions present (<a href="https://github.com/zio/zio-intellij/pull/208">#208</a>)</li>
+          <li>Adding support for the upcoming <code>MutableRunnableSpec</code> (<a href="https://github.com/zio/zio-intellij/pull/216">#216</a>)</li>
+          <li>Miscellaneous bug fixes</li>
         </ul>
         ]]>"""
       )
