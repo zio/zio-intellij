@@ -33,4 +33,7 @@ class UnusedZIOExpressionsInspectionTest extends ZScalaInspectionTest[UnusedZIOE
          |UIO(1)
          |""".stripMargin).assertHighlighted()
 
+  def test_prefix_operator_should_not_be_highlighted(): Unit =
+    z(s"""$START!${END}zio.test.assertCompletes""").assertNotHighlighted()
+
 }

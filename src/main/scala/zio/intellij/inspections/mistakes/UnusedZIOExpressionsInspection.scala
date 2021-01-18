@@ -18,7 +18,7 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
     element match {
       case expr: ScExpression =>
         (expr, expr.nextSiblingNotWhitespace) match {
-          case (zioLike(_), Some(zioLike(_))) =>
+          case (zioLike(_), Some(zioLike(_))) if !excluded(expr.parent) =>
             Some(
               manager.createProblemDescriptor(
                 expr,
@@ -31,6 +31,12 @@ class UnusedZIOExpressionsInspection extends AbstractRegisteredInspection {
           case _ => None
         }
       case _ => None
+    }
+
+  private def excluded(elem: Option[PsiElement]) =
+    elem match {
+      case Some(_: ScPrefixExpr) => true
+      case None                  => false
     }
 }
 
