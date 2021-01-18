@@ -1,5 +1,5 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2020.3.3.1" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold("")("." + _)
+lazy val pluginVersion = "2020.3.4" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "203"
@@ -12,10 +12,11 @@ addCommandAlias(
 
 scalacOptions += "-deprecation"
 
-lazy val `zio-intellij` = project
+lazy val root = project
   .in(file("."))
   .enablePlugins(SbtIdeaPlugin)
   .settings(
+    name := "zio-intellij",
     scalaVersion := scala213,
     version := pluginVersion,
     intellijPlugins := Seq(
@@ -37,5 +38,3 @@ lazy val `zio-intellij` = project
       )
     }
   )
-
-lazy val runner = createRunnerProject(`zio-intellij`)
