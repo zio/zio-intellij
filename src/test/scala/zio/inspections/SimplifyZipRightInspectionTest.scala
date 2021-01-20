@@ -1,7 +1,7 @@
 package zio.inspections
 
 import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
-import zio.intellij.inspections.simplifications.SimplifyZipRightInspection
+import zio.intellij.inspections.simplifications._
 
 abstract class ZipRightInspectionTest(s: String) extends ZSimplifyInspectionTest[SimplifyZipRightInspection] {
   override protected val hint = s"Replace with $s"
@@ -115,5 +115,31 @@ class SimplifyFlatmapWithZipRightOperatorTest extends ZipRightInspectionTest("*>
 
   def test_flatMap_not_discarding_should_not_highlight(): Unit =
     z(s"""ZIO.succeed("Benito Quinquela Martín").${START}flatMap(x => x)$END""").assertNotHighlighted()
+
+}
+
+class SimplifyZipRightToSucceedInspectionTest extends ZSimplifyInspectionTest[SimplifyZipRightToSucceedInspection] {
+  override protected val hint = s"Replace with .as"
+
+  def test_zipRight_to_succeed(): Unit = {
+    z(s"""${START}f("Fernando Fader").zipRight(ZIO.succeed("Carlos Alonso"))$END""").assertHighlighted()
+    val text   = z("""f("Fernando Fader").zipRight(ZIO.succeed("Carlos Alonso"))""")
+    val result = z("""f("Fernando Fader").as("Carlos Alonso")""")
+    testQuickFixes(text, result, hint)
+  }
+
+  def test_zipRight_infix_invocation_to_succeed(): Unit = {
+    z(s"""${START}f("Fernando Fader") zipRight ZIO.succeed("Carlos Alonso")$END""").assertHighlighted()
+    val text   = z("""f("Fernando Fader") zipRight ZIO.succeed("Carlos Alonso")""")
+    val result = z("""f("Fernando Fader").as("Carlos Alonso")""")
+    testQuickFixes(text, result, hint)
+  }
+
+  def test_zipRight_operator_to_succeed(): Unit = {
+    z(s"""${START}f("Fernando Fader") *> ZIO.succeed("Carlos Alonso")$END""").assertHighlighted()
+    val text   = z("""f("Fernando Fader") *> ZIO.succeed("Carlos Alonso")""")
+    val result = z("""f("Fernando Fader").as("Carlos Alonso")""")
+    testQuickFixes(text, result, hint)
+  }
 
 }

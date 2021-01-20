@@ -6,8 +6,10 @@ import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
 import zio.intellij.utils.StringUtils._
 
-class SimplifyZipRightInspection extends ZInspection(ZipRightSimplificationType, ZipRightOperatorSimplificationType)
-class SimplifyZipLeftInspection  extends ZInspection(ZipLeftSimplificationType, ZipLeftOperatorSimplificationType)
+class SimplifyZipRightInspection          extends ZInspection(ZipRightSimplificationType, ZipRightOperatorSimplificationType)
+class SimplifyZipRightToSucceedInspection extends ZInspection(ZipRightToSucceedSimplificationType)
+class SimplifyZipLeftInspection           extends ZInspection(ZipLeftSimplificationType, ZipLeftOperatorSimplificationType)
+class SimplifySucceedToZipLeftInspection  extends ZInspection(ZipLeftToSucceedSimplificationType)
 
 sealed class BaseZipOneSimplificationType(invocation: Qualified, replaceWith: String) extends SimplificationType {
 
@@ -43,8 +45,37 @@ sealed class BaseZipOneOperatorSimplificationType(invocation: Qualified, replace
 
 }
 
+sealed abstract class BaseZipToSucceedSimplificationType extends SimplificationType {
+  override def hint: String = "Replace with .as"
+
+  /**
+   * Simplifies the `toSimplify` expression, replacing it with a `toKeep` expression followed by `.as(zioArg)`
+   *
+   * @param toSimplify Expression to simplify (full one)
+   * @param toKeep Subexpression to keep
+   * @param zioArg Argument to the `ZIO.succeed()` call
+   * @return a SimplificationBuilder
+   */
+  protected def simplify(toSimplify: ScExpression, toKeep: ScExpression, zioArg: ScExpression): SimplificationBuilder =
+    replace(toSimplify).withText(invocationText(toKeep, s"as${zioArg.getWrappedText}")).highlightAll
+}
+
 object ZipRightSimplificationType         extends BaseZipOneSimplificationType(`.flatMap`, "zipRight")
 object ZipRightOperatorSimplificationType extends BaseZipOneOperatorSimplificationType(`.flatMap`, "*>")
+object ZipRightToSucceedSimplificationType extends BaseZipToSucceedSimplificationType {
+  override def getSimplification(expr: ScExpression): Option[Simplification] = expr match {
+    case qual `.*>` `ZIO.succeed`(_, arg)       => Some(simplify(expr, qual, arg))
+    case qual `.zipRight` `ZIO.succeed`(_, arg) => Some(simplify(expr, qual, arg))
+    case _                                      => None
+  }
+}
 
 object ZipLeftSimplificationType         extends BaseZipOneSimplificationType(`.tap`, "zipLeft")
 object ZipLeftOperatorSimplificationType extends BaseZipOneOperatorSimplificationType(`.tap`, "<*")
+object ZipLeftToSucceedSimplificationType extends BaseZipToSucceedSimplificationType {
+  override def getSimplification(expr: ScExpression): Option[Simplification] = expr match {
+    case `ZIO.succeed`(_, arg) `.<*` qual      => Some(simplify(expr, qual, arg))
+    case `ZIO.succeed`(_, arg) `.zipLeft` qual => Some(simplify(expr, qual, arg))
+    case _                                     => None
+  }
+}
