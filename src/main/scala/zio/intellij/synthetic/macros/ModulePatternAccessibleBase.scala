@@ -110,7 +110,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
       } yield members(annotation, serviceTrait)(sco)
     }.getOrElse(Nil)
 
-  private final case class TypeInfo(
+  case class TypeInfo private (
     zioObject: String,
     accessMethod: String,
     rTypeParam: ScType,

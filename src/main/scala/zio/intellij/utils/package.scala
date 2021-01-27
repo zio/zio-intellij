@@ -111,7 +111,7 @@ package object utils {
       case _                                      => None
     }
 
-  def fqnIfIsOfClassFrom(tpe: ScType, patterns: Array[String]): Option[String] =
+  def fqnIfIsOfClassFrom(tpe: ScType, patterns: Seq[String]): Option[String] =
     tpe.tryExtractDesignatorSingleton.extractClass
       .flatMap(Option(_))
       .flatMap(c => Option(c.qualifiedName))

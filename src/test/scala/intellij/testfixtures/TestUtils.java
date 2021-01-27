@@ -15,13 +15,13 @@
 
 package intellij.testfixtures;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.testFramework.ThreadTracker;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.plugins.scala.Console;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.plugins.scala.util.UnloadAwareDisposable;
 import org.junit.Assert;
 
 import java.io.File;
@@ -38,6 +38,7 @@ import java.util.List;
 public class TestUtils {
     private static final Logger LOG = Logger.getInstance("org.jetbrains.plugins.scala.util.TestUtils");
 
+    public static final String CARET_MARKER = "<caret>";
     public static final String BEGIN_MARKER = "<begin>";
     public static final String END_MARKER = "<end>";
 
@@ -61,6 +62,12 @@ public class TestUtils {
         return TEST_DATA_PATH;
     }
 
+    public static String findCommunityRoot() throws IOException {
+        // <community-root>/scala/scala-impl/testdata/
+        String testDataPath = getTestDataPath();
+        return java.nio.file.Paths.get(testDataPath, "..", "..", "..").normalize().toString() + "/";
+    }
+
     @NotNull
     public static String findTestDataDir(String pathname) throws IOException {
         return findTestDataDir(new File(pathname), "testdata");
@@ -79,7 +86,7 @@ public class TestUtils {
         if (testData.exists()) {
             return testData.getCanonicalPath();
         } else {
-            File newParent = parent.getParentFile();
+            File newParent = parent.getCanonicalFile().getParentFile();
             if (newParent == null) throw new RuntimeException("no testdata directory found");
             else return findTestDataDir(newParent, child);
         }
@@ -95,58 +102,12 @@ public class TestUtils {
         return text.substring(0, index) + text.substring(index + END_MARKER.length());
     }
 
-    private static final long ETALON_TIMING = 438;
-
-    private static final boolean COVERAGE_ENABLED_BUILD = "true".equals(System.getProperty("idea.coverage.enabled.build"));
-
-    private static void assertTiming(String message, long expected, long actual) {
-        if (COVERAGE_ENABLED_BUILD) return;
-        long expectedOnMyMachine = expected * Timings.MACHINE_TIMING / ETALON_TIMING;
-        final double acceptableChangeFactor = 1.1;
-
-        // Allow 10% more in case of test machine is busy.
-        // For faster machines (expectedOnMyMachine < expected) allow nonlinear performance rating:
-        // just perform better than acceptable expected
-        if (actual > expectedOnMyMachine * acceptableChangeFactor &&
-                (expectedOnMyMachine > expected || actual > expected * acceptableChangeFactor)) {
-            int percentage = (int)(((float)100 * (actual - expectedOnMyMachine)) / expectedOnMyMachine);
-            Assert.fail(message + ". Operation took " + percentage + "% longer than expected. Expected on my machine: " + expectedOnMyMachine +
-                    ". Actual: " + actual + ". Expected on Etalon machine: " + expected + "; Actual on Etalon: " +
-                    (actual * ETALON_TIMING / Timings.MACHINE_TIMING));
-        }
-        else {
-            int percentage = (int)(((float)100 * (actual - expectedOnMyMachine)) / expectedOnMyMachine);
-            Console.println(message + ". Operation took " + percentage + "% longer than expected. Expected on my machine: " +
-                    expectedOnMyMachine + ". Actual: " + actual + ". Expected on Etalon machine: " + expected +
-                    "; Actual on Etalon: " + (actual * ETALON_TIMING / Timings.MACHINE_TIMING));
-        }
-    }
-
-    public static void assertTiming(String message, long expected, @NotNull Runnable actionToMeasure) {
-        assertTiming(message, expected, 4, actionToMeasure);
-    }
-
-    private static void assertTiming(String message, long expected, int attempts, @NotNull Runnable actionToMeasure) {
-        while (true) {
-            attempts--;
-            long start = System.currentTimeMillis();
-            actionToMeasure.run();
-            long finish = System.currentTimeMillis();
-            try {
-                assertTiming(message, expected, finish - start);
-                break;
-            }
-            catch (AssertionError e) {
-                if (attempts == 0) throw e;
-                System.gc();
-                System.gc();
-                System.gc();
-            }
-        }
-    }
-
     public static List<String> readInput(String filePath) throws IOException {
-        String content = new String(FileUtil.loadFileText(new File(filePath)));
+        return readInput(new File(filePath), null);
+    }
+
+    public static List<String> readInput(File file, @Nullable String encoding) throws IOException {
+        String content = new String(FileUtil.loadFileText(file, encoding));
         Assert.assertNotNull(content);
 
         List<String> input = new ArrayList<>();
@@ -178,8 +139,8 @@ public class TestUtils {
 
 
     public static void disableTimerThread() {
-        ThreadTracker.longRunningThreadCreated(ApplicationManager.getApplication(), "Timer");
-        ThreadTracker.longRunningThreadCreated(ApplicationManager.getApplication(), "BaseDataReader");
-        ThreadTracker.longRunningThreadCreated(ApplicationManager.getApplication(), "ProcessWaitFor");
+        ThreadTracker.longRunningThreadCreated(UnloadAwareDisposable.scalaPluginDisposable(), "Timer");
+        ThreadTracker.longRunningThreadCreated(UnloadAwareDisposable.scalaPluginDisposable(), "BaseDataReader");
+        ThreadTracker.longRunningThreadCreated(UnloadAwareDisposable.scalaPluginDisposable(), "ProcessWaitFor");
     }
 }

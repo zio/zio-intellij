@@ -8,13 +8,14 @@ import zio.intellij.utils.types.{ZLayerTypes, ZioTypes}
 
 object TypeCheckUtils {
 
-  val zioTypes        = ZioTypes.values.map(_.fqName).toArray
-  val zioLayerTypes   = ZLayerTypes.values.map(_.fqName).toArray
-  val zioSinkTypes    = Array("zio.stream.ZSink")
-  val zioStreamTypes  = Array("zio.stream.ZStream")
-  val managedTypes    = Array("zio.ZManaged")
-  val extraTypes      = Array("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
-  val zioTestAsserts  = Array("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM")
+  val zioTypes        = ZioTypes.values.map(_.fqName)
+  val zioLayerTypes   = ZLayerTypes.values.map(_.fqName)
+  val zioSinkTypes    = List("zio.stream.ZSink")
+  val zioStreamTypes  = List("zio.stream.ZStream")
+  val managedTypes    = List("zio.ZManaged")
+  val extraTypes      = List("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
+  val zioTestAsserts  = List("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM")
+  val zioTestPackage  = List("zio.test._")
   val zioLikePackages = zioTypes ++ zioStreamTypes ++ managedTypes ++ extraTypes ++ zioTestAsserts
 
   def fromZioLike(r: ScExpression): Boolean =

@@ -9,6 +9,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.ScClassImpl
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
 import zio.intellij.testsupport.ZTestFramework.expandsToTestMethod
+import zio.intellij.utils.TypeCheckUtils.zioTestPackage
 
 import scala.annotation.tailrec
 
@@ -32,7 +33,7 @@ final class ZTestFramework extends AbstractTestFramework {
     sc match {
       case ResolvesTo(f: ScFunctionDefinition) if !nested(sc) =>
         f.returnType match {
-          case Right(returnType) if isOfClassFrom(returnType, Array("zio.test._")) =>
+          case Right(returnType) if isOfClassFrom(returnType, zioTestPackage) =>
             expandsToTestMethod(returnType)
           case _ => false
         }

@@ -61,7 +61,7 @@ package object inspections {
   }
 
   object hasMethods {
-    val zioHasLikeClasses: Array[String] = Array("zio.Has", "zio.Has._")
+    val zioHasLikeClasses: List[String] = List("zio.Has", "zio.Has._")
 
     private[inspections] val `.get` = invocation("get").from(zioHasLikeClasses)
   }
@@ -200,7 +200,7 @@ package object inspections {
         case result if result.isEmpty => None
         case result =>
           result.flatMap(_.fromType).distinct match {
-            case Array(tpe) => fqnIfIsOfClassFrom(tpe, types.toArray)
+            case Array(tpe) => fqnIfIsOfClassFrom(tpe, types.toSeq)
             case _          => None
           }
       }
@@ -227,8 +227,8 @@ package object inspections {
 
     def unapply(expr: ScExpression): Option[ScExpression] =
       expr.`type`() match {
-        case Right(t) if isOfClassFrom(t, typeFQNs.toArray) => Some(expr)
-        case _                                              => None
+        case Right(t) if isOfClassFrom(t, typeFQNs.toSeq) => Some(expr)
+        case _                                            => None
       }
   }
 
@@ -245,10 +245,10 @@ package object inspections {
           case m: ScMember if typeFQNs.contains(m.containingClass.qualifiedName) => Some(expr)
           case _                                                                 => None
         }
-      case MethodRepr(_, Some(ref @ ScReferenceExpression(_)), None, Seq(_)) if isOfClassFrom(ref, typeFQNs.toArray) =>
+      case MethodRepr(_, Some(ref @ ScReferenceExpression(_)), None, Seq(_)) if isOfClassFrom(ref, typeFQNs.toSeq) =>
         Some(expr)
-      case ref @ ScReferenceExpression(_) if isOfClassFrom(expr, typeFQNs.toArray) => Some(ref)
-      case _                                                                       => None
+      case ref @ ScReferenceExpression(_) if isOfClassFrom(expr, typeFQNs.toSeq) => Some(ref)
+      case _                                                                     => None
     }
   }
 

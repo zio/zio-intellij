@@ -10,11 +10,11 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.utils.{ModuleSyntax, Version}
 
 abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOnCollectionInspection {
-  final override def getLikeCollectionClasses: Array[String] = Array("zio.ZIO")
+  final override def getLikeCollectionClasses: Seq[String] = List("zio.ZIO")
 
   final override def createOptionsPanel(): JComponent = null // god help me
 
-  final override def possibleSimplificationTypes: Array[SimplificationType] = simplifiers.toArray
+  final override def possibleSimplificationTypes: Seq[SimplificationType] = simplifiers
 
   protected def isAvailable(zioVersion: Version): Boolean = zioVersion >= Version.ZIO.`1.0.0`
 
@@ -35,7 +35,7 @@ abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOn
       }
   }
 
-  private def simplifications(expr: ScExpression): Array[Simplification] = {
+  private def simplifications(expr: ScExpression): Seq[Simplification] = {
     def simplificationTypes = for {
       (st, idx) <- possibleSimplificationTypes.zipWithIndex
       if simplificationTypesEnabled(idx)
