@@ -116,6 +116,16 @@
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyToLayerInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyZipRightToSucceedInspection"
+                         displayName="Simplify `*&gt; ZIO.succeed` to `.as`"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyZipRightToSucceedInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedToZipLeftInspection"
+                         displayName="Simplify `ZIO.succeed &lt;*` to `.as`"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifySucceedToZipLeftInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
 
         <localInspection implementationClass="zio.intellij.inspections.mistakes.UnusedZIOExpressionsInspection"
                          displayName="Detects unused ZIO expressions that are mistakenly used like statements"

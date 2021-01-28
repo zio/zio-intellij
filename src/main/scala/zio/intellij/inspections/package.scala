@@ -20,6 +20,9 @@ package object inspections {
 
   object zioMethods {
     val `.*>` : Qualified               = invocation("*>").from(zioLikePackages)
+    val `.zipRight`: Qualified          = invocation("zipRight").from(zioLikePackages)
+    val `.<*` : Qualified               = invocation("<*").from(zioLikePackages)
+    val `.zipLeft`: Qualified           = invocation("zipLeft").from(zioLikePackages)
     val `.as`: Qualified                = invocation("as").from(zioLikePackages)
     val `.map`: Qualified               = invocation("map").from(zioLikePackages)
     val `.flatMap`: Qualified           = invocation("flatMap").from(zioLikePackages)
