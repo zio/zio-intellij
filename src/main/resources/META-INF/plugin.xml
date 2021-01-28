@@ -180,7 +180,11 @@
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyFailInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
-
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyFlattenInspection"
+                         displayName="Replace .map and .flatten with .flatMap" groupPath="Scala,ZIO"
+                         groupName="Simplifications"
+                         shortName="SimplifyFlattenInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyOrElseInspection"
                          displayName="Simplify .orElse(ZIO.fail) to .orElseFail"
                          groupPath="Scala,ZIO" groupName="Simplifications"
