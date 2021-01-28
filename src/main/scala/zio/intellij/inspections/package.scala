@@ -7,7 +7,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScTemplateDefinition}
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScObject, ScTemplateDefinition}
 import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils._
 import zio.intellij.utils.types._
@@ -210,7 +210,7 @@ package object inspections {
         case null                                                       => findOverloaded(ref)
         case t: ScTemplateDefinition if types.contains(t.qualifiedName) => Some(t.qualifiedName)
         case f: ScFunctionDefinition =>
-          Option(f.containingClass).map(_.qualifiedName).filter(types.contains)
+          Option(f.containingClass).collect { case o: ScObject => o.qualifiedName }.filter(types.contains)
         case _ => None
       }
   }
