@@ -28,4 +28,11 @@ class SimplifyIgnoreInspectionTest extends ZSimplifyInspectionTest[SimplifyIgnor
     val result = z("ZIO.succeed(42).ignore")
     testQuickFixes(text, result, hint)
   }
+
+  def test_either_unit_ignore(): Unit = {
+    z(s"Task(42).${START}either.unit$END").assertHighlighted()
+    val text   = z("Task(42).either.unit")
+    val result = z("Task(42).ignore")
+    testQuickFixes(text, result, hint)
+  }
 }

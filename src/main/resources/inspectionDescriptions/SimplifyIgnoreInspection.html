@@ -4,6 +4,7 @@
 x.catchAll(_ => ZIO.unit)                   -> x.ignore
 x.foldCause(_ => (), _ => ())               -> x.ignore
 x.foldCauseM(_ => ZIO.unit, _ => ZIO.unit)  -> x.ignore
+x.either.unit                               -> x.ignore
 </pre>
 </body>
 </html>

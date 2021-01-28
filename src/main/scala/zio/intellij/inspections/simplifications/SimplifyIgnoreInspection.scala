@@ -16,6 +16,7 @@ object IgnoreSimplificationType extends SimplificationType {
       case qual `.catchAll` `_ => ZIO.unit`()                        => Some(replacement(qual))
       case qual `.foldCause` (`_ => ()`(), `_ => ()`())              => Some(replacement(qual))
       case qual `.foldCauseM` (`_ => ZIO.unit`(), `_ => ZIO.unit`()) => Some(replacement(qual))
+      case `.unit`(`.either`(qual))                                  => Some(replacement(qual).highlightFrom(qual))
       case _                                                         => None
     }
   }
