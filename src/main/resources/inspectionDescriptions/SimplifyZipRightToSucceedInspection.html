@@ -1,0 +1,8 @@
+<html>
+<body>Simplify the following expressions to use <code>.as</code> instead:
+<pre>
+f("Fernando Fader").zipRight(ZIO.succeed("Carlos Alonso")) -> f("Fernando Fader").as("Carlos Alonso")
+f("Fernando Fader") *> ZIO.succeed("Carlos Alonso")        -> f("Fernando Fader").as("Carlos Alonso")
+</pre>
+</body>
+</html>
