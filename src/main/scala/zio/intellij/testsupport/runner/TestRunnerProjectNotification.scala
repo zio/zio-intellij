@@ -159,5 +159,5 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
       .map(_.getVersion)
 
   private val suggesterNotificationGroup: NotificationGroup =
-    NotificationGroup.balloonGroup("ZIO Test Runner")
+    NotificationGroupManager.getInstance.getNotificationGroup("Test Runner Download")
 }

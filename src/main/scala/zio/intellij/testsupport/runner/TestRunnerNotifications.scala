@@ -11,9 +11,9 @@ import scala.ref.WeakReference
 private[runner] object TestRunnerNotifications {
 
   private val notificationGroup =
-    new NotificationGroup("ZIO for IntelliJ", NotificationDisplayType.BALLOON, true)
+    NotificationGroupManager.getInstance.getNotificationGroup("Test Runner Download")
   private val notificationErrorGroup =
-    new NotificationGroup("ZIO for IntelliJ", NotificationDisplayType.STICKY_BALLOON, true)
+    NotificationGroupManager.getInstance.getNotificationGroup("Test Runner Download Error")
 
   // do not display notification with same content several times
   private val messagesShown: mutable.Map[String, WeakReference[Notification]] = ScalaCollectionsUtil.newConcurrentMap

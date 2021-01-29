@@ -198,8 +198,8 @@
                          enabledByDefault="true" language="Scala"/>
 
         <!-- Fiber dump -->
-        <notificationGroup id="Fiber Dump Notifications" displayType="balloon"/>
-        <notificationGroup id="Analyze fiber dump" displayType="toolWindow" toolWindowId="Run" isLogByDefault="false"/>
+        <notificationGroup id="Fiber Dump Notifications" displayType="BALLOON"/>
+        <notificationGroup id="Analyze fiber dump" displayType="TOOL_WINDOW" toolWindowId="Run" isLogByDefault="false"/>
         <!-- -->
 
         <localInspection implementationClass="zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection"
@@ -254,6 +254,9 @@
         <runLineMarkerContributor implementationClass="zio.intellij.testsupport.ZTestRunLineMarkerProvider"
                                   language="Scala" order="first"/>
         <testFramework implementation="zio.intellij.testsupport.ZTestFramework" order="first"/>
+
+        <notificationGroup id="Test Runner Download" displayType="BALLOON" isLogByDefault="true"/>
+        <notificationGroup id="Test Runner Download Error" displayType="STICKY_BALLOON" isLogByDefault="true"/>
 
         <applicationService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
 
