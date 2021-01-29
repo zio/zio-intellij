@@ -38,4 +38,10 @@ class SimplifyUnitInspectionTest extends ZSimplifyInspectionTest[SimplifyUnitIns
 
   def test_does_not_highlight_unit_member(): Unit =
     z(s"""UIO(println("a")) $START*> UIO(println("b")).unit$END""").assertNotHighlighted()
+
+  def test_does_not_highlight_unit_member_on_chained_expressions(): Unit =
+    z(s"""val sideEffect = console.putStrLn("reproduce bug")
+         |(sideEffect $START*> sideEffect.forkDaemon.unit$END).exitCode
+         """.stripMargin).assertNotHighlighted()
+
 }
