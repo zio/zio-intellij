@@ -262,6 +262,9 @@
 
         <!-- Project template -->
         <projectTemplatesFactory implementation="zio.intellij.project.ZioProjectTemplateFactory" order="last"/>
+
+        <!-- debugging -->
+        <debuggerClassFilterProvider implementation="zio.intellij.debugger.ZioSteppingFilterProvider"/>
     </extensions>
 
     <actions>
