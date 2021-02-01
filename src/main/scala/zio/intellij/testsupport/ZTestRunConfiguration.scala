@@ -1,7 +1,6 @@
 package zio.intellij.testsupport
 
 import java.net.URL
-
 import com.intellij.execution.actions.RunConfigurationProducer
 import com.intellij.execution.configurations._
 import com.intellij.execution.impl.ConsoleViewImpl
@@ -23,11 +22,13 @@ import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
 import zio.intellij.testsupport.runner.TestRunnerResolveService
 import zio.intellij.utils._
 
+import java.nio.file.Paths
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
 final class ZTestRunConfiguration(project: Project, configurationFactory: ConfigurationFactory, name: String)
-    extends AbstractTestRunConfiguration(project, configurationFactory, name) { self =>
+    extends AbstractTestRunConfiguration(project, configurationFactory, name) {
+  self =>
 
   override val testFramework: ZTestFramework = TestFramework.EXTENSION_NAME.findExtension(classOf[ZTestFramework])
 
@@ -84,7 +85,7 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
       val javaParameters = super.createJavaParameters()
 
       testRunnerJars.foreach { urls =>
-        javaParameters.getClassPath.addAll(urls.map(_.getFile).asJava)
+        javaParameters.getClassPath.addAll(urls.map(u => Paths.get(u.toURI).toFile.toString).asJava)
       }
 
       val params  = javaParameters.getProgramParametersList
@@ -122,7 +123,9 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
       createExecutionResult(consoleView, processHandler)
     }
   }
+
 }
+
 object ZTestRunConfiguration {
   val ZTestRunnerName = "zio.intellij.testsupport.ZTestRunner"
 
