@@ -1,5 +1,5 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2020.3.4" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val pluginVersion = "2020.3.5" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "203"
@@ -30,12 +30,15 @@ lazy val `zio-intellij` = project
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
         Welcome to another exciting release of the ZIO plugin for IntelliJ!<br/>
-        Lots of bug fixes and improvements in this release, thanks a lot to everyone who reported issues!
+        Lots of bug fixes and improvements in this release, huge thanks to Yuriy Bogomolov, Mitsutaka Takeda, and other who contributed code and issues!
         <ul>
-          <li>A new template for creating ZIO projects with File -> New Project (<a href="https://github.com/zio/zio-intellij/pull/206">#206</a>)</li>
-          <li>Correctly handling projects with multiple Scala versions present (<a href="https://github.com/zio/zio-intellij/pull/208">#208</a>)</li>
-          <li>Adding support for the upcoming <code>MutableRunnableSpec</code> (<a href="https://github.com/zio/zio-intellij/pull/216">#216</a>)</li>
-          <li>Miscellaneous bug fixes</li>
+          <li>New refactoring: <code>*&gt; ZIO.succeed</code> -> <code>.as</code> (<a href="https://github.com/zio/zio-intellij/pull/225">#225</a>)</li>
+          <li>New refactoring: <code>.map(...).flatten</code> -> <code>.flatMap</code> (<a href="https://github.com/zio/zio-intellij/pull/227">#227</a>)</li>
+          <li>New refactoring: <code>.either.unit</code> -> <code>.ignore</code> (<a href="https://github.com/zio/zio-intellij/pull/228">#228</a>)</li>
+          <li>Bug fix: Do not suggest <code>.unit</code> refactoring for chained expressions (<a href="https://github.com/zio/zio-intellij/pull/229">#229</a>)</li>
+          <li>Bug fix: Failed to run tests due to invalid file path on Windows (<a href="https://github.com/zio/zio-intellij/pull/236">#236</a>)</li>
+          <li>Feature: Do not automatically step into the ZIO Runtime during debugging</li>
+          <li>Miscellaneous improvements</li>
         </ul>
         ]]>"""
       )
