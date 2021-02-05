@@ -55,7 +55,7 @@ object Version {
   sealed trait Postfix extends Ordered[Postfix] {
     def segments: List[PostfixSegment]
 
-    override def toString: String = segments.mkString("-")
+    override def toString: String = segments.map(_.value).mkString("-")
 
     override def compare(that: Postfix): Int = (this, that) match {
       case (RC(_), Ext(_)) => -1
