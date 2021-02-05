@@ -10,12 +10,12 @@ class VersionParsingTest extends TestCase {
     major: Version.Major,
     minor: Version.Minor,
     patch: Version.Patch,
-    rcVersion: Option[Version.RCVersion]
+    postfix: Option[Version.Postfix]
   ): Unit = {
     assertEquals(version.major, major)
     assertEquals(version.minor, minor)
     assertEquals(version.patch, patch)
-    assertEquals(version.rcVersion, rcVersion)
+    assertEquals(version.postfix, postfix)
   }
 
   def test_should_parse_simple_version(): Unit = {
@@ -41,7 +41,7 @@ class VersionParsingTest extends TestCase {
         Version.Major(1),
         Version.Minor(2),
         Version.Patch(3),
-        Some(Version.RCVersion(Version.RCMajor(4), None))
+        Some(Version.RC(List(Version.PostfixSegment(4))))
       )
       assertEquals(version, Version.parseUnsafe("1.2.3-rc4"))
     }
@@ -56,7 +56,35 @@ class VersionParsingTest extends TestCase {
         Version.Major(1),
         Version.Minor(2),
         Version.Patch(3),
-        Some(Version.RCVersion(Version.RCMajor(4), Some(Version.RCMinor(5))))
+        Some(Version.RC(List(4, 5).map(Version.PostfixSegment)))
+      )
+    }
+  }
+
+  def test_should_parse_extended_version(): Unit = {
+    val versionOpt = Version.parse("1.0.4-2")
+    assertTrue(versionOpt.isDefined)
+    versionOpt.foreach { version =>
+      assertVersion(
+        version,
+        Version.Major(1),
+        Version.Minor(0),
+        Version.Patch(4),
+        Some(Version.Ext(List(Version.PostfixSegment(2))))
+      )
+    }
+  }
+
+  def test_should_parse_very_extended_version(): Unit = {
+    val versionOpt = Version.parse("1.0.4-2-100-500-9000")
+    assertTrue(versionOpt.isDefined)
+    versionOpt.foreach { version =>
+      assertVersion(
+        version,
+        Version.Major(1),
+        Version.Minor(0),
+        Version.Patch(4),
+        Some(Version.Ext(List(2, 100, 500, 9000).map(Version.PostfixSegment)))
       )
     }
   }
@@ -67,8 +95,9 @@ class VersionParsingTest extends TestCase {
   def test_should_fail_to_parse_version_without_patch(): Unit =
     assertEquals(Version.parse("1.2"), None)
 
-  def test_should_fail_to_parse_version_with_invalid_rc_part(): Unit = {
-    assertEquals(Version.parse("1.2.3-4"), None)
+  def test_should_fail_to_parse_version_with_invalid_postfix_part(): Unit = {
+    assertEquals(Version.parse("1.2.3-"), None)
+    assertEquals(Version.parse("1.2.3-4-"), None)
     assertEquals(Version.parse("1.2.3-RC"), None)
     assertEquals(Version.parse("1.2.3-RC-"), None)
     assertEquals(Version.parse("1.2.3-RC-4-"), None)

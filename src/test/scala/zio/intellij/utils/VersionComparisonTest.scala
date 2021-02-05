@@ -43,12 +43,21 @@ class VersionComparisonTest extends TestCase {
     assertTrue(Version.parseUnsafe("1.2.3-RC2") < Version.parseUnsafe("1.2.3-RC2-2"))
   }
 
-  def test_version_without_rc_should_be_greater_than_version_with_rc(): Unit = {
+  def test_version_without_postfix_should_be_greater_than_version_with_rc_and_less_than_version_with_ext(): Unit = {
     assertTrue(Version.parseUnsafe("1.2.3") > Version.parseUnsafe("1.2.3-RC21"))
     assertTrue(Version.parseUnsafe("1.2.3") > Version.parseUnsafe("1.2.3-RC21-1"))
-
     assertTrue(Version.parseUnsafe("1.2.3-RC21") < Version.parseUnsafe("1.2.3"))
     assertTrue(Version.parseUnsafe("1.2.3-RC21-1") < Version.parseUnsafe("1.2.3"))
+
+    assertTrue(Version.parseUnsafe("1.2.3") < Version.parseUnsafe("1.2.3-21"))
+    assertTrue(Version.parseUnsafe("1.2.3") < Version.parseUnsafe("1.2.3-21-1"))
+    assertTrue(Version.parseUnsafe("1.2.3-21") > Version.parseUnsafe("1.2.3"))
+    assertTrue(Version.parseUnsafe("1.2.3-21-1") > Version.parseUnsafe("1.2.3"))
+
+    assertTrue(Version.parseUnsafe("1.2.3-21") > Version.parseUnsafe("1.2.3-RC21"))
+    assertTrue(Version.parseUnsafe("1.2.3-21-1") > Version.parseUnsafe("1.2.3-RC21-1"))
+    assertTrue(Version.parseUnsafe("1.2.3-RC21") < Version.parseUnsafe("1.2.3-21"))
+    assertTrue(Version.parseUnsafe("1.2.3-RC21-1") < Version.parseUnsafe("1.2.3-21-1"))
   }
 
   def test_sorting_on_zio_versions_from_maven(): Unit = {

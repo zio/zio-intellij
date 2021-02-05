@@ -2,9 +2,10 @@ package zio.intellij.utils
 
 import zio.intellij.utils.Version._
 
+import scala.annotation.tailrec
 import scala.util.matching.Regex
 
-sealed abstract case class Version private (major: Major, minor: Minor, patch: Patch, rcVersion: Option[RCVersion])
+sealed abstract case class Version private (major: Major, minor: Minor, patch: Patch, postfix: Option[Postfix])
     extends Ordered[Version] {
   def ===(that: Version): Boolean = Version.versionOrdering.equiv(this, that)
 
@@ -12,16 +13,28 @@ sealed abstract case class Version private (major: Major, minor: Minor, patch: P
     Version.versionOrdering.compare(this, that)
 
   override def toString: String =
-    s"${major.value}.${minor.value}.${patch.value}${rcVersion.fold("")(rc => s"-${rc.toString}")}"
+    s"${major.value}.${minor.value}.${patch.value}${postfix.fold("")("-" + _)}"
 }
 
 object Version {
 
-  val versionOrdering: Ordering[Version] =
-    Ordering[(Major, Minor, Patch)]
-      .on[Version](v => (v.major, v.minor, v.patch))
-      // 1.0.0-RC1 should be less than 1.0.0
-      .orElse(Ordering.Option(Ordering[RCVersion].reverse).reverse.on[Version](_.rcVersion))
+  val versionOrdering: Ordering[Version] = (x: Version, y: Version) => {
+    val compareWithoutPostfix = (x.major, x.minor, x.patch).compare((y.major, y.minor, y.patch))
+    if (compareWithoutPostfix != 0) compareWithoutPostfix
+    else {
+      (x.postfix, y.postfix) match {
+        case (None, None) => 0
+        // '1.0.4-RC1' < '1.0.4' < '1.0.4-1'   (╯°□°)╯︵ ┻━┻
+        case (None, Some(RC(_)))         => 1
+        case (None, Some(Ext(_)))        => -1
+        case (Some(RC(_)), None)         => -1
+        case (Some(Ext(_)), None)        => 1
+        case (Some(Ext(_)), Some(RC(_))) => 1
+        case (Some(RC(_)), Some(Ext(_))) => -1
+        case (Some(p1), Some(p2))        => p1.compare(p2)
+      }
+    }
+  }
 
   final case class Major(value: Int) extends Ordered[Major] {
     override def compare(that: Major): Int = this.value.compare(that.value)
@@ -35,41 +48,54 @@ object Version {
     override def compare(that: Patch): Int = this.value.compare(that.value)
   }
 
-  final case class RCVersion(major: RCMajor, minor: Option[RCMinor]) extends Ordered[RCVersion] {
-    override def compare(that: RCVersion): Int = RCVersion.ordering.compare(this, that)
-
-    override def toString: String = s"RC${major.value}${minor.fold("")(m => s"-${m.value}")}"
+  final case class PostfixSegment(value: Int) extends Ordered[PostfixSegment] {
+    override def compare(that: PostfixSegment): Int = this.value.compare(that.value)
   }
 
-  object RCVersion {
+  sealed trait Postfix extends Ordered[Postfix] {
+    def segments: List[PostfixSegment]
 
-    val ordering: Ordering[RCVersion] =
-      // For now, we don't care if RC1-0 is greater thar RC1
-      // But RC1-2 should be greater than RC1
-      Ordering[(RCMajor, Option[RCMinor])].on[RCVersion](v => (v.major, v.minor))
+    override def toString: String = segments.mkString("-")
+
+    override def compare(that: Postfix): Int = (this, that) match {
+      case (RC(_), Ext(_)) => -1
+      case (Ext(_), RC(_)) => 1
+      case _               => compareSegments(this.segments, that.segments)
+    }
+
+    @tailrec
+    private def compareSegments(left: List[PostfixSegment], right: List[PostfixSegment]): Int =
+      (left, right) match {
+        case (Nil, Nil)         => 0
+        case (Nil, _ :: _)      => -1
+        case (_ :: _, Nil)      => 1
+        case (l :: ls, r :: rs) => if (l == r) compareSegments(ls, rs) else l.compare(r)
+      }
   }
 
-  final case class RCMajor(value: Int) extends Ordered[RCMajor] {
-    override def compare(that: RCMajor): Int = this.value.compare(that.value)
+  final case class RC(segments: List[PostfixSegment]) extends Postfix {
+    override def toString: String = s"RC${super.toString}"
   }
+  final case class Ext(segments: List[PostfixSegment]) extends Postfix
 
-  final case class RCMinor(value: Int) extends Ordered[RCMinor] {
-    override def compare(that: RCMinor): Int = this.value.compare(that.value)
-  }
-
-  val versionRegex: Regex = """(\d+).(\d+).(\d+)(?:(?:-(?:(?:RC)|(?:rc))(\d+))(?:-(\d+))?)?""".r
+  private val versionRegex: Regex = """(\d+).(\d+).(\d+)((?:-((?:RC)|(?:rc))?\d+)(?:-\d+)*)?""".r
+  private val numericRegex: Regex = """\d+""".r
 
   def parse(str: String): Option[Version] =
     str match {
-      case versionRegex(majorStr, minorStr, patchStr, rcMajorStr, rcMinorStr) =>
-        val major        = Major(majorStr.toInt)
-        val minor        = Minor(minorStr.toInt)
-        val patch        = Patch(patchStr.toInt)
-        val rcMajorOpt   = Option(rcMajorStr).map(rcMajorStr => RCMajor(rcMajorStr.toInt))
-        val rcMinorOpt   = Option(rcMinorStr).map(rcMinorStr => RCMinor(rcMinorStr.toInt))
-        val rcVersionOpt = rcMajorOpt.map(RCVersion(_, rcMinorOpt))
+      case versionRegex(majorStr, minorStr, patchStr, postfixStr, rcStr) =>
+        val major = Major(majorStr.toInt)
+        val minor = Minor(minorStr.toInt)
+        val patch = Patch(patchStr.toInt)
 
-        Some(new Version(major, minor, patch, rcVersionOpt) {})
+        val postfix = Option(postfixStr).map { postfix =>
+          val segments = numericRegex.findAllIn(postfix).toList.map(x => PostfixSegment(x.toInt))
+
+          if (rcStr == null) Ext(segments)
+          else RC(segments)
+        }
+
+        Some(new Version(major, minor, patch, postfix) {})
       case _ => None
     }
 
