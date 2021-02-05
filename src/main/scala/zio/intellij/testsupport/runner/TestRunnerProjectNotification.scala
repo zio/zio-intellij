@@ -12,7 +12,7 @@ import org.jetbrains.plugins.scala.project.{ModuleExt, ProjectExt}
 import zio.intellij.ZioIcon
 import zio.intellij.testsupport.runner.TestRunnerNotifications.{displayError, displayInfo}
 import zio.intellij.testsupport.runner.TestRunnerResolveService.{ResolveError, ResolveResult}
-import zio.intellij.utils.{ModuleSyntax, StringBuilderSyntax, Version}
+import zio.intellij.utils.{ModuleSyntax, ScalaVersionHack, StringBuilderSyntax, Version}
 
 import java.net.URLEncoder
 import javax.swing.event.HyperlinkEvent
@@ -109,15 +109,15 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
     sb.appendLine("```")
     sb.appendLine(errors.map {
       case ResolveError.NotFound(version, scalaVersion) =>
-        s"Not found: zio-test-intellij_${scalaVersion.major}:$version"
+        s"Not found: zio-test-intellij_${scalaVersion.versionStr}:$version"
       case ResolveError.DownloadInProgress(version, scalaVersion) =>
-        s"Download in progress: zio-test-intellij_${scalaVersion.major}:$version"
+        s"Download in progress: zio-test-intellij_${scalaVersion.versionStr}:$version"
       case ResolveError.DownloadError(version, scalaVersion, cause) =>
-        s"""Download error: zio-test-intellij_${scalaVersion.major}:$version"
+        s"""Download error: zio-test-intellij_${scalaVersion.versionStr}:$version"
            |Cause:
            |${cause.toString}""".stripMargin
       case ResolveError.UnknownError(version, scalaVersion, cause) =>
-        s"""Unknown error: zio-test-intellij_${scalaVersion.major}:$version"
+        s"""Unknown error: zio-test-intellij_${scalaVersion.versionStr}:$version"
            |Cause:
            |${cause.toString}""".stripMargin
     }.mkString("---"))

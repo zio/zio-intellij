@@ -15,7 +15,7 @@ import zio.intellij.testsupport.runner.TestRunnerDownloader.DownloadResult.{Down
 import zio.intellij.testsupport.runner.TestRunnerDownloader.{DownloadProgressListener, NoopProgressListener}
 import zio.intellij.testsupport.runner.TestRunnerResolveService.ResolveError.DownloadError
 import zio.intellij.testsupport.runner.TestRunnerResolveService._
-import zio.intellij.utils.{BackgroundTask, Version}
+import zio.intellij.utils.{BackgroundTask, ScalaVersionHack, Version}
 
 import scala.beans.BeanProperty
 import scala.collection.mutable
@@ -42,12 +42,12 @@ private[testsupport] final class TestRunnerResolveService
     downloadIfMissing: Boolean,
     resolveFast: Boolean = false,
     progressListener: DownloadProgressListener = NoopProgressListener
-  ): ResolveResult = testRunnerVersions.get((version, scalaVersion.major)) match {
+  ): ResolveResult = testRunnerVersions.get((version, scalaVersion.versionStr)) match {
     case Some(ResolveStatus.Resolved(jarPaths)) => Right(jarPaths)
     case _ if resolveFast                       => Left(ResolveError.NotFound(version, scalaVersion))
     case Some(ResolveStatus.DownloadInProgress) => Left(ResolveError.DownloadInProgress(version, scalaVersion))
     case _ =>
-      val key = s"${version.toString}###${scalaVersion.major}"
+      val key = s"${version.toString}###${scalaVersion.versionStr}"
       if (state.resolvedVersions.containsKey(key)) {
         val jarUrls = state.resolvedVersions.get(key).map(new URL(_))
         resolveClassPath(version, scalaVersion, jarUrls.toIndexedSeq) match {
@@ -67,7 +67,7 @@ private[testsupport] final class TestRunnerResolveService
     scalaVersion: ScalaVersion,
     project: Project
   ): Future[ResolveResult] =
-    testRunnerVersions.get((version, scalaVersion.major)) match {
+    testRunnerVersions.get((version, scalaVersion.versionStr)) match {
       case Some(ResolveStatus.Resolved(fmt)) =>
         Future.successful(Right(fmt))
       case Some(ResolveStatus.DownloadInProgress) =>
@@ -100,9 +100,9 @@ private[testsupport] final class TestRunnerResolveService
     val urls: Array[URL] = jarUrls.toArray
     Try(new URLClassLoader(urls, null).loadClass(ZTestRunnerName + "$")) match {
       case Success(_) =>
-        val key = s"${version.toString}###${scalaVersion.major}"
+        val key = s"${version.toString}###${scalaVersion.versionStr}"
         state.resolvedVersions.put(key, jarUrls.toArray.map(_.toString))
-        testRunnerVersions((version, scalaVersion.major)) = ResolveStatus.Resolved(jarUrls)
+        testRunnerVersions((version, scalaVersion.versionStr)) = ResolveStatus.Resolved(jarUrls)
         Right(jarUrls)
       case Failure(e) =>
         Left(ResolveError.UnknownError(version, scalaVersion, e))
