@@ -1,16 +1,15 @@
 package zio.intellij.testsupport.runner
 
-import java.net.URL
-import java.nio.file.Path
-
 import com.intellij.openapi.progress.ProcessCanceledException
 import org.apache.ivy.util.{AbstractMessageLogger, MessageLogger}
-import org.jetbrains.plugins.scala.{DependencyManager, DependencyManagerBase, ScalaVersion}
-import org.jetbrains.plugins.scala.DependencyManagerBase.{DependencyDescription, _}
+import org.jetbrains.plugins.scala.DependencyManagerBase.DependencyDescription
+import org.jetbrains.plugins.scala.{DependencyManagerBase, ScalaVersion}
 import zio.intellij.testsupport.runner.TestRunnerDownloader.DownloadProgressListener
 import zio.intellij.testsupport.runner.TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
-import zio.intellij.utils.Version
+import zio.intellij.utils.{ScalaVersionHack, Version}
 
+import java.net.URL
+import java.nio.file.Path
 import scala.util.control.NonFatal
 
 private[runner] class TestRunnerDownloader(progressListener: DownloadProgressListener) {
@@ -18,7 +17,7 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
   def download(version: Version)(implicit scalaVersion: ScalaVersion): Either[DownloadFailure, DownloadSuccess] =
     try {
       val resolver             = new DependencyResolver(progressListener)
-      val resolvedDependencies = resolver.resolve(dependencies(version.toString): _*)
+      val resolvedDependencies = resolver.resolve(dependencies(version, scalaVersion): _*)
       val jars: Seq[Path]      = resolvedDependencies.map(_.file.toPath)
       val urls                 = jars.map(_.toUri.toURL).toArray
       Right(DownloadSuccess(version, scalaVersion, urls.toIndexedSeq))
@@ -27,8 +26,8 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
       case NonFatal(e)                 => Left(DownloadFailure(version, scalaVersion, e))
     }
 
-  private def dependencies(version: String)(implicit scalaVersion: ScalaVersion): Seq[DependencyDescription] =
-    List("dev.zio" %% s"zio-test-intellij" % version)
+  private def dependencies(version: Version, scalaVersion: ScalaVersion): Seq[DependencyDescription] =
+    List(DependencyDescription("dev.zio", s"zio-test-intellij_${scalaVersion.versionStr}", version.toString))
 
   private class DependencyResolver(progressListener: DownloadProgressListener) extends DependencyManagerBase {
     override protected val artifactBlackList: Set[String] = Set()

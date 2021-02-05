@@ -157,6 +157,13 @@ package object utils {
       } yield scalaVersion
   }
 
+  implicit class ScalaVersionHack(private val version: ScalaVersion) extends AnyVal {
+    def versionStr = version.languageLevel match {
+      case ScalaLanguageLevel.Scala_3_0 => version.minor
+      case _                            => version.major
+    }
+  }
+
   implicit class TraverseAtHome[A](private val list: List[A]) extends AnyVal {
     def map2[A, B, C](oa: Option[A], ob: Option[B])(f: (A, B) => C): Option[C] =
       oa.flatMap(a => ob.map(b => f(a, b)))

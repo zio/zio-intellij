@@ -23,6 +23,7 @@ import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderUtil}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
 import zio.intellij.{utils, ZioIcon}
 import zio.intellij.testsupport.runner.{TestRunnerDownloader, TestRunnerResolveService}
+import zio.intellij.utils.ScalaVersionHack
 
 import java.awt.FlowLayout
 import java.io.File
@@ -65,7 +66,7 @@ private[zio] class ZioProjectBuilder
       }
 
     def loadVersions = {
-      val url   = s"https://repo1.maven.org/maven2/dev/zio/zio_${scalaVersion.major}/"
+      val url   = s"https://repo1.maven.org/maven2/dev/zio/zio_${scalaVersion.versionStr}/"
       val lines = Versions.loadLinesFrom(url)
       val versionStrings = lines.fold(
         Function.const(hardcodedVersions),
