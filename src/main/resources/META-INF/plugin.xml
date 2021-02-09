@@ -265,6 +265,8 @@
 
         <!-- debugging -->
         <debuggerClassFilterProvider implementation="zio.intellij.debugger.ZioSteppingFilterProvider"/>
+
+        <customLiveTemplate implementation="zio.intellij.postfix.ZPostfixLiveTemplateHack" />
     </extensions>
 
     <actions>

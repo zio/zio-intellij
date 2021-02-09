@@ -1,0 +1,2 @@
+val list = List("Bob", "Joe", "Alyx")
+list.<spot>traverse</spot>
