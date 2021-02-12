@@ -1,0 +1,1 @@
+new Exception("error").<spot>fail</spot>

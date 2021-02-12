@@ -149,6 +149,8 @@ package object utils {
 
     def zioVersion: Option[Version] = findLibrary(lib => lib.contains("/dev/zio/zio_") || lib.contains("/dev.zio/zio_"))
 
+    def hasZio = zioVersion.isDefined
+
     def scalaVersion =
       for {
         scalaSdk     <- module.scalaSdk
