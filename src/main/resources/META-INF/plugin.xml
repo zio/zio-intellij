@@ -197,11 +197,6 @@
                          shortName="SimplifyBuildUseInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
-        <!-- Fiber dump -->
-        <notificationGroup id="Fiber Dump Notifications" displayType="BALLOON"/>
-        <notificationGroup id="Analyze fiber dump" displayType="TOOL_WINDOW" toolWindowId="Run" isLogByDefault="false"/>
-        <!-- -->
-
         <localInspection implementationClass="zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection"
                          displayName="Effect cannot fail; operation on error is impossible"
                          groupPath="Scala,ZIO" groupName="Inspections"
@@ -266,21 +261,9 @@
         <!-- debugging -->
         <debuggerClassFilterProvider implementation="zio.intellij.debugger.ZioSteppingFilterProvider"/>
 
+        <!-- temporary disabled until I can figure out how to disable on invalid items
         <customLiveTemplate implementation="zio.intellij.postfix.ZPostfixLiveTemplateHack" />
+        !-->
     </extensions>
 
-    <actions>
-        <action id="DumpFibers"
-                class="zio.intellij.actions.FiberDumpAction"
-                text="Get ZIO Fiber Dump"
-                icon="AllIcons.Actions.Dump">
-            <add-to-group group-id="DebuggingActionsGroup" anchor="before" relative-to-action="DumpThreads"/>
-        </action>
-
-        <group id="XDebugger.ToolWindow.DumpFibers">
-            <separator/>
-            <reference ref="DumpFibers"/>
-            <add-to-group group-id="XDebugger.ToolWindow.LeftToolbar" anchor="last"/>
-        </group>
-    </actions>
 </idea-plugin>
