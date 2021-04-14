@@ -1,5 +1,5 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2021.1.5" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val pluginVersion = "2021.1.6" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "211"
@@ -20,7 +20,7 @@ lazy val `zio-intellij` = project
     version := pluginVersion,
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2021.1.15".toPlugin
+      "org.intellij.scala:2021.1.16".toPlugin
     ),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
