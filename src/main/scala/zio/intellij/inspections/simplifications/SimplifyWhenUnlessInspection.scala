@@ -1,10 +1,11 @@
 package zio.intellij.inspections.simplifications
 
 import org.jetbrains.plugins.scala.codeInspection.collections._
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFor, ScInfixExpr}
 import zio.intellij.inspections._
 import zio.intellij.utils.NegationUtils.{hasNegation, invertedNegationText, removeDoubleNegation}
 import zio.intellij.utils.OptionUtils
+import zio.intellij.utils.StringUtils._
 
 class SimplifyWhenInspection   extends ZInspection(WhenSimplificationType)
 class SimplifyUnlessInspection extends ZInspection(UnlessSimplificationType)
@@ -12,8 +13,14 @@ class SimplifyUnlessInspection extends ZInspection(UnlessSimplificationType)
 sealed abstract class WhenUnlessSimplificationTypeBase(replacementMethod: String) extends SimplificationType {
   override def hint: String = s"Replace with .$replacementMethod"
 
-  private def replacement(ifStmt: ScExpression, body: ScExpression, conditionText: String): Simplification =
-    replace(ifStmt).withText(s"${body.getText}.$replacementMethod($conditionText)")
+  private def replacement(ifStmt: ScExpression, body: ScExpression, conditionText: String): Simplification = {
+    val bodyText = body match {
+      case _: ScInfixExpr | _: ScFor => body.getParenthesizedText
+      case _                         => body.getText
+    }
+
+    replace(ifStmt).withText(s"$bodyText.$replacementMethod($conditionText)")
+  }
 
   protected def replacement(
     ifStmt: ScExpression,
