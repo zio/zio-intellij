@@ -11,6 +11,9 @@ object StringUtils {
     // injects only braces if required
     def getBracedText: String = wrap(needParenthesis = false)
 
+    // injects only parenthesis if required
+    def getParenthesizedText: String = wrap(needBraces = false)
+
     // injects braces or parenthesis depending on the expression content
     def getWrappedText: String = wrap()
 
@@ -19,8 +22,8 @@ object StringUtils {
       // stupid hack found in scala plugin
       val bracesRequired = exprText.contains('\n')
 
-      if (bracesRequired)
-        exprText.braced(needBraces = needBraces && !expr.startsWithToken(ScalaTokenTypes.tLBRACE))
+      if (needBraces && bracesRequired)
+        exprText.braced(needBraces = !expr.startsWithToken(ScalaTokenTypes.tLBRACE))
       else
         exprText.parenthesize(needParenthesis = needParenthesis && !expr.startsWithToken(ScalaTokenTypes.tLPARENTHESIS))
     }

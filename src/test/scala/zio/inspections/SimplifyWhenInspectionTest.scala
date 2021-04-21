@@ -136,4 +136,51 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
     }
   }
 
+  def test_when_complex_expression_containing_multiple_tokens(): Unit = {
+    def base(expr: String): String =
+      s"""|val a = true
+          |$expr""".stripMargin
+    val complexExpr = """ZIO.succeed(42) *> ZIO.succeed("wrap this")"""
+
+    locally {
+      z(base(s"${START}if (a) $complexExpr else ZIO.unit$END")).assertHighlighted()
+      val text   = z(base(s"if (a) $complexExpr else ZIO.unit"))
+      val result = z(base(s"($complexExpr).when(a)"))
+      testQuickFixes(text, result, hint)
+    }
+
+    locally {
+      z(base(s"${START}if (!a) ZIO.unit else $complexExpr$END")).assertHighlighted()
+      val text   = z(base(s"if (!a) ZIO.unit else $complexExpr"))
+      val result = z(base(s"($complexExpr).when(a)"))
+      testQuickFixes(text, result, hint)
+    }
+  }
+
+  def test_when_complex_expression_containing_for_comprehension(): Unit = {
+    def base(expr: String): String =
+      s"""|val a = true
+          |$expr""".stripMargin
+
+    val complexExpr =
+      """for {
+        | i <- ZIO.succeed(42)
+        | s <- ZIO.succeed("wrap this")
+        |} yield s * i""".stripMargin
+
+    locally {
+      z(base(s"${START}if (a) $complexExpr else ZIO.unit$END")).assertHighlighted()
+      val text   = z(base(s"if (a) $complexExpr else ZIO.unit"))
+      val result = z(base(s"($complexExpr).when(a)"))
+      testQuickFixes(text, result, hint)
+    }
+
+    locally {
+      z(base(s"${START}if (!a) ZIO.unit else $complexExpr$END")).assertHighlighted()
+      val text   = z(base(s"if (!a) ZIO.unit else $complexExpr"))
+      val result = z(base(s"($complexExpr).when(a)"))
+      testQuickFixes(text, result, hint)
+    }
+  }
+
 }
