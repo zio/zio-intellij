@@ -28,9 +28,12 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
   private def versions(project: Project) = {
     val sourceModules = project.modulesWithScala.filter(_.isSourceModule).toList
 
-    sourceModules
-      .flatMap(m => m.zioVersion zip m.scalaVersion)
-      .distinct
+    sourceModules.flatMap { m =>
+      // First ZIO Test runner release: RC18-2
+      // Do not try to download test runner for ZIO versions without runner release
+      val zioVersion = m.zioVersion.filter(v => Version.ZIO.`RC18-2` <= v && v <= Version.ZIO.`latest-ish`)
+      zioVersion zip m.scalaVersion
+    }.distinct
   }
 
   private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
