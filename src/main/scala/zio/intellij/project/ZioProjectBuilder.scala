@@ -15,15 +15,16 @@ import org.jetbrains.plugins.scala.LatestScalaVersions.Scala_2_13
 import org.jetbrains.plugins.scala.extensions.JComponentExt.ActionListenersOwner
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.project.{ScalaLanguageLevel, Version, Versions}
-import org.jetbrains.plugins.scala.{extensions, ScalaBundle, ScalaVersion}
+import org.jetbrains.plugins.scala.{ScalaBundle, ScalaVersion, extensions}
 import org.jetbrains.sbt.project.SbtProjectSystem
 import org.jetbrains.sbt.project.settings.SbtProjectSettings
 import org.jetbrains.sbt.project.template.SbtModuleBuilderUtil.{doSetupModule, getOrCreateContentRootDir}
 import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderUtil}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
-import zio.intellij.{utils, ZioIcon}
+import zio.intellij.{ZioIcon, utils}
 import zio.intellij.testsupport.runner.{TestRunnerDownloader, TestRunnerResolveService}
 import zio.intellij.utils.ScalaVersionHack
+import zio.intellij.utils.Version.ZIO
 
 import java.awt.FlowLayout
 import java.io.File
@@ -57,7 +58,7 @@ private[zio] class ZioProjectBuilder
   }
 
   private def loadZioVersions(scalaVersion: ScalaVersion) = {
-    val hardcodedVersions = List("1.0.5", "1.0.4-2", "1.0.3", "1.0.2", "1.0.1", "1.0.0")
+    val hardcodedVersions = ZIO.`latest-ish`.toString :: List("1.0.5", "1.0.4", "1.0.3", "1.0.2", "1.0.1", "1.0.0")
     val versionPattern    = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
 
     def extractVersions(values: Seq[String]) =
