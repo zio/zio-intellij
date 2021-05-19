@@ -28,7 +28,9 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
     protected val typeArgsForAccessors: Seq[ScTypeParam]
 
     final def apply(sco: ScObject): Seq[String] = {
-      val serviceName = s"${sco.qualifiedName}.Service"
+      val serviceName  =
+        if (sco.typeDefinitions.exists(_.name == "Service")) s"${sco.qualifiedName}.Service"
+        else sco.qualifiedName
       val aliasName   = s"${sco.qualifiedName}.${sco.name}"
       val methods     = (serviceTrait.allMethods ++ serviceTrait.allVals).toSeq
 
@@ -93,14 +95,17 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
   }
 
   private def findAccessibleMacroAnnotation(sco: ScObject): Option[ScAnnotation] =
-    Option(sco.getAnnotation(macroName)).collect {
+    Option(sco.fakeCompanionClassOrCompanionClass.getAnnotation(macroName)).collect {
       case a: ScAnnotation => a
     }
 
   private def findServiceTrait(sco: ScObject): Option[ScTrait] =
     sco.typeDefinitions.collectFirst {
       case tr: ScTrait if tr.name == "Service" => tr
-    }
+    }.orElse(sco.fakeCompanionClassOrCompanionClass match {
+      case typeDef: ScTrait => Some(typeDef)
+      case _ => None
+    })
 
   override def injectMembers(source: ScTypeDefinition): Seq[String] =
     Some(source).collect { case sco: ScObject => sco }.flatMap { sco =>
@@ -170,4 +175,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
       }
     }
   }
+
+  override def needsCompanionObject(source: ScTypeDefinition) =
+    source.findAnnotationNoAliases(macroName) != null
 }
