@@ -15,13 +15,13 @@ import org.jetbrains.plugins.scala.LatestScalaVersions.Scala_2_13
 import org.jetbrains.plugins.scala.extensions.JComponentExt.ActionListenersOwner
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.project.{ScalaLanguageLevel, Version, Versions}
-import org.jetbrains.plugins.scala.{ScalaBundle, ScalaVersion, extensions}
+import org.jetbrains.plugins.scala.{extensions, ScalaBundle, ScalaVersion}
 import org.jetbrains.sbt.project.SbtProjectSystem
 import org.jetbrains.sbt.project.settings.SbtProjectSettings
 import org.jetbrains.sbt.project.template.SbtModuleBuilderUtil.{doSetupModule, getOrCreateContentRootDir}
 import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderUtil}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
-import zio.intellij.{ZioIcon, utils}
+import zio.intellij.{utils, ZioIcon}
 import zio.intellij.testsupport.runner.{TestRunnerDownloader, TestRunnerResolveService}
 import zio.intellij.utils.ScalaVersionHack
 import zio.intellij.utils.Version.ZIO
