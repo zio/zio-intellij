@@ -161,9 +161,12 @@ package object utils {
 
   implicit class ScalaVersionHack(private val version: ScalaVersion) extends AnyVal {
     def versionStr = version.languageLevel match {
-      case ScalaLanguageLevel.Scala_3_0 => version.minor
-      case _                            => version.major
+      case ScalaLanguageLevel.Scala_3_0 if version.isPrerelease => version.minor
+      case ScalaLanguageLevel.Scala_3_0                         => "3" // sigh :(
+      case _                                                    => version.major
     }
+
+    def isPrerelease = version.minorSuffix.contains("-")
   }
 
   implicit class TraverseAtHome[A](private val list: List[A]) extends AnyVal {
