@@ -28,11 +28,11 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
     protected val typeArgsForAccessors: Seq[ScTypeParam]
 
     final def apply(sco: ScObject): Seq[String] = {
-      val serviceName  =
+      val serviceName =
         if (sco.typeDefinitions.exists(_.name == "Service")) s"${sco.qualifiedName}.Service"
         else sco.qualifiedName
-      val aliasName   = s"${sco.qualifiedName}.${sco.name}"
-      val methods     = (serviceTrait.allMethods ++ serviceTrait.allVals).toSeq
+      val aliasName = s"${sco.qualifiedName}.${sco.name}"
+      val methods   = (serviceTrait.allMethods ++ serviceTrait.allVals).toSeq
 
       def withTypeParams(srv: String): String =
         s"$srv${typeParametersApplication(typeArgsForService)}"
@@ -104,7 +104,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
       case tr: ScTrait if tr.name == "Service" => tr
     }.orElse(sco.fakeCompanionClassOrCompanionClass match {
       case typeDef: ScTrait => Some(typeDef)
-      case _ => None
+      case _                => None
     })
 
   override def injectMembers(source: ScTypeDefinition): Seq[String] =
