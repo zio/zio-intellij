@@ -284,7 +284,7 @@
         <notificationGroup id="Test Runner Download" displayType="BALLOON" isLogByDefault="true"/>
         <notificationGroup id="Test Runner Download Error" displayType="STICKY_BALLOON" isLogByDefault="true"/>
 
-        <applicationService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
+        <projectService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
 
         <!-- Project template -->
         <projectTemplatesFactory implementation="zio.intellij.project.ZioProjectTemplateFactory" order="last"/>

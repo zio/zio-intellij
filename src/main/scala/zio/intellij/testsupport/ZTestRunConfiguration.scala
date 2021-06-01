@@ -67,7 +67,7 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
   private def resolveTestRunner(module: Module): Option[Seq[URL]] =
     module.zioVersion zip module.scalaVersion match {
       case Some((zioVersion, scalaVersion)) =>
-        TestRunnerResolveService.instance.resolve(zioVersion, scalaVersion, false).toOption
+        TestRunnerResolveService.instance(module.getProject).resolve(zioVersion, scalaVersion, false).toOption
       case _ => None
     }
 

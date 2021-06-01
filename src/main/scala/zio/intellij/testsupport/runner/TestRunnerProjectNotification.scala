@@ -3,16 +3,21 @@ package zio.intellij.testsupport.runner
 import com.intellij.ide.BrowserUtil
 import com.intellij.notification._
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.{Project, ProjectUtil}
 import org.jetbrains.annotations.NonNls
+import org.jetbrains.sbt.SbtUtil
+import org.jetbrains.sbt.SbtUtil.getDefaultLauncher
+import org.jetbrains.sbt.project.SbtExternalSystemManager
 import zio.intellij.testsupport.runner.TestRunnerNotifications.{displayError, displayInfo}
 import zio.intellij.testsupport.runner.TestRunnerResolveService.ResolveError
 import zio.intellij.utils.{ProjectSyntax, ScalaVersionHack, Version}
 import zio.intellij.{ErrorReporter, ZioIcon}
 
+import java.io.File
 import javax.swing.event.HyperlinkEvent
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
 private[runner] final class TestRunnerProjectNotification(private val project: Project) {
   def init(): Unit =
@@ -23,7 +28,8 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
   private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
     project.versions.foldLeft(false) {
       case (flag, (version, scalaVersion)) =>
-        flag | TestRunnerResolveService.instance
+        flag | TestRunnerResolveService
+          .instance(project)
           .resolve(version, scalaVersion, downloadIfMissing)
           .toOption
           .isEmpty
@@ -45,7 +51,8 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
   private def downloadTestRunner(notification: Notification): Unit = {
     val tasks = project.versions.map {
       case (version, scalaVersion) =>
-        TestRunnerResolveService.instance
+        TestRunnerResolveService
+          .instance(project)
           .resolveAsync(
             version,
             scalaVersion,
@@ -107,10 +114,11 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
         "Enable the integrated ZIO Test runner",
         href("download", "Download ZIO Test runner") + Nbsp * 6 +
           href("learn_more", "Learn more..."),
-        NotificationType.INFORMATION,
-        listener
+        NotificationType.INFORMATION
       )
+      .setListener(listener)
       .setIcon(ZioIcon)
+
 
   private val suggesterNotificationGroup: NotificationGroup =
     NotificationGroupManager.getInstance.getNotificationGroup("Test Runner Download")

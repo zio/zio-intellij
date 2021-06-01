@@ -48,8 +48,8 @@ private[zio] class ZioProjectBuilder
     packagePrefix = None
   )
 
-  private lazy val scalaVersions = ScalaKind()
-  private lazy val sbtVersions   = SbtKind()
+  private lazy val scalaVersions = ScalaKind.loadVersionsWithProgress()
+  private lazy val sbtVersions   = SbtKind.loadVersionsWithProgress()
   private lazy val zioVersions   = loadZioVersions(ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13))
 
   {
@@ -81,7 +81,6 @@ private[zio] class ZioProjectBuilder
       .sorted
       .reverse
       .map(_.presentation)
-      .toArray
 
     Versions(versions.headOption.getOrElse(hardcodedVersions.head), versions)
   }
@@ -97,7 +96,8 @@ private[zio] class ZioProjectBuilder
           settings.setResolveSbtClassifiers(selections.resolveSbtClassifiers)
         }
 
-        TestRunnerResolveService.instance
+        TestRunnerResolveService
+          .instance(moduleModel.getProject)
           .resolve(
             utils.Version.parseUnsafe(selections.zioVersion),
             ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13),
@@ -137,14 +137,14 @@ private[zio] class ZioProjectBuilder
       selections.zioVersion = zioVersions.defaultVersion
     }
 
-    val sbtVersionComboBox = applyTo(new SComboBox())(
-      _.setItems(sbtVersions.versions),
+    val sbtVersionComboBox = applyTo(new SComboBox[String]())(
+      _.setItems(sbtVersions.versions.toArray),
       _.setSelectedItem(selections.sbtVersion)
     )
 
-    val scalaVersionComboBox = applyTo(new SComboBox())(setupScalaVersionItems)
+    val scalaVersionComboBox = applyTo(new SComboBox[String]())(setupScalaVersionItems)
 
-    val zioVersionComboBox = applyTo(new SComboBox())(setupZioVersionItems)
+    val zioVersionComboBox = applyTo(new SComboBox[String]())(setupZioVersionItems)
 
     val packagePrefixField = applyTo(new JBTextField())(
       _.setText(selections.packagePrefix.getOrElse("")),
@@ -291,9 +291,9 @@ private[zio] class ZioProjectBuilder
     }
   }
 
-  private def setupScalaVersionItems(cbx: SComboBox): Unit = {
+  private def setupScalaVersionItems(cbx: SComboBox[String]): Unit = {
     val versions = scalaVersions.versions
-    cbx.setItems(versions)
+    cbx.setItems(versions.toArray)
 
     selections.scalaVersion match {
       case version if versions.contains(version) =>
@@ -303,9 +303,9 @@ private[zio] class ZioProjectBuilder
     }
   }
 
-  private def setupZioVersionItems(cbx: SComboBox): Unit = {
+  private def setupZioVersionItems(cbx: SComboBox[String]): Unit = {
     val versions = zioVersions.versions
-    cbx.setItems(versions)
+    cbx.setItems(versions.toArray)
 
     selections.zioVersion match {
       case version if versions.contains(version) =>
