@@ -8,5 +8,5 @@ private[runner] final class TestRunnerProjectListener extends ProjectManagerList
     new TestRunnerProjectNotification(project).init()
 
   override def projectClosing(project: Project): Unit =
-    TestRunnerResolveService.instance.clearCaches()
+    TestRunnerResolveService.instance(project).clearCaches()
 }

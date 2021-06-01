@@ -290,7 +290,7 @@
         <notificationGroup id="Test Runner Download" displayType="BALLOON" isLogByDefault="true"/>
         <notificationGroup id="Test Runner Download Error" displayType="STICKY_BALLOON" isLogByDefault="true"/>
 
-        <applicationService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
+        <projectService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
 
         <testCreator language="Scala" implementationClass="zio.intellij.testsupport.ZTestCreator" order="first" />
 
