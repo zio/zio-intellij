@@ -111,7 +111,7 @@ private[testsupport] final class TestRunnerResolveService
   private[runner] def clearCaches() = testRunnerVersions.clear()
 }
 object TestRunnerResolveService {
-  def instance: TestRunnerResolveService = ServiceManager.getService(classOf[TestRunnerResolveService])
+  def instance(project: Project): TestRunnerResolveService = project.getService(classOf[TestRunnerResolveService])
 
   type ResolveResult = Either[ResolveError, Seq[URL]]
 
