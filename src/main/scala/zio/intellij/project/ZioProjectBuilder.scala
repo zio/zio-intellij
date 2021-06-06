@@ -18,13 +18,13 @@ import org.jetbrains.plugins.scala.project.{ScalaLanguageLevel, Version, Version
 import org.jetbrains.plugins.scala.{extensions, ScalaBundle, ScalaVersion}
 import org.jetbrains.sbt.project.SbtProjectSystem
 import org.jetbrains.sbt.project.settings.SbtProjectSettings
-import org.jetbrains.sbt.project.template.SbtModuleBuilderUtil.{doSetupModule, getOrCreateContentRootDir}
+import org.jetbrains.sbt.project.template.SbtModuleBuilderUtil.doSetupModule
 import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderUtil}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
-import zio.intellij.{utils, ZioIcon}
-import zio.intellij.testsupport.runner.{TestRunnerDownloader, TestRunnerResolveService}
+import zio.intellij.testsupport.runner.TestRunnerResolveService
 import zio.intellij.utils.ScalaVersionHack
 import zio.intellij.utils.Version.ZIO
+import zio.intellij.{utils, ZioIcon}
 
 import java.awt.FlowLayout
 import java.io.File
@@ -48,9 +48,28 @@ private[zio] class ZioProjectBuilder
     packagePrefix = None
   )
 
-  private lazy val scalaVersions = ScalaKind.loadVersionsWithProgress()
-  private lazy val sbtVersions   = SbtKind.loadVersionsWithProgress()
-  private lazy val zioVersions   = loadZioVersions(ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13))
+  private lazy val scalaVersions = {
+    val versions = ScalaKind.loadVersionsWithProgress()
+    versions.copy(
+      "2.13.6",
+      versions = versions.versions.sortBy(_.startsWith("2"))
+    )
+  }
+  private lazy val sbtVersions = SbtKind.loadVersionsWithProgress()
+  private lazy val zioVersions = loadZioVersions(ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13))
+
+  // Scala3 is only supported since sbt 1.5.0
+  private val minSbtVersionForScala3 = "1.5.0"
+  private lazy val sbtVersionsForScala3 = Versions(
+    "1.5.3",
+    sbtVersions.versions.filter(_ >= minSbtVersionForScala3)
+  )
+
+  private val minZioVersionForScala3 = "1.0.8"
+  private lazy val zioVersionsForScala3 = Versions(
+    ZIO.`latest-ish`.toString,
+    zioVersions.versions.filter(_ >= minZioVersionForScala3)
+  )
 
   {
     val settings = getExternalProjectSettings
@@ -66,8 +85,10 @@ private[zio] class ZioProjectBuilder
         case versionPattern(number) => number
       }
 
+    val versionStr = if (isScala3Version(scalaVersion.versionStr)) "3" else scalaVersion.versionStr
+
     def loadVersions = {
-      val url   = s"https://repo1.maven.org/maven2/dev/zio/zio_${scalaVersion.versionStr}/"
+      val url   = s"https://repo1.maven.org/maven2/dev/zio/zio_$versionStr/"
       val lines = Versions.loadLinesFrom(url)
       val versionStrings = lines.fold(
         Function.const(hardcodedVersions),
@@ -179,6 +200,19 @@ private[zio] class ZioProjectBuilder
 
     scalaVersionComboBox.addActionListenerEx {
       selections.scalaVersion = scalaVersionComboBox.getSelectedItem.asInstanceOf[String]
+
+      val isScala3Selected     = isScala3Version(selections.scalaVersion)
+      val supportedSbtVersions = if (isScala3Selected) sbtVersionsForScala3 else sbtVersions
+      val supportedZioVersions =
+        if (isScala3Selected) zioVersionsForScala3
+        else ScalaVersion.fromString(selections.scalaVersion).map(loadZioVersions).getOrElse(zioVersions)
+      sbtVersionComboBox.setItems(supportedSbtVersions.versions.toArray)
+      zioVersionComboBox.setItems(supportedZioVersions.versions.toArray)
+      // if we select Scala3 version but had Scala2 version selected before and some sbt version incompatible with Scala3,
+      // the latest item from the list will be automatically selected
+      sbtVersionComboBox.setSelectedItemSafe(selections.sbtVersion)
+      sbtVersionComboBox.setSelectedItemSafe(selections.zioVersion)
+      selections.update(SbtKind, sbtVersions)
     }
     zioVersionComboBox.addActionListenerEx {
       selections.zioVersion = zioVersionComboBox.getSelectedItem.asInstanceOf[String]
@@ -246,6 +280,8 @@ private[zio] class ZioProjectBuilder
     step
   }
 
+  private def isScala3Version(scalaVersion: String) = scalaVersion.startsWith("3")
+
   private def sdkSettingsStep(settingsStep: SettingsStep) = new SdkSettingsStep(
     settingsStep,
     this,
@@ -269,7 +305,6 @@ private[zio] class ZioProjectBuilder
     private def validateLanguageLevel(languageLevel: ScalaLanguageLevel, sdk: Sdk): Unit = {
       import JavaSdkVersion.JDK_1_8
       import ScalaLanguageLevel._
-      import org.jetbrains.sbt.Sbt._
 
       def reportMisconfiguration(libraryName: String, libraryVersion: String) =
         throw new ConfigurationException(
@@ -279,15 +314,10 @@ private[zio] class ZioProjectBuilder
         )
 
       languageLevel match {
-        case Scala_3_0 if Option(selections.sbtVersion).exists(Version(_) >= Latest_1_0) =>
-          selections.sbtPlugins = Scala3RequiredSbtPlugins
-        case Scala_3_0 =>
-          reportMisconfiguration(Name, Latest_1_0.presentation)
         case _ if languageLevel >= Scala_2_12 && !JavaSdk.getInstance().getVersion(sdk).isAtLeast(JDK_1_8) =>
           reportMisconfiguration("JDK", JDK_1_8.getDescription)
         case _ =>
       }
-
     }
   }
 
@@ -428,13 +458,23 @@ object ZioProjectBuilder {
       if (includeHelloWorld)
         writeToFile(
           root / "src" / "main" / "scala" / "Main.scala",
-          s"""import zio._
-             |import zio.console.putStrLn
-             |
-             |object Main extends App {
-             |  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
-             |    putStrLn("Welcome to your first ZIO app!").exitCode
-             |}""".stripMargin
+          scalaVersion match {
+            case s if s.startsWith("3") =>
+              s"""import zio._
+                 |import zio.console.putStrLn
+                 |
+                 |object Main extends App:
+                 |  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
+                 |    putStrLn("Welcome to your first ZIO app!").exitCode""".stripMargin
+            case _ =>
+              s"""import zio._
+                 |import zio.console.putStrLn
+                 |
+                 |object Main extends App {
+                 |  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
+                 |    putStrLn("Welcome to your first ZIO app!").exitCode
+                 |}""".stripMargin
+          }
         )
 
       import text.StringUtil.isEmpty
