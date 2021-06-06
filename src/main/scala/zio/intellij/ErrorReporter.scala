@@ -10,7 +10,6 @@ import com.intellij.openapi.diagnostic.{ErrorReportSubmitter, IdeaLoggingEvent, 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
-import org.jetbrains.plugins.scala.ScalaVersion
 import zio.intellij.ErrorReporter.reportErrorOnGithub
 import zio.intellij.utils.{ProjectSyntax, StringBuilderSyntax}
 
