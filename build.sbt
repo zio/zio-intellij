@@ -1,5 +1,5 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2021.1.9" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val pluginVersion = "2021.1.9" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".1")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "211"
@@ -30,7 +30,7 @@ lazy val `zio-intellij` = project
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
         <ul>
-          <li>Adds support for ZIO 1.0.9, including support for the new ZIO Test Smart Asserts and string diffing</li>
+          <li>Fixes Scala 3 version resolving for downloading the test runner.</li>
         </ul>
         ]]>"""
       )
