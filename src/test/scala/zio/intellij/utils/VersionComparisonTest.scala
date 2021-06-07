@@ -1,7 +1,9 @@
 package zio.intellij.utils
 
 import junit.framework.TestCase
-import org.junit.Assert.{assertEquals, assertTrue}
+import org.jetbrains.plugins.scala.ScalaVersion
+import org.jetbrains.plugins.scala.project.ScalaLanguageLevel
+import org.junit.Assert._
 
 class VersionComparisonTest extends TestCase {
 
@@ -58,6 +60,14 @@ class VersionComparisonTest extends TestCase {
     assertTrue(Version.parseUnsafe("1.2.3-21-1") > Version.parseUnsafe("1.2.3-RC21-1"))
     assertTrue(Version.parseUnsafe("1.2.3-RC21") < Version.parseUnsafe("1.2.3-21"))
     assertTrue(Version.parseUnsafe("1.2.3-RC21-1") < Version.parseUnsafe("1.2.3-21-1"))
+  }
+
+  def test_scala_3_prerelease_version_comparison(): Unit = {
+    assertFalse(Version.scala3Version.isPrerelease)
+    val prereleaseScala3Version = new ScalaVersion(ScalaLanguageLevel.Scala_3_0, "0-RC2")
+    assertTrue(prereleaseScala3Version.isPrerelease)
+    assertTrue(prereleaseScala3Version < Version.scala3Version)
+    assertTrue(Version.scala3Version > prereleaseScala3Version)
   }
 
   def test_sorting_on_zio_versions_from_maven(): Unit = {

@@ -8,7 +8,7 @@ import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.{JavaPsiFacade, PsiElement}
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
-import org.jetbrains.plugins.scala.extensions.{executeOnPooledThread, PsiClassExt}
+import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
@@ -20,7 +20,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
-import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectExt, ScalaLanguageLevel}
+import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ScalaLanguageLevel}
 
 import scala.annotation.tailrec
 
@@ -159,14 +159,21 @@ package object utils {
       } yield scalaVersion
   }
 
+  /**
+   * The release version of Scala 3 changes the classifier used to resolve dependencies,
+   * whereas in pre-3.0.0 it used the Scala 2 scheme, e.g. artifact_name:3.0.0-RC2,
+   * the release version uses a single major version digit, i.e. artifact_name:3.
+   *
+   * More info: https://www.scala-lang.org/blog/2021/04/08/scala-3-in-sbt.html
+   */
   implicit class ScalaVersionHack(private val version: ScalaVersion) extends AnyVal {
     def versionStr = version.languageLevel match {
       case ScalaLanguageLevel.Scala_3_0 if version.isPrerelease => version.minor
-      case ScalaLanguageLevel.Scala_3_0                         => "3" // sigh :(
+      case ScalaLanguageLevel.Scala_3_0                         => "3"
       case _                                                    => version.major
     }
 
-    def isPrerelease = version.minorSuffix.contains("-")
+    def isPrerelease = version < Version.scala3Version
   }
 
   implicit class TraverseAtHome[A](private val list: List[A]) extends AnyVal {

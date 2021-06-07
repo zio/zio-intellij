@@ -1,5 +1,7 @@
 package zio.intellij.utils
 
+import org.jetbrains.plugins.scala.ScalaVersion
+import org.jetbrains.plugins.scala.project.ScalaLanguageLevel
 import zio.intellij.utils.Version._
 
 import scala.annotation.tailrec
@@ -17,6 +19,7 @@ sealed abstract case class Version private (major: Major, minor: Minor, patch: P
 }
 
 object Version {
+  val scala3Version = new ScalaVersion(ScalaLanguageLevel.Scala_3_0, "0")
 
   val versionOrdering: Ordering[Version] = (x: Version, y: Version) => {
     val compareWithoutPostfix = (x.major, x.minor, x.patch).compare((y.major, y.minor, y.patch))
