@@ -2,9 +2,10 @@ package zio.intellij.testsupport
 
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
-import org.jetbrains.plugins.scala.extensions.{PsiElementExt, ResolvesTo}
-import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScInfixExpr, ScMethodCall, ScPostfixExpr, ScReferenceExpression}
+import org.jetbrains.plugins.scala.extensions.{ObjectExt, PsiElementExt, ResolvesTo}
+import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef._
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.ScClassImpl
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
@@ -13,8 +14,8 @@ import zio.intellij.testsupport.ZTestFramework.expandsToTestMethod
 import scala.annotation.tailrec
 
 final class ZTestFramework extends AbstractTestFramework {
-  override def getMarkerClassFQName: String = ZSuitePaths.head
-  override def getDefaultSuperClass: String = ZSuitePaths.head
+  override def getMarkerClassFQName: String = ZSpecFQN
+  override def getDefaultSuperClass: String = ZSpecFQN
   override def testFileTemplateName: String = "ZIO Test Suite"
   override def getName: String              = "ZIO Test"
 
@@ -26,7 +27,11 @@ final class ZTestFramework extends AbstractTestFramework {
       case _                         => false
     }
 
-  override def baseSuitePaths: Seq[String] = ZSuitePaths
+  override protected def isTestClass(definition: ScTemplateDefinition): Boolean =
+    if (!definition.is[ScObject]) false
+    else super.isTestClass(definition)
+
+  override def baseSuitePaths: Seq[String] = List(ZSpecFQN)
 
   private def resolvesToTestMethod(sc: ScReferenceExpression): Boolean =
     sc match {
