@@ -45,82 +45,98 @@
                          groupName="Simplifications"
                          shortName="SimplifyUnitInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyIgnoreInspection"
                          displayName="Simplify recovering with Unit to .ignore" groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifyIgnoreInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyMapInspection"
                          displayName="Simplify discarding effect result to .as/.orElseFail" groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifyMapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyBimapInspection"
                          displayName="Simplify mapping result and error effects to .bimap" groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifyBimapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyWhenInspection"
                          displayName="Simplify condition to .when" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyWhenInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyUnlessInspection"
                          displayName="Simplify condition to .unless" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyUnlessInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedEitherInspection"
                          displayName="Simplify Either values to .left/.right" groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifySucceedEitherInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedOptionInspection"
                          displayName="Simplify optional values to .none/.some" groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifySucceedOptionInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyCollectAllInspection"
                          displayName="Simplify collection of effects obtained by mapping each element of some Iterable to foreach"
                          groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifyCollectAllInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyTapInspection"
                          displayName="Simplify various call chains with .tap"
                          groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifyTapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyExitCodeInspection"
                          displayName="Simplify producing an exit code"
                          groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifyExitCodeInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySleepInspection"
                          displayName="Simplify ZIO.sleep to .delay" groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifySleepInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyServiceInspection"
                          displayName="Simplify ZIO.access(_.get) with ZIO.service"
                          groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifyServiceInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyChainToForInspection"
                          displayName="Convert `*>` chain to for-comprehension and vice versa"
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyChainToForInspection" level="INFORMATION"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyToLayerInspection"
                          displayName="Simplify ZLayer.fromEffect(Many) to .toLayer(Many)"
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyToLayerInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyZipRightToSucceedInspection"
                          displayName="Simplify `*&gt; ZIO.succeed` to `.as`"
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyZipRightToSucceedInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedToZipLeftInspection"
                          displayName="Simplify `ZIO.succeed &lt;*` to `.as`"
                          groupPath="Scala,ZIO" groupName="Simplifications"
@@ -180,11 +196,13 @@
                          groupPath="Scala,ZIO" groupName="Simplifications"
                          shortName="SimplifyFailInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyFlattenInspection"
                          displayName="Replace .map and .flatten with .flatMap" groupPath="Scala,ZIO"
                          groupName="Simplifications"
                          shortName="SimplifyFlattenInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyOrElseInspection"
                          displayName="Simplify .orElse(ZIO.fail) to .orElseFail"
                          groupPath="Scala,ZIO" groupName="Simplifications"
@@ -231,6 +249,12 @@
                          displayName="Effect doesn't require environment; there is no need to provide it"
                          groupPath="Scala,ZIO" groupName="Inspections"
                          shortName="UnnecessaryEnvProvisionInspection" level="ERROR"
+                         enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.IncorrectTestClassInspection"
+                         displayName="Detects incorrect use of 'class' instead of 'object' for ZIO Tests specs"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="IncorrectTestClassInspection" level="ERROR"
                          enabledByDefault="true" language="Scala"/>
 
         <intentionAction>
