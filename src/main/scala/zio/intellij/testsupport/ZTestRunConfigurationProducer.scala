@@ -17,7 +17,7 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
     configurationType.confFactory
   }
 
-  override protected def suitePaths: List[String] = ZSuitePaths
+  override protected def suitePaths: List[String] = List(ZSpecFQN)
 
   override def shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean =
     other.isProducedBy(classOf[ScalaApplicationConfigurationProducer])

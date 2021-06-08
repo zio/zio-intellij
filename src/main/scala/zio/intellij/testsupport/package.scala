@@ -16,7 +16,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinitio
 import scala.jdk.CollectionConverters._
 
 package object testsupport {
-  val ZSuitePaths = List("zio.test.RunnableSpec")
+  val ZSpecFQN = "zio.test.RunnableSpec"
 
   def parentTypeDefinition(e: PsiElement): Option[ScTypeDefinition] =
     parentOfType(e, classOf[ScTypeDefinition], strict = false)
