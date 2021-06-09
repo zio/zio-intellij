@@ -20,11 +20,24 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
-import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ScalaLanguageLevel}
+import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectExt, ScalaLanguageLevel}
 
 import scala.annotation.tailrec
 
 package object utils {
+
+  implicit class ProjectSyntax(private val project: Project) extends AnyVal {
+    def versions: List[(Version, ScalaVersion)] = {
+      val sourceModules = project.modulesWithScala.filter(_.isSourceModule).toList
+
+      sourceModules.flatMap { m =>
+        // First ZIO Test runner release: RC18-2
+        // Do not try to download test runner for ZIO versions without runner release
+        val zioVersion = m.zioVersion.filter(_ >= Version.ZIO.`RC18-2`)
+        zioVersion zip m.scalaVersion
+      }.distinct
+    }
+  }
 
   implicit class StringBuilderSyntax(private val builder: StringBuilder) extends AnyVal {
     def appendLine: StringBuilder              = builder.append(System.lineSeparator())
