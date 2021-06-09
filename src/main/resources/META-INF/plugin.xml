@@ -285,6 +285,8 @@
         <!-- debugging -->
         <debuggerClassFilterProvider implementation="zio.intellij.debugger.ZioSteppingFilterProvider"/>
 
+        <errorHandler implementation="zio.intellij.ErrorReporter"/>
+
         <!-- temporary disabled until I can figure out how to disable on invalid items
         <customLiveTemplate implementation="zio.intellij.postfix.ZPostfixLiveTemplateHack" />
         !-->
