@@ -8,7 +8,7 @@ import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenType.ObjectKeyword
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScClass
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.{ElementScope, ScalaPsiUtil}
-import zio.intellij.inspections.mistakes.IncorrectTestClassInspection.ReplaceTargetToken
+import zio.intellij.inspections.mistakes.IncorrectTestClassInspection.ConvertToObject
 import zio.intellij.testsupport.ZSpecFQN
 
 class IncorrectTestClassInspection extends AbstractRegisteredInspection {
@@ -24,9 +24,9 @@ class IncorrectTestClassInspection extends AbstractRegisteredInspection {
         Some(
           manager.createProblemDescriptor(
             c.targetToken,
-            "ZIO Spec must be an 'object' instead of 'class'.",
+            "ZIO Spec must be an 'object' instead of 'class'",
             isOnTheFly,
-            Array[LocalQuickFix](new ReplaceTargetToken(c)),
+            Array[LocalQuickFix](new ConvertToObject(c)),
             ProblemHighlightType.GENERIC_ERROR
           )
         )
@@ -41,8 +41,7 @@ class IncorrectTestClassInspection extends AbstractRegisteredInspection {
   }
 }
 object IncorrectTestClassInspection {
-  final class ReplaceTargetToken(param: ScClass)
-      extends AbstractFixOnPsiElement("Replace 'class' with 'object'", param) {
+  final class ConvertToObject(param: ScClass) extends AbstractFixOnPsiElement("Replace 'class' with 'object'", param) {
 
     override protected def doApplyFix(c: ScClass)(implicit project: Project): Unit = {
       // borrowed from ConvertToObjectFix

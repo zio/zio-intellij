@@ -1,7 +1,7 @@
 package zio.intellij
 
 import com.intellij.openapi.module.Module
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.{Project, ProjectUtil}
 import com.intellij.openapi.roots.OrderRootType
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
@@ -20,11 +20,41 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
-import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ScalaLanguageLevel}
+import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectExt, ScalaLanguageLevel}
+import org.jetbrains.sbt.SbtUtil
+import org.jetbrains.sbt.SbtUtil.getDefaultLauncher
+import org.jetbrains.sbt.project.SbtExternalSystemManager
 
+import java.io.File
 import scala.annotation.tailrec
 
 package object utils {
+
+  implicit class ProjectSyntax(private val project: Project) extends AnyVal {
+    def versions: List[(Version, ScalaVersion)] = {
+      val sourceModules = project.modulesWithScala.filter(_.isSourceModule).toList
+
+      sourceModules.flatMap { m =>
+        // First ZIO Test runner release: RC18-2
+        // Do not try to download test runner for ZIO versions without runner release
+        val zioVersion = m.zioVersion.filter(_ >= Version.ZIO.`RC18-2`)
+        zioVersion zip m.scalaVersion
+      }.distinct
+    }
+
+    def sbtVersion = {
+      val workingDirPath =
+        Option(ProjectUtil.guessProjectDir(project))
+          .getOrElse(throw new IllegalStateException(s"no project directory found for project ${project.getName}"))
+          .getCanonicalPath
+      val workingDir = new File(workingDirPath)
+
+      val sbtSettings = SbtExternalSystemManager.executionSettingsFor(project, workingDirPath)
+      val launcher    = sbtSettings.customLauncher.getOrElse(getDefaultLauncher)
+
+      SbtUtil.detectSbtVersion(workingDir, launcher)
+    }
+  }
 
   implicit class StringBuilderSyntax(private val builder: StringBuilder) extends AnyVal {
     def appendLine: StringBuilder              = builder.append(System.lineSeparator())
