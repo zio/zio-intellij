@@ -111,9 +111,8 @@ class SimplifyTapErrorInspectionTest extends BaseSimplifyTapInspectionTest(".tap
     testQuickFixes(text, result, hint)
   }
 
-  def test_catchAll_zipRight_ZIO_fail_with_anything_other_than_catchAll_parameter(): Unit = {
+  def test_catchAll_zipRight_ZIO_fail_with_anything_other_than_catchAll_parameter(): Unit =
     z(s"ZIO.unit.${START}catchAll(ex => logError(ex) *> ZIO.fail(convertLeft(ex)))$END").assertNotHighlighted()
-  }
 
   def test_flatMapError_reduce_func_no_params(): Unit = {
     z(s"ZIO.unit.${START}flatMapError(a => f(a).as(a))$END").assertHighlighted()
