@@ -242,8 +242,9 @@ package object inspections {
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
       case uncurry1(ref, _) =>
         ref.resolve() match {
-          case m: ScMember if typeFQNs.contains(m.containingClass.qualifiedName) => Some(expr)
-          case _                                                                 => None
+          case m: ScMember =>
+            Option(m.containingClass).map(_.qualifiedName).flatMap(fqn => Option.when(typeFQNs.contains(fqn))(expr))
+          case _ => None
         }
       case MethodRepr(_, Some(ref @ ScReferenceExpression(_)), None, Seq(_)) if isOfClassFrom(ref, typeFQNs.toSeq) =>
         Some(expr)
@@ -308,8 +309,9 @@ package object inspections {
       expr match {
         case ref @ ScReferenceExpression(_) if ref.refName == refName =>
           ref.resolve() match {
-            case p: ScReferencePattern if p.containingClass.qualifiedName == "zio.ExitCode" => true
-            case _                                                                          => false
+            case p: ScReferencePattern =>
+              Option(p.containingClass).map(_.qualifiedName).contains("zio.ExitCode")
+            case _ => false
           }
         case _ => false
       }
