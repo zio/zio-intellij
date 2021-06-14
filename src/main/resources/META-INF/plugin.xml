@@ -119,6 +119,14 @@
                          shortName="SimplifyServiceInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyAccessMInspection"
+                         displayName="Simplify ZIO.accessM with ZIO.serviceWith"
+                         groupPath="Scala,ZIO"
+                         groupName="Simplifications"
+                         shortName="SimplifyAccessMInspection" level="WEAK WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyChainToForInspection"
                          displayName="Convert `*>` chain to for-comprehension and vice versa"
                          groupPath="Scala,ZIO" groupName="Simplifications"
