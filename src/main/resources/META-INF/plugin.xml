@@ -126,7 +126,6 @@
                          shortName="SimplifyServiceWithInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
-
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyChainToForInspection"
                          displayName="Convert `*>` chain to for-comprehension and vice versa"
                          groupPath="Scala,ZIO" groupName="Simplifications"
