@@ -7,6 +7,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.TypePresentationContext
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import zio.intellij.inspections._
 import zio.intellij.inspections.hasMethods.`.get`
+import zio.intellij.inspections.zioMethods.`.flatMap`
 import zio.intellij.utils._
 import zio.intellij.utils.types.ZioType
 
@@ -51,7 +52,16 @@ object ServiceWithSimplificationType extends SimplificationType {
           // ZIO.accessM[TypeAlias](...)
           case ScGenericCall(`ZIO.accessM`(zioType, _), Seq(accessTypeArg)) =>
             replacement(zioType, expr, ref, Some(accessTypeArg))
-
+          case _ => None
+        }
+      case `.flatMap`(serviceCall, ref) =>
+        serviceCall match {
+          case ScGenericCall(`ZIO.service`(zioType, _), Seq(serviceTypeArg)) => {
+            // TODO a hack to keep the type argument as-is, by wrapping it in `Has`
+            // The replacement function will extract the type parameter and use it
+            val arg = createTypeElement(s"zio.Has[${serviceTypeArg.getText}", serviceTypeArg)
+            replacement(zioType, expr, ref, arg)
+          }
           case _ => None
         }
       case _ => None

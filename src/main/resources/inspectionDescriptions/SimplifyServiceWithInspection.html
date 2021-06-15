@@ -6,5 +6,23 @@ type ServiceAlias = Has[Service]
 ZIO.accessM[ServiceAlias](_.get.foo) -> ZIO.serviceWith[Service](_.foo)
 ZIO.accessM[Has[Service]](_.get.foo) -> ZIO.serviceWith[Service](_.foo)
 </pre>
+
+In cases where the calling function has an explicit return type, the type parameter may be omitted, e.g.:
+
+<pre>
+def foo: ZIO[Has[Service], Nothing, Unit] =
+  ZIO.accessM(_.get.foo)
+</pre>
+Will be rewritten to:
+<pre>
+def foo: ZIO[Has[Service], Nothing, Unit] =
+  ZIO.serviceWith(_.foo)
+</pre>
+
+In addition, simplifies the following:
+<pre>
+ZIO.service[Service].flatMap(_.foo) -> ZIO.serviceWith[Service](_.foo)
+</pre>
+
 </body>
 </html>
