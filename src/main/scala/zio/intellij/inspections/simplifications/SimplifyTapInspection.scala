@@ -10,7 +10,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.{createExpressionFromText, createWildcardNode}
 import zio.intellij.inspections.zioMethods._
 import zio.intellij.inspections.{ZInspection, _}
-import zio.intellij.utils.isElementUsed
+import zio.intellij.utils.{isElementUsed, LambdaUtils}
 import zio.intellij.utils.StringUtils._
 
 class SimplifyTapInspection
@@ -43,11 +43,8 @@ object SimplifyTapInspection {
             case _ =>
               val expression = s"${param.name} => ${ref.getText}"
               createExpressionFromText(expression, func) match {
-                case e: ScFunctionExpr =>
-                  ConvertParameterToUnderscoreIntention
-                    .createExpressionToIntroduce(e, true)
-                    .swap
-                    .fold(_ => replaceWithUnderscore(e).getText, _.getText)
+                case e: ScFunctionExpr => LambdaUtils.lambdaToUnderscore(e)
+                case _                 => expression
               }
           }
 
@@ -62,18 +59,6 @@ object SimplifyTapInspection {
         case _ => s"${param.getText} => ${body.getText}"
       }
     go(body, body.parentOfType[ScFunctionExpr])
-  }
-
-  private def replaceWithUnderscore(e: ScFunctionExpr): ScFunctionExpr = {
-    val params = e.parameters.filterNot(p => p.isWildcard || p.isImplicitParameter)
-    params.collectFirst {
-      case named: ScNamedElement if !isElementUsed(named, false) =>
-        val wildcard = createWildcardNode(e.getProject).getPsi
-        named.nameId.replace(wildcard)
-        e
-      case _ => e
-    }
-      .getOrElse(e)
   }
 }
 

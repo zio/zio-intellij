@@ -119,11 +119,11 @@
                          shortName="SimplifyServiceInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
-        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyAccessMInspection"
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyServiceWithInspection"
                          displayName="Simplify ZIO.accessM with ZIO.serviceWith"
                          groupPath="Scala,ZIO"
                          groupName="Simplifications"
-                         shortName="SimplifyAccessMInspection" level="WEAK WARNING"
+                         shortName="SimplifyServiceWithInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
 

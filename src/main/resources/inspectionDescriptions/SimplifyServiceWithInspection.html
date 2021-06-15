@@ -1,6 +1,8 @@
 <html>
 <body>
 <pre>
+type ServiceAlias = Has[Service]
+
 ZIO.accessM[ServiceAlias](_.get.foo) -> ZIO.serviceWith[Service](_.foo)
 ZIO.accessM[Has[Service]](_.get.foo) -> ZIO.serviceWith[Service](_.foo)
 </pre>
