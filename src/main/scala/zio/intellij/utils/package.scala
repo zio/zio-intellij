@@ -120,6 +120,14 @@ package object utils {
   def createExpression(text: String, context: PsiElement): Option[ScExpression] =
     ScalaPsiElementFactory.safe(_.createExpressionFromText(text, context))
 
+  def extractServiceTypeArgument(accessTypeArg: Option[ScTypeElement]) = for {
+    arg           <- accessTypeArg
+    tpe           <- arg.`type`().toOption
+    baseType      <- resolveAliases(tpe)
+    innerTypeArgs <- extractTypeArguments(baseType)
+    if innerTypeArgs.size == 1 // should be exactly one argument
+  } yield innerTypeArgs.head
+
   @annotation.tailrec
   def resolveAliases(tpe: ScType): Option[ScType] =
     if (!tpe.isAliasType) Some(tpe)

@@ -7,8 +7,8 @@ import org.jetbrains.plugins.scala.lang.psi.types.TypePresentationContext
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import zio.intellij.inspections._
 import zio.intellij.inspections.hasMethods.`.get`
+import zio.intellij.utils.extractServiceTypeArgument
 import zio.intellij.utils.types.ZioType
-import zio.intellij.utils.{extractTypeArguments, resolveAliases}
 
 class SimplifyServiceInspection extends ZInspection(AccessGetSimplificationType)
 
@@ -18,16 +18,10 @@ object AccessGetSimplificationType extends SimplificationType {
   private def replacement(zioType: ZioType, accessExpr: ScExpression, accessTypeArg: Option[ScTypeElement] = None)(
     implicit ctx: TypePresentationContext = TypePresentationContext(accessExpr)
   ): Option[Simplification] = {
-    val serviceTypeArg = for {
-      arg           <- accessTypeArg
-      tpe           <- arg.`type`().toOption
-      baseType      <- resolveAliases(tpe)
-      innerTypeArgs <- extractTypeArguments(baseType)
-      if innerTypeArgs.size == 1 // should be exactly one argument
-    } yield innerTypeArgs.head
+    val tpe = extractServiceTypeArgument(accessTypeArg)
 
     val simplification = replace(accessExpr)
-      .withText(s"${zioType.name}.service${serviceTypeArg.fold("")(t => s"[${t.codeText}]")}")
+      .withText(s"${zioType.name}.service${tpe.fold("")(t => s"[${t.codeText}]")}")
       .highlightFrom(accessExpr)
 
     Some(simplification)

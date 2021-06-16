@@ -266,6 +266,8 @@ package object inspections {
   val `ZIO.effect`        = new ZIOStaticMemberReference("effect")
   val `ZIO.effectTotal`   = new ZIOStaticMemberReference("effectTotal")
   val `ZIO.access`        = new ZIOStaticMemberReference("access")
+  val `ZIO.accessM`       = new ZIOStaticMemberReference("accessM")
+  val `ZIO.service`       = new ZIOStaticMemberReference("service")
   val `ZIO.forkAll`       = new ZIOStaticMemberReference("forkAll")
   val `ZIO.forkAll_`      = new ZIOStaticMemberReference("forkAll_")
 
