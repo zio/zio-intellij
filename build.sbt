@@ -1,5 +1,5 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2020.3.5" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".1")(v => s".$v")
+lazy val pluginVersion = "2020.3.10" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "203"
@@ -29,11 +29,10 @@ lazy val `zio-intellij` = project
       xml.changeNotes = sys.env.getOrElse(
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
-        This is a small update, containing a fix for supporting not-so-SemVer ZIO 1.0.4-x updates<br/>
-        Big thanks to Timur Aliberdov for fixing it!
-        <ul>
-          <li>Fixed an issue with the test runner failing to download on Scala 3 projects (<a href="https://github.com/zio/zio-intellij/pull/271">#271</a>)</li>
-        </ul>
+        This is the last feature release for IntelliJ 2020.x. It contains backports of the features and fixes added to
+        2021.x branch.
+        
+        Please upgrade to the latest IntelliJ IDEA to continue receiving future updates!
         ]]>"""
       )
     }
