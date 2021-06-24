@@ -1,6 +1,7 @@
 package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
+import com.intellij.execution.junit.JUnitUtil
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, AbstractRegisteredInspection}
@@ -33,12 +34,17 @@ class IncorrectTestClassInspection extends AbstractRegisteredInspection {
       case _ => None
     }
 
-  private def extendsZSpec(definition: ScClass) = {
-    val elementScope = ElementScope(definition.getProject)
+  private def extendsZSpec(definition: ScClass) =
+    if (isJUnitSpec(definition)) false
+    else {
+      val elementScope = ElementScope(definition.getProject)
 
-    val cachedClass = elementScope.getCachedClass(ZSpecFQN)
-    cachedClass.exists(ScalaPsiUtil.isInheritorDeep(definition, _))
-  }
+      val cachedClass = elementScope.getCachedClass(ZSpecFQN)
+      cachedClass.exists(ScalaPsiUtil.isInheritorDeep(definition, _))
+    }
+
+  private def isJUnitSpec(clazz: ScClass) =
+    JUnitUtil.isJUnit4TestClass(clazz)
 }
 object IncorrectTestClassInspection {
   final class ConvertToObject(param: ScClass) extends AbstractFixOnPsiElement("Replace 'class' with 'object'", param) {
