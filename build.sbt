@@ -1,5 +1,5 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2020.3.10" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val pluginVersion = "2020.3.11" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "203"
@@ -29,8 +29,7 @@ lazy val `zio-intellij` = project
       xml.changeNotes = sys.env.getOrElse(
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
-        This is the last feature release for IntelliJ 2020.x. It contains backports of the features and fixes added to
-        2021.x branch.
+        <strong>This is the last feature release for IntelliJ 2020.x. It contains bug fixes backported from the 2021.x branch.</strong>
         
         Please upgrade to the latest IntelliJ IDEA to continue receiving future updates!
         ]]>"""
