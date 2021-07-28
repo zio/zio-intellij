@@ -43,7 +43,12 @@ object VersionTestUtils {
       |<version>1.0.4-1</version>
       |<version>1.0.4-2</version>
       |<version>1.0.5</version>
-      |<version>1.0.6</version>""".stripMargin
+      |<version>1.0.6</version>
+      |<version>1.0.7</version>
+      |<version>1.0.8</version>
+      |<version>1.0.9</version>
+      |<version>1.0.10</version>
+      |<version>2.0.0-M1</version>""".stripMargin
       .replace("<version>", "")
       .replace("</version>", "")
       .split(System.lineSeparator())

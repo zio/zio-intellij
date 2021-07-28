@@ -27,14 +27,12 @@ object Version {
     else {
       (x.postfix, y.postfix) match {
         case (None, None) => 0
-        // '1.0.4-RC1' < '1.0.4' < '1.0.4-1'   (╯°□°)╯︵ ┻━┻
-        case (None, Some(RC(_)))         => 1
-        case (None, Some(Ext(_)))        => -1
-        case (Some(RC(_)), None)         => -1
-        case (Some(Ext(_)), None)        => 1
-        case (Some(Ext(_)), Some(RC(_))) => 1
-        case (Some(RC(_)), Some(Ext(_))) => -1
-        case (Some(p1), Some(p2))        => p1.compare(p2)
+        // '1.0.4-M1' < '1.0.4-RC1' < '1.0.4' < '1.0.4-1'   (╯°□°)╯︵ ┻━┻
+        case (None, Some(Ext(_))) => -1
+        case (None, Some(_))      => 1
+        case (Some(Ext(_)), None) => 1
+        case (Some(_), None)      => -1
+        case (Some(p1), Some(p2)) => p1.compare(p2)
       }
     }
   }
@@ -61,9 +59,13 @@ object Version {
     override def toString: String = segments.map(_.value).mkString("-")
 
     override def compare(that: Postfix): Int = (this, that) match {
-      case (RC(_), Ext(_)) => -1
-      case (Ext(_), RC(_)) => 1
-      case _               => compareSegments(this.segments, that.segments)
+      case (Milestone(_), RC(_))  => -1
+      case (Milestone(_), Ext(_)) => -1
+      case (RC(_), Ext(_))        => -1
+      case (Ext(_), RC(_))        => 1
+      case (Ext(_), Milestone(_)) => 1
+      case (RC(_), Milestone(_))  => 1
+      case _                      => compareSegments(this.segments, that.segments)
     }
 
     @tailrec
@@ -79,14 +81,20 @@ object Version {
   final case class RC(segments: List[PostfixSegment]) extends Postfix {
     override def toString: String = s"RC${super.toString}"
   }
+
+  final case class Milestone(segments: List[PostfixSegment]) extends Postfix {
+    override def toString: String = s"M${super.toString}"
+  }
+
   final case class Ext(segments: List[PostfixSegment]) extends Postfix
 
-  private val versionRegex: Regex = """(\d+).(\d+).(\d+)((?:-((?:RC)|(?:rc))?\d+)(?:-\d+)*)?""".r
+  // TODO: Get rid of this horror...
+  private val versionRegex: Regex = """(\d+).(\d+).(\d+)((?:-((?:RC)|(?:rc)|(?:M)|(?:m))?\d+)(?:-\d+)*)?""".r
   private val numericRegex: Regex = """\d+""".r
 
   def parse(str: String): Option[Version] =
     str match {
-      case versionRegex(majorStr, minorStr, patchStr, postfixStr, rcStr) =>
+      case versionRegex(majorStr, minorStr, patchStr, postfixStr, rcOrMStr) =>
         val major = Major(majorStr.toInt)
         val minor = Minor(minorStr.toInt)
         val patch = Patch(patchStr.toInt)
@@ -94,8 +102,11 @@ object Version {
         val postfix = Option(postfixStr).map { postfix =>
           val segments = numericRegex.findAllIn(postfix).toList.map(x => PostfixSegment(x.toInt))
 
-          if (rcStr == null) Ext(segments)
-          else RC(segments)
+          Option(rcOrMStr).map(_.toLowerCase) match {
+            case Some("m")  => Milestone(segments)
+            case Some("rc") => RC(segments)
+            case _          => Ext(segments)
+          }
         }
 
         Some(new Version(major, minor, patch, postfix) {})

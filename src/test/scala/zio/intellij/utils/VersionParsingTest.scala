@@ -47,6 +47,21 @@ class VersionParsingTest extends TestCase {
     }
   }
 
+  def test_should_parse_milestone_version(): Unit = {
+    val versionOpt = Version.parse("1.2.3-M4")
+    assertTrue(versionOpt.isDefined)
+    versionOpt.foreach { version =>
+      assertVersion(
+        version,
+        Version.Major(1),
+        Version.Minor(2),
+        Version.Patch(3),
+        Some(Version.Milestone(List(Version.PostfixSegment(4))))
+      )
+      assertEquals(version, Version.parseUnsafe("1.2.3-m4"))
+    }
+  }
+
   def test_should_parse_rc_version_with_minor_part(): Unit = {
     val versionOpt = Version.parse("1.2.3-RC4-5")
     assertTrue(versionOpt.isDefined)
@@ -57,6 +72,20 @@ class VersionParsingTest extends TestCase {
         Version.Minor(2),
         Version.Patch(3),
         Some(Version.RC(List(4, 5).map(Version.PostfixSegment)))
+      )
+    }
+  }
+
+  def test_should_parse_milestone_version_with_minor_part(): Unit = {
+    val versionOpt = Version.parse("1.2.3-M4-5")
+    assertTrue(versionOpt.isDefined)
+    versionOpt.foreach { version =>
+      assertVersion(
+        version,
+        Version.Major(1),
+        Version.Minor(2),
+        Version.Patch(3),
+        Some(Version.Milestone(List(4, 5).map(Version.PostfixSegment)))
       )
     }
   }
@@ -99,8 +128,11 @@ class VersionParsingTest extends TestCase {
     assertEquals(Version.parse("1.2.3-"), None)
     assertEquals(Version.parse("1.2.3-4-"), None)
     assertEquals(Version.parse("1.2.3-RC"), None)
+    assertEquals(Version.parse("1.2.3-M"), None)
     assertEquals(Version.parse("1.2.3-RC-"), None)
+    assertEquals(Version.parse("1.2.3-M-"), None)
     assertEquals(Version.parse("1.2.3-RC-4-"), None)
+    assertEquals(Version.parse("1.2.3-M-4-"), None)
   }
 
   def test_should_parse_versions_from_maven(): Unit =
