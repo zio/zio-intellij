@@ -1,5 +1,5 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2021.1.11" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val pluginVersion = "2021.1.11" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".1")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "211"
@@ -30,7 +30,7 @@ lazy val `zio-intellij` = project
         "ZIO_INTELLIJ_CHANGE_NOTES",
         s"""<![CDATA[
         <ul>
-          <li>Temporarily disabling the <code>.serviceWith</code> refactoring until some bugs can be fixed</li>
+          <li>Supporting the ZIO milestone version format (<a href="https://github.com/zio/zio-intellij/pull/304">#304</a>)</li>
         </ul>
         ]]>"""
       )
