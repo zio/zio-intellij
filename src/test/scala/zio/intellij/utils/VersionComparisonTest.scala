@@ -12,6 +12,8 @@ class VersionComparisonTest extends TestCase {
     assertTrue(Version.parse("1.0.0").get >= Version.parseUnsafe("1.0.0"))
     assertTrue(Version.parse("1.0.0-RC1").get >= Version.parseUnsafe("1.0.0-RC1"))
     assertTrue(Version.parse("1.0.0-RC1-2").get <= Version.parseUnsafe("1.0.0-RC1-2"))
+    assertTrue(Version.parse("1.0.0-M1").get >= Version.parseUnsafe("1.0.0-M1"))
+    assertTrue(Version.parse("1.0.0-M1-2").get <= Version.parseUnsafe("1.0.0-M1-2"))
   }
 
   def test_gt(): Unit = {
@@ -30,7 +32,7 @@ class VersionComparisonTest extends TestCase {
     assertTrue(Version.parseUnsafe("1.2.2") < Version.parseUnsafe("1.2.3"))
   }
 
-  def test_rc_qt(): Unit = {
+  def test_rc_gt(): Unit = {
     assertTrue(Version.parseUnsafe("1.2.3-RC2") > Version.parseUnsafe("1.2.3-RC1"))
     assertTrue(Version.parseUnsafe("1.2.3-RC2-2") > Version.parseUnsafe("1.2.3-RC2-1"))
   }
@@ -45,21 +47,67 @@ class VersionComparisonTest extends TestCase {
     assertTrue(Version.parseUnsafe("1.2.3-RC2") < Version.parseUnsafe("1.2.3-RC2-2"))
   }
 
-  def test_version_without_postfix_should_be_greater_than_version_with_rc_and_less_than_version_with_ext(): Unit = {
+  def test_milestone_gt(): Unit = {
+    assertTrue(Version.parseUnsafe("1.2.3-M2") > Version.parseUnsafe("1.2.3-M1"))
+    assertTrue(Version.parseUnsafe("1.2.3-M2-2") > Version.parseUnsafe("1.2.3-M2-1"))
+  }
+
+  def test_milestone_lt(): Unit = {
+    assertTrue(Version.parseUnsafe("1.2.3-M1") < Version.parseUnsafe("1.2.3-M2"))
+    assertTrue(Version.parseUnsafe("1.2.3-M2-1") < Version.parseUnsafe("1.2.3-M2-2"))
+  }
+
+  def test_milestone_with_minor_part_should_be_greater_than_milestone_without_minor(): Unit = {
+    assertTrue(Version.parseUnsafe("1.2.3-M2-2") > Version.parseUnsafe("1.2.3-M2"))
+    assertTrue(Version.parseUnsafe("1.2.3-M2") < Version.parseUnsafe("1.2.3-M2-2"))
+  }
+
+  def test_version_without_postfix_should_be_greater_than_version_with_rc(): Unit = {
     assertTrue(Version.parseUnsafe("1.2.3") > Version.parseUnsafe("1.2.3-RC21"))
     assertTrue(Version.parseUnsafe("1.2.3") > Version.parseUnsafe("1.2.3-RC21-1"))
+
     assertTrue(Version.parseUnsafe("1.2.3-RC21") < Version.parseUnsafe("1.2.3"))
     assertTrue(Version.parseUnsafe("1.2.3-RC21-1") < Version.parseUnsafe("1.2.3"))
+  }
 
+  def test_version_without_postfix_should_be_greater_than_version_with_milestone(): Unit = {
+    assertTrue(Version.parseUnsafe("1.2.3") > Version.parseUnsafe("1.2.3-M21"))
+    assertTrue(Version.parseUnsafe("1.2.3") > Version.parseUnsafe("1.2.3-M21-1"))
+
+    assertTrue(Version.parseUnsafe("1.2.3-M21") < Version.parseUnsafe("1.2.3"))
+    assertTrue(Version.parseUnsafe("1.2.3-M21-1") < Version.parseUnsafe("1.2.3"))
+  }
+
+  def test_version_with_rc_should_be_greater_than_version_with_milestone(): Unit = {
+    assertTrue(Version.parseUnsafe("1.2.3-RC21") > Version.parseUnsafe("1.2.3-M21"))
+    assertTrue(Version.parseUnsafe("1.2.3-RC21-1") > Version.parseUnsafe("1.2.3-M21-1"))
+
+    assertTrue(Version.parseUnsafe("1.2.3-M21") < Version.parseUnsafe("1.2.3-RC21"))
+    assertTrue(Version.parseUnsafe("1.2.3-M21-1") < Version.parseUnsafe("1.2.3-RC21-1"))
+  }
+
+  def test_version_without_postfix_should_be_less_than_version_with_ext(): Unit = {
     assertTrue(Version.parseUnsafe("1.2.3") < Version.parseUnsafe("1.2.3-21"))
     assertTrue(Version.parseUnsafe("1.2.3") < Version.parseUnsafe("1.2.3-21-1"))
+
     assertTrue(Version.parseUnsafe("1.2.3-21") > Version.parseUnsafe("1.2.3"))
     assertTrue(Version.parseUnsafe("1.2.3-21-1") > Version.parseUnsafe("1.2.3"))
+  }
 
+  def test_version_with_ext_should_be_greater_than_version_with_rc(): Unit = {
     assertTrue(Version.parseUnsafe("1.2.3-21") > Version.parseUnsafe("1.2.3-RC21"))
     assertTrue(Version.parseUnsafe("1.2.3-21-1") > Version.parseUnsafe("1.2.3-RC21-1"))
+
     assertTrue(Version.parseUnsafe("1.2.3-RC21") < Version.parseUnsafe("1.2.3-21"))
     assertTrue(Version.parseUnsafe("1.2.3-RC21-1") < Version.parseUnsafe("1.2.3-21-1"))
+  }
+
+  def test_version_with_ext_should_be_greater_than_version_with_milestone(): Unit = {
+    assertTrue(Version.parseUnsafe("1.2.3-21") > Version.parseUnsafe("1.2.3-M21"))
+    assertTrue(Version.parseUnsafe("1.2.3-21-1") > Version.parseUnsafe("1.2.3-M21-1"))
+
+    assertTrue(Version.parseUnsafe("1.2.3-M21") < Version.parseUnsafe("1.2.3-21"))
+    assertTrue(Version.parseUnsafe("1.2.3-M21-1") < Version.parseUnsafe("1.2.3-21-1"))
   }
 
   def test_scala_3_prerelease_version_comparison(): Unit = {
