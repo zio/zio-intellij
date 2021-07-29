@@ -5,6 +5,7 @@ import intellij.testfixtures._
 import org.jetbrains.plugins.scala.base.libraryLoaders._
 import org.jetbrains.plugins.scala.codeInspection.ScalaInspectionTestBase
 import org.jetbrains.plugins.scala.codeInspection.collections._
+import zio.inspections.ZInspectionTestBase.versionPattern
 import zio.intellij.inspections.ZInspection
 
 import scala.reflect._
@@ -14,9 +15,9 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
   override protected def librariesLoaders: Seq[LibraryLoader] =
     base.librariesLoaders :+
       IvyManagedLoader(
-        "dev.zio" %% "zio"         % "latest.integration",
-        "dev.zio" %% "zio-streams" % "latest.integration",
-        "dev.zio" %% "zio-test"    % "latest.integration"
+        "dev.zio" %% "zio"         % versionPattern,
+        "dev.zio" %% "zio-streams" % versionPattern,
+        "dev.zio" %% "zio-test"    % versionPattern
       )
 
   def z(s: String): String =
@@ -58,6 +59,11 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
     }
 
   }
+}
+
+object ZInspectionTestBase {
+  // https://ant.apache.org/ivy/history/2.3.0/ivyfile/dependency.html#revision
+  val versionPattern = "(,2.0[" // matches all versions lower than 2.0
 }
 
 abstract class ZSimplifyInspectionTest[T <: ZInspection: ClassTag]
