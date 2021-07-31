@@ -1,46 +1,41 @@
 package zio.intellij.project
 
-import com.intellij.ide.util.projectWizard.{ModuleBuilder, ModuleWizardStep, SdkSettingsStep, SettingsStep}
-import com.intellij.openapi.externalSystem.service.project.wizard.AbstractExternalModuleBuilder
+import com.intellij.ide.util.projectWizard.{ModuleWizardStep, SettingsStep}
 import com.intellij.openapi.module.{JavaModuleType, ModifiableModuleModel, Module, ModuleType}
 import com.intellij.openapi.options.ConfigurationException
-import com.intellij.openapi.projectRoots.{JavaSdk, JavaSdkVersion, Sdk, SdkTypeId}
+import com.intellij.openapi.projectRoots.{JavaSdk, JavaSdkVersion, Sdk}
 import com.intellij.openapi.roots.ModifiableRootModel
-import com.intellij.openapi.util.{io, text}
+import com.intellij.openapi.util.io
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.UI
 import org.jetbrains.annotations.NonNls
-import org.jetbrains.plugins.scala.LatestScalaVersions.Scala_2_13
 import org.jetbrains.plugins.scala.extensions.JComponentExt.ActionListenersOwner
 import org.jetbrains.plugins.scala.extensions._
+import org.jetbrains.plugins.scala.project.template.ScalaVersionDownloadingDialog
 import org.jetbrains.plugins.scala.project.{ScalaLanguageLevel, Version, Versions}
 import org.jetbrains.plugins.scala.{extensions, ScalaBundle, ScalaVersion}
-import org.jetbrains.sbt.project.SbtProjectSystem
-import org.jetbrains.sbt.project.settings.SbtProjectSettings
+import org.jetbrains.sbt.project.template.SbtModuleBuilder.LatestSbtVersion
 import org.jetbrains.sbt.project.template.SbtModuleBuilderUtil.doSetupModule
-import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderUtil}
+import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderBase, SbtModuleBuilderUtil, ScalaSettingsStepBase}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
-import zio.intellij.testsupport.runner.TestRunnerResolveService
-import zio.intellij.utils.ScalaVersionHack
+import zio.intellij.ZioIcon
 import zio.intellij.utils.Version.ZIO
-import zio.intellij.{utils, ZioIcon}
+import zio.intellij.utils.{ScalaVersionHack, Version => ZioVersion}
 
 import java.awt.FlowLayout
 import java.io.File
 import javax.swing._
 
-private[zio] class ZioProjectBuilder
-    extends AbstractExternalModuleBuilder[SbtProjectSettings](SbtProjectSystem.Id, new SbtProjectSettings) {
+private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
 
   import Versions.{SBT => SbtKind, Scala => ScalaKind}
   import ZioProjectBuilder._
 
   private val selections = Selections(
-    null,
-    null,
-    null,
-    null,
+    sbtVersion = None,
+    scalaVersion = None,
+    zioVersion = None,
     resolveClassifiers = true,
     resolveSbtClassifiers = false,
     includeZioTest = true,
@@ -48,37 +43,36 @@ private[zio] class ZioProjectBuilder
     packagePrefix = None
   )
 
-  private lazy val scalaVersions = {
-    val versions = ScalaKind.loadVersionsWithProgress()
-    versions.copy(
-      "2.13.6",
-      versions = versions.versions.sortBy(_.startsWith("2"))
-    )
-  }
-  private lazy val sbtVersions = SbtKind.loadVersionsWithProgress()
-  private lazy val zioVersions = loadZioVersions(ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13))
+  val hardcodedZioVersions = Versions(ZIO.`latest-ish`.toString, List("1.0.10", "1.0.9", "1.0.8"))
+
+  private lazy val scalaVersions = ScalaKind.loadVersionsWithProgress()
+  private lazy val sbtVersions   = SbtKind.loadVersionsWithProgress()
+  private lazy val zioVersions = (for {
+    versionStr <- selections.scalaVersion
+    version    <- ScalaVersion.fromString(versionStr)
+    results     = loadZioVersions(version)
+  } yield results).getOrElse(hardcodedZioVersions)
 
   // Scala3 is only supported since sbt 1.5.0
   private val minSbtVersionForScala3 = "1.5.0"
   private lazy val sbtVersionsForScala3 = Versions(
-    "1.5.3",
+    "1.5.5",
     sbtVersions.versions.filter(_ >= minSbtVersionForScala3)
   )
 
-  private val minZioVersionForScala3 = "1.0.8"
+  private val minZioVersionForScala3 = ZIO.`1.0.8`
   private lazy val zioVersionsForScala3 = Versions(
     ZIO.`latest-ish`.toString,
-    zioVersions.versions.filter(_ >= minZioVersionForScala3)
+    zioVersions.versions
+      .map(ZioVersion.parseUnsafe)
+      .filter(_ >= minZioVersionForScala3)
+      .map(_.toString)
+      .toList
   )
-
-  {
-    val settings = getExternalProjectSettings
-    settings.setResolveJavadocs(false)
-  }
 
   private def loadZioVersions(scalaVersion: ScalaVersion) = {
     val hardcodedVersions = ZIO.`latest-ish`.toString :: List("1.0.11", "1.0.10", "1.0.9")
-    val versionPattern    = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
+    val versionPattern = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
 
     def extractVersions(values: Seq[String]) =
       values.collect {
@@ -91,7 +85,7 @@ private[zio] class ZioProjectBuilder
       val url   = s"https://repo1.maven.org/maven2/dev/zio/zio_$versionStr/"
       val lines = Versions.loadLinesFrom(url)
       val versionStrings = lines.fold(
-        Function.const(hardcodedVersions),
+        Function.const(hardcodedZioVersions.versions),
         extractVersions
       )
       versionStrings.map(Version(_))
@@ -100,92 +94,104 @@ private[zio] class ZioProjectBuilder
     val versions = extensions
       .withProgressSynchronously("Fetching available ZIO versions")(loadVersions)
       .sorted
-      .reverse
+      .reverseIterator
       .map(_.presentation)
+      .toList
 
-    Versions(versions.headOption.getOrElse(hardcodedVersions.head), versions)
+    Versions(versions.headOption.getOrElse(hardcodedZioVersions.defaultVersion), versions)
   }
 
   override def getModuleType: ModuleType[_] = JavaModuleType.getModuleType
 
   override def createModule(moduleModel: ModifiableModuleModel): Module = {
-    new File(getModuleFileDirectory) match {
-      case root if root.exists() =>
-        {
-          val settings = getExternalProjectSettings
-          settings.setResolveClassifiers(selections.resolveClassifiers)
-          settings.setResolveSbtClassifiers(selections.resolveSbtClassifiers)
-        }
+    val root = new File(getModuleFileDirectory)
+    if (root.exists()) {
+      val Selections(
+        sbtVersionOpt,
+        scalaVersionOpt,
+        zioVersionOpt,
+        resolveClassifiers,
+        resolveSbtClassifiers,
+        includeZioTest,
+        includeHelloWorld,
+        packagePrefix
+      )                = selections
+      val sbtVersion   = sbtVersionOpt.getOrElse(LatestSbtVersion)
+      val scalaVersion = scalaVersionOpt.getOrElse(ScalaVersion.Latest.Scala_2_13.minor)
+      val zioVersion   = zioVersionOpt.getOrElse(ZIO.`latest-ish`.toString)
 
-        TestRunnerResolveService
-          .instance(moduleModel.getProject)
-          .resolve(
-            utils.Version.parseUnsafe(selections.zioVersion),
-            ScalaVersion.fromString(selections.scalaVersion).getOrElse(Scala_2_13),
-            downloadIfMissing = true
-          )
-          .get()
+      locally {
+        val settings = getExternalProjectSettings
+        settings.setResolveClassifiers(resolveClassifiers)
+        settings.setResolveSbtClassifiers(resolveSbtClassifiers)
+      }
 
-        createProjectTemplateIn(
-          root,
-          getName,
-          selections.scalaVersion,
-          selections.sbtVersion,
-          selections.zioVersion,
-          selections.sbtPlugins,
-          selections.includeZioTest,
-          selections.includeHelloWorld,
-          selections.packagePrefix
-        )
+      createProjectTemplateIn(
+        root,
+        getName,
+        scalaVersion,
+        sbtVersion,
+        zioVersion,
+        includeZioTest,
+        includeHelloWorld,
+        packagePrefix
+      )
 
-        setModuleFilePath(updateModuleFilePath(getModuleFilePath))
-      case _ =>
+      setModuleFilePath(moduleFilePathUpdated(getModuleFilePath))
     }
 
     super.createModule(moduleModel)
   }
+
+  override def setupRootModel(model: ModifiableRootModel): Unit =
+    SbtModuleBuilderUtil.tryToSetupRootModel(model, getContentEntryPath)
 
   override def setupModule(module: Module): Unit = {
     super.setupModule(module)
     doSetupModule(module, getExternalProjectSettings, getContentEntryPath)
   }
 
-  override def modifySettingsStep(settingsStep: SettingsStep): ModuleWizardStep = {
-    //noinspection NameBooleanParameters
-    {
-      selections(ScalaKind) = scalaVersions
-      selections(SbtKind) = sbtVersions
-      selections.zioVersion = Option(selections.zioVersion).getOrElse(zioVersions.versions.headOption.orNull)
+  override def modifySettingsStep(settingsStep: SettingsStep): ModuleWizardStep =
+    new ZioWizardStep(settingsStep)
+
+  final class ZioWizardStep(settingsStep: SettingsStep) extends ScalaSettingsStepBase(settingsStep, this) {
+
+    locally {
+      selections.update(ScalaKind, scalaVersions)
+      selections.update(SbtKind, sbtVersions)
+      selections.zioVersion = selections.zioVersion.orElse(zioVersions.versions.headOption)
     }
 
-    val sbtVersionComboBox = applyTo(new SComboBox[String]())(
+    private val sbtVersionComboBox = applyTo(new SComboBox[String]())(
       _.setItems(sbtVersions.versions.toArray),
-      _.setSelectedItem(selections.sbtVersion)
+      _.setSelectedItemSafe(selections.sbtVersion.orNull)
     )
 
-    val scalaVersionComboBox = applyTo(new SComboBox[String]())(setupScalaVersionItems)
+    private val scalaVersionComboBox = applyTo(new SComboBox[String]())(
+      setupScalaVersionItems
+    )
 
-    val zioVersionComboBox = applyTo(new SComboBox[String]())(setupZioVersionItems)
+    private val zioVersionComboBox = applyTo(new SComboBox[String]())(
+      setupZioVersionItems
+    )
 
-    val packagePrefixField = applyTo(new JBTextField())(
+    private val packagePrefixField = applyTo(new JBTextField())(
       _.setText(selections.packagePrefix.getOrElse("")),
       _.getEmptyText.setText(ScalaBundle.message("package.prefix.example"))
     )
 
-    //noinspection TypeAnnotation
-    val step = sdkSettingsStep(settingsStep)
+    private val resolveClassifiersCheckBox: JCheckBox =
+      applyTo(new JCheckBox(SbtBundle.message("sbt.settings.sources")))(
+        _.setToolTipText(SbtBundle.message("sbt.download.scala.standard.library.sources")),
+        _.setSelected(selections.resolveClassifiers)
+      )
 
-    val resolveSbtClassifiersCheckBox = applyTo(new JCheckBox(SbtBundle.message("sbt.settings.sources")))(
+    private val resolveSbtClassifiersCheckBox = applyTo(new JCheckBox(SbtBundle.message("sbt.settings.sources")))(
       _.setToolTipText(SbtBundle.message("sbt.download.sbt.sources")),
       _.setSelected(selections.resolveSbtClassifiers)
     )
 
-    val resolveClassifiersCheckBox: JCheckBox = applyTo(new JCheckBox(SbtBundle.message("sbt.settings.sources")))(
-      _.setToolTipText(SbtBundle.message("sbt.download.scala.standard.library.sources")),
-      _.setSelected(selections.resolveClassifiers)
-    )
-
-    val includeZioTestCheckBox: JCheckBox = applyTo(new JCheckBox("Include 'zio-test'"))(
+    private val includeZioTestCheckBox: JCheckBox = applyTo(new JCheckBox("Include 'zio-test'"))(
       _.setToolTipText("Includes the ZIO Test library"),
       _.setSelected(selections.includeZioTest)
     )
@@ -195,27 +201,25 @@ private[zio] class ZioProjectBuilder
     }
 
     sbtVersionComboBox.addActionListenerEx {
-      selections.sbtVersion = sbtVersionComboBox.getSelectedItem.asInstanceOf[String]
+      selections.sbtVersion = Option(sbtVersionComboBox.getSelectedItem.asInstanceOf[String])
     }
 
     scalaVersionComboBox.addActionListenerEx {
-      selections.scalaVersion = scalaVersionComboBox.getSelectedItem.asInstanceOf[String]
+      selections.scalaVersion = Option(scalaVersionComboBox.getSelectedItem.asInstanceOf[String])
 
-      val isScala3Selected     = isScala3Version(selections.scalaVersion)
+      val isScala3Selected     = selections.scalaVersion.exists(isScala3Version)
       val supportedSbtVersions = if (isScala3Selected) sbtVersionsForScala3 else sbtVersions
-      val supportedZioVersions =
-        if (isScala3Selected) zioVersionsForScala3
-        else ScalaVersion.fromString(selections.scalaVersion).map(loadZioVersions).getOrElse(zioVersions)
+      val supportedZioVersions = if (isScala3Selected) zioVersionsForScala3 else zioVersions
       sbtVersionComboBox.setItems(supportedSbtVersions.versions.toArray)
       zioVersionComboBox.setItems(supportedZioVersions.versions.toArray)
       // if we select Scala3 version but had Scala2 version selected before and some sbt version incompatible with Scala3,
       // the latest item from the list will be automatically selected
-      sbtVersionComboBox.setSelectedItemSafe(selections.sbtVersion)
-      sbtVersionComboBox.setSelectedItemSafe(selections.zioVersion)
+      sbtVersionComboBox.setSelectedItemSafe(selections.sbtVersion.orNull)
+      zioVersionComboBox.setSelectedItemSafe(selections.zioVersion.orNull)
       selections.update(SbtKind, sbtVersions)
     }
     zioVersionComboBox.addActionListenerEx {
-      selections.zioVersion = zioVersionComboBox.getSelectedItem.asInstanceOf[String]
+      selections.zioVersion = Option(zioVersionComboBox.getSelectedItem.asInstanceOf[String])
     }
     resolveClassifiersCheckBox.addActionListenerEx {
       selections.resolveClassifiers = resolveClassifiersCheckBox.isSelected
@@ -277,24 +281,14 @@ private[zio] class ZioProjectBuilder
       }
     }
 
-    step
-  }
-
-  private def isScala3Version(scalaVersion: String) = scalaVersion.startsWith("3")
-
-  private def sdkSettingsStep(settingsStep: SettingsStep) = new SdkSettingsStep(
-    settingsStep,
-    this,
-    (_: SdkTypeId).isInstanceOf[JavaSdk]
-  ) {
-
     override def updateDataModel(): Unit =
       settingsStep.getContext.setProjectJdk(myJdkComboBox.getSelectedJdk)
 
+    @throws[ConfigurationException]
     override def validate(): Boolean = super.validate() && {
       for {
         sdk     <- Option(myJdkComboBox.getSelectedJdk)
-        version <- Option(selections.scalaVersion)
+        version <- selections.scalaVersion
 
         languageLevel <- ScalaLanguageLevel.findByVersion(version)
       } validateLanguageLevel(languageLevel, sdk)
@@ -321,15 +315,21 @@ private[zio] class ZioProjectBuilder
     }
   }
 
+  private def isScala3Version(scalaVersion: String) = scalaVersion.startsWith("3")
+
   private def setupScalaVersionItems(cbx: SComboBox[String]): Unit = {
     val versions = scalaVersions.versions
     cbx.setItems(versions.toArray)
 
     selections.scalaVersion match {
-      case version if versions.contains(version) =>
-        cbx.setSelectedItem(version)
-      case _ if cbx.getItemCount > 0 => cbx.setSelectedIndex(0)
-      case _                         =>
+      case Some(version) if versions.contains(version) =>
+        cbx.setSelectedItemSafe(version)
+        if (selections.scrollScalaVersionDialogToTheTop) {
+          ScalaVersionDownloadingDialog.UiUtils.scrollToTheTop(cbx)
+        }
+      case _ if cbx.getItemCount > 0 =>
+        cbx.setSelectedIndex(0)
+      case _ =>
     }
   }
 
@@ -338,25 +338,18 @@ private[zio] class ZioProjectBuilder
     cbx.setItems(versions.toArray)
 
     selections.zioVersion match {
-      case version if versions.contains(version) =>
-        cbx.setSelectedItem(version)
-      case _ if cbx.getItemCount > 0 => cbx.setSelectedIndex(0)
-      case _                         =>
+      case Some(version) if versions.contains(version) =>
+        cbx.setSelectedItemSafe(version)
+        if (selections.scrollScalaVersionDialogToTheTop) {
+          ScalaVersionDownloadingDialog.UiUtils.scrollToTheTop(cbx)
+        }
+      case _ if cbx.getItemCount > 0 =>
+        cbx.setSelectedIndex(0)
+      case _ =>
     }
   }
 
   override def getNodeIcon: Icon = ZioIcon
-
-  override def setupRootModel(model: ModifiableRootModel): Unit = SbtModuleBuilderUtil.tryToSetupRootModel(
-    model,
-    getContentEntryPath
-  )
-
-  // TODO customize the path in UI when IDEA-122951 will be implemented
-  protected def updateModuleFilePath(pathname: String): String = {
-    val file = new File(pathname)
-    file.getParent + "/" + Sbt.ModulesDirectory + "/" + file.getName.toLowerCase
-  }
 }
 
 object ZioProjectBuilder {
@@ -364,15 +357,10 @@ object ZioProjectBuilder {
   import Sbt._
   import org.jetbrains.sbt._
 
-  @NonNls private val Scala3RequiredSbtPlugins =
-    """addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.4.4")
-      |""".stripMargin
-
   private final case class Selections(
-    var sbtVersion: String,
-    var scalaVersion: String,
-    var zioVersion: String,
-    var sbtPlugins: String,
+    var sbtVersion: Option[String],
+    var scalaVersion: Option[String],
+    var zioVersion: Option[String],
     var resolveClassifiers: Boolean,
     var resolveSbtClassifiers: Boolean,
     var includeZioTest: Boolean,
@@ -380,24 +368,25 @@ object ZioProjectBuilder {
     var packagePrefix: Option[String]
   ) {
 
+    var scrollScalaVersionDialogToTheTop = false
+
     import Versions.{Kind, SBT => SbtKind, Scala => ScalaKind}
 
-    def apply(kind: Kind): String = kind match {
+    def versionFromKind(kind: Kind): Option[String] = kind match {
       case ScalaKind => scalaVersion
       case SbtKind   => sbtVersion
     }
 
     def update(kind: Kind, versions: Versions): Unit = {
-      val version = apply(kind) match {
-        case null =>
-          val Versions(defaultVersion, versionsArray) = versions
-          versionsArray.headOption.getOrElse(defaultVersion)
-        case value => value
-      }
+      val explicitlySelectedVersion = versionFromKind(kind)
+      val version                   = explicitlySelectedVersion.getOrElse(kind.initiallySelectedVersion(versions.versions))
 
       kind match {
-        case ScalaKind => scalaVersion = version
-        case SbtKind   => sbtVersion = version
+        case ScalaKind =>
+          scalaVersion = Some(version)
+          scrollScalaVersionDialogToTheTop = explicitlySelectedVersion.isEmpty
+        case SbtKind =>
+          sbtVersion = Some(version)
       }
     }
   }
@@ -408,7 +397,6 @@ object ZioProjectBuilder {
     @NonNls scalaVersion: String,
     @NonNls sbtVersion: String,
     @NonNls zioVersion: String,
-    @NonNls sbtPlugins: String,
     includeZioTest: Boolean,
     includeHelloWorld: Boolean,
     packagePrefix: Option[String]
@@ -476,14 +464,6 @@ object ZioProjectBuilder {
                  |}""".stripMargin
           }
         )
-
-      import text.StringUtil.isEmpty
-      if (!isEmpty(sbtPlugins)) {
-        writeToFile(
-          projectDir / PluginsFile,
-          sbtPlugins
-        )
-      }
     }
   }
 }
