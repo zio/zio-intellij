@@ -127,8 +127,8 @@ object Version {
     val `RC21-2`: Version = Version.parseUnsafe("1.0.0-RC21-2")
     val `1.0.0`: Version  = Version.parseUnsafe("1.0.0")
     val `1.0.6`: Version  = Version.parseUnsafe("1.0.6")
+    val `1.0.8`: Version  = Version.parseUnsafe("1.0.8") // first version to support Scala 3.0.0
     val `1.0.10`: Version = Version.parseUnsafe("1.0.10")
-
     val `2.0.0-M2`: Version = Version.parseUnsafe("2.0.0-M2") // first version to support the built-in test runner
     val `2.0.0`: Version    = Version.parseUnsafe("2.0.0")
 
