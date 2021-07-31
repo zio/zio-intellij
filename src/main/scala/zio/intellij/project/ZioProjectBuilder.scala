@@ -58,7 +58,7 @@ private[zio] class ZioProjectBuilder
   }
 
   private def loadZioVersions(scalaVersion: ScalaVersion) = {
-    val hardcodedVersions = ZIO.`latest-ish`.toString :: List("1.0.8", "1.0.5", "1.0.1", "1.0.0")
+    val hardcodedVersions = ZIO.`latest-ish`.toString :: List("1.0.10", "1.0.9", "1.0.8")
     val versionPattern    = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
 
     def extractVersions(values: Seq[String]) =
@@ -86,7 +86,7 @@ private[zio] class ZioProjectBuilder
     Versions(versions.headOption.getOrElse(hardcodedVersions.head), versions)
   }
 
-  override def getModuleType: ModuleType[_ <: ModuleBuilder] = JavaModuleType.getModuleType
+  override def getModuleType: ModuleType[_] = JavaModuleType.getModuleType
 
   override def createModule(moduleModel: ModifiableModuleModel): Module = {
     new File(getModuleFileDirectory) match {
@@ -134,7 +134,7 @@ private[zio] class ZioProjectBuilder
     {
       selections(ScalaKind) = scalaVersions
       selections(SbtKind) = sbtVersions
-      selections.zioVersion = zioVersions.defaultVersion
+      selections.zioVersion = Option(selections.zioVersion).getOrElse(zioVersions.versions.headOption.orNull)
     }
 
     val sbtVersionComboBox = applyTo(new SComboBox())(
