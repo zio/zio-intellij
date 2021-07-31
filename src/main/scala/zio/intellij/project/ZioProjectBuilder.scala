@@ -69,7 +69,6 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
       .map(_.toString)
       .toList
   )
-
   private def loadZioVersions(scalaVersion: ScalaVersion) = {
     val versionPattern = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
 
