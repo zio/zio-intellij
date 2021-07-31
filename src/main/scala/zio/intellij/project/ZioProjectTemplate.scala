@@ -8,7 +8,6 @@ import zio.intellij.ZioIcon
 import javax.swing.Icon
 
 private[zio] class ZioProjectTemplate extends ProjectTemplate {
-  //noinspection ReferencePassedToNls
   override def getName: String = "ZIO project (with sbt)"
 
   override def getDescription: String = "A new sbt project with the ZIO library."

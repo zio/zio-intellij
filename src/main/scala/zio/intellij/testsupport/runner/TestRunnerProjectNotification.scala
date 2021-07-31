@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NonNls
 import zio.intellij.testsupport.runner.TestRunnerNotifications.{displayError, displayInfo}
 import zio.intellij.testsupport.runner.TestRunnerResolveService.ResolveError
 import zio.intellij.utils.Version.ZIO
-import zio.intellij.utils.{ProjectSyntax, ScalaVersionHack}
+import zio.intellij.utils.{ProjectSyntax, ScalaVersionHack, Version}
 import zio.intellij.{ErrorReporter, ZioIcon}
 
 import javax.swing.event.HyperlinkEvent
@@ -25,7 +25,7 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
     project.versions.foldLeft(false) {
       case (flag, (version, scalaVersion)) =>
         flag | (version.requiresTestRunner && TestRunnerResolveService
-	  .instance(project)
+          .instance(project)
           .resolve(version, scalaVersion, downloadIfMissing)
           .toOption
           .isEmpty)
