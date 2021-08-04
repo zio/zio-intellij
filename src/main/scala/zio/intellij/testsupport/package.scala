@@ -16,8 +16,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinitio
 import scala.jdk.CollectionConverters._
 
 package object testsupport {
-  val ZSpecFQN = "zio.test.RunnableSpec"
-  val DefaultRunnableSpec = "zio.test.DefaultRunnableSpec"
+  val ZSpecFQN                   = "zio.test.RunnableSpec"
+  val DefaultRunnableSpec        = "zio.test.DefaultRunnableSpec"
   val DefaultMutableRunnableSpec = "zio.test.DefaultMutableRunnableSpec"
 
   def parentTypeDefinition(e: PsiElement): Option[ScTypeDefinition] =
