@@ -1,0 +1,16 @@
+<html>
+Starting with ZIO 1.0.10, the <code>.bimap</code> is deprecated and renamed to <code>.mapBoth</code>.
+<body>Simplify the following expressions to use <code>.mapBoth</code> instead:
+<pre>
+x.map(a).mapError(b)   -> x.mapBoth(b, a)
+x.map(a).orElseFail(b) -> x.mapBoth(_ => b, a)
+x.as(a).mapError(b)    -> x.mapBoth(b, _ => a)
+x.as(a).orElseFail(b)  -> x.mapBoth(_ => b, _ => a)
+
+x.mapError(a).map(b)   -> x.mapBoth(a, b)
+x.mapError(a).as(b)    -> x.mapBoth(a, _ => b)
+x.orElseFail(a).map(b) -> x.mapBoth(_ => a, b)
+x.orElseFail(a).as(b)  -> x.mapBoth(_ => a, _ => b)
+</pre>
+</body>
+</html>
