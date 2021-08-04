@@ -4,6 +4,7 @@ import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDes
 import com.intellij.execution.junit.JUnitUtil
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import org.jetbrains.plugins.scala.annotator.template.isAbstract
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, AbstractRegisteredInspection}
 import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenType.ObjectKeyword
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScClass
@@ -40,7 +41,9 @@ class IncorrectTestClassInspection extends AbstractRegisteredInspection {
       val elementScope = ElementScope(definition.getProject)
 
       val cachedClass = elementScope.getCachedClass(ZSpecFQN)
-      cachedClass.exists(ScalaPsiUtil.isInheritorDeep(definition, _))
+      cachedClass.exists { c =>
+        !isAbstract(definition) && ScalaPsiUtil.isInheritorDeep(definition, c)
+      }
     }
 
   private def isJUnitSpec(clazz: ScClass) =
