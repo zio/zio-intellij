@@ -59,7 +59,7 @@ abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toRepl
 
 }
 
-class SimplifyBimapErrorModificationInspectionTest   extends SimplifyErrorModificationInspectionTest("bimap", "map")
+class SimplifyMapBothErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("mapBoth", "map")
 class SimplifyTapBothErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("tapBoth", "tap")
 class SimplifyFoldErrorModificationInspectionTest    extends SimplifyErrorModificationInspectionTest("fold", "map")
 class SimplifyFoldMErrorModificationInspectionTest   extends SimplifyErrorModificationInspectionTest("foldM", "flatMap")
