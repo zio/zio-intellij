@@ -58,10 +58,10 @@
                          shortName="SimplifyMapInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
-        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyBimapInspection"
-                         displayName="Simplify mapping result and error effects to .bimap" groupPath="Scala,ZIO"
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyMapBothInspection"
+                         displayName="Simplify mapping result and error effects to .mapBoth" groupPath="Scala,ZIO"
                          groupName="Simplifications"
-                         shortName="SimplifyBimapInspection" level="WEAK WARNING"
+                         shortName="SimplifyMapBothInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyWhenInspection"

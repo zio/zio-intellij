@@ -125,6 +125,9 @@ object Version {
     val `1.0.0`: Version  = Version.parseUnsafe("1.0.0")
     val `1.0.6`: Version  = Version.parseUnsafe("1.0.6")
 
+    val `1.0.10`: Version = Version.parseUnsafe("1.0.10")
+    val `2.0.0`: Version  = Version.parseUnsafe("2.0.0")
+
     val `latest-ish`: Version = Version.parseUnsafe("1.0.10")
   }
 }

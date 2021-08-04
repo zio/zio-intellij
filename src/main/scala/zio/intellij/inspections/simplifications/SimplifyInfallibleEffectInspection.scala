@@ -18,7 +18,7 @@ import zio.intellij.utils.types.ZioType
 
 class SimplifyErrorModificationInspection
     extends ZInspection(
-      BimapErrorModificationSimplificationType,
+      MapBothErrorModificationSimplificationType,
       TapBothErrorModificationSimplificationType,
       FoldErrorModificationSimplificationType,
       FoldMErrorModificationSimplificationType,
@@ -79,7 +79,7 @@ sealed abstract class BaseErrorModificationSimplificationType(qual: Qualified, m
 
 }
 
-object BimapErrorModificationSimplificationType   extends BaseErrorModificationSimplificationType(`.bimap`, "map")
+object MapBothErrorModificationSimplificationType extends BaseErrorModificationSimplificationType(`.mapBoth`, "map")
 object TapBothErrorModificationSimplificationType extends BaseErrorModificationSimplificationType(`.tapBoth`, "tap")
 
 object FoldErrorModificationSimplificationType  extends BaseErrorModificationSimplificationType(`.fold`, "map")

@@ -29,7 +29,7 @@ package object inspections {
     val `.flatMap`: Qualified              = invocation("flatMap").from(zioLikePackages)
     val `.flatMapError`: Qualified         = invocation("flatMapError").from(zioLikePackages)
     val `.mapError`: Qualified             = invocation("mapError").from(zioLikePackages)
-    val `.bimap`: Qualified                = invocation("bimap").from(zioLikePackages)
+    val `.mapBoth`: Qualified              = invocation("mapBoth").from(zioLikePackages)
     val `.orElse`: Qualified               = invocation("orElse").from(zioLikePackages)
     val `.orElseFail`: Qualified           = invocation("orElseFail").from(zioLikePackages)
     val `.orElseEither`: Qualified         = invocation("orElseEither").from(zioLikePackages)
