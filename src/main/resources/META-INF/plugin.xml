@@ -286,6 +286,8 @@
 
         <applicationService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
 
+        <testCreator language="Scala" implementationClass="zio.intellij.testsupport.ZTestCreator" order="first" />
+
         <!-- Project template -->
         <projectTemplatesFactory implementation="zio.intellij.project.ZioProjectTemplateFactory" order="last"/>
 
