@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.annotations.NonNls
 import zio.intellij.testsupport.runner.TestRunnerNotifications.{displayError, displayInfo}
 import zio.intellij.testsupport.runner.TestRunnerResolveService.ResolveError
+import zio.intellij.utils.Version.ZIO
 import zio.intellij.utils.{ProjectSyntax, ScalaVersionHack, Version}
 import zio.intellij.{ErrorReporter, ZioIcon}
 
@@ -23,11 +24,14 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
   private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
     project.versions.foldLeft(false) {
       case (flag, (version, scalaVersion)) =>
-        flag | TestRunnerResolveService.instance
+        flag | (supportedRange(version) && TestRunnerResolveService.instance
           .resolve(version, scalaVersion, downloadIfMissing)
           .toOption
-          .isEmpty
+          .isEmpty)
     }
+
+  private def supportedRange(version: Version) =
+    version >= ZIO.`RC18-2` && version.major.value < 2 // ZIO 2.0 (excluding M1) has the IntelliJ-rendering runner built-in
 
   //noinspection HardCodedStringLiteral
   private def href(ref: String, text: String): String = s"""<a href="$ref">$text</a>"""

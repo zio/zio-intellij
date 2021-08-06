@@ -34,12 +34,7 @@ package object utils {
     def versions: List[(Version, ScalaVersion)] = {
       val sourceModules = project.modulesWithScala.filter(_.isSourceModule).toList
 
-      sourceModules.flatMap { m =>
-        // First ZIO Test runner release: RC18-2
-        // Do not try to download test runner for ZIO versions without runner release
-        val zioVersion = m.zioVersion.filter(_ >= Version.ZIO.`RC18-2`)
-        zioVersion zip m.scalaVersion
-      }.distinct
+      sourceModules.flatMap(m => m.zioVersion zip m.scalaVersion).distinct
     }
 
     def sbtVersion = {
