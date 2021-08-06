@@ -43,7 +43,7 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
     packagePrefix = None
   )
 
-  val hardcodedZioVersions = Versions(ZIO.`latest-ish`.toString, List("1.0.10", "1.0.9", "1.0.8"))
+  val hardcodedZioVersions = Versions(ZIO.`latest-ish`.toString, List("1.0.11", "1.0.10", "1.0.9"))
 
   private lazy val scalaVersions = ScalaKind.loadVersionsWithProgress()
   private lazy val sbtVersions   = SbtKind.loadVersionsWithProgress()
@@ -71,8 +71,7 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
   )
 
   private def loadZioVersions(scalaVersion: ScalaVersion) = {
-    val hardcodedVersions = ZIO.`latest-ish`.toString :: List("1.0.11", "1.0.10", "1.0.9")
-    val versionPattern = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
+    val versionPattern    = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
 
     def extractVersions(values: Seq[String]) =
       values.collect {

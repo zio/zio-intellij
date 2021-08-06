@@ -18,7 +18,9 @@ To continue enjoying new features, please upgrade to the latest available Intell
 
 **Currently supported**:
  * 2021.2 (current release)
- * 2020.1
+ * 2021.1
+
+Previous versions are still available on the Marketplace.
 
 ### Features
 
