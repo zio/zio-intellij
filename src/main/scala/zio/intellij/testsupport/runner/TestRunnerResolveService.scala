@@ -1,14 +1,12 @@
 package zio.intellij.testsupport.runner
 
-import java.net.{URL, URLClassLoader}
 import com.intellij.openapi.components.{PersistentStateComponent, ServiceManager, State, Storage}
-import com.intellij.openapi.progress.{ProcessCanceledException, ProgressIndicator, Task}
+import com.intellij.openapi.progress.{ProcessCanceledException, ProgressIndicator}
 import com.intellij.openapi.project.Project
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.{Nls, NonNls}
 import org.jetbrains.plugins.scala.ScalaVersion
-import org.jetbrains.plugins.scala.extensions.invokeLater
 import org.jetbrains.plugins.scala.util.ScalaCollectionsUtil
 import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
 import zio.intellij.testsupport.runner.TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
@@ -17,6 +15,7 @@ import zio.intellij.testsupport.runner.TestRunnerResolveService.ResolveError.Dow
 import zio.intellij.testsupport.runner.TestRunnerResolveService._
 import zio.intellij.utils.{BackgroundTask, ScalaVersionHack, Version}
 
+import java.net.{URL, URLClassLoader}
 import scala.beans.BeanProperty
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
