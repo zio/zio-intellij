@@ -35,13 +35,13 @@ final class ZTestFramework extends AbstractTestFramework {
     if (!definition.is[ScObject]) false
     else super.isTestClass(definition)
 
-  override def baseSuitePaths: Seq[String] = List(DefaultRunnableSpec, DefaultMutableRunnableSpec)
+  override def baseSuitePaths: Seq[String] = List(ZSpecFQN)
 
   private def resolvesToTestMethod(sc: ScReferenceExpression): Boolean =
     sc match {
       case ResolvesTo(f: ScFunctionDefinition) if !nested(sc) =>
         f.returnType match {
-          case Right(returnType) if isOfClassFrom(returnType, zioTestPackage) =>
+          case Right(SpecReturnType(returnType)) if isOfClassFrom(returnType, zioTestPackage) =>
             expandsToTestMethod(returnType)
           case _ => false
         }
@@ -70,6 +70,16 @@ final class ZTestFramework extends AbstractTestFramework {
     }.flatten
 
     hasParentTestMethod(nestedElem)
+  }
+
+  object SpecReturnType {
+    def unapply(tpe: ScType): Option[ScType] =
+      // in ZIO 2.0 the spec return type was changed to a path-dependent type alias
+      tpe.aliasType match {
+        case Some(alias) => alias.upper.toOption
+        case None        => Some(tpe)
+      }
+
   }
 }
 
