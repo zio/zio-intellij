@@ -34,6 +34,7 @@ lazy val `zio-intellij` = project
           <li>Removing <code>.bimap</code>, replacing with <code>.mapBoth</code> (<a href="https://github.com/zio/zio-intellij/pull/310">#310</a>)</li>
           <li>Added Create Test dialog for ZIO Test (you're welcome, Kit!) (<a href="https://github.com/zio/zio-intellij/pull/311">#311</a>)</li>
           <li>Added support for ZIO 2.0 and now using its built-in test runner! (<a href="https://github.com/zio/zio-intellij/pull/319">#319</a>)</li>
+          <li>Numerous improvements for Scala 3 and ZIO 2.0</li>
           <li>Miscellaneous bugfixes</li>
         </ul>
         ]]>"""
