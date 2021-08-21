@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 import scala.util.matching.Regex
 
 sealed abstract case class Version private (major: Major, minor: Minor, patch: Patch, postfix: Option[Postfix])
-    extends Ordered[Version] {
+    extends Ordered[Version] { self =>
   def ===(that: Version): Boolean = Version.versionOrdering.equiv(this, that)
 
   override def compare(that: Version): Int =
@@ -16,6 +16,9 @@ sealed abstract case class Version private (major: Major, minor: Minor, patch: P
 
   override def toString: String =
     s"${major.value}.${minor.value}.${patch.value}${postfix.fold("")("-" + _)}"
+
+  private[intellij] def requiresTestRunner =
+    self >= ZIO.`RC18-2` && self.major < ZIO.`2.0.0`.major // ZIO 2.0 (excluding M1) has the IntelliJ-rendering runner built-in
 }
 
 object Version {
@@ -89,7 +92,7 @@ object Version {
   final case class Ext(segments: List[PostfixSegment]) extends Postfix
 
   // TODO: Get rid of this horror...
-  private val versionRegex: Regex = """(\d+).(\d+).(\d+)((?:-((?:RC)|(?:rc)|(?:M)|(?:m))?\d+)(?:-\d+)*)?""".r
+  private val versionRegex: Regex = """(\d+).(\d+).(\d+)(-(RC|rc|M|m)?\d+(?:-\d+)*)?""".r
   private val numericRegex: Regex = """\d+""".r
 
   def parse(str: String): Option[Version] =
@@ -126,7 +129,8 @@ object Version {
     val `1.0.6`: Version  = Version.parseUnsafe("1.0.6")
     val `1.0.10`: Version = Version.parseUnsafe("1.0.10")
 
-    val `2.0.0`: Version = Version.parseUnsafe("2.0.0")
+    val `2.0.0-M2`: Version = Version.parseUnsafe("2.0.0-M2") // first version to support the built-in test runner
+    val `2.0.0`: Version    = Version.parseUnsafe("2.0.0")
 
     val `latest-ish`: Version = Version.parseUnsafe("1.0.10")
   }

@@ -24,14 +24,11 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
   private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
     project.versions.foldLeft(false) {
       case (flag, (version, scalaVersion)) =>
-        flag | (supportedRange(version) && TestRunnerResolveService.instance
+        flag | (version.requiresTestRunner && TestRunnerResolveService.instance
           .resolve(version, scalaVersion, downloadIfMissing)
           .toOption
           .isEmpty)
     }
-
-  private def supportedRange(version: Version) =
-    version >= ZIO.`RC18-2` && version.major < ZIO.`2.0.0`.major // ZIO 2.0 (excluding M1) has the IntelliJ-rendering runner built-in
 
   //noinspection HardCodedStringLiteral
   private def href(ref: String, text: String): String = s"""<a href="$ref">$text</a>"""

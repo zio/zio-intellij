@@ -20,6 +20,7 @@ import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, 
 import org.jetbrains.plugins.scala.testingSupport.test.{SuiteValidityChecker, _}
 import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
 import zio.intellij.testsupport.runner.TestRunnerResolveService
+import zio.intellij.utils.Version.ZIO
 import zio.intellij.utils._
 
 import java.nio.file.Paths
@@ -47,8 +48,7 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
   private def runnerInfo =
     TestFrameworkRunnerInfo(
       Option(self.getModule).flatMap { module =>
-        if (hasTestRunner(module)) Some(ZTestRunnerName)
-        else None
+        Option.when(module.zioVersion.exists(_.requiresTestRunner) && hasTestRunner(module))(ZTestRunnerName)
       }.getOrElse(fromTestConfiguration(testConfigurationData))
     )
 
@@ -62,11 +62,14 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
   override def getActionName: String = getName
 
   private def useIntegratedRunner: Boolean =
-    runnerInfo.runnerClass == ZTestRunnerName
+    runnerInfo.runnerClass == ZTestRunnerName || isSupportedZio2
+
+  private def isSupportedZio2: Boolean =
+    Option(self.getModule).flatMap(_.zioVersion).exists(_ >= ZIO.`2.0.0-M2`)
 
   private def resolveTestRunner(module: Module): Option[Seq[URL]] =
     module.zioVersion zip module.scalaVersion match {
-      case Some((zioVersion, scalaVersion)) =>
+      case Some((zioVersion, scalaVersion)) if zioVersion.requiresTestRunner =>
         TestRunnerResolveService.instance.resolve(zioVersion, scalaVersion, false).toOption
       case _ => None
     }
@@ -104,6 +107,9 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
           case "-s" :: suite :: _       => mutableList.appendAll(Seq("-s", suite))
           case "-testName" :: test :: _ => mutableList.appendAll(Seq("-t", test))
         }
+      if (isSupportedZio2) {
+        mutableList.appendAll(Seq("-renderer", "intellij", "-summary", "false"))
+      }
       mutableList.toList
     }
 
