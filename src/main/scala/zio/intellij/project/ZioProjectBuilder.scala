@@ -71,7 +71,7 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
   )
 
   private def loadZioVersions(scalaVersion: ScalaVersion) = {
-    val versionPattern    = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
+    val versionPattern = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
 
     def extractVersions(values: Seq[String]) =
       values.collect {
@@ -445,24 +445,35 @@ object ZioProjectBuilder {
       if (includeHelloWorld)
         writeToFile(
           root / "src" / "main" / "scala" / "Main.scala",
-          scalaVersion match {
-            case s if s.startsWith("3") =>
-              s"""import zio._
-                 |import zio.console.putStrLn
-                 |
-                 |object Main extends App:
-                 |  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
-                 |    putStrLn("Welcome to your first ZIO app!").exitCode""".stripMargin
-            case _ =>
-              s"""import zio._
-                 |import zio.console.putStrLn
-                 |
-                 |object Main extends App {
-                 |  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
-                 |    putStrLn("Welcome to your first ZIO app!").exitCode
-                 |}""".stripMargin
-          }
+          HelloWorld(scalaVersion, zioVersion)
         )
     }
   }
+}
+object HelloWorld {
+  def apply(scalaVersion: String, zioVersion: String): String = {
+    val (imp, prn) = versionSpecific(zioVersion)
+
+    scalaVersion match {
+      case s if s.startsWith("3") =>
+        s"""import zio.*
+           |import $imp
+           |
+           |object Main extends App:
+           |  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
+           |    $prn("Welcome to your first ZIO app!").exitCode""".stripMargin
+      case _ =>
+        s"""import zio._
+           |import $imp
+           |
+           |object Main extends App {
+           |  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
+           |    $prn("Welcome to your first ZIO app!").exitCode
+           |}""".stripMargin
+    }
+  }
+
+  private def versionSpecific(zioVersion: String) =
+    if (zioVersion.startsWith("2")) ("zio.Console.printLine", "printLine")
+    else ("zio.console.putStrLn", "putStrLn")
 }
