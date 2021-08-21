@@ -1,8 +1,8 @@
 lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2021.2.13" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val pluginVersion = "2021.3.13" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "212"
+ThisBuild / intellijBuild := "213"
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias(
@@ -20,7 +20,7 @@ lazy val `zio-intellij` = project
     version := pluginVersion,
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2021.2.22".toPlugin
+      "org.intellij.scala:2021.3.8".toPlugin
     ),
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
