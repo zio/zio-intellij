@@ -132,6 +132,6 @@ object Version {
     val `2.0.0-M2`: Version = Version.parseUnsafe("2.0.0-M2") // first version to support the built-in test runner
     val `2.0.0`: Version    = Version.parseUnsafe("2.0.0")
 
-    val `latest-ish`: Version = Version.parseUnsafe("1.0.10")
+    val `latest-ish`: Version = Version.parseUnsafe("1.0.11")
   }
 }

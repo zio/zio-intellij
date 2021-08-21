@@ -58,7 +58,7 @@ private[zio] class ZioProjectBuilder
   }
 
   private def loadZioVersions(scalaVersion: ScalaVersion) = {
-    val hardcodedVersions = ZIO.`latest-ish`.toString :: List("1.0.10", "1.0.9", "1.0.8")
+    val hardcodedVersions = ZIO.`latest-ish`.toString :: List("1.0.11", "1.0.10", "1.0.9")
     val versionPattern    = ".+>(\\d+\\.\\d+\\.\\d+(?:-\\w+)?)/<.*".r
 
     def extractVersions(values: Seq[String]) =
