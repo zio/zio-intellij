@@ -5,10 +5,11 @@ import com.intellij.openapi.project.{Project, ProjectUtil}
 import com.intellij.openapi.roots.OrderRootType
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
-import com.intellij.psi.{JavaPsiFacade, PsiElement}
+import com.intellij.psi.{JavaPsiFacade, PsiClass, PsiElement}
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
+import org.jetbrains.plugins.scala.lang.psi.ElementScope
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
@@ -18,9 +19,12 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinitio
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
+import org.jetbrains.plugins.scala.lang.psi.types.api.UndefinedType
+import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
+import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
-import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectExt, ScalaLanguageLevel}
+import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectContext, ProjectExt, ScalaLanguageLevel}
 import org.jetbrains.sbt.SbtUtil
 import org.jetbrains.sbt.SbtUtil.getDefaultLauncher
 import org.jetbrains.sbt.project.SbtExternalSystemManager
@@ -149,6 +153,30 @@ package object utils {
       .flatMap(Option(_))
       .flatMap(c => Option(c.qualifiedName))
       .find(ScalaNamesUtil.nameFitToPatterns(_, patterns, strict = false))
+
+  def isExpressionOfType(fqns: String*): ScExpression => Boolean = {
+    case expression @ Typeable(scType) => fqns.exists(conformsToTypeFromClass(scType, _)(expression))
+    case _                             => false
+  }
+
+  def conformsToTypeFromClass(scType: ScType, fqn: String)(implicit projectContext: ProjectContext): Boolean =
+    (scType != api.Null) && (scType != api.Nothing) && {
+      ElementScope(projectContext)
+        .getCachedClass(fqn)
+        .map(createParameterizedType)
+        .exists(scType.conforms)
+    }
+
+  def createParameterizedType(clazz: PsiClass) = {
+    val designatorType = ScDesignatorType(clazz)
+    clazz.getTypeParameters match {
+      case Array()    => designatorType
+      case parameters => ScParameterizedType(designatorType, parameters.map(UndefinedType(_)).toIndexedSeq)
+    }
+  }
+
+  def isIterable: ScExpression => Boolean =
+    isExpressionOfType("scala.collection.Iterable")
 
   object Field {
 

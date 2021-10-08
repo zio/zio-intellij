@@ -246,6 +246,12 @@
                          shortName="SimplifyErrorSeparationInspection" level="ERROR"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyAssertInspection"
+                         displayName="Simplify complex ZIO Test assertions"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyAssertInspection" level="WEAK WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.suggestions.SuggestTypeAliasInspection"
                          displayName="Choose a more specific type alias"
                          groupPath="Scala,ZIO" groupName="Inspections"

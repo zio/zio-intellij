@@ -2,15 +2,19 @@ package zio.intellij
 
 import com.intellij.psi.PsiAnnotation
 import org.jetbrains.plugins.scala.codeInspection.collections.{isOfClassFrom, _}
+import org.jetbrains.plugins.scala.codeInspection.conformsToTypeFromClass
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScPattern, ScReferencePattern, ScWildcardPattern}
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScObject, ScTemplateDefinition}
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScObject, ScTemplateDefinition, ScTrait}
+import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils._
 import zio.intellij.utils.types._
+
+import scala.reflect.ClassTag
 
 package object inspections {
 
@@ -56,8 +60,6 @@ package object inspections {
     val `.forkAs`: Qualified               = invocation("forkAs").from(zioLikePackages)
     val `.forkOn`: Qualified               = invocation("forkOn").from(zioLikePackages)
     val `.forkWithErrorHandler`: Qualified = invocation("forkWithErrorHandler").from(zioLikePackages)
-
-    private[inspections] val `assert` = unqualified("assert").from(zioLikePackages)
   }
 
   object hasMethods {
@@ -72,6 +74,38 @@ package object inspections {
 
   object managedMethods {
     val `.use`: Qualified = invocation("use").from(managedTypes)
+  }
+
+  object assertMethods {
+    val anything: Unqualified             = unqualified("anything").from(zioTestPackage)
+    val equalTo: Unqualified              = unqualified("equalTo").from(zioTestPackage)
+    val isGreaterThan: Unqualified        = unqualified("isGreaterThan").from(zioTestPackage)
+    val isGreaterThanEqualTo: Unqualified = unqualified("isGreaterThanEqualTo").from(zioTestPackage)
+    val isLessThan: Unqualified           = unqualified("isLessThan").from(zioTestPackage)
+    val isLessThanEqualTo: Unqualified    = unqualified("isLessThanEqualTo").from(zioTestPackage)
+    val isSome: Unqualified               = unqualified("isSome").from(zioTestPackage)
+    val isEmpty: Unqualified              = unqualified("isEmpty").from(zioTestPackage)
+    val isNull: Unqualified               = unqualified("isNull").from(zioTestPackage)
+    val contains: Unqualified             = unqualified("contains").from(zioTestPackage)
+    val containsString: Unqualified       = unqualified("containsString").from(zioTestPackage)
+    val exists: Unqualified               = unqualified("exists").from(zioTestPackage)
+    val startsWith: Unqualified           = unqualified("startsWith").from(zioTestPackage)
+    val startsWithString: Unqualified     = unqualified("startsWithString").from(zioTestPackage)
+    val endsWith: Unqualified             = unqualified("endsWith").from(zioTestPackage)
+    val endsWithString: Unqualified       = unqualified("endsWithString").from(zioTestPackage)
+
+    val assertFqn = new ZioType("test.CompileVariants")
+
+    object AssertReferenceExtractor extends TraitMemberReferenceExtractor {
+      override def types: Set[String] = Set(assertFqn.fqName)
+    }
+
+    val assert = new Curried2StaticMemberReference[ZioType](AssertReferenceExtractor, "assert") {
+      override protected val typeCompanion: TypeCompanion[ZioType] = new TypeCompanion[ZioType] {
+        override def values: List[ZioType] = List(assertFqn)
+        override def defaultValue: ZioType = assertFqn
+      }
+    }
   }
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
@@ -142,7 +176,7 @@ package object inspections {
   }
 
   sealed abstract class Curried2StaticMemberReference[T <: Type](
-    extractor: StaticMemberReferenceExtractor,
+    extractor: MemberReferenceExtractor[ScTemplateDefinition],
     refName: String
   ) extends BaseStaticMemberReference[T](refName) {
 
@@ -192,7 +226,7 @@ package object inspections {
     override protected val typeCompanion: TypeCompanion[ZLayerType] = ZLayerTypes
   }
 
-  sealed trait StaticMemberReferenceExtractor {
+  sealed abstract class MemberReferenceExtractor[+T <: ScTemplateDefinition: ClassTag] {
     def types: Set[String]
 
     private def findOverloaded(expr: ScReferenceExpression) =
@@ -210,10 +244,13 @@ package object inspections {
         case null                                                       => findOverloaded(ref)
         case t: ScTemplateDefinition if types.contains(t.qualifiedName) => Some(t.qualifiedName)
         case f: ScFunctionDefinition =>
-          Option(f.containingClass).collect { case o: ScObject => o.qualifiedName }.filter(types.contains)
+          Option(f.containingClass).collect { case o: T => o.qualifiedName }.filter(types.contains)
         case _ => None
       }
   }
+
+  sealed trait StaticMemberReferenceExtractor extends MemberReferenceExtractor[ScObject]
+  sealed trait TraitMemberReferenceExtractor  extends MemberReferenceExtractor[ScTrait]
 
   object ZIOStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
     override val types: Set[String] = zioTypes.toSet
