@@ -43,6 +43,12 @@ class SimplifyAssertInspectionTest extends ZSimplifyInspectionTest[SimplifyAsser
   def test_isNull() =
     test("assert(a)(isNull)", "assertTrue(a == null)")
 
+  def test_isTrue() =
+    test("assert(List(1,2,3).isEmpty)(isTrue)", "assertTrue(List(1,2,3).isEmpty)")
+
+  def test_isFalse() =
+    test("assert(List(1,2,3).isEmpty)(isFalse)", "assertTrue(!(List(1,2,3).isEmpty))")
+
   def test_contains_non_iterable() =
     z(s"""${START}assert("abc")(contains("a"))$END""").assertNotHighlighted()
 
@@ -52,7 +58,7 @@ class SimplifyAssertInspectionTest extends ZSimplifyInspectionTest[SimplifyAsser
   def test_containsString_non_string() =
     z(s"""${START}assert(List("a"))(containsString("a"))$END""").assertNotHighlighted()
 
-  def test_containsString() =
+  def ignored_test_containsString() =
     test("""assert("abc")(containsString("ab"))""", """assertTrue("abc".contains("ab"))""")
 
   def test_exists_non_iterable() =
@@ -76,6 +82,6 @@ class SimplifyAssertInspectionTest extends ZSimplifyInspectionTest[SimplifyAsser
   def test_startsWithString_non_string() =
     z(s"""${START}assert(List("abc"))(startsWithString(List("ab")))$END""").assertNotHighlighted()
 
-//  def test_startsWithString() =
-//    test("""assert(a)(startsWithString("ab"))""", """assertTrue("abc".startsWith("ab"))""")
+  def ignored_test_startsWithString() =
+    test("""assert(a)(startsWithString("ab"))""", """assertTrue("abc".startsWith("ab"))""")
 }

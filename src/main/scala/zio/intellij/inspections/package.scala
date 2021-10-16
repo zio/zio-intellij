@@ -86,6 +86,8 @@ package object inspections {
     val isSome: Unqualified               = unqualified("isSome").from(zioTestPackage)
     val isEmpty: Unqualified              = unqualified("isEmpty").from(zioTestPackage)
     val isNull: Unqualified               = unqualified("isNull").from(zioTestPackage)
+    val isTrue: Unqualified               = unqualified("isTrue").from(zioTestPackage)
+    val isFalse: Unqualified              = unqualified("isFalse").from(zioTestPackage)
     val contains: Unqualified             = unqualified("contains").from(zioTestPackage)
     val containsString: Unqualified       = unqualified("containsString").from(zioTestPackage)
     val exists: Unqualified               = unqualified("exists").from(zioTestPackage)

@@ -21,9 +21,7 @@ object SimplifyEqualToType extends SimplificationType {
     expr match {
       case assert(_, body, assertion) =>
         mkAssertion(body, assertion).collect {
-          case terms =>
-            val replace = body.getText :: terms
-            replacement(expr, replace.mkString)
+          case replace => replacement(expr, replace.mkString)
         }
       case _ => None
     }
@@ -31,35 +29,38 @@ object SimplifyEqualToType extends SimplificationType {
   private def mkAssertion(body: ScExpression, assertion: ScExpression): Option[List[String]] = {
     def go(asrt: ScExpression, terms: List[String]): List[String] =
       asrt match {
-        case equalTo(ScBooleanLiteral(bool))        => if (bool) "" :: terms else terms // TODO equalTo(false)
-        case equalTo(expr)                          => go(expr, "==" :: terms)
-        case isGreaterThan(expr)                    => go(expr, ">" :: terms)
-        case isGreaterThanEqualTo(expr)             => go(expr, ">=" :: terms)
-        case isLessThan(expr)                       => go(expr, "<" :: terms)
-        case isLessThanEqualTo(expr)                => go(expr, "<=" :: terms)
+        case equalTo(ScBooleanLiteral(bool))        => if (bool) body.getText :: Nil else Nil // TODO equalTo(false)
+        case equalTo(expr)                          => go(expr, "==" :: terms) :+ body.getText
+        case isGreaterThan(expr)                    => go(expr, ">" :: terms) :+ body.getText
+        case isGreaterThanEqualTo(expr)             => go(expr, ">=" :: terms) :+ body.getText
+        case isLessThan(expr)                       => go(expr, "<" :: terms) :+ body.getText
+        case isLessThanEqualTo(expr)                => go(expr, "<=" :: terms) :+ body.getText
+        case isSome()                               => Nil
         case isSome(expr)                           => go(expr, ".get" :: terms)
-        case isEmpty()                              => ".isEmpty" :: terms
-        case isNull()                               => "== null" :: terms
+        case isEmpty()                              => s"${body.getText}.isEmpty" :: Nil
+        case isNull()                               => s"${body.getText} == null" :: Nil
+        case isTrue()                               => body.getText :: Nil
+        case isFalse()                              => s"!(${body.getText})" :: Nil
         case contains(_) if !isIterable(body)       => Nil
-        case contains(expr)                         => s".contains(${go(expr, terms).mkString})" :: terms
+        case contains(expr)                         => s"${body.getText}.contains(${go(expr, terms).mkString})" :: Nil
         case containsString(_) if !isString(body)   => Nil
-        case containsString(expr)                   => s".contains(${go(expr, terms).mkString})" :: terms
+        case containsString(expr)                   => s"${body.getText}.contains(${go(expr, terms).mkString})" :: Nil
         case exists(_) if !isIterable(body)         => Nil
-        case exists(anything())                     => ".nonEmpty" :: terms
-        case exists(equalTo(arg))                   => s".contains(${arg.getText})" :: terms
-        case exists(expr)                           => s".exists(_ ${go(expr, terms).reverse.mkString})" :: terms
+        case exists(anything())                     => s"${body.getText}.nonEmpty" :: Nil
+        case exists(equalTo(arg))                   => s"${body.getText}.contains(${arg.getText})" :: Nil
+        case exists(expr)                           => s"${body.getText}.exists(_ ${go(expr, terms).init.reverse.mkString})" :: Nil
         case startsWith(_) if !isSeq(body)          => Nil
-        case startsWith(expr)                       => s".startsWith(${go(expr, terms).mkString})" :: terms
+        case startsWith(expr)                       => s"${body.getText}.startsWith(${go(expr, terms).mkString})" :: Nil
         case startsWithString(_) if !isString(body) => Nil
-        case startsWithString(expr)                 => s".startsWith(${go(expr, terms).mkString})" :: terms
+        case startsWithString(expr)                 => s"${body.getText}.startsWith(${go(expr, terms).mkString})" :: Nil
         case endsWith(_) if !isSeq(body)            => Nil
-        case endsWith(expr)                         => s".endsWith(${go(expr, terms).mkString})" :: terms
+        case endsWith(expr)                         => s"${body.getText}.endsWith(${go(expr, terms).mkString})" :: Nil
         case endsWithString(_) if !isString(body)   => Nil
-        case endsWithString(expr)                   => s".startsWith(${go(expr, terms).mkString})" :: terms
+        case endsWithString(expr)                   => s"${body.getText}.startsWith(${go(expr, terms).mkString})" :: Nil
         case other                                  => other.getText :: terms
       }
 
-    val expr = go(assertion, Nil).reverse
-    Option.when(expr.nonEmpty)(expr)
+    val expr = go(assertion, Nil)
+    Option.when(expr.nonEmpty)(expr.reverse)
   }
 }
