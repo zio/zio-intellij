@@ -2,21 +2,23 @@ package zio.intellij.searchers
 
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.util.PsiTreeUtil
-import intellij.testfixtures.RichStr
 import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestAdapter
 import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.util.Markers
+import org.jetbrains.plugins.scala.DependencyManagerBase._
+import zio.inspections.ZInspectionTestBase
 
 import scala.jdk.CollectionConverters._
 
 class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdapter with Markers {
 
   protected val zioOrg     = "dev.zio"
-  protected val zioVersion = "latest.integration"
+  protected val zioVersion = ZInspectionTestBase.versionPattern
 
   override def librariesLoaders: Seq[LibraryLoader] =
-    super.librariesLoaders :+ IvyManagedLoader(zioOrg %% "zio" % zioVersion, zioOrg %% "zio-macros" % zioVersion)
+    super.librariesLoaders :+
+      IvyManagedLoader(zioOrg %% "zio" % zioVersion, zioOrg %% "zio-macros" % zioVersion)
 
   private def doTest(fileText: String): Unit = {
 

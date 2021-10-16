@@ -15,11 +15,9 @@ import org.jetbrains.plugins.scala.extensions.ObjectExt
 import org.jetbrains.plugins.scala.project.{ModuleExt, ScalaLanguageLevel, ScalaLibraryProperties, ScalaLibraryType, template}
 import org.junit.Assert._
 
-case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryLoader {
+case class ScalaSDKLoader(includeScalaReflect: Boolean = false, includeScalaCompiler: Boolean = false) extends LibraryLoader {
 
-  protected lazy val dependencyManager: DependencyManagerBase = new DependencyManagerBase {
-    override protected val artifactBlackList: Set[String] = Set.empty
-  }
+  protected lazy val dependencyManager: DependencyManagerBase = DependencyManager
 
   import DependencyManagerBase._
   import ScalaSDKLoader._
@@ -31,11 +29,9 @@ case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryL
         List(
           scalaCompilerDescription.transitive(),
           scalaLibraryDescription.transitive(),
-          //scalaLibraryDescription(Scala_2_13),
-          //DependencyDescription("ch.epfl.lamp", s"tasty-core_${version.major}", version.minor),
-          DependencyDescription("ch.epfl.lamp", "dotty-interfaces", version.minor),
-          //DependencyDescription("org.scala-lang.modules", "scala-asm", "7.0.0-scala-1")
+          DependencyDescription("org.scala-lang", "scala3-interfaces", version.minor),
         )
+
       case _                  =>
         val maybeScalaReflect = if (includeScalaReflect) Some(scalaReflectDescription) else None
         List(
@@ -86,7 +82,10 @@ case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryL
 
     val classesRoots = {
       import scala.jdk.CollectionConverters._
-      compilerClasspath.map(findJarFile).asJava
+      val files =
+        if (includeScalaCompiler) compilerClasspath
+        else compilerClasspath.filterNot(compilerFile == _)
+      files.map(findJarFile).asJava
     }
 
     val libraryTable = LibraryTablesRegistrar.getInstance.getLibraryTable(module.getProject)
@@ -106,7 +105,7 @@ case class ScalaSDKLoader(includeScalaReflect: Boolean = false) extends LibraryL
 
     inWriteAction {
       val version = Artifact.ScalaCompiler.versionOf(compilerFile)
-      val properties = ScalaLibraryProperties(version, compilerClasspath)
+      val properties = ScalaLibraryProperties(version, compilerClasspath, Seq.empty)
 
       val editor = new ExistingLibraryEditor(library, null)
       editor.setType(ScalaLibraryType())

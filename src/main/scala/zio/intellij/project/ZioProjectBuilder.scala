@@ -15,7 +15,6 @@ import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.project.template.ScalaVersionDownloadingDialog
 import org.jetbrains.plugins.scala.project.{ScalaLanguageLevel, Version, Versions}
 import org.jetbrains.plugins.scala.{extensions, ScalaBundle, ScalaVersion}
-import org.jetbrains.sbt.project.template.SbtModuleBuilder.LatestSbtVersion
 import org.jetbrains.sbt.project.template.SbtModuleBuilderUtil.doSetupModule
 import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderBase, SbtModuleBuilderUtil, ScalaSettingsStepBase}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
@@ -99,8 +98,6 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
     Versions(versions.headOption.getOrElse(hardcodedZioVersions.defaultVersion), versions)
   }
 
-  override def getModuleType: ModuleType[_] = JavaModuleType.getModuleType
-
   override def createModule(moduleModel: ModifiableModuleModel): Module = {
     val root = new File(getModuleFileDirectory)
     if (root.exists()) {
@@ -114,7 +111,7 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
         includeHelloWorld,
         packagePrefix
       )                = selections
-      val sbtVersion   = sbtVersionOpt.getOrElse(LatestSbtVersion)
+      val sbtVersion   = sbtVersionOpt.getOrElse(Versions.SBT.LatestSbtVersion)
       val scalaVersion = scalaVersionOpt.getOrElse(ScalaVersion.Latest.Scala_2_13.minor)
       val zioVersion   = zioVersionOpt.getOrElse(ZIO.`latest-ish`.toString)
 
@@ -179,12 +176,12 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
     )
 
     private val resolveClassifiersCheckBox: JCheckBox =
-      applyTo(new JCheckBox(SbtBundle.message("sbt.settings.sources")))(
+      applyTo(new JCheckBox(SbtBundle.message("sbt.settings.resolveClassifiers")))(
         _.setToolTipText(SbtBundle.message("sbt.download.scala.standard.library.sources")),
         _.setSelected(selections.resolveClassifiers)
       )
 
-    private val resolveSbtClassifiersCheckBox = applyTo(new JCheckBox(SbtBundle.message("sbt.settings.sources")))(
+    private val resolveSbtClassifiersCheckBox = applyTo(new JCheckBox(SbtBundle.message("sbt.settings.resolveSbtClassifiers")))(
       _.setToolTipText(SbtBundle.message("sbt.download.sbt.sources")),
       _.setSelected(selections.resolveSbtClassifiers)
     )
