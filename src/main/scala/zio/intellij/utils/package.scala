@@ -19,7 +19,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinitio
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
-import org.jetbrains.plugins.scala.lang.psi.types.api.UndefinedType
+import org.jetbrains.plugins.scala.lang.psi.types.api.{StdType, UndefinedType}
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
@@ -177,6 +177,9 @@ package object utils {
 
   def isIterable: ScExpression => Boolean =
     isExpressionOfType("scala.collection.Iterable")
+
+  def isAssertion: ScExpression => Boolean =
+    isExpressionOfType("zio.test.Assertion")
 
   object Field {
 

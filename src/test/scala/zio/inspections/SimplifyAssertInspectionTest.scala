@@ -83,5 +83,50 @@ class SimplifyAssertInspectionTest extends ZSimplifyInspectionTest[SimplifyAsser
     z(s"""${START}assert(List("abc"))(startsWithString(List("ab")))$END""").assertNotHighlighted()
 
   def ignored_test_startsWithString() =
-    test("""assert(a)(startsWithString("ab"))""", """assertTrue("abc".startsWith("ab"))""")
+    test("""assert("abc")(startsWithString("ab"))""", """assertTrue("abc".startsWith("ab"))""")
+
+  def test_not() =
+    test("""assert("a")(not(equalTo("b"))""", """assertTrue(!("a" == "b"))""")
+
+  def test_isEmptyString_non_str() =
+    z(s"""${START}assert(List())(isEmptyString)$END""").assertNotHighlighted()
+
+  def ignore_test_isEmptyString() =
+    test("""assert("a")(isEmptyString)""", """assertTrue(a.isEmpty)""")
+
+  def test_isNegative() =
+    test("""assert(1)(isNegative)""", """assertTrue(1 < 0)""")
+
+  def test_isPositive() =
+    test("""assert(1)(isPositive)""", """assertTrue(1 > 0)""")
+
+  def test_isNonEmpty() =
+    test("""assert(List(1,3))(isNonEmpty)""", """assertTrue(List(1,3).nonEmpty)""")
+
+  def test_isNaNDouble() =
+    test("""assert(1.0d)(isNaNDouble)""", """assertTrue(1.0d.isNaN)""")
+
+  def test_isPosInfinityDouble() =
+    test("""assert(1.0d)(isPosInfinityDouble)""", """assertTrue(1.0d.isPosInfinity)""")
+
+  def test_isNegInfinityDouble() =
+    test("""assert(1.0d)(isNegInfinityDouble)""", """assertTrue(1.0d.isNegInfinity)""")
+
+  def test_isFiniteDouble() =
+    test("""assert(1.0d)(isFiniteDouble)""", """assertTrue(1.0d <= Double.MaxValue)""")
+
+  def test_isInfiniteDouble() =
+    test("""assert(1.0d)(isInfiniteDouble)""", """assertTrue(1.0d.isInfinite)""")
+
+  def test_isPosInfinityFloat() =
+    test("""assert(1.0)(isPosInfinityFloat)""", """assertTrue(1.0.isPosInfinity)""")
+
+  def test_isNegInfinityFloat() =
+    test("""assert(1.0)(isNegInfinityFloat)""", """assertTrue(1.0.isNegInfinity)""")
+
+  def test_isFiniteFloat() =
+    test("""assert(1.0)(isFiniteFloat)""", """assertTrue(1.0 <= Float.MaxValue)""")
+
+  def test_isInfiniteFloat() =
+    test("""assert(1.0)(isInfiniteFloat)""", """assertTrue(1.0.isInfinite)""")
 }
