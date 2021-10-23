@@ -33,7 +33,9 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
        |object Test {
        |
        |  val logger: Logger = null
+       |  val a: String = "hello"
        |  val b = ZIO.unit
+       |  val o: Option[Int] = Some(1)
        |  def f(a: Any): ZIO[Any, Throwable, Unit] = ???
        |  def f(a: Any, b: Any): ZIO[Any, Throwable, Unit] = ???
        |
