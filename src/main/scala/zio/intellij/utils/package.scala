@@ -6,6 +6,7 @@ import com.intellij.openapi.roots.OrderRootType
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.{JavaPsiFacade, PsiClass, PsiElement}
+import jetbrains.macroAnnotations.CachedInUserData
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
@@ -19,11 +20,12 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinitio
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
-import org.jetbrains.plugins.scala.lang.psi.types.api.{StdType, UndefinedType}
+import org.jetbrains.plugins.scala.lang.psi.types.api.UndefinedType
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
+import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
 import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectContext, ProjectExt, ScalaLanguageLevel}
 import org.jetbrains.sbt.SbtUtil
 import org.jetbrains.sbt.SbtUtil.getDefaultLauncher
@@ -201,6 +203,8 @@ package object utils {
   }
 
   implicit class ModuleSyntax(private val module: Module) extends AnyVal {
+
+    @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))
     def findLibrary(p: String => Boolean): Option[Version] =
       (for {
         library <- module.libraries
@@ -211,11 +215,14 @@ package object utils {
         version    <- Version.parse(versionStr)
       } yield version).headOption
 
-    def zioVersion: Option[Version] = findLibrary(lib => lib.contains("/dev/zio/zio_") || lib.contains("/dev.zio/zio_"))
+    @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))
+    def zioVersion: Option[Version] =
+      findLibrary(lib => lib.contains("/dev/zio/zio_") || lib.contains("/dev.zio/zio_"))
 
     def hasZio = zioVersion.isDefined
 
-    def scalaVersion =
+    @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))
+    def scalaVersion: Option[ScalaVersion] =
       for {
         scalaSdk     <- module.scalaSdk
         compiler     <- scalaSdk.compilerVersion
