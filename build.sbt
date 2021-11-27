@@ -10,30 +10,56 @@ addCommandAlias(
   "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"
 )
 
-scalacOptions += "-deprecation"
+ThisBuild / scalacOptions ++= Seq(
+  "-explaintypes",
+  "-deprecation",
+  "-unchecked",
+  "-feature",
+  "-Xlint:serial",
+  "-Ymacro-annotations",
+  "-Xfatal-warnings",
+  "-language:implicitConversions",
+  "-language:reflectiveCalls",
+  "-language:existentials"
+)
 
-lazy val `zio-intellij` = project
-  .in(file("."))
-  .enablePlugins(SbtIdeaPlugin)
-  .settings(
-    scalaVersion := scala213,
-    version := pluginVersion,
-    intellijPlugins := Seq(
-      "com.intellij.java".toPlugin,
-      "org.intellij.scala:2021.3.8".toPlugin
-    ),
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
-    testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
-    patchPluginXml := pluginXmlOptions { xml =>
-      xml.version = version.value
-      xml.changeNotes = sys.env.getOrElse(
-        "ZIO_INTELLIJ_CHANGE_NOTES",
-        s"""<![CDATA[
+lazy val root =
+  newProject("zio-intellij", file("."))
+    .enablePlugins(SbtIdeaPlugin)
+    .settings(
+      patchPluginXml := pluginXmlOptions { xml =>
+        xml.version = version.value
+        xml.changeNotes = sys.env.getOrElse(
+          "ZIO_INTELLIJ_CHANGE_NOTES",
+          s"""<![CDATA[
         <ul>
           <li>A new refactoring, converting <code>assert</code> into <code>assertTrue</code> (<a href="https://github.com/zio/zio-intellij/pull/328">#328</a>)</li>
           <li>Miscellaneous bugfixes and improvements</li>
         </ul>
         ]]>"""
-      )
-    }
+        )
+      }
+    )
+    .dependsOn(macros)
+
+lazy val macros = newProject("macros", file("macros"))
+  .enablePlugins(SbtIdeaPlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scala213 intransitive ()
+    )
+  )
+
+def newProject(projectName: String, base: File): Project =
+  Project(projectName, base).settings(
+    name := projectName,
+    scalaVersion := scala213,
+    version := pluginVersion,
+    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
+    testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
+    intellijPlugins := Seq(
+      "com.intellij.java".toPlugin,
+      "org.intellij.scala:2021.3.8".toPlugin
+    ),
+    (Test / scalacOptions) += "-Xmacro-settings:enable-expression-tracers"
   )

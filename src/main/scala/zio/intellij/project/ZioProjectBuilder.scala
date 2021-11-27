@@ -181,10 +181,11 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
         _.setSelected(selections.resolveClassifiers)
       )
 
-    private val resolveSbtClassifiersCheckBox = applyTo(new JCheckBox(SbtBundle.message("sbt.settings.resolveSbtClassifiers")))(
-      _.setToolTipText(SbtBundle.message("sbt.download.sbt.sources")),
-      _.setSelected(selections.resolveSbtClassifiers)
-    )
+    private val resolveSbtClassifiersCheckBox =
+      applyTo(new JCheckBox(SbtBundle.message("sbt.settings.resolveSbtClassifiers")))(
+        _.setToolTipText(SbtBundle.message("sbt.download.sbt.sources")),
+        _.setSelected(selections.resolveSbtClassifiers)
+      )
 
     private val includeZioTestCheckBox: JCheckBox = applyTo(new JCheckBox("Include 'zio-test'"))(
       _.setToolTipText("Includes the ZIO Test library"),
