@@ -240,11 +240,13 @@ package object utils {
   implicit class ScalaVersionHack(private val version: ScalaVersion) extends AnyVal {
     def versionStr = version.languageLevel match {
       case ScalaLanguageLevel.Scala_3_0 if version.isPrerelease => version.minor
-      case ScalaLanguageLevel.Scala_3_0                         => "3"
+      case lang if isScala3(lang)                               => "3"
       case _                                                    => version.major
     }
 
     def isPrerelease = version < Version.scala3Version
+
+    def isScala3(level: ScalaLanguageLevel): Boolean = level.compare(ScalaLanguageLevel.Scala_3_0) >= 0
   }
 
   implicit class TraverseAtHome[A](private val list: List[A]) extends AnyVal {
