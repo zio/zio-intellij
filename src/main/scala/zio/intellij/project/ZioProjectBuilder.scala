@@ -121,7 +121,7 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
         settings.setResolveSbtClassifiers(resolveSbtClassifiers)
       }
 
-      createProjectTemplateIn(
+      doCreateProjectTemplateIn(
         root,
         getName,
         scalaVersion,
@@ -136,14 +136,6 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
     }
 
     super.createModule(moduleModel)
-  }
-
-  override def setupRootModel(model: ModifiableRootModel): Unit =
-    SbtModuleBuilderUtil.tryToSetupRootModel(model, getContentEntryPath)
-
-  override def setupModule(module: Module): Unit = {
-    super.setupModule(module)
-    doSetupModule(module, getExternalProjectSettings, getContentEntryPath)
   }
 
   override def modifySettingsStep(settingsStep: SettingsStep): ModuleWizardStep =
@@ -387,7 +379,7 @@ object ZioProjectBuilder {
     }
   }
 
-  private def createProjectTemplateIn(
+  private def doCreateProjectTemplateIn(
     root: File,
     @NonNls name: String,
     @NonNls scalaVersion: String,

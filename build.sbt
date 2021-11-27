@@ -1,5 +1,6 @@
-lazy val scala213      = "2.13.2"
-lazy val pluginVersion = "2021.3.13" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scala213           = "2.13.2"
+lazy val scalaPluginVersion = "2021.3.13"
+lazy val pluginVersion      = "2021.3.13" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "213"
@@ -59,7 +60,7 @@ def newProject(projectName: String, base: File): Project =
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
-      "org.intellij.scala:2021.3.8".toPlugin
+      s"org.intellij.scala:$scalaPluginVersion".toPlugin
     ),
     (Test / scalacOptions) += "-Xmacro-settings:enable-expression-tracers"
   )
