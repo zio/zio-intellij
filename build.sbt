@@ -1,6 +1,6 @@
 lazy val scala213           = "2.13.2"
 lazy val scalaPluginVersion = "2021.3.13"
-lazy val pluginVersion      = "2021.3.13" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val pluginVersion      = "2021.3.14" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "213"
@@ -34,8 +34,8 @@ lazy val root =
           "ZIO_INTELLIJ_CHANGE_NOTES",
           s"""<![CDATA[
         <ul>
-          <li>A new refactoring, converting <code>assert</code> into <code>assertTrue</code> (<a href="https://github.com/zio/zio-intellij/pull/328">#328</a>)</li>
-          <li>Miscellaneous bugfixes and improvements</li>
+          <li>Performance improvement overall by caching access to common information (<a href="https://github.com/zio/zio-intellij/pull/347">#347</a>)</li>
+          <li>Miscellaneous bug fixes</li>
         </ul>
         ]]>"""
         )
