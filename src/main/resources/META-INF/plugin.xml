@@ -270,6 +270,12 @@
                          shortName="IncorrectTestClassInspection" level="ERROR"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.IncorrectPreludeNewTypeAliasInspection"
+                         displayName="Detects erroneous use of 'Foo.type' instead of 'Foo.Type' for ZIO Prelude's Newtypes"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="IncorrectPreludeNewTypeAliasInspection" level="ERROR"
+                         enabledByDefault="true" language="Scala"/>
+
         <intentionAction>
             <category>ZIO/Suggestions</category>
             <className>zio.intellij.intentions.suggestions.SuggestTypeAlias</className>
