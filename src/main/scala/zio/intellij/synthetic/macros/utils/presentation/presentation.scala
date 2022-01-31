@@ -23,7 +23,7 @@ package object presentation {
       buffer.append("implicit ")
     buffer.append(clause.parameters.map(presentationStringForScalaParameter).mkString(", "))
     buffer.append(")")
-    buffer.result
+    buffer.result()
   }
 
   private[macros] def presentationStringForScalaParameter(parameter: ScParameter): String = {
@@ -31,7 +31,7 @@ package object presentation {
     buffer.append(parameterAnnotations(parameter))
     buffer.append(escape(parameter.name))
     buffer.append(parameterTypeAnnotations(parameter))
-    buffer.result
+    buffer.result()
   }
 
   private[macros] def presentationStringForScalaTypeParameters(
@@ -75,7 +75,7 @@ package object presentation {
       buffer.append(" : ")
       buffer.append(defaultPresentationStringForScalaType(ScTypeUtil.stripTypeArgs(tp)))
     }
-    buffer.result
+    buffer.result()
   }
 
   private def renderAnnotation(annotation: ScAnnotation): String = {
@@ -89,7 +89,7 @@ package object presentation {
     if (arguments.nonEmpty)
       buffer.append(arguments.iterator.map(a => escape(a.getText)).mkString("(", ", ", ")"))
 
-    buffer.result
+    buffer.result()
   }
 
   private def parameterAnnotations(param: ScParameter): String = {

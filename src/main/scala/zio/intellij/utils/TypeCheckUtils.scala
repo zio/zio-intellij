@@ -126,7 +126,7 @@ object TypeCheckUtils {
     isInfallibleEffect(tpe.getOrAny)
 
   def isInfallibleEffect(zio: ScExpression): Boolean =
-    isInfallibleEffect(zio.`type`)
+    isInfallibleEffect(zio.`type`())
 
   def isAnyEnvEffect(zio: ScExpression): Boolean =
     zio.`type`().getOrAny match {

@@ -50,7 +50,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
         val hasServiceTpe = for {
           has        <- createType(hasDesignator, sco)
           service    <- findTypeDefByName(sco.getProject, serviceName)
-          serviceTpe <- service.`type`.toOption
+          serviceTpe <- service.`type`().toOption
         } yield ScParameterizedType(has, Seq(serviceTpe))
 
         possibleAliasTpe.exists(alias => hasServiceTpe.exists(SuggestTypeAlias.equiv(alias, _).isDefined))

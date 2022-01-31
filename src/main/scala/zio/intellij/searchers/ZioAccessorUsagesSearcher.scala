@@ -93,7 +93,7 @@ class ZioAccessorUsagesSearcher extends QueryExecutor[PsiReference, ReferencesSe
   }
 
   private def isAccessorField(field: ScTypedDefinition, candidate: TermSignature): Boolean = candidate match {
-    case Field(f) => f.name == field.name && fromZio(f.`type`.getOrAny)
+    case Field(f) => f.name == field.name && fromZio(f.`type`().getOrAny)
     case _        => false
   }
 
@@ -104,7 +104,7 @@ class ZioAccessorUsagesSearcher extends QueryExecutor[PsiReference, ReferencesSe
     lazy val areSameElements =
       seq1.zip(seq2).forall {
         case (p1, p2) =>
-          p1.name == p2.name && p1.`type` == p2.`type`
+          p1.name == p2.name && p1.`type`() == p2.`type`()
       }
 
     isSameLength && areSameElements

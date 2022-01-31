@@ -422,7 +422,7 @@ object ZioProjectBuilder {
            |  .settings(
            |    name := "$name",
            |    libraryDependencies ++= Seq(
-           |      ${dependencies.result}
+           |      ${dependencies.result()}
            |    )$sbtRunner
            |  )
            |""".stripMargin

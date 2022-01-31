@@ -50,7 +50,7 @@ jobs:
       - name: Set up Scala
         uses: olafurpg/setup-scala@v10
         with:
-          java-version: "adopt@1.8"
+          java-version: "adopt@1.11"
 
       - name: Package plugin
         # The first packageArtifact creates the files (including plugin.xml).

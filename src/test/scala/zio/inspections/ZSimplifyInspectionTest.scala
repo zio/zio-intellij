@@ -13,12 +13,14 @@ import scala.reflect._
 trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestBase =>
 
   override protected def librariesLoaders: Seq[LibraryLoader] =
-    base.librariesLoaders :+
+    Seq(
+      ScalaSDKLoader(),
       IvyManagedLoader(
         "dev.zio" %% "zio"         % versionPattern,
         "dev.zio" %% "zio-streams" % versionPattern,
         "dev.zio" %% "zio-test"    % versionPattern
       )
+    )
 
   def z(s: String): String =
     s"""import zio._
