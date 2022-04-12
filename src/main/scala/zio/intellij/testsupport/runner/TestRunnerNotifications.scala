@@ -22,7 +22,6 @@ private[runner] object TestRunnerNotifications {
     message: String,
     notificationType: NotificationType,
     actions: Seq[NotificationAction] = Nil,
-    listener: Option[NotificationListener] = None,
     icon: Option[Icon] = None
   )(implicit project: Project): Unit = {
     updateShownMessagesCache(message)
@@ -34,7 +33,6 @@ private[runner] object TestRunnerNotifications {
       } else {
         notificationErrorGroup.createNotification(message, notificationType)
       }
-    listener.foreach(notification.setListener)
     actions.foreach(notification.addAction)
     icon.foreach(notification.setIcon)
     notification.notify(project)
@@ -59,24 +57,21 @@ private[runner] object TestRunnerNotifications {
   def displayInfo(
     message: String,
     actions: Seq[NotificationAction] = Nil,
-    listener: Option[NotificationListener] = None,
     icon: Option[Icon] = None
   )(implicit project: Project = null): Unit =
-    displayNotification(message, NotificationType.INFORMATION, actions, listener, icon)
+    displayNotification(message, NotificationType.INFORMATION, actions, icon)
 
   def displayWarning(
     message: String,
     actions: Seq[NotificationAction] = Nil,
-    listener: Option[NotificationListener] = None,
     icon: Option[Icon] = None
   )(implicit project: Project = null): Unit =
-    displayNotification(message, NotificationType.WARNING, actions, listener, icon)
+    displayNotification(message, NotificationType.WARNING, actions, icon)
 
   def displayError(
     message: String,
     actions: Seq[NotificationAction] = Nil,
-    listener: Option[NotificationListener] = None,
     icon: Option[Icon] = None
   )(implicit project: Project = null): Unit =
-    displayNotification(message, NotificationType.ERROR, actions, listener, icon)
+    displayNotification(message, NotificationType.ERROR, actions, icon)
 }

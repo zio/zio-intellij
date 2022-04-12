@@ -4,14 +4,11 @@ import com.intellij.ide.BrowserUtil
 import com.intellij.notification._
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
-import org.jetbrains.annotations.NonNls
 import zio.intellij.testsupport.runner.TestRunnerNotifications.{displayError, displayInfo}
 import zio.intellij.testsupport.runner.TestRunnerResolveService.ResolveError
-import zio.intellij.utils.Version.ZIO
-import zio.intellij.utils.{ProjectSyntax, ScalaVersionHack, Version}
+import zio.intellij.utils.{ProjectSyntax, ScalaVersionHack}
 import zio.intellij.{ErrorReporter, ZioIcon}
 
-import javax.swing.event.HyperlinkEvent
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -30,19 +27,6 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
           .toOption
           .isEmpty)
     }
-
-  //noinspection HardCodedStringLiteral
-  private def href(ref: String, text: String): String = s"""<a href="$ref">$text</a>"""
-  @NonNls private val Nbsp                            = "&nbsp;"
-
-  private val listener: NotificationListener = (notification: Notification, link: HyperlinkEvent) => {
-    link.getDescription match {
-      case "download" => downloadTestRunner(notification)
-      case "learn_more" =>
-        BrowserUtil.open("https://plugins.jetbrains.com/plugin/13820-zio-for-intellij/zio-test-runner")
-      case _ =>
-    }
-  }
 
   private def downloadTestRunner(notification: Notification): Unit = {
     val tasks = project.versions.map {
@@ -106,13 +90,15 @@ private[runner] final class TestRunnerProjectNotification(private val project: P
 
   private def createNotification: Notification =
     suggesterNotificationGroup
-      .createNotification(
-        "Enable the integrated ZIO Test runner",
-        href("download", "Download ZIO Test runner") + Nbsp * 6 +
-          href("learn_more", "Learn more..."),
-        NotificationType.INFORMATION
-      )
-      .setListener(listener)
+      .createNotification("Enable the integrated ZIO Test runner", NotificationType.INFORMATION)
+      .addAction(new NotificationAction("Download ZIO Test runner") {
+        override def actionPerformed(e: AnActionEvent, notification: Notification): Unit =
+          downloadTestRunner(notification)
+      })
+      .addAction(new NotificationAction("Learn more...") {
+        override def actionPerformed(e: AnActionEvent, notification: Notification): Unit =
+          BrowserUtil.open("https://plugins.jetbrains.com/plugin/13820-zio-for-intellij/zio-test-runner")
+      })
       .setIcon(ZioIcon)
 
   private val suggesterNotificationGroup: NotificationGroup =

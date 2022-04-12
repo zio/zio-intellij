@@ -3,9 +3,9 @@ lazy val scalaPluginVersion = "2022.1.13"
 lazy val pluginVersion      = "2022.1.16" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "2022.1"
+ThisBuild / intellijBuild := "221.5080.210"
 
-addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
+addCommandAlias("fmt", "scalafmtAll")
 addCommandAlias(
   "check",
   "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"
