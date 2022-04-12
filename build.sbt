@@ -11,6 +11,11 @@ addCommandAlias(
   "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"
 )
 
+(Global / javacOptions) := Seq(
+    "-source", "11",
+    "-target", "11"
+  )
+
 ThisBuild / scalacOptions ++= Seq(
   "-explaintypes",
   "-deprecation",
