@@ -1,9 +1,9 @@
 lazy val scala213           = "2.13.8"
-lazy val scalaPluginVersion = "2022.1.2"
-lazy val pluginVersion      = "2022.1.15" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scalaPluginVersion = "2022.1.13"
+lazy val pluginVersion      = "2022.1.16" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "221"
+ThisBuild / intellijBuild := "2022.1"
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias(
@@ -34,7 +34,7 @@ lazy val root =
           "ZIO_INTELLIJ_CHANGE_NOTES",
           s"""<![CDATA[
         <ul>
-          <li>First official release supporting IntelliJ IDEA 2021.3</li>
+          <li>First official release supporting IntelliJ IDEA 2022.1</li>
         </ul>
         ]]>"""
         )
