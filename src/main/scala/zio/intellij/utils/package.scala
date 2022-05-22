@@ -225,7 +225,7 @@ package object utils {
     def scalaVersion: Option[ScalaVersion] =
       for {
         scalaSdk     <- module.scalaSdk
-        compiler     <- scalaSdk.compilerVersion
+        compiler     <- scalaSdk.libraryVersion
         scalaVersion <- ScalaVersion.fromString(compiler)
       } yield scalaVersion
   }
