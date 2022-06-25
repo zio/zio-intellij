@@ -1,8 +1,8 @@
-package zio.intellij.testsupport.runner
+package zio.intellij.testsupport.zio1.runner
 
 import com.intellij.openapi.project.{Project, ProjectManagerListener}
 
-private[runner] final class TestRunnerProjectListener extends ProjectManagerListener {
+private[testsupport] final class TestRunnerProjectListener extends ProjectManagerListener {
 
   override def projectOpened(project: Project): Unit =
     new TestRunnerProjectNotification(project).init()

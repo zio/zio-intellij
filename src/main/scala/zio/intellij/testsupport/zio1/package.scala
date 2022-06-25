@@ -1,4 +1,4 @@
-package zio.intellij
+package zio.intellij.testsupport
 
 import com.intellij.codeInsight.TestFrameworks
 import com.intellij.psi.impl.source.tree.LeafPsiElement
@@ -6,20 +6,16 @@ import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.{PsiClass, PsiElement}
 import com.intellij.testIntegration.TestFramework
-import org.jetbrains.plugins.scala.extensions._
+import org.jetbrains.plugins.scala.extensions.PsiElementExt
 import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenTypes
 import org.jetbrains.plugins.scala.lang.psi.api.base.{ScLiteral, ScReference}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScMethodCall, ScReferenceExpression}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScFunctionDefinition, ScPatternDefinition}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-package object testsupport {
-  val ZSpecFQN                   = "zio.test.RunnableSpec"
-  val DefaultRunnableSpec        = "zio.test.DefaultRunnableSpec"
-  val DefaultMutableRunnableSpec = "zio.test.DefaultMutableRunnableSpec"
-
+package object zio1 {
   def parentTypeDefinition(e: PsiElement): Option[ScTypeDefinition] =
     parentOfType(e, classOf[ScTypeDefinition], strict = false)
 

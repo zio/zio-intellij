@@ -1,18 +1,19 @@
-package zio.intellij.testsupport.runner
+package zio.intellij.testsupport.zio1.runner
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.notification._
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
-import zio.intellij.testsupport.runner.TestRunnerNotifications.{displayError, displayInfo}
-import zio.intellij.testsupport.runner.TestRunnerResolveService.ResolveError
+import TestRunnerNotifications.{displayError, displayInfo}
+import TestRunnerResolveService.ResolveError
+import zio.intellij.testsupport.zio1.runner.TestRunnerResolveService.ResolveError
 import zio.intellij.utils.{ProjectSyntax, ScalaVersionHack}
 import zio.intellij.{ErrorReporter, ZioIcon}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-private[runner] final class TestRunnerProjectNotification(private val project: Project) {
+private[testsupport] final class TestRunnerProjectNotification(private val project: Project) {
   def init(): Unit =
     if (shouldSuggestTestRunner(project)) {
       createNotification.notify(project)

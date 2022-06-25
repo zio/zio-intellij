@@ -1,4 +1,4 @@
-package zio.intellij.testsupport.runner
+package zio.intellij.testsupport.zio1.runner
 
 import com.intellij.notification._
 import com.intellij.openapi.project.Project

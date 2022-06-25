@@ -1,11 +1,11 @@
-package zio.intellij.testsupport.runner
+package zio.intellij.testsupport.zio1.runner
 
 import com.intellij.openapi.progress.ProcessCanceledException
 import org.apache.ivy.util.{AbstractMessageLogger, MessageLogger}
 import org.jetbrains.plugins.scala.DependencyManagerBase.DependencyDescription
 import org.jetbrains.plugins.scala.{DependencyManagerBase, ScalaVersion}
-import zio.intellij.testsupport.runner.TestRunnerDownloader.DownloadProgressListener
-import zio.intellij.testsupport.runner.TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
+import TestRunnerDownloader.DownloadProgressListener
+import TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
 import zio.intellij.utils.{ScalaVersionHack, Version}
 
 import java.net.URL

@@ -35,7 +35,7 @@
 
     <applicationListeners>
         <listener topic="com.intellij.openapi.project.ProjectManagerListener"
-                  class="zio.intellij.testsupport.runner.TestRunnerProjectListener"/>
+                  class="zio.intellij.testsupport.zio1.runner.TestRunnerProjectListener"/>
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -286,17 +286,22 @@
 
         <referencesSearch implementation="zio.intellij.searchers.ZioAccessorUsagesSearcher"/>
 
-        <!-- test runner -->
+        <!-- test support -->
+        <testFramework implementation="zio.intellij.testsupport.Zio1TestFramework" />
+        <testFramework implementation="zio.intellij.testsupport.Zio2TestFramework" />
+
         <configurationType implementation="zio.intellij.testsupport.ZTestConfigurationType"/>
+
         <runConfigurationProducer implementation="zio.intellij.testsupport.ZTestRunConfigurationProducer"/>
         <runLineMarkerContributor implementationClass="zio.intellij.testsupport.ZTestRunLineMarkerProvider"
                                   language="Scala" order="first"/>
-        <testFramework implementation="zio.intellij.testsupport.ZTestFramework" order="first"/>
+
+
 
         <notificationGroup id="Test Runner Download" displayType="BALLOON" isLogByDefault="true"/>
         <notificationGroup id="Test Runner Download Error" displayType="STICKY_BALLOON" isLogByDefault="true"/>
 
-        <projectService serviceImplementation="zio.intellij.testsupport.runner.TestRunnerResolveService" />
+        <projectService serviceImplementation="zio.intellij.testsupport.zio1.runner.TestRunnerResolveService" />
 
         <testCreator language="Scala" implementationClass="zio.intellij.testsupport.ZTestCreator" order="first" />
 

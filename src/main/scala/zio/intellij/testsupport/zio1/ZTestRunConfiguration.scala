@@ -1,6 +1,5 @@
-package zio.intellij.testsupport
+package zio.intellij.testsupport.zio1
 
-import java.net.URL
 import com.intellij.execution.actions.RunConfigurationProducer
 import com.intellij.execution.configurations._
 import com.intellij.execution.impl.ConsoleViewImpl
@@ -16,22 +15,31 @@ import com.intellij.testIntegration.TestFramework
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.testingSupport.test.CustomTestRunnerBasedStateProvider.TestFrameworkRunnerInfo
+import org.jetbrains.plugins.scala.testingSupport.test._
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
-import org.jetbrains.plugins.scala.testingSupport.test.{SuiteValidityChecker, _}
-import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
-import zio.intellij.testsupport.runner.TestRunnerResolveService
+import zio.intellij.testsupport.zio1.ZTestRunConfiguration.ZTestRunnerName
+import zio.intellij.testsupport.zio1.runner.TestRunnerResolveService
+import zio.intellij.testsupport.{ZTestFramework, ZTestRunConfigurationProducer, Zio1TestFramework, Zio2TestFramework}
 import zio.intellij.utils.Version.ZIO
 import zio.intellij.utils._
 
+import java.net.URL
 import java.nio.file.Paths
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
-final class ZTestRunConfiguration(project: Project, configurationFactory: ConfigurationFactory, name: String)
+final class Zio1TestRunConfiguration(project: Project, configurationFactory: ConfigurationFactory)
+    extends ZTestRunConfiguration(project, configurationFactory, "") {
+  override val testFramework: ZTestFramework = TestFramework.EXTENSION_NAME.findExtension(classOf[Zio1TestFramework])
+}
+final class Zio2TestRunConfiguration(project: Project, configurationFactory: ConfigurationFactory)
+    extends ZTestRunConfiguration(project, configurationFactory, "") {
+  override val testFramework: ZTestFramework = TestFramework.EXTENSION_NAME.findExtension(classOf[Zio2TestFramework])
+}
+
+sealed abstract class ZTestRunConfiguration(project: Project, configurationFactory: ConfigurationFactory, name: String)
     extends AbstractTestRunConfiguration(project, configurationFactory, name) {
   self =>
-
-  override val testFramework: ZTestFramework = TestFramework.EXTENSION_NAME.findExtension(classOf[ZTestFramework])
 
   override val configurationProducer: ZTestRunConfigurationProducer =
     RunConfigurationProducer.EP_NAME.findExtension(classOf[ZTestRunConfigurationProducer])
@@ -62,9 +70,9 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
   override def getActionName: String = getName
 
   private def useIntegratedRunner: Boolean =
-    runnerInfo.runnerClass == ZTestRunnerName || isSupportedZio2
+    runnerInfo.runnerClass == ZTestRunnerName || isZio2
 
-  private def isSupportedZio2: Boolean =
+  private def isZio2: Boolean =
     Option(self.getModule).flatMap(_.zioVersion).exists(_ >= ZIO.`2.0.0-M2`)
 
   private def resolveTestRunner(module: Module): Option[Seq[URL]] =
@@ -107,7 +115,7 @@ final class ZTestRunConfiguration(project: Project, configurationFactory: Config
           case "-s" :: suite :: _       => mutableList.appendAll(Seq("-s", suite))
           case "-testName" :: test :: _ => mutableList.appendAll(Seq("-t", test))
         }
-      if (isSupportedZio2) {
+      if (isZio2) {
         mutableList.appendAll(Seq("-renderer", "intellij", "-summary", "false"))
       }
       mutableList.toList

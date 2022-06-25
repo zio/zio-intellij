@@ -2,6 +2,7 @@ package zio.intellij.testsupport
 
 import com.intellij.execution.configurations.{ConfigurationFactory, ConfigurationType}
 import com.intellij.openapi.project.DumbAware
+
 import javax.swing.Icon
 
 final class ZTestConfigurationType extends ConfigurationType with DumbAware {

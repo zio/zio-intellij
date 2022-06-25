@@ -1,6 +1,5 @@
 package zio.intellij.testsupport
 
-import com.intellij.codeInsight.TestFrameworks
 import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
@@ -9,7 +8,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.{PsiClass, PsiFile, PsiPackage}
 import com.intellij.testIntegration.createTest.{CreateTestAction, CreateTestDialog}
 import com.intellij.util.IncorrectOperationException
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScClass, ScObject, ScTypeDefinition}
+import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.project.ProjectExt
 import org.jetbrains.plugins.scala.testingSupport.ScalaTestCreator
 import zio.intellij.ZioIcon

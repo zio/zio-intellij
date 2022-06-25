@@ -1,7 +1,7 @@
 package zio.intellij.testsupport
 
 import com.intellij.execution.Location
-import com.intellij.execution.actions.{ConfigurationContext, ConfigurationFromContext}
+import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.{ConfigurationFactory, ConfigurationTypeUtil}
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
@@ -9,6 +9,8 @@ import org.jetbrains.plugins.scala.runner.ScalaApplicationConfigurationProducer
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer.CreateFromContextInfo
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer.CreateFromContextInfo._
+import zio.intellij.testsupport.ZTestFramework.{ZIO1SpecFQN, ZIO2SpecFQN}
+import zio.intellij.testsupport.zio1.{testName, IsZioTestElement, ZTestRunConfiguration}
 
 final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProducer[ZTestRunConfiguration] {
 
@@ -17,7 +19,7 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
     configurationType.confFactory
   }
 
-  override protected def suitePaths: List[String] = List(ZSpecFQN)
+  override protected def suitePaths: List[String] = List(ZIO1SpecFQN, ZIO2SpecFQN)
 
   override def shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean =
     other.isProducedBy(classOf[ScalaApplicationConfigurationProducer])

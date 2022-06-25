@@ -10,15 +10,18 @@ import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.ScClassImpl
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
 import zio.intellij.ZioIcon
-import zio.intellij.testsupport.ZTestFramework.expandsToTestMethod
+import zio.intellij.testsupport.ZTestFramework.{expandsToTestMethod, ZIO1SpecFQN, ZIO2SpecFQN}
 import zio.intellij.utils.TypeCheckUtils.zioTestPackage
 
 import javax.swing.Icon
 import scala.annotation.tailrec
 
-final class ZTestFramework extends AbstractTestFramework {
-  override def getMarkerClassFQName: String = ZSpecFQN
-  override def getDefaultSuperClass: String = DefaultRunnableSpec
+final class Zio1TestFramework() extends ZTestFramework(ZIO1SpecFQN)
+final class Zio2TestFramework() extends ZTestFramework(ZIO2SpecFQN)
+
+sealed abstract class ZTestFramework(zSpecFqn: String) extends AbstractTestFramework {
+  override def getMarkerClassFQName: String = zSpecFqn
+  override def getDefaultSuperClass: String = zSpecFqn
   override def testFileTemplateName: String = "ZIO Test Suite"
   override def getName: String              = "ZIO Test"
   override def getIcon: Icon                = ZioIcon
@@ -35,7 +38,7 @@ final class ZTestFramework extends AbstractTestFramework {
     if (!definition.is[ScObject]) false
     else super.isTestClass(definition)
 
-  override def baseSuitePaths: Seq[String] = List(ZSpecFQN)
+  override def baseSuitePaths: Seq[String] = List(zSpecFqn)
 
   private def resolvesToTestMethod(sc: ScReferenceExpression): Boolean =
     sc match {
@@ -84,7 +87,11 @@ final class ZTestFramework extends AbstractTestFramework {
 }
 
 object ZTestFramework {
+  val ZIO1SpecFQN = "zio.test.AbstractRunnableSpec"
+  val ZIO2SpecFQN = "zio.test.ZIOSpecAbstract"
+
   private[ZTestFramework] val testMethodTypes = Set(
+    "_root_.zio.test.Spec[R, E]",
     "_root_.zio.test.Spec[R, E, T]",
     "_root_.zio.test.Spec[R, _root_.zio.test.TestFailure[E], _root_.zio.test.TestSuccess]",
     "_root_.zio.test.Spec[Any, _root_.zio.test.TestFailure[Nothing], _root_.zio.test.TestSuccess]",

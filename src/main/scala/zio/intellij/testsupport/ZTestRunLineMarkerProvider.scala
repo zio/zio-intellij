@@ -1,7 +1,5 @@
 package zio.intellij.testsupport
 
-import java.util.function.Function
-
 import com.intellij.execution.TestStateStorage
 import com.intellij.execution.lineMarker.{ExecutorAction, RunLineMarkerContributor}
 import com.intellij.execution.testframework.TestIconMapper
@@ -10,17 +8,20 @@ import com.intellij.icons.AllIcons.RunConfigurations.TestState
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.project.Project
 import com.intellij.psi.{PsiClass, PsiElement}
-import javax.swing.Icon
 import org.jetbrains.plugins.scala.decompiler.scalasig.ScalaSigPrinter
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.testingSupport.test.ui.ScalaTestRunLineMarkerProvider
+import zio.intellij.testsupport.zio1.{testName, IsZioTestElement}
+
+import java.util.function.Function
+import javax.swing.Icon
 
 final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
 
-  val TooltipProvider: java.util.function.Function[PsiElement, String] = (_: PsiElement) => "Run Test"
-  val TestProtocol                                                     = "java:test"
+  private val TooltipProvider: java.util.function.Function[PsiElement, String] = (_: PsiElement) => "Run Test"
+  private val TestProtocol                                                     = "java:test"
 
   override def getInfo(element: PsiElement): RunLineMarkerContributor.Info = {
     def buildInfo(td: ScTypeDefinition, tm: Option[ScReferenceExpression]) =
