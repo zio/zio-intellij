@@ -36,7 +36,9 @@ final class ErrorReporter extends ErrorReportSubmitter {
       .toList
 
     try reportErrorOnGithub(
-      errors.headOption.map(e => "Unhandled exception: " + e.split("\n", 2).head).getOrElse("An unhandled exception occurred in the plugin"),
+      errors.headOption
+        .map(e => "Unhandled exception: " + e.split("\n", 2).head)
+        .getOrElse("An unhandled exception occurred in the plugin"),
       "The following exceptions(s) occurred in the ZIO for IntelliJ plugin:",
       Option(additionalInfo),
       errors,

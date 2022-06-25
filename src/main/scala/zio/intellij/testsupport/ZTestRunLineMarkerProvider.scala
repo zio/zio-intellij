@@ -13,7 +13,6 @@ import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.testingSupport.test.ui.ScalaTestRunLineMarkerProvider
-import zio.intellij.testsupport.zio1.{testName, IsZioTestElement}
 
 import java.util.function.Function
 import javax.swing.Icon

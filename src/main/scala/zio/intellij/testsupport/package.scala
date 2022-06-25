@@ -1,4 +1,4 @@
-package zio.intellij.testsupport
+package zio.intellij
 
 import com.intellij.codeInsight.TestFrameworks
 import com.intellij.psi.impl.source.tree.LeafPsiElement
@@ -15,7 +15,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinitio
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-package object zio1 {
+package object testsupport {
   def parentTypeDefinition(e: PsiElement): Option[ScTypeDefinition] =
     parentOfType(e, classOf[ScTypeDefinition], strict = false)
 

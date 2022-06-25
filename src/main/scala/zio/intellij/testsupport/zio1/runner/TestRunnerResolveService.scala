@@ -8,7 +8,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.{Nls, NonNls}
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.util.ScalaCollectionsUtil
-import zio.intellij.testsupport.zio1.ZTestRunConfiguration.ZTestRunnerName
+import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
 import TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
 import TestRunnerDownloader.{DownloadProgressListener, NoopProgressListener}
 import TestRunnerResolveService.ResolveError.DownloadError

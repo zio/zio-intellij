@@ -4,7 +4,6 @@ import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.project.Project
 import org.jetbrains.plugins.scala.project.ProjectExt
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestRunConfigurationFactory
-import zio.intellij.testsupport.zio1.{Zio1TestRunConfiguration, Zio2TestRunConfiguration}
 import zio.intellij.utils.ModuleSyntax
 
 import javax.swing.Icon

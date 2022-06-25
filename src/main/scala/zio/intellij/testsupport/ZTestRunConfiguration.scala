@@ -1,4 +1,4 @@
-package zio.intellij.testsupport.zio1
+package zio.intellij.testsupport
 
 import com.intellij.execution.actions.RunConfigurationProducer
 import com.intellij.execution.configurations._
@@ -17,9 +17,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.testingSupport.test.CustomTestRunnerBasedStateProvider.TestFrameworkRunnerInfo
 import org.jetbrains.plugins.scala.testingSupport.test._
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
-import zio.intellij.testsupport.zio1.ZTestRunConfiguration.ZTestRunnerName
+import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
 import zio.intellij.testsupport.zio1.runner.TestRunnerResolveService
-import zio.intellij.testsupport.{ZTestFramework, ZTestRunConfigurationProducer, Zio1TestFramework, Zio2TestFramework}
 import zio.intellij.utils.Version.ZIO
 import zio.intellij.utils._
 
