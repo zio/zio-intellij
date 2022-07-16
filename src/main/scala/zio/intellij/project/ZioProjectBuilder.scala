@@ -1,10 +1,9 @@
 package zio.intellij.project
 
 import com.intellij.ide.util.projectWizard.{ModuleWizardStep, SettingsStep}
-import com.intellij.openapi.module.{JavaModuleType, ModifiableModuleModel, Module, ModuleType}
+import com.intellij.openapi.module.{ModifiableModuleModel, Module}
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.projectRoots.{JavaSdk, JavaSdkVersion, Sdk}
-import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.openapi.util.io
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBTextField
@@ -15,8 +14,7 @@ import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.project.template.ScalaVersionDownloadingDialog
 import org.jetbrains.plugins.scala.project.{ScalaLanguageLevel, Version, Versions}
 import org.jetbrains.plugins.scala.{extensions, ScalaBundle, ScalaVersion}
-import org.jetbrains.sbt.project.template.SbtModuleBuilderUtil.doSetupModule
-import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderBase, SbtModuleBuilderUtil, ScalaSettingsStepBase}
+import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderBase, ScalaSettingsStepBase}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
 import zio.intellij.ZioIcon
 import zio.intellij.utils.Version.ZIO
@@ -25,6 +23,7 @@ import zio.intellij.utils.{ScalaVersionHack, Version => ZioVersion}
 import java.awt.FlowLayout
 import java.io.File
 import javax.swing._
+import scala.collection.mutable
 
 private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
 
@@ -398,7 +397,7 @@ object ZioProjectBuilder {
 
       import io.FileUtil.writeToFile
 
-      val dependencies = new StringBuilder
+      val dependencies = new mutable.StringBuilder
       dependencies.append(s""""dev.zio" %% "zio" % "$zioVersion"""")
       if (includeZioTest) {
         dependencies.append(",").append(System.lineSeparator)
