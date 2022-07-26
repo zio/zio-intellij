@@ -1,11 +1,11 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.8"
-lazy val scalaPluginVersion = "2022.2.2"
-lazy val pluginVersion      = "2022.2.16" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scalaPluginVersion = "2022.2.10"
+lazy val pluginVersion      = "2022.2.17" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "222.2270.31"
+ThisBuild / intellijBuild := "222.3345.118"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true
@@ -41,7 +41,8 @@ lazy val root =
           "ZIO_INTELLIJ_CHANGE_NOTES",
           s"""<![CDATA[
         <ul>
-          <li>First official release supporting IntelliJ IDEA 2022.1</li>
+          <li>First official release supporting IntelliJ IDEA 2022.2</li>
+          <li>Many bug fixes and improvements, including initial support for ZIO 2.0.</li>
         </ul>
         ]]>"""
         )
