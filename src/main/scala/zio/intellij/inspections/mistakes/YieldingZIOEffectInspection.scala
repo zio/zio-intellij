@@ -1,17 +1,34 @@
 package zio.intellij.inspections.mistakes
 
-import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
-import com.intellij.psi.PsiElement
-import org.jetbrains.plugins.scala.codeInspection.AbstractRegisteredInspection
+import com.intellij.codeInspection._
+import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import zio.intellij.inspections.zioLike
 
-class YieldingZIOEffectInspection extends AbstractRegisteredInspection {
+class YieldingZIOEffectInspection extends LocalInspectionTool {
+
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
+    case expr: ScFor =>
+      expr.body match {
+        case Some(e: ScBlock) =>
+          e.exprs.lastOption match {
+            case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
+              Some(createDescriptor(holder.getManager, isOnTheFly, body))
+            case _ => None
+          }
+        case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
+          Some(createDescriptor(holder.getManager, isOnTheFly, body))
+        case _ => None
+      }
+    case _ => None
+  }
 
   private def createDescriptor(
+    manager: InspectionManager,
+    isOnTheFly: Boolean,
     expr: ScExpression
-  )(implicit manager: InspectionManager, isOnTheFly: Boolean): ProblemDescriptor =
+  ): ProblemDescriptor =
     manager.createProblemDescriptor(
       expr,
       YieldingZIOEffectInspection.message,
@@ -37,28 +54,6 @@ class YieldingZIOEffectInspection extends AbstractRegisteredInspection {
       .flatMap(_.generators)
       .flatMap(_.expr)
       .exists(fromSameClass(_, expr))
-
-  override protected def problemDescriptor(
-    element: PsiElement,
-    maybeQuickFix: Option[LocalQuickFix],
-    descriptionTemplate: String,
-    highlightType: ProblemHighlightType
-  )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
-    element match {
-      case expr: ScFor =>
-        expr.body match {
-          case Some(e: ScBlock) =>
-            e.exprs.lastOption match {
-              case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
-                Some(createDescriptor(body))
-              case _ => None
-            }
-          case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
-            Some(createDescriptor(body))
-          case _ => None
-        }
-      case _ => None
-    }
 }
 
 object YieldingZIOEffectInspection {

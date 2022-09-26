@@ -1,10 +1,9 @@
 package zio.intellij.inspections.mistakes
 
-import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
+import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
 import org.jetbrains.annotations.Nls
-import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnTwoPsiElements, AbstractRegisteredInspection}
+import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnTwoPsiElements, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.extensions.PsiElementExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGuard}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createElementFromText
@@ -13,22 +12,18 @@ import zio.intellij.inspections._
 import zio.intellij.inspections.mistakes.IfGuardInsteadOfWhenInspection.createFix
 import zio.intellij.utils.TypeCheckUtils._
 
-class IfGuardInsteadOfWhenInspection extends AbstractRegisteredInspection {
+class IfGuardInsteadOfWhenInspection extends LocalInspectionTool {
 
-  override protected def problemDescriptor(
-    element: PsiElement,
-    maybeQuickFix: Option[LocalQuickFix],
-    descriptionTemplate: String,
-    highlightType: ProblemHighlightType
-  )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
-    element match {
-      case `_ <- x`(genExpr)
-          if fromZio(genExpr) && IntentionAvailabilityChecker.checkInspection(this, element.getParent) =>
-        Option(element.getNextSiblingNotWhitespaceComment).collect {
-          case guard @ guard(_) => createFix(genExpr, guard)
-        }
-      case _ => None
-    }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
+    case element @ `_ <- x`(genExpr)
+        if fromZio(genExpr) && IntentionAvailabilityChecker.checkInspection(this, element.getParent) =>
+      Option(element.getNextSiblingNotWhitespaceComment).collect {
+        case guard @ guard(_) =>
+          val quickFix = createFix(holder.getManager, isOnTheFly, genExpr, guard)
+          holder.registerProblem(quickFix)
+      }
+    case _ => None
+  }
 }
 
 object IfGuardInsteadOfWhenInspection {
@@ -44,9 +39,11 @@ object IfGuardInsteadOfWhenInspection {
   }
 
   private def createFix(
+    manager: InspectionManager,
+    isOnTheFly: Boolean,
     genExpr: ScExpression,
     guard: ScGuard
-  )(implicit manager: InspectionManager, isOnTheFly: Boolean): ProblemDescriptor =
+  ): ProblemDescriptor =
     manager.createProblemDescriptor(
       guard,
       problemMessage,

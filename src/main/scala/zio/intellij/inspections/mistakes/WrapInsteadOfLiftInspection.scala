@@ -1,9 +1,9 @@
 package zio.intellij.inspections.mistakes
 
-import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
+import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, AbstractRegisteredInspection}
+import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGenerator}
@@ -17,60 +17,55 @@ import zio.intellij.utils.types.{ZioType, ZioTypes}
 
 import scala.annotation.tailrec
 
-class WrapInsteadOfLiftInspection extends AbstractRegisteredInspection {
+class WrapInsteadOfLiftInspection extends LocalInspectionTool {
 
-  override protected def problemDescriptor(
-    element: PsiElement,
-    maybeQuickFix: Option[LocalQuickFix],
-    descriptionTemplate: String,
-    highlightType: ProblemHighlightType
-  )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] = {
-
-    @tailrec
-    def isUsed(expr: Option[PsiElement]): Boolean = {
-      val _isUsed: PsiElement => Boolean = {
-        case n: ScNamedElement => isElementUsed(n, isOnTheFly)
-        case _                 => false
-      }
-
-      expr match {
-        case Some(v: ScValueOrVariable) =>
-          v.hasExplicitType || v.declaredElements.exists(_isUsed)
-        case Some(r: ScReferencePattern) =>
-          r.bindings.filterNot(_.isWildcard).exists(_isUsed)
-        case Some(ScGenerator(p, _)) => isUsed(p.toOption)
-        case _                       => false
-      }
-    }
-
-    def createFix(localFix: QuickFix): ProblemDescriptor =
-      manager.createProblemDescriptor(
-        localFix.toReplace,
-        messageFormat.format(localFix.wrappedEffect, localFix.wrappedEffect),
-        isOnTheFly,
-        Array[LocalQuickFix](localFix),
-        ProblemHighlightType.WEAK_WARNING
-      )
-
-    def hasEffectMethod(zioType: ZioType): Boolean =
-      zioType != ZioTypes.UIO && zioType != ZioTypes.URIO
-
-    element match {
-      case expr: ScExpression =>
-        expr match {
-          case Future(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
-            Some(createFix(new QuickFix(zioType, expr, f, "Future", "implicit ec => ")))
-          case Try(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
-            Some(createFix(new QuickFix(zioType, expr, f, "Try")))
-          case Option(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
-            Some(createFix(new QuickFix(zioType, expr, f, "Option")))
-          case Either(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
-            Some(createFix(new QuickFix(zioType, expr, f, "Either")))
-          case _ => None
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple =
+    (element: PsiElement) => {
+      @tailrec
+      def isUsed(expr: Option[PsiElement]): Boolean = {
+        val _isUsed: PsiElement => Boolean = {
+          case n: ScNamedElement => isElementUsed(n, isOnTheFly)
+          case _                 => false
         }
-      case _ => None
+
+        expr match {
+          case Some(v: ScValueOrVariable) =>
+            v.hasExplicitType || v.declaredElements.exists(_isUsed)
+          case Some(r: ScReferencePattern) =>
+            r.bindings.filterNot(_.isWildcard).exists(_isUsed)
+          case Some(ScGenerator(p, _)) => isUsed(p.toOption)
+          case _                       => false
+        }
+      }
+
+      def createFix(localFix: QuickFix): ProblemDescriptor =
+        holder.getManager.createProblemDescriptor(
+          localFix.toReplace,
+          messageFormat.format(localFix.wrappedEffect, localFix.wrappedEffect),
+          isOnTheFly,
+          Array[LocalQuickFix](localFix),
+          ProblemHighlightType.WEAK_WARNING
+        )
+
+      def hasEffectMethod(zioType: ZioType): Boolean =
+        zioType != ZioTypes.UIO && zioType != ZioTypes.URIO
+
+      element match {
+        case expr: ScExpression =>
+          expr match {
+            case Future(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
+              Some(createFix(new QuickFix(zioType, expr, f, "Future", "implicit ec => ")))
+            case Try(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
+              Some(createFix(new QuickFix(zioType, expr, f, "Try")))
+            case Option(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
+              Some(createFix(new QuickFix(zioType, expr, f, "Option")))
+            case Either(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
+              Some(createFix(new QuickFix(zioType, expr, f, "Either")))
+            case _ =>
+          }
+        case _ =>
+      }
     }
-  }
 
   val Future = new ExpressionExtractor(scalaFuture)
   val Try    = new ExpressionExtractor(scalaTry)

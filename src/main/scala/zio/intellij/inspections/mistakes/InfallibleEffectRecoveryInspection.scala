@@ -1,10 +1,10 @@
 package zio.intellij.inspections.mistakes
 
-import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
+import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.collections.{stripped, MethodRepr}
-import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, AbstractRegisteredInspection}
+import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
@@ -12,9 +12,9 @@ import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection._
 import zio.intellij.utils.TypeCheckUtils.isInfallibleEffect
-import zio.intellij.utils.{OptionUtils => OptionOps, _}
+import zio.intellij.utils._
 
-class InfallibleEffectRecoveryInspection extends AbstractRegisteredInspection {
+class InfallibleEffectRecoveryInspection extends LocalInspectionTool {
 
   private def canFailDesignator(context: PsiElement): Option[ScType] =
     createType("_root_.zio.CanFail", context)
@@ -25,19 +25,13 @@ class InfallibleEffectRecoveryInspection extends AbstractRegisteredInspection {
       case _                                          => false
     }
 
-  override protected def problemDescriptor(
-    element: PsiElement,
-    maybeQuickFix: Option[LocalQuickFix],
-    descriptionTemplate: String,
-    highlightType: ProblemHighlightType
-  )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
-    element match {
-      case MethodRepr(expr, Some(base), Some(ref), _) if isInfallibleEffect(base) =>
-        expr.findImplicitArguments.flatMap { args =>
-          OptionOps.when(args.map(_.element).exists(isCanFailEv))(createFix(expr, base, ref, highlightType))
-        }
-      case _ => None
-    }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
+    case MethodRepr(expr, Some(base), Some(ref), _) if isInfallibleEffect(base) =>
+      expr.findImplicitArguments.flatMap { args =>
+        Option.when(args.map(_.element).exists(isCanFailEv))(createFix(holder.getManager, isOnTheFly, expr, base, ref))
+      }
+    case _ => None
+  }
 }
 
 object InfallibleEffectRecoveryInspection {
@@ -47,17 +41,18 @@ object InfallibleEffectRecoveryInspection {
     s"Effect cannot fail; operation .$toDelete is impossible"
 
   def createFix(
+    manager: InspectionManager,
+    isOnTheFly: Boolean,
     expr: ScExpression,
     base: ScExpression,
-    toDelete: ScReference,
-    highlightType: ProblemHighlightType
-  )(implicit manager: InspectionManager, isOnTheFly: Boolean): ProblemDescriptor =
+    toDelete: ScReference
+  ): ProblemDescriptor =
     manager.createProblemDescriptor(
       expr,
       description(toDelete.refName),
       isOnTheFly,
       Array[LocalQuickFix](new RecoveryQuickFix(expr, base, toDelete.refName)),
-      highlightType
+      ProblemHighlightType.ERROR
     )
 
   final private class RecoveryQuickFix(expr: ScExpression, base: ScExpression, toDelete: String)

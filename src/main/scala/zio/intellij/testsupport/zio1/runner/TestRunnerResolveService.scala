@@ -1,13 +1,13 @@
 package zio.intellij.testsupport.zio1.runner
 
-import com.intellij.openapi.components.{PersistentStateComponent, ServiceManager, State, Storage}
+import com.intellij.notification.Notification
+import com.intellij.openapi.components.{PersistentStateComponent, State, Storage}
 import com.intellij.openapi.progress.{ProcessCanceledException, ProgressIndicator}
 import com.intellij.openapi.project.Project
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.{Nls, NonNls}
 import org.jetbrains.plugins.scala.ScalaVersion
-import org.jetbrains.plugins.scala.util.ScalaCollectionsUtil
 import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
 import TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
 import TestRunnerDownloader.{DownloadProgressListener, NoopProgressListener}
@@ -16,9 +16,12 @@ import TestRunnerResolveService._
 import zio.intellij.utils.{BackgroundTask, ScalaVersionHack, Version}
 
 import java.net.{URL, URLClassLoader}
+import java.util.concurrent.ConcurrentHashMap
 import scala.beans.BeanProperty
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
+import scala.jdk.CollectionConverters.ConcurrentMapHasAsScala
+import scala.ref.WeakReference
 import scala.util._
 
 // Borrowed from ScalafmtDynamicServiceImpl and friends
@@ -27,7 +30,8 @@ import scala.util._
 private[testsupport] final class TestRunnerResolveService
     extends PersistentStateComponent[TestRunnerResolveService.ServiceState] {
 
-  private val testRunnerVersions: mutable.Map[(Version, String), ResolveStatus] = ScalaCollectionsUtil.newConcurrentMap
+  private val testRunnerVersions: mutable.Map[(Version, String), ResolveStatus] =
+    new ConcurrentHashMap[(Version, String), ResolveStatus]().asScala
 
   private val state: TestRunnerResolveService.ServiceState = new TestRunnerResolveService.ServiceState
 

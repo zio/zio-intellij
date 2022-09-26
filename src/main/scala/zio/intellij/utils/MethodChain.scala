@@ -24,7 +24,7 @@ object MethodChain {
   private def collectChain(expr: ScExpression): List[ScExpression] = {
     @tailrec
     def collectChainAcc(expr: ScExpression, acc: List[ScExpression]): List[ScExpression] = {
-      val newAcc = expr.getParent.is[ScMethodCall].fold(acc, expr :: acc)
+      val newAcc = if (expr.getParent.is[ScMethodCall]) acc else expr :: acc
       expr match {
         case ScInfixExpr(left, _, _) => collectChainAcc(left, newAcc)
         case ChainCall(inner)        => collectChainAcc(inner, newAcc)

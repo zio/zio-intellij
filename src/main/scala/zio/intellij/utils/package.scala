@@ -9,6 +9,7 @@ import com.intellij.psi.{JavaPsiFacade, PsiClass, PsiElement}
 import jetbrains.macroAnnotations.CachedInUserData
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
+import org.jetbrains.plugins.scala.compiler.references.ModuleSbtExtensions
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.ElementScope
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId

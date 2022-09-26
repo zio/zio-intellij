@@ -2,6 +2,9 @@ package zio.intellij.inspections
 
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElement
+import org.jetbrains.plugins.scala.codeInspection
+import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
+
 import javax.swing.JComponent
 import org.jetbrains.plugins.scala.codeInspection.collections.OperationOnCollectionInspectionBase.SimplifiableExpression
 import org.jetbrains.plugins.scala.codeInspection.collections._
@@ -23,16 +26,14 @@ abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOn
       .flatMap(_.zioVersion)
       .exists(zioVersion => inspection.isAvailable(zioVersion))
 
-  protected override def actionFor(implicit
-    holder: ProblemsHolder,
-    isOnTheFly: Boolean
-  ): PartialFunction[PsiElement, Any] = {
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
     case SimplifiableExpression(expr) if isInspectionAvailable(this, expr) =>
       simplifications(expr).foreach {
         case s @ Simplification(toReplace, _, hint, rangeInParent) =>
           val quickFix = OperationOnCollectionQuickFix(s)
           holder.registerProblem(toReplace.getElement, hint, highlightType, rangeInParent, quickFix)
       }
+    case _ =>
   }
 
   private def simplifications(expr: ScExpression): Seq[Simplification] = {

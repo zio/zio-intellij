@@ -2,10 +2,11 @@ package zio.intellij.testsupport.zio1.runner
 
 import com.intellij.notification._
 import com.intellij.openapi.project.Project
-import org.jetbrains.plugins.scala.util.ScalaCollectionsUtil
 
+import java.util.concurrent.ConcurrentHashMap
 import javax.swing.Icon
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 import scala.ref.WeakReference
 
 private[runner] object TestRunnerNotifications {
@@ -16,7 +17,8 @@ private[runner] object TestRunnerNotifications {
     NotificationGroupManager.getInstance.getNotificationGroup("Test Runner Download Error")
 
   // do not display notification with same content several times
-  private val messagesShown: mutable.Map[String, WeakReference[Notification]] = ScalaCollectionsUtil.newConcurrentMap
+  private val messagesShown: mutable.Map[String, WeakReference[Notification]] =
+    new ConcurrentHashMap[String, WeakReference[Notification]]().asScala
 
   private def displayNotification(
     message: String,

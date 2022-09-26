@@ -1,42 +1,35 @@
 package zio.intellij.inspections.mistakes
 
-import com.intellij.codeInspection.{InspectionManager, LocalQuickFix, ProblemDescriptor, ProblemHighlightType}
-import com.intellij.psi.PsiElement
-import org.jetbrains.plugins.scala.codeInspection.AbstractRegisteredInspection
-import org.jetbrains.plugins.scala.lang.psi.{ElementScope, ScalaPsiUtil}
+import com.intellij.codeInspection._
+import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScSimpleTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScTypeAliasDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.lang.psi.types.ScalaTypePresentation.ObjectTypeSuffix
+import org.jetbrains.plugins.scala.lang.psi.{ElementScope, ScalaPsiUtil}
 
-class IncorrectPreludeNewTypeAliasInspection extends AbstractRegisteredInspection {
+class IncorrectPreludeNewTypeAliasInspection extends LocalInspectionTool {
 
-  override protected def problemDescriptor(
-    element: PsiElement,
-    maybeQuickFix: Option[LocalQuickFix],
-    descriptionTemplate: String,
-    highlightType: ProblemHighlightType
-  )(implicit manager: InspectionManager, isOnTheFly: Boolean): Option[ProblemDescriptor] =
-    element match {
-      case s: ScTypeAliasDefinition =>
-        s.aliasedTypeElement.collect {
-          case sc @ ScSimpleTypeElement(ref) if sc.getParamTypeText.endsWith(ObjectTypeSuffix) =>
-            Option(ref.resolve()).collect {
-              case o: ScObject if isNewtype(o) => o
-            }.flatMap { self =>
-              Option.when(ref.isReferenceTo(self))(
-                manager.createProblemDescriptor(
-                  sc,
-                  s"Possibly mistaken use of '${self.name}.type' in the type alias, did you mean '${self.name}.Type' instead?",
-                  isOnTheFly,
-                  Array.empty[LocalQuickFix],
-                  ProblemHighlightType.WARNING
-                )
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
+    case s: ScTypeAliasDefinition =>
+      s.aliasedTypeElement.collect {
+        case sc @ ScSimpleTypeElement(ref) if sc.getParamTypeText.endsWith(ObjectTypeSuffix) =>
+          Option(ref.resolve()).collect {
+            case o: ScObject if isNewtype(o) => o
+          }.flatMap { self =>
+            Option.when(ref.isReferenceTo(self))(
+              holder.getManager.createProblemDescriptor(
+                sc,
+                s"Possibly mistaken use of '${self.name}.type' in the type alias, did you mean '${self.name}.Type' instead?",
+                isOnTheFly,
+                Array.empty[LocalQuickFix],
+                ProblemHighlightType.WARNING
               )
-            }
-        }.flatten
-      case _ => None
-    }
+            )
+          }
+      }.flatten
+    case _ => None
+  }
 
   def isNewtype(tpe: ScObject): Boolean = {
     val elementScope = ElementScope(tpe.getProject)
