@@ -20,12 +20,12 @@ addCommandAlias("check", "scalafmtCheckAll")
 
 ThisBuild / scalacOptions ++= Seq(
   "-explaintypes",
-  "-deprecation",
+  // "-deprecation",
   "-unchecked",
   "-feature",
   "-Xlint:serial",
   "-Ymacro-annotations",
-  "-Xfatal-warnings",
+  // "-Xfatal-warnings",
   "-language:implicitConversions",
   "-language:reflectiveCalls",
   "-language:existentials"
