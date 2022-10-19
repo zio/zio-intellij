@@ -5,7 +5,7 @@ lazy val scalaPluginVersion = "2022.2.10"
 lazy val pluginVersion      = "2022.2.17" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "222.3345.118"
+ThisBuild / intellijBuild := "222"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true
