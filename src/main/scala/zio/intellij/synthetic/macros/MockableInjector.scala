@@ -19,7 +19,8 @@ class MockableInjector extends SyntheticMembersInjector {
   override def injectSupers(source: ScTypeDefinition): Seq[String] =
     MockableInjector.findMacroAnnotationTypeElement(source) match {
       case Some((_, serviceClassName)) =>
-        Seq(s"zio.test.mock.Mock[zio.Has[$serviceClassName]]")
+        if (source.module.exists(_.isZio2)) Seq(s"zio.mock.Mock[$serviceClassName]")
+        else Seq(s"zio.test.mock.Mock[zio.Has[$serviceClassName]]")
       case _ => Seq.empty
     }
 
@@ -36,7 +37,10 @@ class MockableInjector extends SyntheticMembersInjector {
   override def injectMembers(source: ScTypeDefinition): Seq[String] =
     MockableInjector.findMacroAnnotationTypeElement(source) match {
       case Some((_, serviceClassName)) =>
-        Seq(s"val compose: zio.URLayer[zio.Has[zio.test.mock.Proxy], zio.Has[$serviceClassName]] = ???")
+        if (source.module.exists(_.isZio2))
+          Seq(s"val compose: zio.URLayer[zio.mock.Proxy, $serviceClassName] = ???")
+        else
+          Seq(s"val compose: zio.URLayer[zio.Has[zio.test.mock.Proxy], zio.Has[$serviceClassName]] = ???")
       case _ => Seq.empty
     }
 
@@ -44,9 +48,11 @@ class MockableInjector extends SyntheticMembersInjector {
 
 object MockableInjector {
   private[this] val mockableAnnotation = "zio.test.mock.mockable"
+  private[this] val mockable2Annotation = "zio.mock.mockable"
 
-  def findMacroAnnotationTypeElement(source: ScTypeDefinition): Option[(ScTypeElement, String)] =
-    Option(source.findAnnotationNoAliases(mockableAnnotation)).flatMap {
+  def findMacroAnnotationTypeElement(source: ScTypeDefinition): Option[(ScTypeElement, String)] = {
+    val annotation = if (source.module.exists(_.isZio2)) mockable2Annotation else mockableAnnotation
+    Option(source.findAnnotationNoAliases(annotation)).flatMap {
       case a: ScAnnotation =>
         a.typeElement match {
           case ScParameterizedTypeElement(_, Seq(serviceTypeElement)) =>
@@ -58,6 +64,7 @@ object MockableInjector {
         }
       case _ => None
     }
+  }
 
   def makeTags(typeDefinition: ScTypeDefinition): List[String] =
     getMembers(typeDefinition).view.collect {
