@@ -1,8 +1,8 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.8"
-lazy val scalaPluginVersion = "2022.1.13"
-lazy val pluginVersion      = "2022.1.16" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scalaPluginVersion = "2022.1.17"
+lazy val pluginVersion      = "2022.1.17" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "221"
@@ -38,9 +38,8 @@ lazy val root =
         xml.changeNotes = sys.env.getOrElse(
           "ZIO_INTELLIJ_CHANGE_NOTES",
           s"""<![CDATA[
-        <ul>
-          <li>First official release supporting IntelliJ IDEA 2022.1</li>
-        </ul>
+        Preliminary support for ZIO 2.0.<br/>
+        <b>Note:</b> While the ZIO 2.0 support is ongoing, there might be false ZIO 1.0 suggestions that do not work for ZIO 2.0. Please report any such instances to the plugin Github/Discord. Thanks!
         ]]>"""
         )
       }
