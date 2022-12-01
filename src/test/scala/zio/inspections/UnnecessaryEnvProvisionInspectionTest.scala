@@ -16,7 +16,7 @@ abstract class UnnecessaryEnvProvisionInspectionTest(fromEffect: String => Strin
   def testInlineReplacement(): Unit = {
     val text   = z(s"${fromEffect("UIO(1)")}.$faultyMethod(???)")
     val result = z(fromEffect("UIO(1)"))
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testValHighlighting(): Unit = z {
@@ -33,7 +33,7 @@ abstract class UnnecessaryEnvProvisionInspectionTest(fromEffect: String => Strin
       s"""val foo = ${fromEffect("UIO(1)")}
          |foo""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testDefHighlighting(): Unit = z {
@@ -50,7 +50,7 @@ abstract class UnnecessaryEnvProvisionInspectionTest(fromEffect: String => Strin
       s"""def foo = ${fromEffect("UIO(1)")}
          |foo""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testInlineBlockHighlighting(): Unit =
@@ -69,7 +69,7 @@ abstract class UnnecessaryEnvProvisionInspectionTest(fromEffect: String => Strin
          |}""".stripMargin
     }
     val result = z(s"${fromEffect("UIO(1)")}")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testValBlockHighlighting(): Unit =
@@ -93,7 +93,7 @@ abstract class UnnecessaryEnvProvisionInspectionTest(fromEffect: String => Strin
       s"""val foo = ${fromEffect("UIO(1)")}
          |foo""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testDefBlockHighlighting(): Unit = z {
@@ -116,7 +116,7 @@ abstract class UnnecessaryEnvProvisionInspectionTest(fromEffect: String => Strin
       s"""def foo = ${fromEffect("UIO(1)")}
          |foo""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testSimpleProvideInlineHighlighting(): Unit =
@@ -125,7 +125,7 @@ abstract class UnnecessaryEnvProvisionInspectionTest(fromEffect: String => Strin
   def testSimpleProvideInlineReplacement(): Unit = {
     val text   = z(s"${fromEffect("UIO(1)")}.provide(???)")
     val result = z(fromEffect("UIO(1)"))
-    testQuickFixes(text, result, UnnecessaryEnvProvisionInspection.hint("provide"))
+    testQuickFix(text, result, UnnecessaryEnvProvisionInspection.hint("provide"))
   }
 
   def testFallibleEffectNoHighlighting(): Unit =

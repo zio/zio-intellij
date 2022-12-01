@@ -2,7 +2,7 @@ package zio.intellij.testsupport
 
 import com.intellij.execution.configurations.JavaParameters
 import com.intellij.openapi.util.SystemInfo.{isLinux, isMac, isWindows}
-import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestAdapter
+import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestCase
 import org.jetbrains.plugins.scala.util.Markers
 import org.junit.Assert.assertArrayEquals
 
@@ -35,7 +35,7 @@ class MacOsZTestRunConfigurationTest
 abstract class ZTestRunConfigurationTestBase(shouldRun: Boolean)(
   path: URL,
   assertPath: String
-) extends ScalaLightCodeInsightFixtureTestAdapter
+) extends ScalaLightCodeInsightFixtureTestCase
     with Markers {
   def rebuildList(input: List[String]): List[String] = {
     val mutableList: ListBuffer[String] = ListBuffer.empty[String]

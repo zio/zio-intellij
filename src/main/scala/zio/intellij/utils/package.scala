@@ -120,7 +120,7 @@ package object utils {
     createTypeElement(tpe.codeText, context)
 
   def createExpression(text: String, context: PsiElement): Option[ScExpression] =
-    ScalaPsiElementFactory.safe(_.createExpressionFromText(text, context))
+    ScalaPsiElementFactory.safe(_.createExpressionFromText(text, context)(context))
 
   def extractServiceTypeArgument(accessTypeArg: Option[ScTypeElement]) = for {
     arg           <- accessTypeArg

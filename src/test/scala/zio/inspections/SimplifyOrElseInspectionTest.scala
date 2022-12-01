@@ -19,7 +19,7 @@ class SimplifyOrElseInspectionTest extends ZSimplifyInspectionTest[SimplifyOrEls
     val result = z {
       """b.orElse(b).orElseFail(new RuntimeException("ooof"))"""
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testOneLineBlockHighlighting(): Unit =
@@ -38,7 +38,7 @@ class SimplifyOrElseInspectionTest extends ZSimplifyInspectionTest[SimplifyOrEls
     val result = z {
       """b.orElse(b).orElseFail(new RuntimeException("ooof"))"""
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testMultiLineBlockHighlighting(): Unit =
@@ -65,7 +65,7 @@ class SimplifyOrElseInspectionTest extends ZSimplifyInspectionTest[SimplifyOrEls
         |  new RuntimeException("ooof")
         |}""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testNoHighlighting(): Unit =

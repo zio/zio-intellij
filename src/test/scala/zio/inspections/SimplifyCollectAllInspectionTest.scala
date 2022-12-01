@@ -24,7 +24,7 @@ abstract class CollectAllInspectionTest(methodToReplace: String, methodToReplace
       s"""val myIterable: Iterable[String] = ???
          |URIO.$methodToReplaceWith$nParamList(myIterable)(f)""".stripMargin
     )
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testBlockHighlighting(): Unit =
@@ -58,7 +58,7 @@ abstract class CollectAllInspectionTest(methodToReplace: String, methodToReplace
          |    f(it)
          |}""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }
 

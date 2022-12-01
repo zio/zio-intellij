@@ -10,7 +10,7 @@ class SimplifyAssertInspectionTest extends ZSimplifyInspectionTest[SimplifyAsser
     z(s"$START$test$END").assertHighlighted()
     val t = z(test)
     val e = z(expected)
-    testQuickFixes(t, e, hint)
+    testQuickFix(t, e, hint)
   }
 
   def testEqualTo_true() =

@@ -19,7 +19,7 @@ class SimplifyFailOrDieInspectionTest extends ZSimplifyInspectionTest[SimplifyFa
     val result = z {
       """ZIO.die(new RuntimeException("ooof"))"""
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testOneLineBlockHighlighting(): Unit =
@@ -38,7 +38,7 @@ class SimplifyFailOrDieInspectionTest extends ZSimplifyInspectionTest[SimplifyFa
     val result = z {
       """ZIO.die(new RuntimeException("ooof"))"""
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testMultiLineBlockHighlighting(): Unit =
@@ -65,6 +65,6 @@ class SimplifyFailOrDieInspectionTest extends ZSimplifyInspectionTest[SimplifyFa
         |  new RuntimeException("ooof")
         |}""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }

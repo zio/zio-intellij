@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnTwoPsiElements, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.extensions.PsiElementExt
-import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGuard}
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGuard, ScMethodCall}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createElementFromText
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
 import zio.intellij.inspections._
@@ -32,7 +32,7 @@ object IfGuardInsteadOfWhenInspection {
       extends AbstractFixOnTwoPsiElements(fixMessage, generatorExpr, guard) {
 
     override protected def doApplyFix(generatorExpr: ScExpression, guard: ScGuard)(implicit project: Project): Unit = {
-      val replacement = createElementFromText(s"${generatorExpr.getText}.when(${guard.expr.fold("")(_.getText)})")
+      val replacement = createElementFromText[ScExpression](s"${generatorExpr.getText}.when(${guard.expr.fold("")(_.getText)})", generatorExpr)(generatorExpr.projectContext)
       generatorExpr.replace(replacement)
       guard.delete()
     }

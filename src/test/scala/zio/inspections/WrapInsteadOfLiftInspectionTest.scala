@@ -19,7 +19,7 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
                     |ZIO(o)""".stripMargin)
     val result = z(s"""val o: Option[Int] = Option(42)
                       |ZIO.fromOption(o)""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_option_reference_apply(): Unit = {
@@ -29,35 +29,35 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
                     |ZIO.apply(o)""".stripMargin)
     val result = z(s"""val o: Option[Int] = Option(42)
                       |ZIO.fromOption(o)""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_option_direct_some(): Unit = {
     z(s"${START}ZIO(Some(42))$END").assertHighlighted()
     val text   = z(s"ZIO(Some(42))")
     val result = z(s"ZIO.fromOption(Some(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_option_direct_none(): Unit = {
     z(s"${START}ZIO(None)$END").assertHighlighted()
     val text   = z(s"ZIO(None)")
     val result = z(s"ZIO.fromOption(None)")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_option_effect(): Unit = {
     z(s"${START}ZIO.effect(Option(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effect(Option(42))")
     val result = z(s"ZIO.fromOption(Option(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_option_effectTotal(): Unit = {
     z(s"${START}ZIO.effectTotal(Option(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effectTotal(Option(42))")
     val result = z(s"ZIO.fromOption(Option(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_non_option_getOrElse(): Unit =
@@ -71,7 +71,7 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
                     |ZIO.effect(o.map(_ + " foo"))""".stripMargin)
     val result = z(s"""val o: Option[String] = ???
                       |ZIO.fromOption(o.map(_ + " foo"))""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_nested(): Unit = {
@@ -80,7 +80,7 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
 
     val text   = z("ZIO.effect(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)).getOrElse(None))")
     val result = z("ZIO.fromOption(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)).getOrElse(None))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }
 
@@ -95,7 +95,7 @@ class TryWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Try") {
                     |ZIO(t)""".stripMargin)
     val result = z(s"""val t: Try[Int] = Try(42)
                       |ZIO.fromTry(t)""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_try_reference_apply(): Unit = {
@@ -105,35 +105,35 @@ class TryWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Try") {
                     |ZIO.apply(t)""".stripMargin)
     val result = z(s"""val t: Try[Int] = Try(42)
                       |ZIO.fromTry(t)""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_try_direct_success(): Unit = {
     z(s"${START}ZIO(Success(42))$END").assertHighlighted()
     val text   = z(s"ZIO(Success(42))")
     val result = z(s"ZIO.fromTry(Success(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_try_direct_failure(): Unit = {
     z(s"${START}ZIO(Failure(new Exception()))$END").assertHighlighted()
     val text   = z(s"ZIO(Failure(new Exception()))")
     val result = z(s"ZIO.fromTry(Failure(new Exception()))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_try_effect(): Unit = {
     z(s"${START}ZIO.effect(Try(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effect(Try(42))")
     val result = z(s"ZIO.fromTry(Try(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_try_effectTotal(): Unit = {
     z(s"${START}ZIO.effectTotal(Try(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effectTotal(Try(42))")
     val result = z(s"ZIO.fromTry(Try(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_nested(): Unit = {
@@ -142,7 +142,7 @@ class TryWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Try") {
 
     val text   = z("ZIO.effect(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)))")
     val result = z("ZIO.fromTry(util.Right(util.Try(Option(42))).getOrElse(util.Try(None)))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }
 
@@ -157,7 +157,7 @@ class EitherWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Eith
                     |ZIO(either)""".stripMargin)
     val result = z(s"""val either: Either[String, Int] = Right(42)
                       |ZIO.fromEither(either)""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_either_reference_apply(): Unit = {
@@ -167,35 +167,35 @@ class EitherWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Eith
                     |ZIO.apply(either)""".stripMargin)
     val result = z(s"""val either: Either[String, Int] = Right(42)
                       |ZIO.fromEither(either)""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_either_direct_right(): Unit = {
     z(s"${START}ZIO(Right(42))$END").assertHighlighted()
     val text   = z(s"ZIO(Right(42))")
     val result = z(s"ZIO.fromEither(Right(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_either_direct_left(): Unit = {
     z(s"${START}ZIO(Left(42))$END").assertHighlighted()
     val text   = z(s"ZIO(Left(42))")
     val result = z(s"ZIO.fromEither(Left(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_either_effect(): Unit = {
     z(s"${START}ZIO.effect(Right(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effect(Right(42))")
     val result = z(s"ZIO.fromEither(Right(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_either_effectTotal(): Unit = {
     z(s"${START}ZIO.effectTotal(Right(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effectTotal(Right(42))")
     val result = z(s"ZIO.fromEither(Right(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_nested(): Unit = {
@@ -204,7 +204,7 @@ class EitherWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Eith
 
     val text   = z("ZIO.effect(util.Right(util.Try(Option(42))))")
     val result = z("ZIO.fromEither(util.Right(util.Try(Option(42))))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }
 
@@ -219,7 +219,7 @@ class FutureWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Futu
                     |ZIO(future)""".stripMargin)
     val result = z(s"""val future = Future(42)
                       |ZIO.fromFuture(implicit ec => future)""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_future_reference_apply(): Unit = {
@@ -229,34 +229,34 @@ class FutureWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Futu
                     |ZIO.apply(future)""".stripMargin)
     val result = z(s"""val future = Future(42)
                       |ZIO.fromFuture(implicit ec => future)""".stripMargin)
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_future_direct_method(): Unit = {
     z(s"${START}ZIO(Future(42))$END").assertHighlighted()
     val text   = z(s"ZIO(Future(42))")
     val result = z(s"ZIO.fromFuture(implicit ec => Future(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_future_effect(): Unit = {
     z(s"${START}ZIO.effect(Future(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effect(Future(42))")
     val result = z(s"ZIO.fromFuture(implicit ec => Future(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_future_effectTotal(): Unit = {
     z(s"${START}ZIO.effectTotal(Future(42))$END").assertHighlighted()
     val text   = z(s"ZIO.effectTotal(Future(42))")
     val result = z(s"ZIO.fromFuture(implicit ec => Future(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_zio_alias_task(): Unit = {
     z(s"${START}Task.effectTotal(Future(42))$END").assertHighlighted()
     val text   = z(s"Task.effectTotal(Future(42))")
     val result = z(s"Task.fromFuture(implicit ec => Future(42))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }

@@ -13,7 +13,7 @@ class SimplifyTapWithZipLeftTest extends ZipLeftInspectionTest(".zipLeft") {
     z(s"""ZIO.succeed("Remedios Varo").${START}tap(_ => x)$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Remedios Varo").tap(_ => x)""")
     val result = z("""ZIO.succeed("Remedios Varo").zipLeft(x)""")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_block_tap_to_zipLeft(): Unit = {
@@ -39,7 +39,7 @@ class SimplifyTapWithZipLeftTest extends ZipLeftInspectionTest(".zipLeft") {
         | x
         |}""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_tap_not_discarding_should_not_highlight(): Unit =
@@ -53,7 +53,7 @@ class SimplifyTapWithZipLeftOperatorTest extends ZipLeftInspectionTest("<*") {
     z(s"""ZIO.succeed("Xul Solar").${START}tap(_ => x)$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Xul Solar").tap(_ => ZIO succeed x)""")
     val result = z("""ZIO.succeed("Xul Solar") <* (ZIO succeed x)""")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_block_infix_tap_to_<*(): Unit = {
@@ -78,14 +78,14 @@ class SimplifyTapWithZipLeftOperatorTest extends ZipLeftInspectionTest("<*") {
         |  ZIO succeed x
         |}""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_tap_to_<*(): Unit = {
     z(s"""ZIO.succeed("Frida Kahlo").${START}tap(_ => x)$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Frida Kahlo").tap(_ => ZIO.succeed(x))""")
     val result = z("""ZIO.succeed("Frida Kahlo") <* ZIO.succeed(x)""")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_block_tap_to_<*(): Unit = {
@@ -110,7 +110,7 @@ class SimplifyTapWithZipLeftOperatorTest extends ZipLeftInspectionTest("<*") {
         |  ZIO.succeed(x)
         |}""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_tap_not_discarding_should_not_highlight(): Unit =
@@ -125,21 +125,21 @@ class SimplifySucceedToZipLeftInspectionTest extends ZSimplifyInspectionTest[Sim
     z(s"""${START}ZIO.succeed("Fernando Fader").zipLeft(f("Carlos Alonso"))$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Fernando Fader").zipLeft(f("Carlos Alonso"))""")
     val result = z("""f("Carlos Alonso").as("Fernando Fader")""")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_zipLeft_infix_invocation_to_succeed(): Unit = {
     z(s"""${START}ZIO.succeed("Fernando Fader") zipLeft f("Carlos Alonso")$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Fernando Fader") zipLeft f("Carlos Alonso")""")
     val result = z("""f("Carlos Alonso").as("Fernando Fader")""")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_zipLeft_operator_to_succeed(): Unit = {
     z(s"""${START}ZIO.succeed("Fernando Fader") <* f("Carlos Alonso")$END""").assertHighlighted()
     val text   = z("""ZIO.succeed("Fernando Fader") <* f("Carlos Alonso")""")
     val result = z("""f("Carlos Alonso").as("Fernando Fader")""")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
 }

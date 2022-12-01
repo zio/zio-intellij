@@ -17,7 +17,7 @@ object LambdaUtils {
     val params = e.parameters.filterNot(p => p.isWildcard || p.isImplicitParameter)
     params.collectFirst {
       case named: ScNamedElement if !isElementUsed(named, false) =>
-        val wildcard = createWildcardNode(e.getProject).getPsi
+        val wildcard = createWildcardNode(e.features)(e.projectContext).getPsi
         named.nameId.replace(wildcard)
         e
       case _ => e

@@ -1,6 +1,5 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 import zio.intellij.inspections.mistakes.IfGuardInsteadOfWhenInspection
 
 class IfGuardInsteadOfWhenInspectionTest extends ZScalaInspectionTest[IfGuardInsteadOfWhenInspection] {
@@ -37,6 +36,6 @@ class IfGuardInsteadOfWhenInspectionTest extends ZScalaInspectionTest[IfGuardIns
                       |  y <- ZIO.succeed(6)
                       |} yield ()""".stripMargin)
 
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }

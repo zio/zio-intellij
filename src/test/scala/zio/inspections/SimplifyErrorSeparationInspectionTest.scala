@@ -32,7 +32,7 @@ abstract class SimplifyErrorSeparationInspectionTest(toReplace: String, toReplac
   def testDefRefReplacement(): Unit = {
     val text   = zdef(s"${methodToReplace("foo")}")
     val result = zdef(s"${methodToReplaceWith("foo")}")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testDefUnderscoreHighlighting(): Unit = zdef(s"$START${methodToReplace("foo(_)")}$END").assertHighlighted()
@@ -40,7 +40,7 @@ abstract class SimplifyErrorSeparationInspectionTest(toReplace: String, toReplac
   def testDefUnderscoreReplacement(): Unit = {
     val text   = zdef(s"${methodToReplace("foo(_)")}")
     val result = zdef(s"${methodToReplaceWith("foo(_)")}")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testDefLambdaHighlighting(): Unit = zdef(s"$START${methodToReplace("el => foo(el)")}$END").assertHighlighted()
@@ -48,7 +48,7 @@ abstract class SimplifyErrorSeparationInspectionTest(toReplace: String, toReplac
   def testDefLambdaReplacement(): Unit = {
     val text   = zdef(s"${methodToReplace("el => foo(el)")}")
     val result = zdef(s"${methodToReplaceWith("el => foo(el)")}")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testValRefHighlighting(): Unit = zval(s"$START${methodToReplace("foo")}$END").assertHighlighted()
@@ -56,7 +56,7 @@ abstract class SimplifyErrorSeparationInspectionTest(toReplace: String, toReplac
   def testValRefReplacement(): Unit = {
     val text   = zval(s"${methodToReplace("foo")}")
     val result = zval(s"${methodToReplaceWith("foo")}")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testValUnderscoreHighlighting(): Unit = zval(s"$START${methodToReplace("foo(_)")}$END").assertHighlighted()
@@ -64,7 +64,7 @@ abstract class SimplifyErrorSeparationInspectionTest(toReplace: String, toReplac
   def testValUnderscoreReplacement(): Unit = {
     val text   = zval(s"${methodToReplace("foo(_)")}")
     val result = zval(s"${methodToReplaceWith("foo(_)")}")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testValLambdaHighlighting(): Unit = zval(s"$START${methodToReplace("el => foo(el)")}$END").assertHighlighted()
@@ -72,7 +72,7 @@ abstract class SimplifyErrorSeparationInspectionTest(toReplace: String, toReplac
   def testValLambdaReplacement(): Unit = {
     val text   = zval(s"${methodToReplace("el => foo(el)")}")
     val result = zval(s"${methodToReplaceWith("el => foo(el)")}")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testFallibleEffectNoHighlighting(): Unit =

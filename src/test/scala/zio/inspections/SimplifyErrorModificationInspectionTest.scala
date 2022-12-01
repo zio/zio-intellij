@@ -17,7 +17,7 @@ abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toRepl
   def testInlineReplacement(): Unit = {
     val text   = z(s"UIO(1).$methodToReplace")
     val result = z(s"UIO(1).$methodToReplaceWith")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testValHighlighting(): Unit = z {
@@ -34,7 +34,7 @@ abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toRepl
       s"""val foo = UIO(1)
          |foo.$methodToReplaceWith""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testDefHighlighting(): Unit = z {
@@ -51,7 +51,7 @@ abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toRepl
       s"""def foo = UIO(1)
          |foo.$methodToReplaceWith""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testFallibleEffectNoHighlighting(): Unit =

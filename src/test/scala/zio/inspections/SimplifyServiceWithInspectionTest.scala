@@ -25,7 +25,7 @@ class SimplifyServiceWithInspectionTest extends ZSimplifyInspectionTest[Simplify
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.serviceWith(_.read)")))
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_accessM_get_explicit_type(): Unit = {
@@ -37,7 +37,7 @@ class SimplifyServiceWithInspectionTest extends ZSimplifyInspectionTest[Simplify
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.serviceWith[Redis](_.read)")))
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_accessM_get_with_alias(): Unit = {
@@ -49,7 +49,7 @@ class SimplifyServiceWithInspectionTest extends ZSimplifyInspectionTest[Simplify
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.serviceWith[Redis](_.read)")))
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_accessM_get_lambda(): Unit = {
@@ -61,7 +61,7 @@ class SimplifyServiceWithInspectionTest extends ZSimplifyInspectionTest[Simplify
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.serviceWith[Redis](_.read)")))
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_accessM_get_method_call_with_param(): Unit = {
@@ -73,7 +73,7 @@ class SimplifyServiceWithInspectionTest extends ZSimplifyInspectionTest[Simplify
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.serviceWith[Redis](_.read(2))")))
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_service_flatMap(): Unit = {
@@ -85,6 +85,6 @@ class SimplifyServiceWithInspectionTest extends ZSimplifyInspectionTest[Simplify
 
     val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.serviceWith[Redis](_.read(2))")))
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }

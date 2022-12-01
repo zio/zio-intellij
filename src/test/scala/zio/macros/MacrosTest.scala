@@ -2,16 +2,16 @@ package zio.macros
 
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.util.PsiTreeUtil
-import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestAdapter
 import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScFunctionDefinition, ScPatternDefinition}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.lang.psi.types.{PhysicalMethodSignature, TypePresentationContext}
 import org.jetbrains.plugins.scala.DependencyManagerBase._
+import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestCase
 import org.junit.Assert.fail
 import zio.inspections.ZInspectionTestBase
 
-abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestAdapter {
+abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestCase {
   protected val zioOrg     = "dev.zio"
   protected def zioVersion = ZInspectionTestBase.versionPattern
 

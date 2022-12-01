@@ -56,7 +56,7 @@ abstract class SimplifyForeachInspectionTest(
          |  _ <- $zioMethodToReplaceWith
          |} yield ???""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testForCompBlockHighlighting(): Unit =
@@ -80,7 +80,7 @@ abstract class SimplifyForeachInspectionTest(
          |  _ <- $zioBlockMethodToReplaceWith
          |} yield ???""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testNestedForCompHighlighting(): Unit =
@@ -116,7 +116,7 @@ abstract class SimplifyForeachInspectionTest(
          |  _ <- b
          |} yield ???""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testNestedBlockForCompHighlighting(): Unit =
@@ -152,7 +152,7 @@ abstract class SimplifyForeachInspectionTest(
          |  _ <- b
          |} yield ???""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testChainHighlighting(): Unit =
@@ -170,7 +170,7 @@ abstract class SimplifyForeachInspectionTest(
       s"""val myIterable: Iterable[String] = ???
          |$zioMethodToReplaceWith *> b""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testBlockChainHighlighting(): Unit =
@@ -188,7 +188,7 @@ abstract class SimplifyForeachInspectionTest(
       s"""val myIterable: Iterable[String] = ???
          |$zioBlockMethodToReplaceWith *> b""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testNestedChainHighlighting(): Unit =
@@ -206,7 +206,7 @@ abstract class SimplifyForeachInspectionTest(
       s"""val myIterable: Iterable[String] = ???
          |b <* b *> b *> $zioMethodToReplaceWith *> b""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testNestedBlockChainHighlighting(): Unit =
@@ -224,7 +224,7 @@ abstract class SimplifyForeachInspectionTest(
       s"""val myIterable: Iterable[String] = ???
          |b <* b *> b *> $zioBlockMethodToReplaceWith *> b""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
 }

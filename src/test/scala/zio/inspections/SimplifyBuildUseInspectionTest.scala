@@ -22,7 +22,7 @@ class SimplifyBuildUseInspectionTest extends ZSimplifyInspectionTest[SimplifyBui
   def testRefReplacement(): Unit = {
     val text   = zz("layer.build.use(effect.provide)")
     val result = zz("effect.provideLayer(layer)")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testUnderscoreHighlighting(): Unit =
@@ -31,7 +31,7 @@ class SimplifyBuildUseInspectionTest extends ZSimplifyInspectionTest[SimplifyBui
   def testUnderscoreReplacement(): Unit = {
     val text   = zz("layer.build.use(effect.provide(_))")
     val result = zz("effect.provideLayer(layer)")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testLambdaHighlighting(): Unit =
@@ -40,7 +40,7 @@ class SimplifyBuildUseInspectionTest extends ZSimplifyInspectionTest[SimplifyBui
   def testLambdaReplacement(): Unit = {
     val text   = zz("layer.build.use(l => effect.provide(l))")
     val result = zz("effect.provideLayer(layer)")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def testLambdaNoHighlighting(): Unit =

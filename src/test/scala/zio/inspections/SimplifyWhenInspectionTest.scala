@@ -18,14 +18,14 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
       z(base(s"${START}if (a) b else ZIO.unit$END")).assertHighlighted()
       val text   = z(base(s"if (a) b else ZIO.unit"))
       val result = z(base(s"b.when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
 
     locally {
       z(base(s"${START}if (!a) ZIO.unit else b$END")).assertHighlighted()
       val text   = z(base(s"if (!a) ZIO.unit else b"))
       val result = z(base(s"b.when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
   }
 
@@ -38,14 +38,14 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
       z(base(s"${START}if (a) ZIO.succeed(42) else ZIO.unit$END")).assertHighlighted()
       val text   = z(base(s"if (a) ZIO.succeed(42) else ZIO.unit"))
       val result = z(base(s"ZIO.succeed(42).when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
 
     locally {
       z(base(s"${START}if (!a) ZIO.unit else ZIO.succeed(42)$END")).assertHighlighted()
       val text   = z(base(s"if (!a) ZIO.unit else ZIO.succeed(42)"))
       val result = z(base(s"ZIO.succeed(42).when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
   }
 
@@ -58,14 +58,14 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
       z(base(s"${START}if (a) ZIO(42) else ZIO.unit$END")).assertHighlighted()
       val text   = z(base(s"if (a) ZIO(42) else ZIO.unit"))
       val result = z(base(s"ZIO(42).when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
 
     locally {
       z(base(s"${START}if (!a) ZIO.unit else ZIO(42)$END")).assertHighlighted()
       val text   = z(base(s"if (!a) ZIO.unit else ZIO(42)"))
       val result = z(base(s"ZIO(42).when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
   }
 
@@ -81,14 +81,14 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
       z(base(s"${START}if (a) $reference else ZIO.unit$END")).assertHighlighted()
       val text   = z(base(s"if (a) $reference else ZIO.unit"))
       val result = z(base(s"$reference.when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
 
     locally {
       z(base(s"${START}if (!a) ZIO.unit else $reference$END")).assertHighlighted()
       val text   = z(base(s"if (!a) ZIO.unit else $reference"))
       val result = z(base(s"$reference.when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
   }
 
@@ -103,14 +103,14 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
       z(base(s"${START}if (a) $methodCall else ZIO.unit$END")).assertHighlighted()
       val text   = z(base(s"if (a) $methodCall else ZIO.unit"))
       val result = z(base(s"$methodCall.when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
 
     locally {
       z(base(s"${START}if (!a) ZIO.unit else $methodCall$END")).assertHighlighted()
       val text   = z(base(s"if (!a) ZIO.unit else $methodCall"))
       val result = z(base(s"$methodCall.when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
   }
 
@@ -125,14 +125,14 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
       z(base(s"${START}if (!(!a)) b else ZIO.unit$END")).assertHighlighted()
       val text   = z(base(s"if (!(!a)) b else ZIO.unit"))
       val result = z(base(s"b.when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
 
     locally {
       z(base(s"${START}if (!(!(!a))) ZIO.unit else b$END")).assertHighlighted()
       val text   = z(base(s"if (!(!(!a))) ZIO.unit else b"))
       val result = z(base(s"b.when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
   }
 
@@ -146,14 +146,14 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
       z(base(s"${START}if (a) $complexExpr else ZIO.unit$END")).assertHighlighted()
       val text   = z(base(s"if (a) $complexExpr else ZIO.unit"))
       val result = z(base(s"($complexExpr).when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
 
     locally {
       z(base(s"${START}if (!a) ZIO.unit else $complexExpr$END")).assertHighlighted()
       val text   = z(base(s"if (!a) ZIO.unit else $complexExpr"))
       val result = z(base(s"($complexExpr).when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
   }
 
@@ -172,14 +172,14 @@ class SimplifyWhenInspectionTest extends ZSimplifyInspectionTest[SimplifyWhenIns
       z(base(s"${START}if (a) $complexExpr else ZIO.unit$END")).assertHighlighted()
       val text   = z(base(s"if (a) $complexExpr else ZIO.unit"))
       val result = z(base(s"($complexExpr).when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
 
     locally {
       z(base(s"${START}if (!a) ZIO.unit else $complexExpr$END")).assertHighlighted()
       val text   = z(base(s"if (!a) ZIO.unit else $complexExpr"))
       val result = z(base(s"($complexExpr).when(a)"))
-      testQuickFixes(text, result, hint)
+      testQuickFix(text, result, hint)
     }
   }
 

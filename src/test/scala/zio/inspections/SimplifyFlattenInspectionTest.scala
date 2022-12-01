@@ -12,6 +12,6 @@ class SimplifyFlattenInspectionTest extends ZSimplifyInspectionTest[SimplifyFlat
     z(s"b.${START}map(x => ZIO.succeed(x * 2)).flatten$END").assertHighlighted()
     val text   = z("b.map(x => ZIO.succeed(x * 2)).flatten")
     val result = z("b.flatMap(x => ZIO.succeed(x * 2))")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }

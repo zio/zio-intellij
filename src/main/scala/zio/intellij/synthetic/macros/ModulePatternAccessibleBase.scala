@@ -1,6 +1,9 @@
 package zio.intellij.synthetic.macros
 
+import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScAnnotation
+import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
+import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScTypeAliasDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScTypeParam
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTrait, ScTypeDefinition}
@@ -70,7 +73,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
         case Field(field) =>
           val isPoly   = typeArgsForAccessors.nonEmpty
           val tpe      = modifyType(field.`type`().getOrAny)
-          val typeInfo = TypeInfo(tpe)
+          val typeInfo = TypeInfo(tpe, field)
           val returnTypeAndBody = s"${returnType(typeInfo)} = " +
             s"${typeInfo.zioObject}.${typeInfo.accessMethod}(_.get[$serviceApplication].${field.name})"
 
@@ -80,7 +83,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
 
         case Method(method) =>
           val tpe      = modifyType(method.returnType.getOrAny)
-          val typeInfo = TypeInfo(tpe)
+          val typeInfo = TypeInfo(tpe, method)
           val typeParamsDefinition =
             typeParametersDefinition(
               typeArgsForAccessors ++ method.typeParameters,
@@ -123,7 +126,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
   )
 
   private object TypeInfo {
-    def apply(tpe: ScType): TypeInfo = {
+    def apply(tpe: ScType, ctx: PsiElement): TypeInfo = {
       val any = StdTypes.instance(tpe.projectContext).Any
 
       def zioTypeArgs(tpe: ScType): (ScType, List[ScType]) =
@@ -165,7 +168,8 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
           otherTypeParams = rest
         )
       } else {
-        val throwable = createTypeElementFromText("Throwable")(tpe.projectContext).`type`().getOrAny
+        val element = createTypeElementFromText("Throwable", ctx)(ctx)
+        val throwable = element.`type`().getOrAny
         new TypeInfo(
           zioObject = "zio.ZIO",
           accessMethod = "access",

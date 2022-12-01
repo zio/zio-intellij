@@ -2,16 +2,16 @@ package zio.intellij.searchers
 
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.util.PsiTreeUtil
-import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestAdapter
 import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.util.Markers
 import org.jetbrains.plugins.scala.DependencyManagerBase._
+import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestCase
 import zio.inspections.ZInspectionTestBase
 
 import scala.jdk.CollectionConverters._
 
-class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdapter with Markers {
+class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestCase with Markers {
 
   protected val zioOrg     = "dev.zio"
   protected val zioVersion = ZInspectionTestBase.versionPattern
@@ -22,7 +22,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
 
   private def doTest(fileText: String): Unit = {
 
-    val (source, expectedUsageRanges) = extractMarkers(StringUtil.convertLineSeparators(fileText))
+    val (source, expectedUsageRanges) = extractMarker(StringUtil.convertLineSeparators(fileText))
 
     configureFromFileText(source)
 
@@ -55,7 +55,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
     doTest(base(s"""@accessible
                    |object FindMyAccessors {
                    |  trait Service {
-                   |    val method$caretText: UIO[Int] = ???
+                   |    val method$CARET: UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -66,7 +66,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
     doTest(base(s"""@accessible
                    |object FindMyAccessors {
                    |  trait Service {
-                   |    def method$caretText: UIO[Int] = ???
+                   |    def method$CARET: UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -78,7 +78,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  val method: URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    val method$caretText: UIO[Int] = ???
+                   |    val method$CARET: UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -91,7 +91,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method: URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText: UIO[Int] = ???
+                   |    def method$CARET: UIO[Int] = ???
                    |  }
                    |}
                    |${start}FindMyAccessors.method$end
@@ -102,7 +102,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  val method: URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    val method$caretText: Int = ???
+                   |    val method$CARET: Int = ???
                    |  }
                    |}
                    |
@@ -114,7 +114,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method: URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText: Int = ???
+                   |    def method$CARET: Int = ???
                    |  }
                    |}
                    |${start}FindMyAccessors.method$end
@@ -125,7 +125,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  val method: Int = ???
                    |  trait Service {
-                   |    val method$caretText: UIO[Int] = ???
+                   |    val method$CARET: UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -137,7 +137,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method: Int = ???
                    |  trait Service {
-                   |    def method$caretText: UIO[Int] = ???
+                   |    def method$CARET: UIO[Int] = ???
                    |  }
                    |}
                    |FindMyAccessors.method
@@ -148,7 +148,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  val method: Int = ???
                    |  trait Service {
-                   |    val method$caretText: Int = ???
+                   |    val method$CARET: Int = ???
                    |  }
                    |}
                    |
@@ -160,7 +160,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method: Int = ???
                    |  trait Service {
-                   |    def method$caretText: Int = ???
+                   |    def method$CARET: Int = ???
                    |  }
                    |}
                    |FindMyAccessors.method
@@ -171,7 +171,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String): UIO[Int] = ???
+                   |    def method$CARET(arg1: String): UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -183,7 +183,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: Int): UIO[Int] = ???
+                   |    def method$CARET(arg1: Int): UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -195,7 +195,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String, arg2: Int): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): UIO[Int] = ???
+                   |    def method$CARET(arg1: String, arg2: Int): UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -207,7 +207,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: Int, arg2: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): UIO[Int] = ???
+                   |    def method$CARET(arg1: String, arg2: Int): UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -219,7 +219,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String): Int = ???
+                   |    def method$CARET(arg1: String): Int = ???
                    |  }
                    |}
                    |
@@ -231,7 +231,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: Int): Int = ???
+                   |    def method$CARET(arg1: Int): Int = ???
                    |  }
                    |}
                    |
@@ -243,7 +243,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String, arg2: Int): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): Int = ???
+                   |    def method$CARET(arg1: String, arg2: Int): Int = ???
                    |  }
                    |}
                    |
@@ -255,7 +255,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: Int, arg2: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): Int = ???
+                   |    def method$CARET(arg1: String, arg2: Int): Int = ???
                    |  }
                    |}
                    |
@@ -267,7 +267,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String): UIO[Int] = ???
+                   |    def method$CARET(arg1: String): UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -279,7 +279,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: Int): UIO[Int] = ???
+                   |    def method$CARET(arg1: Int): UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -291,7 +291,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String, arg2: Int): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): UIO[Int] = ???
+                   |    def method$CARET(arg1: String, arg2: Int): UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -303,7 +303,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: Int, arg2: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): UIO[Int] = ???
+                   |    def method$CARET(arg1: String, arg2: Int): UIO[Int] = ???
                    |  }
                    |}
                    |
@@ -315,7 +315,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String): Int = ???
+                   |    def method$CARET(arg1: String): Int = ???
                    |  }
                    |}
                    |
@@ -327,7 +327,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: Int): Int = ???
+                   |    def method$CARET(arg1: Int): Int = ???
                    |  }
                    |}
                    |
@@ -339,7 +339,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String, arg2: Int): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): Int = ???
+                   |    def method$CARET(arg1: String, arg2: Int): Int = ???
                    |  }
                    |}
                    |
@@ -351,7 +351,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: Int, arg2: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): Int = ???
+                   |    def method$CARET(arg1: String, arg2: Int): Int = ???
                    |  }
                    |}
                    |
@@ -363,7 +363,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  val method: URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    val method$caretText: UIO[Int]
+                   |    val method$CARET: UIO[Int]
                    |  }
                    |}
                    |
@@ -376,7 +376,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method: URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText: UIO[Int]
+                   |    def method$CARET: UIO[Int]
                    |  }
                    |}
                    |${start}FindMyAccessors.method$end
@@ -387,7 +387,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  val method: URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    val method$caretText: Int
+                   |    val method$CARET: Int
                    |  }
                    |}
                    |
@@ -399,7 +399,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method: URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText: Int
+                   |    def method$CARET: Int
                    |  }
                    |}
                    |${start}FindMyAccessors.method$end
@@ -410,7 +410,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  val method: Int = ???
                    |  trait Service {
-                   |    val method$caretText: UIO[Int]
+                   |    val method$CARET: UIO[Int]
                    |  }
                    |}
                    |
@@ -422,7 +422,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method: Int = ???
                    |  trait Service {
-                   |    def method$caretText: UIO[Int]
+                   |    def method$CARET: UIO[Int]
                    |  }
                    |}
                    |FindMyAccessors.method
@@ -433,7 +433,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  val method: Int = ???
                    |  trait Service {
-                   |    val method$caretText: Int
+                   |    val method$CARET: Int
                    |  }
                    |}
                    |
@@ -445,7 +445,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method: Int = ???
                    |  trait Service {
-                   |    def method$caretText: Int
+                   |    def method$CARET: Int
                    |  }
                    |}
                    |FindMyAccessors.method
@@ -456,7 +456,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String): UIO[Int]
+                   |    def method$CARET(arg1: String): UIO[Int]
                    |  }
                    |}
                    |
@@ -468,7 +468,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: Int): UIO[Int]
+                   |    def method$CARET(arg1: Int): UIO[Int]
                    |  }
                    |}
                    |
@@ -480,7 +480,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String, arg2: Int): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): UIO[Int]
+                   |    def method$CARET(arg1: String, arg2: Int): UIO[Int]
                    |  }
                    |}
                    |
@@ -492,7 +492,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: Int, arg2: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): UIO[Int]
+                   |    def method$CARET(arg1: String, arg2: Int): UIO[Int]
                    |  }
                    |}
                    |
@@ -504,7 +504,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String): Int
+                   |    def method$CARET(arg1: String): Int
                    |  }
                    |}
                    |
@@ -516,7 +516,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: Int): Int
+                   |    def method$CARET(arg1: Int): Int
                    |  }
                    |}
                    |
@@ -528,7 +528,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String, arg2: Int): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): Int
+                   |    def method$CARET(arg1: String, arg2: Int): Int
                    |  }
                    |}
                    |
@@ -540,7 +540,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: Int, arg2: String): URIO[Has[Service], Int] = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): Int
+                   |    def method$CARET(arg1: String, arg2: Int): Int
                    |  }
                    |}
                    |
@@ -552,7 +552,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String): UIO[Int]
+                   |    def method$CARET(arg1: String): UIO[Int]
                    |  }
                    |}
                    |
@@ -564,7 +564,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: Int): UIO[Int]
+                   |    def method$CARET(arg1: Int): UIO[Int]
                    |  }
                    |}
                    |
@@ -576,7 +576,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String, arg2: Int): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): UIO[Int]
+                   |    def method$CARET(arg1: String, arg2: Int): UIO[Int]
                    |  }
                    |}
                    |
@@ -588,7 +588,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: Int, arg2: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): UIO[Int]
+                   |    def method$CARET(arg1: String, arg2: Int): UIO[Int]
                    |  }
                    |}
                    |
@@ -600,7 +600,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String): Int
+                   |    def method$CARET(arg1: String): Int
                    |  }
                    |}
                    |
@@ -612,7 +612,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: Int): Int
+                   |    def method$CARET(arg1: Int): Int
                    |  }
                    |}
                    |
@@ -624,7 +624,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: String, arg2: Int): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int): Int
+                   |    def method$CARET(arg1: String, arg2: Int): Int
                    |  }
                    |}
                    |
@@ -636,7 +636,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestAdap
                    |object FindMyAccessors {
                    |  def method(arg1: Int, arg2: String): Int = ???
                    |  trait Service {
-                   |    def method$caretText(arg1: String, arg2: Int)
+                   |    def method$CARET(arg1: String, arg2: Int)
                    |  }
                    |}
                    |

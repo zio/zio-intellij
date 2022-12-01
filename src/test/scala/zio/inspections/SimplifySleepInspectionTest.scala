@@ -12,7 +12,7 @@ class SimplifySleepInspectionTest extends ZSimplifyInspectionTest[SimplifySleepI
     z(s"""${START}ZIO.sleep(1.seconds) *> putStrLn("")$END""").assertHighlighted()
     val text   = z(s"""ZIO.sleep(1.seconds) *> putStrLn("")""")
     val result = z(s"""putStrLn("").delay(1.seconds)""")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_block_zipRight(): Unit = {
@@ -37,14 +37,14 @@ class SimplifySleepInspectionTest extends ZSimplifyInspectionTest[SimplifySleepI
          |  1.seconds
          |}""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_flatMap(): Unit = {
     z(s"""${START}ZIO.sleep(1.seconds).flatMap(_ => putStrLn(""))$END""").assertHighlighted()
     val text   = z(s"""ZIO.sleep(1.seconds).flatMap(_ => putStrLn(""))""")
     val result = z(s"""putStrLn("").delay(1.seconds)""")
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 
   def test_block_flatMap(): Unit = {
@@ -69,6 +69,6 @@ class SimplifySleepInspectionTest extends ZSimplifyInspectionTest[SimplifySleepI
          |  1.seconds
          |}""".stripMargin
     }
-    testQuickFixes(text, result, hint)
+    testQuickFix(text, result, hint)
   }
 }
