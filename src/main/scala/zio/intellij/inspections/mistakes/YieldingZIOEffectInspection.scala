@@ -15,11 +15,11 @@ class YieldingZIOEffectInspection extends LocalInspectionTool {
         case Some(e: ScBlock) =>
           e.exprs.lastOption match {
             case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
-              holder.registerProblem(expr, YieldingZIOEffectInspection.message, ProblemHighlightType.WEAK_WARNING)
+              holder.registerProblem(body, YieldingZIOEffectInspection.message, ProblemHighlightType.WEAK_WARNING)
             case _ =>
           }
         case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
-          holder.registerProblem(expr, YieldingZIOEffectInspection.message, ProblemHighlightType.WEAK_WARNING)
+          holder.registerProblem(body, YieldingZIOEffectInspection.message, ProblemHighlightType.WEAK_WARNING)
         case _ =>
       }
     case _ =>

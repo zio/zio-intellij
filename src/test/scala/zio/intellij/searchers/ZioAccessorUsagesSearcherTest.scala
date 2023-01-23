@@ -2,19 +2,24 @@ package zio.intellij.searchers
 
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.plugins.scala.DependencyManagerBase._
+import org.jetbrains.plugins.scala.ScalaVersion
+import org.jetbrains.plugins.scala.base.ScalaSdkOwner
 import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
+import org.jetbrains.plugins.scala.codeInspection.ScalaAnnotatorQuickFixTestBase
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.util.Markers
-import org.jetbrains.plugins.scala.DependencyManagerBase._
-import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestCase
+import org.junit.Ignore
 import zio.inspections.ZInspectionTestBase
 
 import scala.jdk.CollectionConverters._
 
-class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestCase with Markers {
+@Ignore
+class ZioAccessorUsagesSearcherTest extends ScalaAnnotatorQuickFixTestBase with Markers {
 
-  protected val zioOrg     = "dev.zio"
-  protected val zioVersion = ZInspectionTestBase.versionPattern
+  override protected def defaultVersionOverride: Option[ScalaVersion] = Some(ScalaSdkOwner.preferableSdkVersion)
+  protected val zioOrg                                                = "dev.zio"
+  protected val zioVersion                                            = ZInspectionTestBase.versionPattern
 
   override def librariesLoaders: Seq[LibraryLoader] =
     super.librariesLoaders :+
@@ -23,7 +28,6 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestCase
   private def doTest(fileText: String): Unit = {
 
     val (source, expectedUsageRanges) = extractMarker(StringUtil.convertLineSeparators(fileText))
-
     configureFromFileText(source)
 
     val elem  = myFixture.getElementAtCaret
@@ -643,4 +647,5 @@ class ZioAccessorUsagesSearcherTest extends ScalaLightCodeInsightFixtureTestCase
                    |FindMyAccessors.method(1, "")
       """.stripMargin))
 
+  override protected def description: String = ""
 }

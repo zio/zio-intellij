@@ -7,7 +7,8 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.{ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.lang.psi.types.{PhysicalMethodSignature, TypePresentationContext}
 import org.jetbrains.plugins.scala.DependencyManagerBase._
-import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestCase
+import org.jetbrains.plugins.scala.ScalaVersion
+import org.jetbrains.plugins.scala.base.{ScalaLightCodeInsightFixtureTestCase, ScalaSdkOwner}
 import org.junit.Assert.fail
 import zio.inspections.ZInspectionTestBase
 
@@ -17,6 +18,7 @@ abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestCase {
 
   protected var extendedObject: ScObject                                  = _
   implicit protected var typePresentationContext: TypePresentationContext = _
+  override protected def defaultVersionOverride: Option[ScalaVersion] = Some(ScalaSdkOwner.preferableSdkVersion)
 
   protected def code: String
 

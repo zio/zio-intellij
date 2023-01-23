@@ -6,6 +6,7 @@ import com.intellij.ide.scratch.ScratchRootType
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
+import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.plugins.scala.base.{ScalaLightCodeInsightFixtureTestCase, SharedTestProjectToken}
 import org.jetbrains.plugins.scala.codeInspection.ScalaAnnotatorQuickFixTestBase.{ExpectedHighlight, TestPrepareResult, checkOffset}
 import org.jetbrains.plugins.scala.extensions.{HighlightInfoExt, StringExt, executeWriteActionCommand}
@@ -22,26 +23,24 @@ abstract class ScalaAnnotatorQuickFixTestBase extends ScalaLightCodeInsightFixtu
   import ScalaAnnotatorQuickFixTestBase.quickFixes
 
   protected def testQuickFix(text: String, expected: String, hint: String): Unit = {
-    val action = doFindQuickFix(text, hint)
-
-    executeWriteActionCommand() {
-      action.invoke(getProject, getEditor, getFile)
-    }(getProject)
-
-    val expectedFileText = createTestText(expected)
-    myFixture.checkResult(expectedFileText.withNormalizedSeparator.trim, true)
-  }
-
-  protected def testQuickFixAllInFile(text: String, expected: String, hint: String): Unit = {
     val actions = doFindQuickFixes(text, hint)
+    assertTrue(s"Quick fixes not found: $hint", actions.nonEmpty)
 
     executeWriteActionCommand() {
       actions.foreach(_.invoke(getProject, getEditor, getFile))
     }(getProject)
 
-    val expectedFileText = createTestText(expected)
-    myFixture.checkResult(expectedFileText.withNormalizedSeparator.trim, true)
+    val expectedFile = createLightFile(ScalaFileType.INSTANCE, createTestText(expected).withNormalizedSeparator.trim)
+
+    reformatFile(getFile)
+    reformatFile(expectedFile)
+
+    getFixture.checkResult(expectedFile.getText, /*stripTrailingSpaces = */ true)
   }
+  protected def reformatFile(file: PsiFile): Unit =
+    executeWriteActionCommand() {
+      CodeStyleManager.getInstance(getProject).reformat(file)
+    }(getProject)
 
   protected def checkNotFixable(text: String, hint: String): Unit = {
     checkNotFixable(text, _ == hint)

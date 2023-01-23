@@ -3,7 +3,6 @@ package zio.inspections
 import zio.intellij.inspections.mistakes.YieldingZIOEffectInspection
 
 class YieldingZIOEffectInspectionTest extends ZScalaInspectionTest[YieldingZIOEffectInspection] {
-  import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
   override protected val description = YieldingZIOEffectInspection.message
 

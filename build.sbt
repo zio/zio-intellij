@@ -1,7 +1,7 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
-lazy val scalaPluginVersion = "2022.3.13"
+lazy val scalaPluginVersion = "2022.3.16"
 lazy val pluginVersion      = "2022.3.20" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
@@ -17,12 +17,12 @@ addCommandAlias("check", "scalafmtCheckAll")
 
 ThisBuild / scalacOptions ++= Seq(
   "-explaintypes",
-  // "-deprecation",
+  "-deprecation",
   "-unchecked",
   "-feature",
   "-Xlint:serial",
   "-Ymacro-annotations",
-  // "-Xfatal-warnings",
+  "-Xfatal-warnings",
   "-language:implicitConversions",
   "-language:reflectiveCalls",
   "-language:existentials"

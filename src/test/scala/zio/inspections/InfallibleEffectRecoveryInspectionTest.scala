@@ -1,6 +1,5 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 import zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection
 
 abstract class InfallibleEffectRecoveryInspectionTest(fromEffect: String => String)
