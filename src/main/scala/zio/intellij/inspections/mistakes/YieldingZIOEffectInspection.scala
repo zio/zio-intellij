@@ -1,6 +1,7 @@
 package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection._
+import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
@@ -14,28 +15,15 @@ class YieldingZIOEffectInspection extends LocalInspectionTool {
         case Some(e: ScBlock) =>
           e.exprs.lastOption match {
             case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
-              Some(createDescriptor(holder.getManager, isOnTheFly, body))
-            case _ => None
+              holder.registerProblem(expr, YieldingZIOEffectInspection.message, ProblemHighlightType.WEAK_WARNING)
+            case _ =>
           }
         case Some(body @ zioLike(_)) if hasGeneratorFromSameClass(expr, body) =>
-          Some(createDescriptor(holder.getManager, isOnTheFly, body))
-        case _ => None
+          holder.registerProblem(expr, YieldingZIOEffectInspection.message, ProblemHighlightType.WEAK_WARNING)
+        case _ =>
       }
-    case _ => None
+    case _ =>
   }
-
-  private def createDescriptor(
-    manager: InspectionManager,
-    isOnTheFly: Boolean,
-    expr: ScExpression
-  ): ProblemDescriptor =
-    manager.createProblemDescriptor(
-      expr,
-      YieldingZIOEffectInspection.message,
-      isOnTheFly,
-      Array.empty[LocalQuickFix],
-      ProblemHighlightType.WEAK_WARNING
-    )
 
   private def typeName(e: ScExpression): Option[String] =
     e.`type`()
@@ -58,6 +46,7 @@ class YieldingZIOEffectInspection extends LocalInspectionTool {
 
 object YieldingZIOEffectInspection {
 
+  @Nls
   val message =
     "Possibly mistaken wrapping of the result in a ZIO effect. Perhaps you meant to yield the result directly?"
 }

@@ -1,7 +1,8 @@
 package zio.intellij.inspections.mistakes
 
-import com.intellij.codeInspection.{LocalInspectionTool, LocalQuickFix, ProblemHighlightType, ProblemsHolder}
+import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
 import com.intellij.psi.PsiElement
+import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
@@ -13,18 +14,14 @@ class UnusedZIOExpressionsInspection extends LocalInspectionTool {
     case expr: ScExpression =>
       (expr, expr.nextSiblingNotWhitespace) match {
         case (zioLike(_), Some(zioLike(_))) if !excluded(expr.parent) =>
-          Some(
-            holder.getManager.createProblemDescriptor(
-              expr,
-              UnusedZIOExpressionsInspection.message,
-              isOnTheFly,
-              Array.empty[LocalQuickFix],
-              ProblemHighlightType.LIKE_UNUSED_SYMBOL
-            )
+          holder.registerProblem(
+            expr,
+            UnusedZIOExpressionsInspection.message,
+            ProblemHighlightType.LIKE_UNUSED_SYMBOL
           )
-        case _ => None
+        case _ =>
       }
-    case _ => None
+    case _ =>
   }
 
   private def excluded(elem: Option[PsiElement]) =
@@ -35,5 +32,6 @@ class UnusedZIOExpressionsInspection extends LocalInspectionTool {
 }
 
 object UnusedZIOExpressionsInspection {
+  @Nls
   val message = "This expression is unused. Did you mean to compose it with another effect?"
 }

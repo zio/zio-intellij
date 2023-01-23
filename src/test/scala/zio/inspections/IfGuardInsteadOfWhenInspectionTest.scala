@@ -36,6 +36,6 @@ class IfGuardInsteadOfWhenInspectionTest extends ZScalaInspectionTest[IfGuardIns
                       |  y <- ZIO.succeed(6)
                       |} yield ()""".stripMargin)
 
-    testQuickFix(text, result, hint)
+    testQuickFixAllInFile(text, result, hint)
   }
 }

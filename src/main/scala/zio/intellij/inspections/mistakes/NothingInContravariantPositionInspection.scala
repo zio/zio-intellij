@@ -2,6 +2,7 @@ package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection._
 import com.intellij.psi.PsiElement
+import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.extensions._
@@ -29,11 +30,9 @@ class NothingInContravariantPositionInspection extends LocalInspectionTool {
                           // TODO hack, think of a better heuristic for this
                           // only prevent contravariant R (and R*) positions
                           tp.name.startsWith("R") =>
-                      holder.getManager.createProblemDescriptor(
+                      holder.registerProblem(
                         elem,
                         NothingInContravariantPositionInspection.message,
-                        isOnTheFly,
-                        Array.empty[LocalQuickFix],
                         ProblemHighlightType.WARNING
                       )
                   }
@@ -47,5 +46,6 @@ class NothingInContravariantPositionInspection extends LocalInspectionTool {
 }
 
 object NothingInContravariantPositionInspection {
+  @Nls
   val message = "Possibly erroneous use of Nothing in the R type parameter. Perhaps you meant to use Any?"
 }

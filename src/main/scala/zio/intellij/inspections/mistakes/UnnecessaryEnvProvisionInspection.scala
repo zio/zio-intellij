@@ -10,10 +10,10 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
-import zio.intellij.inspections.mistakes.UnnecessaryEnvProvisionInspection.createFix
+import zio.intellij.inspections.mistakes.UnnecessaryEnvProvisionInspection.ProvideQuickFix
 import zio.intellij.inspections.zioMethods.`.provideSomeLayer`
 import zio.intellij.utils.TypeCheckUtils.isAnyEnvEffect
-import zio.intellij.utils.{OptionUtils => OptionOps, _}
+import zio.intellij.utils._
 
 class UnnecessaryEnvProvisionInspection extends LocalInspectionTool {
 
@@ -28,46 +28,33 @@ class UnnecessaryEnvProvisionInspection extends LocalInspectionTool {
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
     case MethodRepr(expr, Some(base), Some(ref), _) if isAnyEnvEffect(base) =>
-      createPossibleFix(holder.getManager, isOnTheFly, expr, base, ref)
+      createPossibleFix(holder, expr, base, ref)
     case MethodRepr(expr @ `.provideSomeLayer`(_, _), Some(MethodRepr(_, Some(base), Some(ref), _)), _, _)
         if isAnyEnvEffect(base) =>
-      createPossibleFix(holder.getManager, isOnTheFly, expr, base, ref)
-    case _ => None
+      createPossibleFix(holder, expr, base, ref)
+    case _ =>
   }
 
   private def createPossibleFix(
-    manager: InspectionManager,
-    isOnTheFly: Boolean,
+    holder: ProblemsHolder,
     expr: ScExpression,
     base: ScExpression,
-    ref: ScReference
-  ) =
-    expr.findImplicitArguments.flatMap { args =>
-      OptionOps.when(args.map(_.element).exists(isNeedsEnvEv)) {
-        createFix(manager, isOnTheFly, expr, base, ref, getDisplayName)
+    toDelete: ScReference
+  ): Unit =
+    expr.findImplicitArguments.foreach { args =>
+      if (args.map(_.element).exists(isNeedsEnvEv)) {
+        holder.registerProblem(
+          expr,
+          getDisplayName,
+          ProblemHighlightType.ERROR,
+          new ProvideQuickFix(expr, base, toDelete.refName)
+        )
       }
     }
 }
 
 object UnnecessaryEnvProvisionInspection {
   def hint(toDelete: String) = s"Remove unnecessary .$toDelete"
-
-  def createFix(
-    manager: InspectionManager,
-    isOnTheFly: Boolean,
-    expr: ScExpression,
-    base: ScExpression,
-    toDelete: ScReference,
-    description: String
-  ): ProblemDescriptor =
-    manager.createProblemDescriptor(
-      expr,
-      description,
-      isOnTheFly,
-      Array[LocalQuickFix](new ProvideQuickFix(expr, base, toDelete.refName)),
-      ProblemHighlightType.ERROR
-    )
-
   final private class ProvideQuickFix(expr: ScExpression, base: ScExpression, toDelete: String)
       extends AbstractFixOnPsiElement(hint(toDelete), expr) {
     override protected def doApplyFix(expr: ScExpression)(implicit project: Project): Unit =

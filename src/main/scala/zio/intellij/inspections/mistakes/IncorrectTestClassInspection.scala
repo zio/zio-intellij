@@ -1,6 +1,6 @@
 package zio.intellij.inspections.mistakes
 
-import com.intellij.codeInspection.{LocalInspectionTool, LocalQuickFix, ProblemHighlightType, ProblemsHolder}
+import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
 import com.intellij.execution.junit.JUnitUtil
 import com.intellij.openapi.project.Project
 import org.jetbrains.plugins.scala.annotator.template.isAbstract
@@ -16,16 +16,13 @@ class IncorrectTestClassInspection extends LocalInspectionTool {
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
     case c: ScClass if extendsZSpec(c) =>
-      Some(
-        holder.getManager.createProblemDescriptor(
-          c.targetToken,
-          "ZIO Spec must be an 'object' instead of 'class'",
-          isOnTheFly,
-          Array[LocalQuickFix](new ConvertToObject(c)),
-          ProblemHighlightType.GENERIC_ERROR
-        )
+      holder.registerProblem(
+        c.targetToken,
+        "ZIO Spec must be an 'object' instead of 'class'",
+        ProblemHighlightType.GENERIC_ERROR,
+        new ConvertToObject(c)
       )
-    case _ => None
+    case _ =>
   }
 
   private def extendsZSpec(definition: ScClass) =

@@ -3,6 +3,7 @@ package zio.intellij.inspections.mistakes
 import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.collections.{stripped, MethodRepr}
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
@@ -26,34 +27,27 @@ class InfallibleEffectRecoveryInspection extends LocalInspectionTool {
     }
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case MethodRepr(expr, Some(base), Some(ref), _) if isInfallibleEffect(base) =>
-      expr.findImplicitArguments.flatMap { args =>
-        Option.when(args.map(_.element).exists(isCanFailEv))(createFix(holder.getManager, isOnTheFly, expr, base, ref))
+    case MethodRepr(expr, Some(base), Some(toDelete), _) if isInfallibleEffect(base) =>
+      expr.findImplicitArguments.foreach { args =>
+        if (args.map(_.element).exists(isCanFailEv)) {
+          holder.registerProblem(
+            expr,
+            description(toDelete.refName),
+            ProblemHighlightType.GENERIC_ERROR,
+            new RecoveryQuickFix(expr, base, toDelete.refName)
+          )
+        }
       }
-    case _ => None
+    case _ =>
   }
 }
 
 object InfallibleEffectRecoveryInspection {
   def hint(toDelete: String) = s"Remove unreachable .$toDelete"
 
+  @Nls
   def description(toDelete: String) =
     s"Effect cannot fail; operation .$toDelete is impossible"
-
-  def createFix(
-    manager: InspectionManager,
-    isOnTheFly: Boolean,
-    expr: ScExpression,
-    base: ScExpression,
-    toDelete: ScReference
-  ): ProblemDescriptor =
-    manager.createProblemDescriptor(
-      expr,
-      description(toDelete.refName),
-      isOnTheFly,
-      Array[LocalQuickFix](new RecoveryQuickFix(expr, base, toDelete.refName)),
-      ProblemHighlightType.ERROR
-    )
 
   final private class RecoveryQuickFix(expr: ScExpression, base: ScExpression, toDelete: String)
       extends AbstractFixOnPsiElement(hint(toDelete), expr) {

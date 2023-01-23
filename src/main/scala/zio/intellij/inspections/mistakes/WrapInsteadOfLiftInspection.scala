@@ -38,13 +38,12 @@ class WrapInsteadOfLiftInspection extends LocalInspectionTool {
         }
       }
 
-      def createFix(localFix: QuickFix): ProblemDescriptor =
-        holder.getManager.createProblemDescriptor(
+      def createFix(localFix: QuickFix): Unit =
+        holder.registerProblem(
           localFix.toReplace,
           messageFormat.format(localFix.wrappedEffect, localFix.wrappedEffect),
-          isOnTheFly,
-          Array[LocalQuickFix](localFix),
-          ProblemHighlightType.WEAK_WARNING
+          ProblemHighlightType.WEAK_WARNING,
+          localFix
         )
 
       def hasEffectMethod(zioType: ZioType): Boolean =
@@ -54,13 +53,13 @@ class WrapInsteadOfLiftInspection extends LocalInspectionTool {
         case expr: ScExpression =>
           expr match {
             case Future(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
-              Some(createFix(new QuickFix(zioType, expr, f, "Future", "implicit ec => ")))
+              createFix(new QuickFix(zioType, expr, f, "Future", "implicit ec => "))
             case Try(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
-              Some(createFix(new QuickFix(zioType, expr, f, "Try")))
+              createFix(new QuickFix(zioType, expr, f, "Try"))
             case Option(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
-              Some(createFix(new QuickFix(zioType, expr, f, "Option")))
+              createFix(new QuickFix(zioType, expr, f, "Option"))
             case Either(zioType, f) if !isUsed(expr.parent) && hasEffectMethod(zioType) =>
-              Some(createFix(new QuickFix(zioType, expr, f, "Either")))
+              createFix(new QuickFix(zioType, expr, f, "Either"))
             case _ =>
           }
         case _ =>
@@ -93,7 +92,11 @@ final class QuickFix(
 ) extends AbstractFixOnPsiElement(s"Replace with ZIO.from$wrappedEffect", toReplace) {
 
   override protected def doApplyFix(element: ScExpression)(implicit project: Project): Unit =
-    element.replace(createExpressionFromText(s"${zioType.name}.from$wrappedEffect($prefix${replaceWith.getText}", element)(element.projectContext))
+    element.replace(
+      createExpressionFromText(s"${zioType.name}.from$wrappedEffect($prefix${replaceWith.getText}", element)(
+        element.projectContext
+      )
+    )
 }
 
 object WrapInsteadOfLiftInspection {

@@ -2,12 +2,11 @@ package zio.intellij.inspections.suggestions
 
 import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.psi.types.{ScType, TypePresentationContext}
-import zio.intellij.inspections.suggestions.SuggestTypeAliasInspection.{createFix, AliasInfo}
+import zio.intellij.inspections.suggestions.SuggestTypeAliasInspection.{AliasInfo, TypeAliasQuickFix}
 import zio.intellij.intentions.suggestions.SuggestTypeAlias
 import zio.intellij.utils.TypeCheckUtils.fromZioLike
 import zio.intellij.utils.{ListSyntax, createTypeElement, extractTypeArguments, OptionUtils => OptionOps}
@@ -33,7 +32,12 @@ class SuggestTypeAliasInspection extends LocalInspectionTool {
             implicit val tpc: TypePresentationContext = TypePresentationContext(te)
 
             val typeElements = mostSpecificAliases.flatMap(alias => createTypeElement(alias.tpe, element))
-            createFix(holder.getManager, isOnTheFly, te, typeElements, getDisplayName)
+            holder.registerProblem(
+              te,
+              getDisplayName,
+              ProblemHighlightType.INFORMATION,
+              typeElements.map(new TypeAliasQuickFix(te, _)): _*
+            )
           }
         case _ => None
       }
@@ -44,21 +48,6 @@ class SuggestTypeAliasInspection extends LocalInspectionTool {
 object SuggestTypeAliasInspection {
 
   def hint(to: String): String = s"Replace with a more specific $to"
-
-  def createFix(
-    manager: InspectionManager,
-    isOnTheFly: Boolean,
-    from: ScTypeElement,
-    to: Seq[ScTypeElement],
-    descriptionTemplate: String
-  ): ProblemDescriptor =
-    manager.createProblemDescriptor(
-      from,
-      descriptionTemplate,
-      isOnTheFly,
-      to.map(new TypeAliasQuickFix(from, _)).toArray[LocalQuickFix],
-      ProblemHighlightType.INFORMATION
-    )
 
   final private class TypeAliasQuickFix(from: ScTypeElement, to: ScTypeElement)
       extends AbstractFixOnPsiElement(hint(to.getText), from) {

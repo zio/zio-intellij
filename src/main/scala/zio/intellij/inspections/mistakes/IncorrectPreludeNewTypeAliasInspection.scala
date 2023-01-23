@@ -16,19 +16,17 @@ class IncorrectPreludeNewTypeAliasInspection extends LocalInspectionTool {
         case sc @ ScSimpleTypeElement(ref) if sc.getParamTypeText.endsWith(ObjectTypeSuffix) =>
           Option(ref.resolve()).collect {
             case o: ScObject if isNewtype(o) => o
-          }.flatMap { self =>
-            Option.when(ref.isReferenceTo(self))(
-              holder.getManager.createProblemDescriptor(
+          }.foreach { self =>
+            if (ref.isReferenceTo(self)) {
+              holder.registerProblem(
                 sc,
                 s"Possibly mistaken use of '${self.name}.type' in the type alias, did you mean '${self.name}.Type' instead?",
-                isOnTheFly,
-                Array.empty[LocalQuickFix],
                 ProblemHighlightType.WARNING
               )
-            )
+            }
           }
-      }.flatten
-    case _ => None
+      }
+    case _ =>
   }
 
   def isNewtype(tpe: ScObject): Boolean = {
