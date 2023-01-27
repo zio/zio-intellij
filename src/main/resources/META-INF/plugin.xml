@@ -316,6 +316,9 @@
         <!-- temporary disabled until I can figure out how to disable on invalid items
         <customLiveTemplate implementation="zio.intellij.postfix.ZPostfixLiveTemplateHack" />
         !-->
+
+        <!-- Live Templates -->
+        <defaultLiveTemplates file="/liveTemplates/zio.xml"/>
     </extensions>
 
 </idea-plugin>
