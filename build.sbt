@@ -1,11 +1,11 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
-lazy val scalaPluginVersion = "2022.3.18"
-lazy val pluginVersion      = "2022.3.21" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scalaPluginVersion = "2023.1.9"
+lazy val pluginVersion      = "2023.1.20" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "223"
+ThisBuild / intellijBuild := "231.6890.12"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true
@@ -37,7 +37,6 @@ lazy val root =
         xml.changeNotes = sys.env.getOrElse(
           "ZIO_INTELLIJ_CHANGE_NOTES",
           s"""<![CDATA[
-        <b>Note:</b> This is the last major release targeting IntelliJ 2022.3<br/>
         <b>What's new?</b>
         <ul>
           <li>Added some live templates for easier ZLayer and Service accessors creation (<a href="https://github.com/zio/zio-intellij/pull/392">#392</a>). Huge thanks to Mark Rudolph for the contribution!</li>

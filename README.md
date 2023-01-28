@@ -10,14 +10,14 @@ The plugin is now available on the [JetBrains Plugin Marketplace](https://plugin
 
 <img src="https://user-images.githubusercontent.com/601206/79748708-89a48080-8316-11ea-95a3-3542dab04684.png" />
 
-**Supported versions**: IntelliJ IDEA 2022.x, 2021.x (Community edition or better)
+**Supported versions**
 
 A note about support: this plugin is maintained for the last two IntelliJ IDEA versions. When a new IDEA is released, the oldest supported version will stop getting new features (except critical bug fixes).
 
 To continue enjoying new features, please upgrade to the latest available IntellJ version!
 
 **Currently supported**:
- * 2022.3 (EAP)
+ * 2023.1 (EAP)
  * 2022.x (current release)
  * 2021.x
 
