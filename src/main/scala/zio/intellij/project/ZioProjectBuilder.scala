@@ -5,6 +5,7 @@ import com.intellij.openapi.module.{ModifiableModuleModel, Module}
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.projectRoots.{JavaSdk, JavaSdkVersion, Sdk}
 import com.intellij.openapi.util.io
+import com.intellij.openapi.util.text.Strings
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.UI
@@ -264,7 +265,8 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
           label.setDisplayedMnemonic('Z')
 
         case label: JLabel if label.getText.startsWith("Project ") && label.getText.length > 8 =>
-          label.setText(label.getText.substring(8) |> (s => s.substring(0, 1).toUpperCase + s.substring(1)))
+          val newText = Strings.capitalize(label.getText.substring(8))
+          label.setText(newText)
       }
     }
 

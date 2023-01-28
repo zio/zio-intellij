@@ -6,6 +6,7 @@ on:
       - idea221.x
       - idea222.x
       - idea223.x
+      - idea231.x
   pull_request:
 
 jobs:
