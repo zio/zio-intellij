@@ -5,17 +5,31 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFor}
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods.`.*>`
 import zio.intellij.utils.StringUtils._
+import zio.intellij.utils.Version
 import zio.intellij.utils.types.ZioType
 
-class SimplifyForeachInspection
+class SimplifyForeachInspectionZIO1
     extends ZInspection(
-      ForeachForCompSimplificationType,
-      ForeachParForCompSimplificationType,
+      ForeachForCompSimplificationType("foreach_"),
+      ForeachParForCompSimplificationType("foreachPar_"),
       ForeachParNForCompSimplificationType,
-      ForeachChainSimplificationType,
-      ForeachParChainSimplificationType,
+      ForeachChainSimplificationType("foreach_"),
+      ForeachParChainSimplificationType("foreachPar_"),
       ForeachParNChainSimplificationType
-    )
+    ) {
+  override protected def isAvailable(zioVersion: Version): Boolean =
+    zioVersion >= Version.ZIO.`1.0.0` && zioVersion < Version.ZIO.`2.0.0`
+}
+
+class SimplifyForeachInspectionZIO2
+    extends ZInspection(
+      ForeachForCompSimplificationType("foreachDiscard"),
+      ForeachParForCompSimplificationType("foreachParDiscard"),
+      ForeachChainSimplificationType("foreachDiscard"),
+      ForeachParChainSimplificationType("foreachParDiscard")
+    ) {
+  override protected def isAvailable(zioVersion: Version): Boolean = zioVersion >= Version.ZIO.`2.0.0`
+}
 
 sealed abstract class BaseForeachSimplificationType(methodName: String) extends SimplificationType {
 
@@ -63,11 +77,11 @@ sealed abstract class BaseForeachForCompSimplificationType(
     }
 }
 
-object ForeachForCompSimplificationType
-    extends BaseForeachForCompSimplificationType(methodName = "foreach_", methodExtractor = `ZIO.foreach`)
+case class ForeachForCompSimplificationType(methodName: String)
+    extends BaseForeachForCompSimplificationType(methodName = methodName, methodExtractor = `ZIO.foreach`)
 
-object ForeachParForCompSimplificationType
-    extends BaseForeachForCompSimplificationType(methodName = "foreachPar_", methodExtractor = `ZIO.foreachPar`)
+case class ForeachParForCompSimplificationType(methodName: String)
+    extends BaseForeachForCompSimplificationType(methodName = methodName, methodExtractor = `ZIO.foreachPar`)
 
 object ForeachParNForCompSimplificationType extends BaseForeachParNSimplificationType {
 
@@ -96,11 +110,11 @@ sealed abstract class BaseForeachChainSimplificationType(
     }
 }
 
-object ForeachChainSimplificationType
-    extends BaseForeachChainSimplificationType(methodName = "foreach_", methodExtractor = `ZIO.foreach`)
+case class ForeachChainSimplificationType(methodName: String)
+    extends BaseForeachChainSimplificationType(methodName = methodName, methodExtractor = `ZIO.foreach`)
 
-object ForeachParChainSimplificationType
-    extends BaseForeachChainSimplificationType(methodName = "foreachPar_", methodExtractor = `ZIO.foreachPar`)
+case class ForeachParChainSimplificationType(methodName: String)
+    extends BaseForeachChainSimplificationType(methodName = methodName, methodExtractor = `ZIO.foreachPar`)
 
 object ForeachParNChainSimplificationType extends BaseForeachParNSimplificationType {
 

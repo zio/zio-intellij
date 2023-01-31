@@ -1,12 +1,16 @@
 package zio.inspections
 
-import zio.intellij.inspections.simplifications.SimplifyForeachInspection
+import zio.intellij.inspections.ZInspection
+import zio.intellij.inspections.simplifications.SimplifyForeachInspectionZIO1
+import zio.intellij.inspections.simplifications.SimplifyForeachInspectionZIO2
 
-abstract class SimplifyForeachInspectionTest(
+import scala.reflect.ClassTag
+
+abstract class SimplifyForeachInspectionTest[S <: ZInspection: ClassTag](
   methodToReplace: String,
   methodToReplaceWith: String,
   isParN: Boolean = false
-) extends ZSimplifyInspectionTest[SimplifyForeachInspection] {
+) extends ZSimplifyInspectionTest[S] {
 
   private val nParamList = if (isParN) "(n)" else ""
 
@@ -226,14 +230,32 @@ abstract class SimplifyForeachInspectionTest(
 
 }
 
-class SimplifyForeachToForeach_Test
-    extends SimplifyForeachInspectionTest(methodToReplace = "foreach", methodToReplaceWith = "foreach_")
+class SimplifyForeachToForeach_ZIO1Test
+    extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO1](
+      methodToReplace = "foreach",
+      methodToReplaceWith = "foreach_"
+    )
 
-class SimplifyForeachParToForeachPar_Test
-    extends SimplifyForeachInspectionTest(methodToReplace = "foreachPar", methodToReplaceWith = "foreachPar_")
+class SimplifyForeachToForeach_ZIO2Test
+    extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO2](
+      methodToReplace = "foreach",
+      methodToReplaceWith = "foreachDiscard"
+    )
+
+class SimplifyForeachParToForeachPar_ZIO1Test
+    extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO1](
+      methodToReplace = "foreachPar",
+      methodToReplaceWith = "foreachPar_"
+    )
+
+class SimplifyForeachParToForeachPar_ZIO2Test
+    extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO2](
+      methodToReplace = "foreachPar",
+      methodToReplaceWith = "foreachParDiscard"
+    )
 
 class SimplifyForeachParNToForeachParN_Test
-    extends SimplifyForeachInspectionTest(
+    extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO1](
       methodToReplace = "foreachParN",
       methodToReplaceWith = "foreachParN_",
       isParN = true

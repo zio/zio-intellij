@@ -186,10 +186,16 @@
                          shortName="SimplifyZipLeftInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
-        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyForeachInspection"
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyForeachInspectionZIO1"
                          displayName="Simplify .foreach by discarding unused result thus slightly improving performance"
                          groupPath="Scala,ZIO" groupName="Simplifications"
-                         shortName="SimplifyForeachInspection" level="WARNING"
+                         shortName="SimplifyForeachInspectionZIO1" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifyForeachInspectionZIO2"
+                         displayName="Simplify .foreach by discarding unused result thus slightly improving performance"
+                         groupPath="Scala,ZIO" groupName="Simplifications"
+                         shortName="SimplifyForeachInspectionZIO2" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
         <localInspection implementationClass="zio.intellij.inspections.mistakes.IfGuardInsteadOfWhenInspection"
