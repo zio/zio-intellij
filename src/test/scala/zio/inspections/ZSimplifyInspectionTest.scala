@@ -25,7 +25,7 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
     )
 
   def z(s: String): String =
-    s"""$`import zio._`
+    s"""${`import zio._`}
        |import scala.concurrent.Future
        |import scala.concurrent.ExecutionContext.Implicits.global
        |import scala.util._

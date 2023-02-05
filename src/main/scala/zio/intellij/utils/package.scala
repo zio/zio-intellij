@@ -145,6 +145,13 @@ package object utils {
         case _ => None
       }
 
+  // A with B with C => Seq(A, B, C)
+  def split(tpe: ScType): Seq[ScType] =
+    resolveAliases(tpe.widen) match {
+      case Some(ScCompoundType(components, _, _)) => components.flatMap(split)
+      case other                                  => other.toSeq
+    }
+
   def extractTypeArguments(tpe: ScType): Option[Seq[ScType]] =
     tpe match {
       case parameterizedType: ScParameterizedType => Some(parameterizedType.typeArguments)

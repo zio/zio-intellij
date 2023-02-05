@@ -264,6 +264,12 @@
                          shortName="UnnecessaryEnvProvisionInspection" level="ERROR"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.macros.ProvideMacroZIO2Inspection"
+                         displayName="There were issues while constructing a layer"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="ProvideMacroZIO2Inspection" level="ERROR"
+                         enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.mistakes.IncorrectTestClassInspection"
                          displayName="Detects incorrect use of 'class' instead of 'object' for ZIO Tests specs"
                          groupPath="Scala,ZIO" groupName="Inspections"
