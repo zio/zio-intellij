@@ -1,6 +1,5 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 import zio.intellij.inspections.simplifications.SimplifyErrorModificationInspection
 
 abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toReplaceWith: String)

@@ -5,12 +5,14 @@ import intellij.testfixtures._
 import org.jetbrains.plugins.scala.base.libraryLoaders._
 import org.jetbrains.plugins.scala.codeInspection.ScalaInspectionTestBase
 import org.jetbrains.plugins.scala.codeInspection.collections._
-import zio.inspections.ZInspectionTestBase.versionPattern
+import zio.inspections.ZInspectionTestBase._
 import zio.intellij.inspections.ZInspection
 
 import scala.reflect._
 
 trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestBase =>
+
+  protected def isZIO1 = true
 
   override protected def librariesLoaders: Seq[LibraryLoader] =
     Seq(
@@ -23,12 +25,7 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
     )
 
   def z(s: String): String =
-    s"""import zio._
-       |import zio.console._
-       |import zio.duration._
-       |import zio.stream._
-       |import zio.test._
-       |import zio.test.Assertion._
+    s"""$`import zio._`
        |import scala.concurrent.Future
        |import scala.concurrent.ExecutionContext.Implicits.global
        |import scala.util._
@@ -61,13 +58,30 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
       } finally if (thrownEx != null) ()
       else throw new AssertionError("An error from the highlighter was expected to be thrown, but wasn't.")
     }
-
   }
+
+  private val versionPattern = if (isZIO1) versionPatternZIO1 else versionPatternZIO2
+  private val `import zio._` =
+    if (isZIO1) {
+      """import zio._
+        |import zio.console._
+        |import zio.duration._
+        |import zio.stream._
+        |import zio.test._
+        |import zio.test.Assertion._""".stripMargin
+    } else {
+      """import zio._
+        |import zio.stream._
+        |import zio.test._
+        |import zio.test.Assertion._""".stripMargin
+    }
+
 }
 
 object ZInspectionTestBase {
   // https://ant.apache.org/ivy/history/2.3.0/ivyfile/dependency.html#revision
-  val versionPattern = "(,2.0[" // matches all versions lower than 2.0
+  val versionPatternZIO1 = "(,2.0[" // matches all versions lower than 2.0
+  val versionPatternZIO2 = "[2.0,)" // matches all versions greater or equal to 2.0
 }
 
 abstract class ZSimplifyInspectionTest[T <: ZInspection: ClassTag]

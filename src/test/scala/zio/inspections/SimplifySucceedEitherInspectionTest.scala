@@ -1,6 +1,5 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.simplifications.SimplifySucceedEitherInspection
 
 abstract class SimplifySucceedEitherInspectionTest(s: String)
@@ -9,7 +8,6 @@ abstract class SimplifySucceedEitherInspectionTest(s: String)
 }
 
 class SucceedLeftInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO.left") {
-  import EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
   def test_succeed_Left(): Unit = {
     z(s"${START}ZIO.succeed(Left(a))$END").assertHighlighted()
@@ -113,7 +111,6 @@ class SucceedLeftInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO
 }
 
 class SucceedRightInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO.right") {
-  import EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
   def test_succeed_Right(): Unit = {
     z(s"${START}ZIO.succeed(Right(a))$END").assertHighlighted()
