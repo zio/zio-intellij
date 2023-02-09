@@ -229,6 +229,7 @@ package object utils {
 
     def hasZio = zioVersion.isDefined
 
+    def isZio1 = zioVersion.exists(_.major < Version.ZIO.`2.0.0`.major)
     def isZio2 = zioVersion.exists(_.major >= Version.ZIO.`2.0.0`.major)
 
     @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))

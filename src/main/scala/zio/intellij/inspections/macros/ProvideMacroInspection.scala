@@ -7,6 +7,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.{
   createExpressionFromText,
   createTypeElementFromText
 }
+import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.psi.types.{api, ScType, TypePresentationContext}
 import org.jetbrains.plugins.scala.project.{ProjectContext, ProjectPsiElementExt, ScalaFeatures}
@@ -17,26 +18,29 @@ import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils._
 
 import java.lang.System.lineSeparator
+import scala.util.chaining.scalaUtilChainingOps
 
-class ProvideMacroZIO2Inspection extends LocalInspectionTool {
+class ProvideMacroInspection extends LocalInspectionTool {
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
     case expr @ `.provide`(Typeable(`ZIO[R, E, A]`(r, _, _)), layers @ _*) if expr.module.exists(_.isZio2) =>
-      implicit val tpContext: TypePresentationContext = expr
-      implicit val pContext: ProjectContext           = expr
-      implicit val scalaFeatures: ScalaFeatures       = expr
-      val result =
-        LayerBuilder(
-          target0 = split(r).map(new ZType(_)).toList,
-          remainder = List.empty,
-          providedLayers = layers.map(new ZExpr(_)).toList,
+      LayerBuilder
+        .tryBuildZIO2(expr)(
+          target = split(r),
+          remainder = Nil,
+          providedLayers = layers,
           method = ProvideMethod.Provide
-        ).tryBuild
-
-      result match {
-        case Left(issue) => visitIssue(holder, expr)(issue)
-        case Right(_)    =>
-      }
+        )
+        .fold(visitIssue(holder, expr), identity)
+    case expr @ `.inject`(Typeable(`ZIO[R, E, A]`(r, _, _)), layers @ _*) if expr.module.exists(_.isZio1) =>
+      LayerBuilder
+        .tryBuildZIO1(expr)(
+          target = split(r),
+          remainder = Nil,
+          providedLayers = layers,
+          method = ProvideMethod.Provide
+        )
+        .fold(visitIssue(holder, expr), identity)
     case _ =>
   }
 
@@ -46,6 +50,9 @@ class ProvideMacroZIO2Inspection extends LocalInspectionTool {
       case warning: ConstructionWarning => visitWarning(holder, expr)(warning)
     }
 
+  private val errorHighlight   = ProblemHighlightType.GENERIC_ERROR
+  private val warningHighlight = ProblemHighlightType.WEAK_WARNING
+
   import ErrorRendering._
 
   private def visitError(holder: ProblemsHolder, expr: ScExpression)(error: ConstructionError): Unit =
@@ -54,34 +61,40 @@ class ProvideMacroZIO2Inspection extends LocalInspectionTool {
         holder.registerProblem(
           expr,
           missingLayersError(topLevel, transitives, isUsingProvideSome = false),
-          ProblemHighlightType.GENERIC_ERROR
+          errorHighlight
         )
       case DuplicateLayersError(duplicates) =>
         duplicates.foreach {
           case (tpe, exprs) =>
             exprs.foreach { expr =>
-              holder.registerProblem(expr.value, ambigousLayersError(tpe, exprs), ProblemHighlightType.GENERIC_ERROR)
+              holder.registerProblem(expr.value, ambigousLayersError(tpe, exprs), errorHighlight)
             }
         }
       case CircularityError(circular) =>
         circular.foreach {
           case (a, b) =>
-            holder.registerProblem(expr, circularityError(a, b), ProblemHighlightType.GENERIC_ERROR)
+            holder.registerProblem(expr, circularityError(a, b), errorHighlight)
         }
+      case NonHasTypesError(types) =>
+        holder.registerProblem(
+          expr,
+          nonHasTypeError(types),
+          errorHighlight
+        )
     }
 
   private def visitWarning(holder: ProblemsHolder, expr: ScExpression)(warning: ConstructionWarning): Unit =
     warning match {
       case UnusedLayersWarning(layers) =>
         layers.foreach { layer =>
-          holder.registerProblem(layer.value, unusedLayersWarning, ProblemHighlightType.WEAK_WARNING)
+          holder.registerProblem(layer.value, unusedLayersWarning, warningHighlight)
         }
       case UnusedProvideSomeLayersWarning(layers) =>
-        holder.registerProblem(expr, unusedProvideSomeLayersWarning(layers), ProblemHighlightType.WEAK_WARNING)
+        holder.registerProblem(expr, unusedProvideSomeLayersWarning(layers), warningHighlight)
       case SuperfluousProvideCustomWarning =>
-        holder.registerProblem(expr, superfluousProvideCustomWarning, ProblemHighlightType.WEAK_WARNING)
+        holder.registerProblem(expr, superfluousProvideCustomWarning, warningHighlight)
       case ProvideSomeAnyEnvWarning =>
-        holder.registerProblem(expr, provideSomeAnyEnvWarning, ProblemHighlightType.WEAK_WARNING)
+        holder.registerProblem(expr, provideSomeAnyEnvWarning, warningHighlight)
       case Warnings(w) =>
         w.foreach(visitWarning(holder, expr))
     }
@@ -98,37 +111,33 @@ class ProvideMacroZIO2Inspection extends LocalInspectionTool {
  * @param remainder
  *   A list of types indicating the input of the final layer. This would be the
  *   parameter of ZIO.provideSome
- * @param providedLayers
- *   A list of layers that have been provided by the user.
+ * @param providedLayerNodes
+ *   A list of layers that have been provided by the user to build services
+ * @param sideEffectNodes
+ *   A list of layers that have been provided by the users that might contain side effects, might also be used to build services.
+ *   These nodes are guaranteed to not cause "unused layer" warning.
  * @param method
  *   The sort of method that is being called: `provide`, `provideSome`, or
  *   `provideCustom`. This is used to provide improved warnings.
+ *  @param typeToLayer
+ *  to construct a `ZLayer` that summons required type
  */
 final case class LayerBuilder(
   target0: List[ZType],
   remainder: List[ZType],
-  providedLayers: List[ZExpr],
-  method: ProvideMethod
+  providedLayerNodes: List[Node],
+  sideEffectNodes: List[Node],
+  method: ProvideMethod,
+  typeToLayer: ZType => String
 )(implicit tpContext: TypePresentationContext, pContext: ProjectContext, scalaFeatures: ScalaFeatures) {
 
-  private val anyStdType      = api.Any
-  private val debugLayerType  = createTypeElementFromText("_root_.zio.ZLayer.Debug", scalaFeatures).`type`().toOption
-  private val sideEffectZType = new ZType(api.Unit)
+  def tryBuild: Either[ConstructionIssue, Unit] = assertNoAmbiguity.flatMap(_ => tryBuildInternal)
 
-  private lazy val target = {
-    val target1 =
-      if (method.isProvideSomeShared) target0.filterNot(t1 => remainder.exists(t2 => t2.conforms(t1)))
-      else target0
-    target1.filterNot(_.value.equiv(anyStdType))
-  }
+  private val target =
+    if (method.isProvideSomeShared) target0.filterNot(t => remainder.exists(_.conforms(t)))
+    else target0
 
-  private lazy val remainderNodes: List[Node] = remainder.map(typeToNode).distinct
-
-  private val (sideEffectNodes, providedLayerNodes): (List[Node], List[Node]) =
-    providedLayers.flatMap(layerToNode).partition(_.outputs.exists(sideEffectZType.conforms))
-
-  def tryBuild: Either[ConstructionIssue, Unit] =
-    assertNoAmbiguity.flatMap(_ => tryBuildInternal)
+  private val remainderNodes = remainder.map(typeToNode).distinct
 
   /**
    * Checks to see if any type is provided by multiple layers.
@@ -254,34 +263,114 @@ final case class LayerBuilder(
     initialCircularErrors ++ groupedTransitiveErrors ++ remainingErrors
   }
 
-  private def layerToNode(expr: ZExpr): Option[Node] =
-    expr.value match {
-      case Typeable(`ZLayer[RIn, E, ROut]`(in, _, out)) =>
-        val inputs = split(in).toList.filterNot(_.equiv(anyStdType)).map(new ZType(_))
-        val outputs = split(out).toList match {
-          case debug :: Nil if debugLayerType.exists(debug.conforms) => None
-          case outs                                                  => Some(outs.map(new ZType(_)))
-        }
-
-        outputs.map(Node(inputs, _, expr))
-      case _ => None
-    }
-
   private def typeToNode(tpe: ZType): Node =
     Node(
-      Nil,
-      List(tpe),
-      new ZExpr(createExpressionFromText(s"_root_.zio.ZLayer.environment[$tpe]", scalaFeatures))
+      inputs = Nil,
+      outputs = List(tpe),
+      value = new ZExpr(createExpressionFromText(typeToLayer(tpe), scalaFeatures))
     )
 
 }
 
 object LayerBuilder {
 
+  // version specific: making sure ScType <: Has[_]
+  def tryBuildZIO1(expr: ScExpression)(
+    target: Seq[ScType],
+    remainder: Seq[ScType],
+    providedLayers: Seq[ScExpression],
+    method: ProvideMethod
+  ): Either[ConstructionIssue, Unit] = {
+    implicit val tpContext: TypePresentationContext = expr
+    implicit val pContext: ProjectContext           = expr
+    implicit val scalaFeatures: ScalaFeatures       = expr
+
+    val hasDesignator = createType("_root_.zio.Has", expr)
+
+    def isHasType(tpe: ZType): Boolean =
+      tpe.value match {
+        case ParameterizedType(designator, _) => hasDesignator.exists(_.equiv(designator))
+        case _                                => false
+      }
+
+    // we are not expecting to see non-Has types often in ZIO1 so it's dirty but efficient enough
+    val nonHasTypes = collection.mutable.ListBuffer.empty[ZType]
+
+    def toZType(tpe: ScType): Option[ZType] =
+      ZType(tpe).tap(_.foreach(tpe => if (!isHasType(tpe)) nonHasTypes += tpe))
+
+    def layerToNode(expr: ScExpression): Option[Node] =
+      expr match {
+        case Typeable(`ZLayer[RIn, E, ROut]`(in, _, out)) =>
+          val inputs  = split(in).toList.flatMap(toZType)
+          val outputs = split(out).toList.flatMap(toZType)
+          Some(Node(inputs, outputs, new ZExpr(expr)))
+        case _ => None
+      }
+
+    // do NOT inline
+    // toZType is stateful
+    val target0             = target.toList.flatMap(toZType)
+    val remainder0          = remainder.toList.flatMap(toZType)
+    val providedLayerNodes0 = providedLayers.toList.flatMap(layerToNode)
+
+    if (nonHasTypes.nonEmpty)
+      Left(NonHasTypesError(nonHasTypes.toSet))
+    else
+      LayerBuilder(
+        target0 = target0,
+        remainder = remainder0,
+        providedLayerNodes = providedLayerNodes0,
+        sideEffectNodes = Nil,
+        method = method,
+        typeToLayer = tpe => s"_root_.zio.ZLayer.requires[$tpe]"
+      ).tryBuild
+  }
+
+  // version-specific: taking care of Debug and side-effect layers
+  def tryBuildZIO2(expr: ScExpression)(
+    target: Seq[ScType],
+    remainder: Seq[ScType],
+    providedLayers: Seq[ScExpression],
+    method: ProvideMethod
+  ): Either[ConstructionIssue, Unit] = {
+    implicit val tpContext: TypePresentationContext = expr
+    implicit val pContext: ProjectContext           = expr
+    implicit val scalaFeatures: ScalaFeatures       = expr
+
+    val debugLayer = createTypeElementFromText("_root_.zio.ZLayer.Debug", scalaFeatures).`type`().toOption
+
+    def layerToNode(expr: ScExpression): Option[Node] =
+      expr match {
+        case Typeable(`ZLayer[RIn, E, ROut]`(in, _, out)) =>
+          val inputs = split(in).toList.flatMap(ZType(_))
+          val outputs = split(out).toList match {
+            case debug :: Nil if debugLayer.exists(debug.conforms) => None
+            case outs                                              => Some(outs.flatMap(ZType(_)))
+          }
+
+          outputs.map(Node(inputs, _, new ZExpr(expr)))
+        case _ => None
+      }
+
+    val (sideEffectNodes, providedLayerNodes) =
+      providedLayers.toList.flatMap(layerToNode).partition(_.outputs.exists(o => api.Unit.conforms(o.value)))
+
+    LayerBuilder(
+      target0 = target.toList.flatMap(ZType(_)),
+      remainder = remainder.toList.flatMap(ZType(_)),
+      providedLayerNodes = providedLayerNodes,
+      sideEffectNodes = sideEffectNodes,
+      method = method,
+      typeToLayer = tpe => s"_root_.zio.ZLayer.environment[$tpe]"
+    ).tryBuild
+  }
+
   // dirty hack to make it work
   // ScType and ScExpression don't have equals / hashCode methods, which makes it difficult to use it with the algorithm
   // besides, original ZIO algorithm uses string comparison too
-  final class ZType(val value: ScType)(implicit context: TypePresentationContext) {
+  // also, ZType is guaranteed to have meaningful type (non-Any)
+  final class ZType private (val value: ScType)(implicit context: TypePresentationContext) {
     def conforms(that: ZType): Boolean = this.value.conforms(that.value)
 
     override def equals(other: Any): Boolean = other match {
@@ -293,6 +382,13 @@ object LayerBuilder {
 
     private lazy val widened = value.widen
     private lazy val asStr   = resolveAliases(widened).getOrElse(widened).presentableText
+  }
+
+  object ZType {
+
+    def apply(value: ScType)(implicit pc: ProjectContext, tpc: TypePresentationContext): Option[ZType] =
+      Option.unless(value.equiv(api.Any))(new ZType(value))
+
   }
 
   final class ZExpr(val value: ScExpression)(implicit context: TypePresentationContext) {
@@ -325,6 +421,7 @@ object LayerBuilder {
   final case class MissingLayersError(topLevel: Seq[ZType], transitives: Map[ZExpr, Seq[ZType]])
       extends ConstructionError
   final case class CircularityError(circular: Seq[(ZExpr, ZExpr)]) extends ConstructionError
+  final case class NonHasTypesError(types: Set[ZType])             extends ConstructionError
 
   sealed trait ConstructionWarning                                    extends ConstructionIssue
   final case class UnusedLayersWarning(layers: Set[ZExpr])            extends ConstructionWarning
@@ -472,6 +569,9 @@ object ErrorRendering {
         |  "╰─◉" $a
 
         |    "╰─ ◉" $b""".stripMargin
+
+  def nonHasTypeError(types: Set[ZType]): String =
+    s"Contains non-Has types:$lineSeparator- ${types.mkString(s"$lineSeparator- ")}"
 
   def unusedProvideSomeLayersWarning(layers: Seq[ZType]): String =
     s"""You have provided more arguments to provideSome than is required.

@@ -16,6 +16,7 @@ object TypeCheckUtils {
   val extraTypes      = List("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
   val zioTestAsserts  = List("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM")
   val zioTestPackage  = List("zio.test._")
+  val zioMagicPackage = List("zio.magic._")
   val zioLikePackages = zioTypes ++ zioStreamTypes ++ managedTypes ++ extraTypes ++ zioTestAsserts
 
   def fromZioLike(r: ScExpression): Boolean =
