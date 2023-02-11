@@ -1,7 +1,6 @@
 package zio.inspections
 
 import zio.intellij.inspections.simplifications.SimplifyBuildUseInspection
-import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
 class SimplifyBuildUseInspectionTest extends ZSimplifyInspectionTest[SimplifyBuildUseInspection] {
   override protected val hint: String = "Replace with .provideLayer"

@@ -145,6 +145,13 @@ package object utils {
         case _ => None
       }
 
+  // A with B with C => Seq(A, B, C)
+  def split(tpe: ScType): Seq[ScType] =
+    resolveAliases(tpe.widen) match {
+      case Some(ScCompoundType(components, _, _)) => components.flatMap(split)
+      case other                                  => other.toSeq
+    }
+
   def extractTypeArguments(tpe: ScType): Option[Seq[ScType]] =
     tpe match {
       case parameterizedType: ScParameterizedType => Some(parameterizedType.typeArguments)
@@ -222,6 +229,7 @@ package object utils {
 
     def hasZio = zioVersion.isDefined
 
+    def isZio1 = zioVersion.exists(_.major < Version.ZIO.`2.0.0`.major)
     def isZio2 = zioVersion.exists(_.major >= Version.ZIO.`2.0.0`.major)
 
     @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))
