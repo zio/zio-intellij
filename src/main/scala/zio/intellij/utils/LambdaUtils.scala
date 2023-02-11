@@ -9,14 +9,13 @@ object LambdaUtils {
 
   def lambdaToUnderscore(expr: ScFunctionExpr): String =
     ConvertParameterToUnderscoreIntention
-      .createExpressionToIntroduce(expr, true)
-      .swap
+      .createExpressionToIntroduce(expr, withoutParameterTypes = true)
       .fold(_ => replaceWithUnderscore(expr).getText, _.getText)
 
   private def replaceWithUnderscore(e: ScFunctionExpr): ScFunctionExpr = {
     val params = e.parameters.filterNot(p => p.isWildcard || p.isImplicitParameter)
     params.collectFirst {
-      case named: ScNamedElement if !isElementUsed(named, false) =>
+      case named: ScNamedElement if !isElementUsed(named, isOnTheFly = false) =>
         val wildcard = createWildcardNode(e.features)(e.projectContext).getPsi
         named.nameId.replace(wildcard)
         e
