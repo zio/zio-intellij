@@ -4,7 +4,6 @@ import zio.intellij.inspections.mistakes.NothingInContravariantPositionInspectio
 
 class NothingInContravariantPositionInspectionTest
     extends ZScalaInspectionTest[NothingInContravariantPositionInspection] {
-  import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
   override protected val description = NothingInContravariantPositionInspection.message
 

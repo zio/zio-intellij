@@ -1,6 +1,5 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.simplifications.SimplifyMapInspection
 
 abstract class MapInspectionTest(s: String) extends ZSimplifyInspectionTest[SimplifyMapInspection] {
@@ -8,7 +7,6 @@ abstract class MapInspectionTest(s: String) extends ZSimplifyInspectionTest[Simp
 }
 
 class SimplifyMapTest extends MapInspectionTest(".as") {
-  import EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
   def test_map_to_x(): Unit = {
     z(s"ZIO.succeed(42).${START}map(_ => x)$END").assertHighlighted()
@@ -44,7 +42,6 @@ class SimplifyMapTest extends MapInspectionTest(".as") {
 }
 
 class SimplifyMapErrorTest extends MapInspectionTest(".orElseFail") {
-  import EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
   def test_mapError_to_x(): Unit = {
     z(s"ZIO.succeed(42).${START}mapError(_ => x)$END").assertHighlighted()

@@ -1,10 +1,8 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.simplifications.SimplifyUnitInspection
 
 class SimplifyUnitInspectionTest extends ZSimplifyInspectionTest[SimplifyUnitInspection] {
-  import EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
   override protected val hint = "Replace with .unit"
 

@@ -8,7 +8,7 @@ import zio.intellij.utils.types.{ZLayerTypes, ZioTypes}
 
 object TypeCheckUtils {
 
-  val zioTypes        = ZioTypes.values.map(_.fqName)
+  val zioTypes        = ZioTypes.values.map(_.fqName) :+ "zio.ZIOVersionSpecific"
   val zioLayerTypes   = ZLayerTypes.values.map(_.fqName)
   val zioSinkTypes    = List("zio.stream.ZSink")
   val zioStreamTypes  = List("zio.stream.ZStream")
@@ -16,6 +16,7 @@ object TypeCheckUtils {
   val extraTypes      = List("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
   val zioTestAsserts  = List("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM")
   val zioTestPackage  = List("zio.test._")
+  val zioMagicPackage = List("zio.magic._")
   val zioLikePackages = zioTypes ++ zioStreamTypes ++ managedTypes ++ extraTypes ++ zioTestAsserts
 
   def fromZioLike(r: ScExpression): Boolean =
@@ -39,12 +40,15 @@ object TypeCheckUtils {
   def fromZioStream(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioStreamTypes)
 
+  def fromZioLayer(tpe: ScType): Boolean =
+    isOfClassFrom(tpe, zioLayerTypes)
+
   sealed trait TypeArgs3Extractor {
 
     protected def fromTarget(tpe: ScType): Boolean
 
     private def unapplyInner(tpe: ScType): Option[(ScType, ScType, ScType)] =
-      resolveAliases(tpe.tryExtractDesignatorSingleton).flatMap(extractTypeArguments).flatMap {
+      resolveAliases(tpe.widen).flatMap(extractTypeArguments).flatMap {
         case Seq(r, e, a) => Some(r, e, a)
         case _            => None
       }
@@ -112,6 +116,10 @@ object TypeCheckUtils {
         case `ZStream[R, E, O]`(r, e, a) if r.isAny => Some(e, a)
         case _                                      => None
       }
+  }
+
+  object `ZLayer[RIn, E, ROut]` extends TypeArgs3Extractor {
+    override protected def fromTarget(tpe: ScType): Boolean = fromZioLayer(tpe)
   }
 
   def isInfallibleEffect(tpe: ScType): Boolean =

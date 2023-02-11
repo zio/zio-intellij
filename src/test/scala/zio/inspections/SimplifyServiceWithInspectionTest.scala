@@ -1,6 +1,5 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 import org.junit.Ignore
 import zio.intellij.inspections.simplifications.SimplifyServiceWithInspection
 

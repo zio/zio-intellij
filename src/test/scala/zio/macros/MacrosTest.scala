@@ -14,7 +14,7 @@ import zio.inspections.ZInspectionTestBase
 
 abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestCase {
   protected val zioOrg     = "dev.zio"
-  protected def zioVersion = ZInspectionTestBase.versionPattern
+  protected def zioVersion = ZInspectionTestBase.versionPatternZIO1
 
   protected var extendedObject: ScObject                                  = _
   implicit protected var typePresentationContext: TypePresentationContext = _

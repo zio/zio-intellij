@@ -1,10 +1,8 @@
 package zio.inspections
 
-import com.intellij.testFramework.EditorTestUtil
 import zio.intellij.inspections.simplifications.SimplifyFlattenInspection
 
 class SimplifyFlattenInspectionTest extends ZSimplifyInspectionTest[SimplifyFlattenInspection] {
-  import EditorTestUtil.{SELECTION_END_TAG => END, SELECTION_START_TAG => START}
 
   override protected val hint = "Replace .map and .flatten with .flatMap"
 
