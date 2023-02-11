@@ -1,9 +1,10 @@
 package zio.intellij.intentions.suggestions
 
+import com.intellij.codeInsight.intention.preview.IntentionPreviewInfo
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.{PsiElement, PsiFile}
 import org.jetbrains.plugins.scala.codeInsight.intention.types.AbstractTypeAnnotationIntention.complete
 import org.jetbrains.plugins.scala.codeInsight.intention.types.{startTemplate, ChooseTypeTextExpression}
 import org.jetbrains.plugins.scala.extensions._
@@ -51,6 +52,9 @@ final class SuggestTypeAlias extends ZTypeAnnotationIntention {
       case _ => false
     }
 
+  override def generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo =
+    IntentionPreviewInfo.EMPTY
+
   private def adjustElementAtOffset(element: PsiElement, editor: Editor): PsiElement =
     ScalaPsiUtil.adjustElementAtOffset(element, editor.getCaretModel.getOffset)
 }
@@ -83,10 +87,10 @@ object SuggestTypeAlias {
       case _                                   => tpe
     }
 
-  def equiv(alias: ScTypeAliasDefinition, tpe: ScType) =
+  def equiv(alias: ScTypeAliasDefinition, tpe: ScType): Option[ScType] =
     check(alias, tpe)(_.equiv(tpe))
 
-  def conforms(alias: ScTypeAliasDefinition, tpe: ScType) =
+  def conforms(alias: ScTypeAliasDefinition, tpe: ScType): Option[ScType] =
     check(alias, tpe)(_.conforms(tpe))
 
   private def check(alias: ScTypeAliasDefinition, tpe: ScType)(checker: ScType => Boolean) = {
