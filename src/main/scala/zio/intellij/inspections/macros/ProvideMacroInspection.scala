@@ -1,6 +1,7 @@
 package zio.intellij.inspections.macros
 
 import com.intellij.codeInspection._
+import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.{
@@ -22,27 +23,51 @@ import scala.util.chaining.scalaUtilChainingOps
 
 class ProvideMacroInspection extends LocalInspectionTool {
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case expr @ `.provide`(Typeable(`ZIO[R, E, A]`(r, _, _)), layers @ _*) if expr.module.exists(_.isZio2) =>
-      LayerBuilder
-        .tryBuildZIO2(expr)(
-          target = split(r),
-          remainder = Nil,
-          providedLayers = layers,
-          method = ProvideMethod.Provide
-        )
-        .fold(visitIssue(holder, expr), identity)
-    case expr @ `.inject`(Typeable(`ZIO[R, E, A]`(r, _, _)), layers @ _*) if expr.module.exists(_.isZio1) =>
-      LayerBuilder
-        .tryBuildZIO1(expr)(
-          target = split(r),
-          remainder = Nil,
-          providedLayers = layers,
-          method = ProvideMethod.Provide
-        )
-        .fold(visitIssue(holder, expr), identity)
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = element => {
+    val module = element.module
+    if (module.exists(_.isZio1)) visitZIO1ProvideMethods(holder)(element)
+    else if (module.exists(_.isZio2)) visitZIO2ProvideMethods(holder)(element)
+  }
+
+  private def visitZIO1ProvideMethods(holder: ProblemsHolder)(element: PsiElement): Unit = element match {
+    case expr @ `.inject`(base, layers @ _*) =>
+      tryBuildProvideZIO1(base, layers).fold(visitIssue(holder, expr), identity)
     case _ =>
   }
+
+  private def visitZIO2ProvideMethods(holder: ProblemsHolder)(element: PsiElement): Unit = element match {
+    case expr @ `.provide`(base, layers @ _*) =>
+      tryBuildProvideZIO2(base, layers).fold(visitIssue(holder, expr), identity)
+    case _ =>
+  }
+
+  private def tryBuildProvideZIO1(base: ScExpression, layers: Seq[ScExpression]): Either[ConstructionIssue, Unit] =
+    base match {
+      case Typeable(`ZIO[R, E, A]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO1(base)(
+            target = split(r),
+            remainder = Nil,
+            providedLayers = layers,
+            method = ProvideMethod.Provide
+          )
+      case _ =>
+        Right(())
+    }
+
+  private def tryBuildProvideZIO2(base: ScExpression, layers: Seq[ScExpression]): Either[ConstructionIssue, Unit] =
+    base match {
+      case Typeable(`ZIO[R, E, A]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO2(base)(
+            target = split(r),
+            remainder = Nil,
+            providedLayers = layers,
+            method = ProvideMethod.Provide
+          )
+      case _ =>
+        Right(())
+    }
 
   private def visitIssue(holder: ProblemsHolder, expr: ScExpression)(issue: ConstructionIssue): Unit =
     issue match {
