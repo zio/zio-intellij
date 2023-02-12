@@ -9,16 +9,17 @@ import scala.reflect.ClassTag
 abstract class SimplifyForeachInspectionTest[S <: ZInspection: ClassTag](
   methodToReplace: String,
   methodToReplaceWith: String,
+  isZIO1Test: Boolean,
   isParN: Boolean = false
 ) extends ZSimplifyInspectionTest[S] {
 
   private val nParamList = if (isParN) "(n)" else ""
 
-  private val zioMethodToReplace     = s"""URIO.$methodToReplace$nParamList(myIterable)(f)"""
-  private val zioMethodToReplaceWith = s"""URIO.$methodToReplaceWith$nParamList(myIterable)(f)"""
+  private val zioMethodToReplace     = s"""ZIO.$methodToReplace$nParamList(myIterable)(f)"""
+  private val zioMethodToReplaceWith = s"""ZIO.$methodToReplaceWith$nParamList(myIterable)(f)"""
 
   private val zioBlockMethodToReplace =
-    s"""URIO.$methodToReplace$nParamList(myIterable) { it =>
+    s"""ZIO.$methodToReplace$nParamList(myIterable) { it =>
        |  println(it)
        |  for {
        |    _ <- ZIO.fail(???)
@@ -26,7 +27,7 @@ abstract class SimplifyForeachInspectionTest[S <: ZInspection: ClassTag](
        |}""".stripMargin
 
   private val zioBlockMethodToReplaceWith =
-    s"""URIO.$methodToReplaceWith$nParamList(myIterable) {
+    s"""ZIO.$methodToReplaceWith$nParamList(myIterable) {
        |  it =>
        |    println(it)
        |    for {
@@ -35,6 +36,8 @@ abstract class SimplifyForeachInspectionTest[S <: ZInspection: ClassTag](
        |}""".stripMargin
 
   override protected val hint: String = s"Replace with ZIO.$methodToReplaceWith"
+
+  override protected def isZIO1: Boolean = isZIO1Test
 
   def testForCompHighlighting(): Unit =
     z {
@@ -233,30 +236,35 @@ abstract class SimplifyForeachInspectionTest[S <: ZInspection: ClassTag](
 class SimplifyForeachToForeach_ZIO1Test
     extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO1](
       methodToReplace = "foreach",
-      methodToReplaceWith = "foreach_"
+      methodToReplaceWith = "foreach_",
+      isZIO1Test = true
     )
 
 class SimplifyForeachToForeach_ZIO2Test
     extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO2](
       methodToReplace = "foreach",
-      methodToReplaceWith = "foreachDiscard"
+      methodToReplaceWith = "foreachDiscard",
+      isZIO1Test = false
     )
 
 class SimplifyForeachParToForeachPar_ZIO1Test
     extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO1](
       methodToReplace = "foreachPar",
-      methodToReplaceWith = "foreachPar_"
+      methodToReplaceWith = "foreachPar_",
+      isZIO1Test = true
     )
 
 class SimplifyForeachParToForeachPar_ZIO2Test
     extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO2](
       methodToReplace = "foreachPar",
-      methodToReplaceWith = "foreachParDiscard"
+      methodToReplaceWith = "foreachParDiscard",
+      isZIO1Test = false
     )
 
 class SimplifyForeachParNToForeachParN_Test
     extends SimplifyForeachInspectionTest[SimplifyForeachInspectionZIO1](
       methodToReplace = "foreachParN",
       methodToReplaceWith = "foreachParN_",
+      isZIO1Test = true,
       isParN = true
     )
