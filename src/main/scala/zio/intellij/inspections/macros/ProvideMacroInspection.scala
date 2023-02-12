@@ -3,7 +3,7 @@ package zio.intellij.inspections.macros
 import com.intellij.codeInspection._
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGenericCall, ScMethodCall}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.{
   createExpressionFromText,
   createTypeElementFromText
@@ -32,12 +32,16 @@ class ProvideMacroInspection extends LocalInspectionTool {
   private def visitZIO1ProvideMethods(holder: ProblemsHolder)(element: PsiElement): Unit = element match {
     case expr @ `.inject`(base, layers @ _*) =>
       tryBuildProvideZIO1(base, layers).fold(visitIssue(holder, expr), identity)
+    case fullyApplied @ ScMethodCall(partiallyApplied @ `.injectSome`(base, _ @_*), layers) =>
+      visitProvideSomeZIO1(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
     case _ =>
   }
 
   private def visitZIO2ProvideMethods(holder: ProblemsHolder)(element: PsiElement): Unit = element match {
     case expr @ `.provide`(base, layers @ _*) =>
       tryBuildProvideZIO2(base, layers).fold(visitIssue(holder, expr), identity)
+    case fullyApplied @ ScMethodCall(partiallyApplied @ `.provideSome`(base, _ @_*), layers) =>
+      visitProvideSomeZIO2(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
     case _ =>
   }
 
@@ -69,6 +73,48 @@ class ProvideMacroInspection extends LocalInspectionTool {
         Right(())
     }
 
+  private def visitProvideSomeZIO1(
+    expr: ScExpression,       // effectLike.injectSome[Foo]
+    base: ScExpression,       // effectLike
+    layers: Seq[ScExpression] // layer1, layer2
+  ): Either[ConstructionIssue, Unit] =
+    base match {
+      case Typeable(`ZIO[R, E, A]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO1(expr)(
+            target = split(r),
+            remainder = methodTypeArgs(expr).flatMap(split),
+            providedLayers = layers,
+            method = ProvideMethod.ProvideSome
+          )
+      case _ =>
+        Right(())
+    }
+
+  private def visitProvideSomeZIO2(
+    expr: ScExpression,       // effectLike.provideSome[Foo]
+    base: ScExpression,       // effectLike
+    layers: Seq[ScExpression] // layer1, layer2
+  ): Either[ConstructionIssue, Unit] =
+    base match {
+      case Typeable(`ZIO[R, E, A]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO2(expr)(
+            target = split(r),
+            remainder = methodTypeArgs(expr).flatMap(split),
+            providedLayers = layers,
+            method = ProvideMethod.ProvideSome
+          )
+      case _ =>
+        Right(())
+    }
+
+  private def methodTypeArgs(expr: ScExpression): Seq[ScType] =
+    expr match {
+      case ScGenericCall(_, typeArgs) => typeArgs.flatMap(_.`type`().toOption)
+      case _                          => Seq.empty
+    }
+
   private def visitIssue(holder: ProblemsHolder, expr: ScExpression)(issue: ConstructionIssue): Unit =
     issue match {
       case error: ConstructionError     => visitError(holder, expr)(error)
@@ -82,12 +128,8 @@ class ProvideMacroInspection extends LocalInspectionTool {
 
   private def visitError(holder: ProblemsHolder, expr: ScExpression)(error: ConstructionError): Unit =
     error match {
-      case MissingLayersError(topLevel, transitives) =>
-        holder.registerProblem(
-          expr,
-          missingLayersError(topLevel, transitives, isUsingProvideSome = false),
-          errorHighlight
-        )
+      case MissingLayersError(topLevel, transitives, isProvideSome) =>
+        holder.registerProblem(expr, missingLayersError(topLevel, transitives, isProvideSome), errorHighlight)
       case DuplicateLayersError(duplicates) =>
         duplicates.foreach {
           case (tpe, exprs) =>
@@ -101,19 +143,13 @@ class ProvideMacroInspection extends LocalInspectionTool {
             holder.registerProblem(expr, circularityError(a, b), errorHighlight)
         }
       case NonHasTypesError(types) =>
-        holder.registerProblem(
-          expr,
-          nonHasTypeError(types),
-          errorHighlight
-        )
+        holder.registerProblem(expr, nonHasTypeError(types), errorHighlight)
     }
 
   private def visitWarning(holder: ProblemsHolder, expr: ScExpression)(warning: ConstructionWarning): Unit =
     warning match {
       case UnusedLayersWarning(layers) =>
-        layers.foreach { layer =>
-          holder.registerProblem(layer.value, unusedLayersWarning, warningHighlight)
-        }
+        layers.foreach(layer => holder.registerProblem(layer.value, unusedLayersWarning, warningHighlight))
       case UnusedProvideSomeLayersWarning(layers) =>
         holder.registerProblem(expr, unusedProvideSomeLayersWarning(layers), warningHighlight)
       case SuperfluousProvideCustomWarning =>
@@ -213,12 +249,7 @@ final case class LayerBuilder(
     val unusedUserLayers        = providedLayerNodes.map(_.value).toSet -- usedLayers -- remainderNodes.map(_.value)
     val unusedUserLayersWarning = Option.when(unusedUserLayers.nonEmpty)(UnusedLayersWarning(unusedUserLayers))
 
-    val emptyRemainderWarning =
-      method match {
-        case ProvideMethod.ProvideSome | ProvideMethod.ProvideSomeShared =>
-          Option.when(remainder.isEmpty)(ProvideSomeAnyEnvWarning)
-        case _ => None
-      }
+    val emptyRemainderWarning = Option.when(method.isProvideSome && remainder.isEmpty)(ProvideSomeAnyEnvWarning)
 
     val unusedRemainderLayers = remainderNodes.filterNot(node => usedLayers(node.value))
     val unusedRemainderLayersWarning =
@@ -258,7 +289,7 @@ final case class LayerBuilder(
     if (circularErrors.nonEmpty)
       CircularityError(circularErrors)
     else
-      MissingLayersError(topLevelErrors, transitive)
+      MissingLayersError(topLevelErrors, transitive, method.isProvideSome)
   }
 
   /**
@@ -443,7 +474,7 @@ object LayerBuilder {
 
   sealed trait ConstructionError                                            extends ConstructionIssue
   final case class DuplicateLayersError(duplicates: Map[ZType, Seq[ZExpr]]) extends ConstructionError
-  final case class MissingLayersError(topLevel: Seq[ZType], transitives: Map[ZExpr, Seq[ZType]])
+  final case class MissingLayersError(topLevel: Seq[ZType], transitives: Map[ZExpr, Seq[ZType]], isProvideSome: Boolean)
       extends ConstructionError
   final case class CircularityError(circular: Seq[(ZExpr, ZExpr)]) extends ConstructionError
   final case class NonHasTypesError(types: Set[ZType])             extends ConstructionError
@@ -562,24 +593,35 @@ object ErrorRendering {
   def missingLayersError(
     toplevel: Seq[ZType],
     transitive: Map[ZExpr, Seq[ZType]],
-    isUsingProvideSome: Boolean = true
+    isProvideSome: Boolean
   ): String = {
     var index = 0
     def next = { index += 1; index }
     val indices          = collection.mutable.Map.empty[ZType, String]
     def id(layer: ZType) = indices.getOrElseUpdate(layer, s"$next.")
 
-    val topLevelString = toplevel.map(layer => s"${id(layer)} $layer").mkString(lineSeparator).indent(indent)
+    val topLevelString = Option.when(toplevel.nonEmpty) {
+      toplevel.map(layer => s"${id(layer)} $layer").mkString(lineSeparator)
+    }
 
-    val transitiveStrings = transitive.map {
-      case (layer, deps) =>
-        val depsString = deps.map(dep => s"${id(dep)} $dep").mkString(lineSeparator)
-        s"Required by $layer\n" + depsString
-    }.mkString(lineSeparator).indent(indent)
+    val transitiveStrings = Option.when(transitive.nonEmpty) {
+      transitive.map {
+        case (layer, deps) =>
+          val depsString = deps.map(dep => s"${id(dep)} $dep").mkString(lineSeparator)
+          s"Required by $layer\n" + depsString
+      }.mkString(lineSeparator)
+    }
 
-    val header = s"Please provide layers for the following ${pluralizeTypes(index)}:"
+    val header = Some(s"Please provide layers for the following ${pluralizeTypes(index)}:")
 
-    List(header, topLevelString, transitiveStrings).mkString(lineSeparator)
+    val footer =
+      Option.when(isProvideSome) {
+        val allMissingTypes = toplevel ++ transitive.values.flatten
+        s"""Alternatively, you may add them to the remainder type ascription:
+           | .provideSome[${allMissingTypes.mkString(" & ")}]""".stripMargin
+      }
+
+    List(header, topLevelString, transitiveStrings, footer).flatten.mkString(lineSeparator)
   }
 
   def ambigousLayersError(tpe: ZType, providedBy: Seq[ZExpr]): String =
@@ -609,8 +651,6 @@ object ErrorRendering {
     "You are using provideCustom unnecessarily. None of the default services are required. Simply use provide instead."
   val provideSomeAnyEnvWarning =
     "You are using provideSome unnecessarily. The layer is fully satisfied. Simply use provide instead."
-
-  private val indent = 1
 
   private def pluralizeTypes(n: Int): String =
     if (n == 1) "type" else s"$n types"
