@@ -24,10 +24,13 @@ abstract class ProvideMacroInspectionTestBase extends ZScalaInspectionTest[Provi
 
   protected def r(str: String): String = s"$START$str$END"
 
+  protected def Has(tpe: String): String = if (isZIO1) s"Has[$tpe]" else tpe
+
+  protected val imports: String = if (isZIO1) "import zio.magic._" else ""
+
 }
 
-abstract class ProvideMacroInspectionTest(val provide: String, val Has: String => String, val imports: String)
-    extends ProvideMacroInspectionTestBase {
+abstract class ProvideMacroInspectionTest(val provide: String) extends ProvideMacroInspectionTestBase {
 
   def testValidSimpleNoHighlighting(): Unit = z {
     s"""$imports
@@ -142,8 +145,7 @@ abstract class ProvideMacroInspectionTest(val provide: String, val Has: String =
 
 }
 
-class ProvideMacroZIO1InspectionTest
-    extends ProvideMacroInspectionTest("inject", tpe => s"Has[$tpe]", "import zio.magic._") {
+class ProvideMacroZIO1InspectionTest extends ProvideMacroInspectionTest("inject") {
 
   override protected def librariesLoaders: Seq[LibraryLoader] =
     IvyManagedLoader("io.github.kitlangton" %% "zio-magic" % "0.3.12") +: super.librariesLoaders
@@ -171,7 +173,7 @@ class ProvideMacroZIO1InspectionTest
 
 }
 
-class ProvideMacroZIO2InspectionTest extends ProvideMacroInspectionTest("provide", identity, "") {
+class ProvideMacroZIO2InspectionTest extends ProvideMacroInspectionTest("provide") {
 
   override protected def isZIO1 = false
 
@@ -199,8 +201,7 @@ class ProvideMacroZIO2InspectionTest extends ProvideMacroInspectionTest("provide
 
 }
 
-abstract class ProvideSomeMacroInspectionTest(val provideSome: String, val Has: String => String, val imports: String)
-    extends ProvideMacroInspectionTestBase {
+abstract class ProvideSomeMacroInspectionTest(val provideSome: String) extends ProvideMacroInspectionTestBase {
 
   def testValidSimpleNoHighlighting(): Unit = z {
     s"""$imports
@@ -320,8 +321,7 @@ abstract class ProvideSomeMacroInspectionTest(val provideSome: String, val Has: 
 
 }
 
-class ProvideSomeMacroZIO1InspectionTest
-    extends ProvideSomeMacroInspectionTest("injectSome", tpe => s"Has[$tpe]", "import zio.magic._") {
+class ProvideSomeMacroZIO1InspectionTest extends ProvideSomeMacroInspectionTest("injectSome") {
 
   override protected def librariesLoaders: Seq[LibraryLoader] =
     IvyManagedLoader("io.github.kitlangton" %% "zio-magic" % "0.3.12") +: super.librariesLoaders
@@ -349,7 +349,7 @@ class ProvideSomeMacroZIO1InspectionTest
 
 }
 
-class ProvideSomeMacroZIO2InspectionTest extends ProvideSomeMacroInspectionTest("provideSome", identity, "") {
+class ProvideSomeMacroZIO2InspectionTest extends ProvideSomeMacroInspectionTest("provideSome") {
 
   override protected def isZIO1 = false
 
@@ -383,3 +383,92 @@ class ProvideSomeMacroZIO2InspectionTest extends ProvideSomeMacroInspectionTest(
   }.assertHighlighted()
 
 }
+
+abstract class ProvideMacroSpecInspectionTestBase extends ZScalaInspectionTest[ProvideMacroInspection] {
+  override protected def librariesLoaders: Seq[LibraryLoader] =
+    if (isZIO1) IvyManagedLoader("io.github.kitlangton" %% "zio-magic" % "0.3.12") +: super.librariesLoaders
+    else super.librariesLoaders
+
+  override protected def description                            = "Please provide layers for the following"
+  override protected def descriptionMatches(s: String): Boolean = s != null && s.startsWith(description)
+
+  protected def r(str: String): String = s"$START$str$END"
+}
+
+abstract class ProvideMacroZIO1SpecInspectionTestBase(val provide: String) extends ProvideMacroSpecInspectionTestBase {
+  def testValidSimpleNoHighlighting(): Unit = z {
+    s"""import zio.magic._
+       |
+       |val spec: Spec[Has[String], Unit, Unit] = ???
+       |val layer: ULayer[Has[String]] = ???
+       |${r(s"spec.$provide(layer)")}""".stripMargin
+  }.assertNotHighlighted()
+  def testValidSimpleHighlighting(): Unit = z {
+    s"""import zio.magic._
+       |
+       |val spec: Spec[Has[String] with Has[Int], Unit, Unit] = ???
+       |val layer: ULayer[Has[String]] = ???
+       |${r(s"spec.$provide(layer)")}""".stripMargin
+  }.assertHighlighted()
+}
+class ProvideMacroZIO1SpecInspectionTest       extends ProvideMacroZIO1SpecInspectionTestBase("inject")
+class ProvideSharedMacroZIO1SpecInspectionTest extends ProvideMacroZIO1SpecInspectionTestBase("injectShared")
+
+abstract class ProvideSomeMacroZIO1SpecInspectionTestBase(val provideSome: String)
+    extends ProvideMacroSpecInspectionTestBase {
+  def testValidSimpleNoHighlighting(): Unit = z {
+    s"""import zio.magic._
+       |
+       |val spec: Spec[Has[String] with Has[Boolean], Unit, Unit] = ???
+       |val layer: ULayer[Has[String]] = ???
+       |${r(s"spec.$provideSome[Has[Boolean]](layer)")}""".stripMargin
+  }.assertNotHighlighted()
+  def testValidSimpleHighlighting(): Unit = z {
+    s"""import zio.magic._
+       |
+       |val spec: Spec[Has[String] with Has[Int] with Has[Boolean], Unit, Unit] = ???
+       |val layer: ULayer[Has[String]] = ???
+       |${r(s"spec.$provideSome[Has[Boolean]](layer)")}""".stripMargin
+  }.assertHighlighted()
+}
+class ProvideSomeMacroZIO1SpecInspectionTest extends ProvideSomeMacroZIO1SpecInspectionTestBase("injectSome")
+class ProvideSomeSharedMacroZIO1SpecInspectionTest
+    extends ProvideSomeMacroZIO1SpecInspectionTestBase("injectSomeShared")
+
+abstract class ProvideMacroZIO2SpecInspectionTestBase(val provide: String) extends ProvideMacroSpecInspectionTestBase {
+  override protected def isZIO1 = false
+  def testValidSimpleNoHighlighting(): Unit = z {
+    s"""
+       |val spec: Spec[String, Unit] = ???
+       |val layer: ULayer[String] = ???
+       |${r(s"spec.$provide(layer)")}""".stripMargin
+  }.assertNotHighlighted()
+  def testValidSimpleHighlighting(): Unit = z {
+    s"""
+       |val spec: Spec[String with Int, Unit] = ???
+       |val layer: ULayer[String] = ???
+       |${r(s"spec.$provide(layer)")}""".stripMargin
+  }.assertHighlighted()
+}
+class ProvideMacroZIO2SpecInspectionTest       extends ProvideMacroZIO2SpecInspectionTestBase("provide")
+class ProvideSharedMacroZIO2SpecInspectionTest extends ProvideMacroZIO2SpecInspectionTestBase("provideShared")
+
+abstract class ProvideSomeMacroZIO2SpecInspectionTestBase(val provideSome: String)
+    extends ProvideMacroSpecInspectionTestBase {
+  override protected def isZIO1 = false
+  def testValidSimpleNoHighlighting(): Unit = z {
+    s"""
+       |val spec: Spec[String with Boolean, Unit] = ???
+       |val layer: ULayer[String] = ???
+       |${r(s"spec.$provideSome[Boolean](layer)")}""".stripMargin
+  }.assertNotHighlighted()
+  def testValidSimpleHighlighting(): Unit = z {
+    s"""
+       |val spec: Spec[String with Int with Boolean, Unit] = ???
+       |val layer: ULayer[String] = ???
+       |${r(s"spec.$provideSome[Boolean](layer)")}""".stripMargin
+  }.assertHighlighted()
+}
+class ProvideSomeMacroZIO2SpecInspectionTest extends ProvideSomeMacroZIO2SpecInspectionTestBase("provideSome")
+class ProvideSomeSharedMacroZIO2SpecInspectionTest
+    extends ProvideSomeMacroZIO2SpecInspectionTestBase("provideSomeShared")
