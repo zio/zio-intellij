@@ -1,8 +1,9 @@
 package zio.intellij.testsupport
 
 import com.intellij.execution.Location
-import com.intellij.execution.actions.ConfigurationFromContext
+import com.intellij.execution.actions.{ConfigurationContext, ConfigurationFromContext}
 import com.intellij.execution.configurations.{ConfigurationFactory, ConfigurationTypeUtil}
+import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.runner.ScalaApplicationConfigurationProducer
@@ -22,6 +23,16 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
 
   override def shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean =
     other.isProducedBy(classOf[ScalaApplicationConfigurationProducer])
+
+  override def setupConfigurationFromContext(
+    configuration: ZTestRunConfiguration,
+    context: ConfigurationContext,
+    sourceElement: Ref[PsiElement]
+  ): Boolean =
+    Option(context.getLocation).flatMap(getContextInfo) match {
+      case Some(AllInPackage(_, _)) => false // TODO: disabled until the ZIO Test runner supports multiple specs args
+      case _                        => super.setupConfigurationFromContext(configuration, context, sourceElement)
+    }
 
   override protected def configurationName(contextInfo: CreateFromContextInfo): String =
     contextInfo match {
