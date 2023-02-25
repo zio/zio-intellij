@@ -34,6 +34,10 @@ class ProvideMacroInspection extends LocalInspectionTool {
       tryBuildProvideZIO1(base, layers).fold(visitIssue(holder, expr), identity)
     case fullyApplied @ ScMethodCall(partiallyApplied @ `.injectSome`(base, _ @_*), layers) =>
       visitProvideSomeZIO1(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
+    case expr @ `.injectShared`(base, layers @ _*) =>
+      tryBuildProvideZIO1(base, layers).fold(visitIssue(holder, expr), identity)
+    case fullyApplied @ ScMethodCall(partiallyApplied @ `.injectSomeShared`(base, _ @_*), layers) =>
+      visitProvideSomeSharedZIO1(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
     case _ =>
   }
 
@@ -42,12 +46,24 @@ class ProvideMacroInspection extends LocalInspectionTool {
       tryBuildProvideZIO2(base, layers).fold(visitIssue(holder, expr), identity)
     case fullyApplied @ ScMethodCall(partiallyApplied @ `.provideSome`(base, _ @_*), layers) =>
       visitProvideSomeZIO2(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
+    case expr @ `.provideShared`(base, layers @ _*) =>
+      tryBuildProvideZIO2(base, layers).fold(visitIssue(holder, expr), identity)
+    case fullyApplied @ ScMethodCall(partiallyApplied @ `.provideSomeShared`(base, _ @_*), layers) =>
+      visitProvideSomeSharedZIO2(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
     case _ =>
   }
 
   private def tryBuildProvideZIO1(base: ScExpression, layers: Seq[ScExpression]): Either[ConstructionIssue, Unit] =
     base match {
       case Typeable(`ZIO[R, E, A]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO1(base)(
+            target = split(r),
+            remainder = Nil,
+            providedLayers = layers,
+            method = ProvideMethod.Provide
+          )
+      case Typeable(`zio1.Spec[R, E, T]`(r, _, _)) =>
         LayerBuilder
           .tryBuildZIO1(base)(
             target = split(r),
@@ -62,6 +78,14 @@ class ProvideMacroInspection extends LocalInspectionTool {
   private def tryBuildProvideZIO2(base: ScExpression, layers: Seq[ScExpression]): Either[ConstructionIssue, Unit] =
     base match {
       case Typeable(`ZIO[R, E, A]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO2(base)(
+            target = split(r),
+            remainder = Nil,
+            providedLayers = layers,
+            method = ProvideMethod.Provide
+          )
+      case Typeable(`zio2.Spec[R, E]`(r, _)) =>
         LayerBuilder
           .tryBuildZIO2(base)(
             target = split(r),
@@ -87,6 +111,14 @@ class ProvideMacroInspection extends LocalInspectionTool {
             providedLayers = layers,
             method = ProvideMethod.ProvideSome
           )
+      case Typeable(`zio1.Spec[R, E, T]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO1(expr)(
+            target = split(r),
+            remainder = methodTypeArgs(expr).flatMap(split),
+            providedLayers = layers,
+            method = ProvideMethod.ProvideSome
+          )
       case _ =>
         Right(())
     }
@@ -104,6 +136,50 @@ class ProvideMacroInspection extends LocalInspectionTool {
             remainder = methodTypeArgs(expr).flatMap(split),
             providedLayers = layers,
             method = ProvideMethod.ProvideSome
+          )
+      case Typeable(`zio2.Spec[R, E]`(r, _)) =>
+        LayerBuilder
+          .tryBuildZIO2(expr)(
+            target = split(r),
+            remainder = methodTypeArgs(expr).flatMap(split),
+            providedLayers = layers,
+            method = ProvideMethod.ProvideSome
+          )
+      case _ =>
+        Right(())
+    }
+
+  private def visitProvideSomeSharedZIO1(
+    expr: ScExpression,       // effectLike.injectSome[Foo]
+    base: ScExpression,       // effectLike
+    layers: Seq[ScExpression] // layer1, layer2
+  ): Either[ConstructionIssue, Unit] =
+    base match {
+      case Typeable(`zio1.Spec[R, E, T]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO1(expr)(
+            target = split(r),
+            remainder = methodTypeArgs(expr).flatMap(split),
+            providedLayers = layers,
+            method = ProvideMethod.ProvideSomeShared
+          )
+      case _ =>
+        Right(())
+    }
+
+  private def visitProvideSomeSharedZIO2(
+    expr: ScExpression,       // effectLike.provideSome[Foo]
+    base: ScExpression,       // effectLike
+    layers: Seq[ScExpression] // layer1, layer2
+  ): Either[ConstructionIssue, Unit] =
+    base match {
+      case Typeable(`zio2.Spec[R, E]`(r, _)) =>
+        LayerBuilder
+          .tryBuildZIO2(expr)(
+            target = split(r),
+            remainder = methodTypeArgs(expr).flatMap(split),
+            providedLayers = layers,
+            method = ProvideMethod.ProvideSomeShared
           )
       case _ =>
         Right(())

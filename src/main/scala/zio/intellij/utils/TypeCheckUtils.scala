@@ -17,6 +17,7 @@ object TypeCheckUtils {
   val zioTestAsserts  = List("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM")
   val zioTestPackage  = List("zio.test._")
   val zioMagicPackage = List("zio.magic._")
+  val zioSpecTypes    = List("zio.test.Spec", "zio.test.SpecVersionSpecific")
   val zioLikePackages = zioTypes ++ zioStreamTypes ++ managedTypes ++ extraTypes ++ zioTestAsserts
 
   def fromZioLike(r: ScExpression): Boolean =
@@ -42,6 +43,24 @@ object TypeCheckUtils {
 
   def fromZioLayer(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioLayerTypes)
+
+  def fromZioSpec(tpe: ScType): Boolean =
+    isOfClassFrom(tpe, zioSpecTypes)
+
+  sealed trait TypeArgs2Extractor {
+
+    protected def fromTarget(tpe: ScType): Boolean
+
+    private def unapplyInner(tpe: ScType): Option[(ScType, ScType)] =
+      resolveAliases(tpe.widen).flatMap(extractTypeArguments).flatMap {
+        case Seq(r, e) => Some(r, e)
+        case _         => None
+      }
+
+    def unapply(tpe: ScType): Option[(ScType, ScType)] =
+      if (fromTarget(tpe)) unapplyInner(tpe) else None
+
+  }
 
   sealed trait TypeArgs3Extractor {
 
@@ -120,6 +139,14 @@ object TypeCheckUtils {
 
   object `ZLayer[RIn, E, ROut]` extends TypeArgs3Extractor {
     override protected def fromTarget(tpe: ScType): Boolean = fromZioLayer(tpe)
+  }
+
+  object `zio1.Spec[R, E, T]` extends TypeArgs3Extractor {
+    override protected def fromTarget(tpe: ScType): Boolean = fromZioSpec(tpe)
+  }
+
+  object `zio2.Spec[R, E]` extends TypeArgs2Extractor {
+    override protected def fromTarget(tpe: ScType): Boolean = fromZioSpec(tpe)
   }
 
   def isInfallibleEffect(tpe: ScType): Boolean =
