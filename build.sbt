@@ -1,8 +1,8 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
-lazy val scalaPluginVersion = "2022.3.16"
-lazy val pluginVersion      = "2022.3.20" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scalaPluginVersion = "2022.3.18"
+lazy val pluginVersion      = "2022.3.21" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "223"
@@ -37,8 +37,15 @@ lazy val root =
         xml.changeNotes = sys.env.getOrElse(
           "ZIO_INTELLIJ_CHANGE_NOTES",
           s"""<![CDATA[
-        Preliminary support for ZIO 2.0.<br/>
-        <b>Note:</b> While the ZIO 2.0 support is ongoing, there might be false ZIO 1.0 suggestions that do not work for ZIO 2.0. Please report any such instances to the plugin Github/Discord. Thanks!
+        <b>Note:</b> This is the last major release targeting IntelliJ 2022.3<br/>
+        <b>What's new?</b>
+        <ul>
+          <li>Added some live templates for easier ZLayer and Service accessors creation (<a href="https://github.com/zio/zio-intellij/pull/392">#392</a>). Huge thanks to Mark Rudolph for the contribution!</li>
+          <li>Added inspections for <code>.provide*</code> and <code>.inject*</code> (for zio-magic users) (<a href="https://github.com/zio/zio-intellij/pull/396">#396</a>, <a href="https://github.com/zio/zio-intellij/pull/399">#399</a>, <a href="https://github.com/zio/zio-intellij/pull/401">#401</a>). Huge thanks to Nikita Myazin for the contribution!</li>
+          <li>Fixes for ZIO 2.0-specific <code>foreach*</code> suggestions (<a href="https://github.com/zio/zio-intellij/pull/394">#394</a>). Huge thanks to Marcel Kalai for the contribution!</li>
+          <li>Many internal improvements for ZIO 2.0 support</li>
+          <li>Lots of small bugfixes and yaks shaving</li>
+        </ul>
         ]]>"""
         )
       }
