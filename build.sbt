@@ -72,3 +72,13 @@ def newProject(projectName: String, base: File): Project =
     ),
     (Test / scalacOptions) += "-Xmacro-settings:enable-expression-tracers"
   )
+  
+lazy val docs = project
+  .in(file("zio-intellij-docs"))
+  .settings(
+    moduleName := "zio-intellij-docs",
+    projectName                                := "ZIO Intellij",
+    mainModuleName                             := (root / moduleName).value,
+    projectStage                               := ProjectStage.ProductionReady
+  )
+  .enablePlugins(WebsitePlugin)
