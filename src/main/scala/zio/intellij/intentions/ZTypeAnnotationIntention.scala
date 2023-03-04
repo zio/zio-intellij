@@ -2,7 +2,6 @@ package zio.intellij.intentions
 
 import com.intellij.openapi.editor.Editor
 import org.jetbrains.plugins.scala.codeInsight.intention.types._
-import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScBindingPattern, ScTypedPattern, ScWildcardPattern}
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScUnderscoreSection
@@ -16,8 +15,8 @@ abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention 
 
   override protected def descriptionStrategy: Strategy =
     ZStrategy {
-      case (te, declaredType) => isOfClassFrom(declaredType, zioLikePackages) && shouldSuggest(te, declaredType)
-      case _                  => false
+      case (te, tpe) => (fromZioLike(tpe) || fromZioLayer(tpe)) && shouldSuggest(te, tpe)
+      case _         => false
     }
 
   override def invocationStrategy(maybeEditor: Option[Editor]): Strategy =
