@@ -8,7 +8,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.psi.types.{ScType, TypePresentationContext}
 import zio.intellij.inspections.suggestions.SuggestTypeAliasInspection.{AliasInfo, TypeAliasQuickFix}
 import zio.intellij.intentions.suggestions.SuggestTypeAlias
-import zio.intellij.utils.TypeCheckUtils.fromZioLike
+import zio.intellij.utils.TypeCheckUtils.{fromZioLayer, fromZioLike}
 import zio.intellij.utils.{ListSyntax, createTypeElement, extractTypeArguments, OptionUtils => OptionOps}
 
 class SuggestTypeAliasInspection extends LocalInspectionTool {
@@ -19,9 +19,9 @@ class SuggestTypeAliasInspection extends LocalInspectionTool {
       .exists(args => aliases.exists(_.args < args))
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case element @ (te: ScTypeElement) if isOnTheFly =>
+    case te: ScTypeElement if isOnTheFly =>
       te match {
-        case Typeable(tpe) if fromZioLike(tpe) =>
+        case Typeable(tpe) if fromZioLike(tpe) || fromZioLayer(tpe) =>
           val allAliases = SuggestTypeAlias.findMatchingAliases(te, tpe)
           val mostSpecificAliases =
             allAliases
@@ -31,7 +31,7 @@ class SuggestTypeAliasInspection extends LocalInspectionTool {
           OptionOps.when(shouldSuggest(tpe, mostSpecificAliases)) {
             implicit val tpc: TypePresentationContext = TypePresentationContext(te)
 
-            val typeElements = mostSpecificAliases.flatMap(alias => createTypeElement(alias.tpe, element))
+            val typeElements = mostSpecificAliases.flatMap(alias => createTypeElement(alias.tpe, te))
             holder.registerProblem(
               te,
               getDisplayName,
@@ -39,9 +39,9 @@ class SuggestTypeAliasInspection extends LocalInspectionTool {
               typeElements.map(new TypeAliasQuickFix(te, _)): _*
             )
           }
-        case _ => None
+        case _ =>
       }
-    case _ => None
+    case _ =>
   }
 }
 
