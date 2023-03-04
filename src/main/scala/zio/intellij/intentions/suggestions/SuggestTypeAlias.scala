@@ -17,11 +17,12 @@ import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorTyp
 import org.jetbrains.plugins.scala.lang.psi.types.api.presentation.ScTypeText
 import org.jetbrains.plugins.scala.lang.psi.types.api.{ParameterizedType, UndefinedType}
 import org.jetbrains.plugins.scala.lang.psi.types.recursiveUpdate.ScSubstitutor
+import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, TypePresentationContext}
 import org.jetbrains.plugins.scala.project.ProjectContext
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker.checkIntention
 import zio.intellij.intentions.ZTypeAnnotationIntention
-import zio.intellij.utils.TypeCheckUtils.fromZioLike
+import zio.intellij.utils.TypeCheckUtils.{fromZioLayer, fromZioLike}
 
 // borrowed from MakeTypeMoreSpecificIntention
 
@@ -43,11 +44,10 @@ final class SuggestTypeAlias extends ZTypeAnnotationIntention {
 
   override def isAvailable(project: Project, editor: Editor, element: PsiElement): Boolean =
     adjustElementAtOffset(element, editor) match {
-      case element: PsiElement if checkIntention(this, element) =>
+      case element if checkIntention(this, element) =>
         element.parentOfType[ScSimpleTypeElement] match {
-          case Some(tpe) if tpe.`type`().toOption.exists(fromZioLike) =>
-            complete(element, descriptionStrategy)
-          case _ => false
+          case Some(Typeable(tpe)) if fromZioLike(tpe) || fromZioLayer(tpe) => complete(element, descriptionStrategy)
+          case _                                                            => false
         }
       case _ => false
     }
@@ -76,10 +76,14 @@ object SuggestTypeAlias {
     }
   }
 
-  def findMatchingAliases(te: ScTypeElement, declaredType: ScType): List[ScType] =
-    (allAliasesFor(declaredType, te.projectContext, te.resolveScope).collect {
-      case alias: ScTypeAliasDefinition => conforms(alias, declaredType)
-    }.flatten :+ topLevelType(declaredType)).distinct
+  def findMatchingAliases(te: ScTypeElement, declaredType: ScType): List[ScType] = {
+    val matchingAliases =
+      allAliasesFor(declaredType, te.projectContext, te.resolveScope).collect {
+        case alias: ScTypeAliasDefinition => conforms(alias, declaredType)
+      }.flatten
+
+    (topLevelType(declaredType) +: matchingAliases).distinct
+  }
 
   def topLevelType(tpe: ScType): ScType =
     tpe.aliasType match {
@@ -96,14 +100,11 @@ object SuggestTypeAlias {
   private def check(alias: ScTypeAliasDefinition, tpe: ScType)(checker: ScType => Boolean) = {
     val undefParams = alias.typeParameters.map(UndefinedType(_))
     val undefSubst  = ScSubstitutor.bind(alias.typeParameters, undefParams)
-    alias.aliasedType.toOption
-      .flatMap(aliasType =>
-        undefSubst(aliasType)
-          .conformanceSubstitutor(tpe)
-          .map(subst => subst.apply(ParameterizedType(ScDesignatorType(alias), undefParams)))
-          .collect {
-            case t: ScType if checker(t) => t
-          }
-      )
+    alias.aliasedType.toOption.flatMap { aliasType =>
+      undefSubst(aliasType)
+        .conformanceSubstitutor(tpe)
+        .map(subst => subst.apply(ParameterizedType(ScDesignatorType(alias), undefParams)))
+        .collect { case t: ScType if checker(t) => t }
+    }
   }
 }
