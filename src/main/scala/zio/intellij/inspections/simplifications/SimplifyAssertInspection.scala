@@ -12,9 +12,10 @@ import org.jetbrains.plugins.scala.lang.psi.types.{api, ScParameterizedType, ScT
 import org.jetbrains.plugins.scala.project.ProjectContext
 import zio.intellij.inspections.ZInspection
 import zio.intellij.inspections.assertMethods._
+import zio.intellij.utils.StringUtils.ScExpressionExt
 import zio.intellij.utils._
 
-final class SimplifyAssertInspection extends ZInspection(SimplifyEqualToType)
+final class SimplifyAssertInspection extends ZInspection(SimplifyEqualToType, SimplifyAssertTrueChain)
 
 object SimplifyEqualToType extends SimplificationType {
   override def hint: String = "Replace with assertTrue"
@@ -114,4 +115,37 @@ object SimplifyEqualToType extends SimplificationType {
         case _                      => false
       }
   }
+}
+
+object SimplifyAssertTrueChain extends SimplificationType {
+
+  override def hint: String = "Replace with assertTrue(conditions: _*)"
+
+  def replacement(expr: ScExpression, body: FlattenedAssertions): Simplification = {
+    val assertTrue = s"assertTrue(${body.assertions.map(_.getBracedText).mkString(", ")})"
+    // we can safely combine via `&&` here since `||` is parsed differently and won't get here
+    val assert = body.remainder.fold(assertTrue)(r => s"${r.getText} && $assertTrue")
+    replace(expr).withText(assert).highlightFrom(body.remainder.getOrElse(expr))
+  }
+
+  override def getSimplification(expr: ScExpression): Option[Simplification] =
+    (expr, expr.getParent) match {
+      // if there's an `assertTrue` parent, we've already handled this case
+      case (_, stripped(parent @ (_ && assertTrue(_ @_*)))) if parent ne expr => None
+      case (_ `&&` assertTrue(topLevel @ _*), _) =>
+        val assertions = extractAssertions(expr)
+        Option.when(assertions.assertions != topLevel)(replacement(expr, assertions))
+      case _ => None
+    }
+
+  @scala.annotation.tailrec
+  private def extractAssertions(expr: ScExpression, acc: Seq[ScExpression] = Vector.empty): FlattenedAssertions =
+    expr match {
+      case left `&&` assertTrue(right @ _*) => extractAssertions(left, right ++ acc)
+      case assertTrue(exprs @ _*)           => FlattenedAssertions(exprs ++ acc, None)
+      case assert                           => FlattenedAssertions(acc, Some(assert))
+    }
+
+  private final case class FlattenedAssertions(assertions: Seq[ScExpression], remainder: Option[ScExpression])
+
 }
