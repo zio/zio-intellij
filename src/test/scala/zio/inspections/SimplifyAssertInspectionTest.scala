@@ -2,15 +2,17 @@ package zio.inspections
 
 import zio.intellij.inspections.simplifications.SimplifyAssertInspection
 
-class SimplifyAssertInspectionTest extends ZSimplifyInspectionTest[SimplifyAssertInspection] {
-  override protected val hint: String = "Replace with assertTrue"
-
-  private def test(test: String, expected: String): Unit = {
+abstract class SimplifyAssertInspectionTest extends ZSimplifyInspectionTest[SimplifyAssertInspection] {
+  protected def test(test: String, expected: String): Unit = {
     z(s"$START$test$END").assertHighlighted()
     val t = z(test)
     val e = z(expected)
     testQuickFix(t, e, hint)
   }
+}
+
+class SimplifyEqualToTypeTest extends SimplifyAssertInspectionTest {
+  override protected val hint: String = "Replace with assertTrue"
 
   def testEqualTo_true() =
     test("assert(1 == 1)(equalTo(true))", "assertTrue(1 == 1)")
@@ -131,4 +133,68 @@ class SimplifyAssertInspectionTest extends ZSimplifyInspectionTest[SimplifyAsser
 
   def test_isInfiniteFloat() =
     test("""assert(1.0)(isInfiniteFloat)""", """assertTrue(1.0.isInfinite)""")
+}
+
+class SimplifyAssertTrueChain extends SimplifyAssertInspectionTest {
+  override protected def isZIO1 = false
+
+  override protected val hint: String = "Replace with assertTrue(conditions: _*)"
+
+  def test_simpleSingleAssertionNoHighlight() =
+    z(s"${START}assertTrue(1 == 1)$END").assertNotHighlighted()
+
+  def test_complexSingleAssertionNoHighlight() =
+    z(s"""${START}assertTrue(1 == 1, 2 == 2, 3 == 3)$END""").assertNotHighlighted()
+
+  def test_withRegularAssertionPrefixNoHighlight() =
+    z(s"""${START}assert(1)(anything) && assertTrue(1 == 1)$END""").assertNotHighlighted()
+
+  def test_withRegularAssertionPostfixNoHighlight() =
+    z(s"""${START}assertTrue(1 == 1) && assert(1)(anything)$END""").assertNotHighlighted()
+
+  def test_twoAssertions() =
+    test("assertTrue(1 == 1, 2 == 2) && assertTrue(3 == 3)", "assertTrue(1 == 1, 2 == 2, 3 == 3)")
+
+  def test_threeAssertions() =
+    test(
+      "assertTrue(1 == 1, 2 == 2) && assertTrue(3 == 3) && assertTrue(4 == 4)",
+      "assertTrue(1 == 1, 2 == 2, 3 == 3, 4 == 4)"
+    )
+
+  def test_threeAssertionsWithNegationNoHighlight() =
+    z(s"${START}assertTrue(1 == 1) && !assertTrue(2 == 2) && assertTrue(3 == 3)$END").assertNotHighlighted()
+
+  def test_nestedAssertionNoHighlight() =
+    z(s"assert(1)(anything) $START&& assertTrue(1 == 1)$END && assert(1)(anything)").assertNotHighlighted()
+
+  def test_nestedAssertions_And() = {
+    z(s"assert(1)(anything) $START&& assertTrue(1 == 1) && assertTrue(2 == 2)$END && assert(1)(anything)")
+      .assertHighlighted()
+
+    val t = z(s"assert(1)(anything) && assertTrue(1 == 1) && assertTrue(2 == 2) && assert(1)(anything)")
+    val e = z(s"assert(1)(anything) && assertTrue(1 == 1, 2 == 2) && assert(1)(anything)")
+    testQuickFix(t, e, hint)
+  }
+
+  def test_nestedAssertions_Or() = {
+    z(s"assert(1)(anything) || ${START}assertTrue(1 == 1) && assertTrue(2 == 2)$END || assert(1)(anything)")
+      .assertHighlighted()
+
+    val t = z(s"assert(1)(anything) || assertTrue(1 == 1) && assertTrue(2 == 2) || assert(1)(anything)")
+    val e = z(s"assert(1)(anything) || assertTrue(1 == 1, 2 == 2) || assert(1)(anything)")
+    testQuickFix(t, e, hint)
+  }
+
+  def test_nestedAssertions_Negation() = {
+    z(s"!assertTrue(1 == 1) $START&& assertTrue(2 == 2) && assertTrue(3 == 3)$END")
+      .assertHighlighted()
+
+    val t = z(s"!assertTrue(1 == 1) && assertTrue(2 == 2) && assertTrue(3 == 3)")
+    val e = z(s"!assertTrue(1 == 1) && assertTrue(2 == 2, 3 == 3)")
+    testQuickFix(t, e, hint)
+  }
+
+  def test_threeAssertionsNoChildHighlight() =
+    z(s"${START}assertTrue(1 == 1) && assertTrue(2 == 2)$END && assertTrue(3 == 3)").assertNotHighlighted()
+
 }

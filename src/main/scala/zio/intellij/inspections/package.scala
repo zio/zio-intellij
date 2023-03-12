@@ -124,12 +124,16 @@ package object inspections {
       override def types: Set[String] = Set(assertFqn.fqName)
     }
 
+    val assertTrue = unqualified("assertTrue").from(zioTestPackage)
     val assert = new Curried2StaticMemberReference[ZioType](AssertReferenceExtractor, "assert") {
       override protected val typeCompanion: TypeCompanion[ZioType] = new TypeCompanion[ZioType] {
         override def values: List[ZioType] = List(assertFqn)
         override def defaultValue: ZioType = assertFqn
       }
     }
+
+    val `&&` : Qualified = invocation("&&").from(zioTestPackage)
+
   }
 
   def invocation(methodName: String)  = new Qualified(methodName == _)
