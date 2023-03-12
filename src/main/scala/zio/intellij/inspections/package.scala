@@ -367,6 +367,12 @@ package object inspections {
       Some(expr).filter(fromZioLike)
   }
 
+  object zioSpec {
+
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      Some(expr).filter(fromZioSpec)
+  }
+
   val exitCodeSuccess = new ExitCode("success")
   val exitCodeFailure = new ExitCode("failure")
 

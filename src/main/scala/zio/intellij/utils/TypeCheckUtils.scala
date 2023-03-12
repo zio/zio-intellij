@@ -44,6 +44,9 @@ object TypeCheckUtils {
   def fromZioLayer(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioLayerTypes)
 
+  def fromZioSpec(r: ScExpression): Boolean =
+    isOfClassFrom(r, zioSpecTypes)
+
   def fromZioSpec(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioSpecTypes)
 
