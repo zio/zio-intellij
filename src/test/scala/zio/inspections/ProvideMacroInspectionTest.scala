@@ -199,6 +199,22 @@ class ProvideMacroZIO2InspectionTest extends ProvideMacroInspectionTest("provide
        |effect.provide(layer, ${r("sideEffect")})""".stripMargin
   }.assertNotHighlighted()
 
+  def testUseSubtypesNoHighlighting(): Unit = z {
+    s"""$imports
+       |trait ConfigService
+       |case class ConfigServiceLive() extends ConfigService
+       |
+       |trait Database
+       |case class DatabaseLive(configService: ConfigService) extends Database
+       |
+       |val databaseLive: URLayer[ConfigService, DatabaseLive] = ???
+       |val configServiceLive: ULayer[ConfigServiceLive] = ???
+       |
+       |val app: URIO[Database, Unit] = ???
+       |${r("app.provide(configServiceLive, databaseLive)")}
+       |""".stripMargin
+  }.assertNotHighlighted()
+
 }
 
 abstract class ProvideSomeMacroInspectionTest(val provideSome: String) extends ProvideMacroInspectionTestBase {
@@ -381,6 +397,22 @@ class ProvideSomeMacroZIO2InspectionTest extends ProvideSomeMacroInspectionTest(
        |val layer: ULayer[String] = ???
        |${r("effect.provideSome[Any](layer)")}""".stripMargin
   }.assertHighlighted()
+
+  def testUseSubtypesNoHighlighting(): Unit = z {
+    s"""$imports
+       |trait ConfigService
+       |case class ConfigServiceLive() extends ConfigService
+       |
+       |trait Database
+       |case class DatabaseLive(configService: ConfigService) extends Database
+       |
+       |val databaseLive: URLayer[ConfigService, DatabaseLive] = ???
+       |val configServiceLive: URLayer[ZIOAppArgs, ConfigServiceLive] = ???
+       |
+       |val app: URIO[Database, Unit] = ???
+       |${r("app.provideSome[ZIOAppArgs](configServiceLive, databaseLive)")}
+       |""".stripMargin
+  }.assertNotHighlighted()
 
 }
 
