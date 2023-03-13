@@ -271,7 +271,7 @@ final case class LayerBuilder(
   def tryBuild: Either[ConstructionIssue, Unit] = assertNoAmbiguity.flatMap(_ => tryBuildInternal)
 
   private val target =
-    if (method.isProvideSomeShared) target0.filterNot(t => remainder.exists(_.conforms(t)))
+    if (method.isProvideSomeShared) target0.filterNot(t => remainder.exists(_.isSubtypeOf(t)))
     else target0
 
   private val remainderNodes = remainder.map(typeToNode).distinct
@@ -300,7 +300,7 @@ final case class LayerBuilder(
      */
     val layerTreeEither: Either[::[GraphError], LayerTree[ZExpr]] = {
       val nodes = providedLayerNodes ++ remainderNodes ++ sideEffectNodes
-      val graph = Graph(nodes, (l, r) => r.conforms(l))
+      val graph = Graph(nodes, _.isSubtypeOf(_))
 
       for {
         original    <- graph.buildComplete(target)
@@ -503,7 +503,7 @@ object LayerBuilder {
   // besides, original ZIO algorithm uses string comparison too
   // also, ZType is guaranteed to have meaningful type (non-Any)
   final class ZType private (val value: ScType)(implicit context: TypePresentationContext) {
-    def conforms(that: ZType): Boolean = this.value.conforms(that.value)
+    def isSubtypeOf(that: ZType): Boolean = this.value.conforms(that.value)
 
     override def equals(other: Any): Boolean = other match {
       case that: ZType => this.asStr == that.asStr
