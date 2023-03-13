@@ -1,37 +1,36 @@
 package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
-import com.intellij.psi.PsiElement
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
-import org.jetbrains.plugins.scala.extensions._
-import org.jetbrains.plugins.scala.lang.psi.api.expr._
-import zio.intellij.inspections.zioLike
+import org.jetbrains.plugins.scala.codeInspection.codeInspectionHack.expressionResultIsNotUsed
+import zio.intellij.inspections.{zioLike, zioSpec}
 
 class UnusedZIOExpressionsInspection extends LocalInspectionTool {
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case expr: ScExpression =>
-      (expr, expr.nextSiblingNotWhitespace) match {
-        case (zioLike(_), Some(zioLike(_))) if !excluded(expr.parent) =>
-          holder.registerProblem(
-            expr,
-            UnusedZIOExpressionsInspection.message,
-            ProblemHighlightType.LIKE_UNUSED_SYMBOL
-          )
-        case _ =>
-      }
+    case expr @ zioLike(_) if expressionResultIsNotUsed(expr) =>
+      holder.registerProblem(
+        expr,
+        UnusedZIOExpressionsInspection.unusedZioExprMessage,
+        ProblemHighlightType.LIKE_UNUSED_SYMBOL
+      )
+    case expr @ zioSpec(_) if expressionResultIsNotUsed(expr) =>
+      holder.registerProblem(
+        expr,
+        UnusedZIOExpressionsInspection.unusedZioSpecMessage,
+        ProblemHighlightType.LIKE_UNUSED_SYMBOL
+      )
     case _ =>
   }
 
-  private def excluded(elem: Option[PsiElement]) =
-    elem match {
-      case Some(_: ScPrefixExpr) => true
-      case _                     => false
-    }
 }
 
 object UnusedZIOExpressionsInspection {
   @Nls
-  val message = "This expression is unused. Did you mean to compose it with another effect?"
+  val unusedZioExprMessage = "This expression is unused. Did you mean to compose it with another effect?"
+
+  @Nls
+  val unusedZioSpecMessage = "This test is ignored. Did you mean to compose it with another test using `+`?"
+
 }
