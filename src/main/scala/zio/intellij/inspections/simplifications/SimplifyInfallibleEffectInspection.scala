@@ -82,8 +82,9 @@ sealed abstract class BaseErrorModificationSimplificationType(qual: Qualified, m
 object MapBothErrorModificationSimplificationType extends BaseErrorModificationSimplificationType(`.mapBoth`, "map")
 object TapBothErrorModificationSimplificationType extends BaseErrorModificationSimplificationType(`.tapBoth`, "tap")
 
-object FoldErrorModificationSimplificationType  extends BaseErrorModificationSimplificationType(`.fold`, "map")
-object FoldMErrorModificationSimplificationType extends BaseErrorModificationSimplificationType(`.foldM`, "flatMap")
+object FoldErrorModificationSimplificationType extends BaseErrorModificationSimplificationType(`.fold_notStream`, "map")
+object FoldMErrorModificationSimplificationType
+    extends BaseErrorModificationSimplificationType(`.foldM_notStream`, "flatMap")
 object FoldTraceMErrorModificationSimplificationType
     extends BaseErrorModificationSimplificationType(`.foldTraceM`, "flatMap")
 
