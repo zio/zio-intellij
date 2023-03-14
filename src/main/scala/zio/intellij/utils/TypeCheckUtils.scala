@@ -57,7 +57,7 @@ object TypeCheckUtils {
     protected def fromTarget(tpe: ScType): Boolean
 
     private def unapplyInner(tpe: ScType): Option[(ScType, ScType)] =
-      resolveAliases(tpe.widen).flatMap(extractTypeArguments).flatMap {
+      extractAllTypeArguments(tpe).flatMap {
         case Seq(r, e) => Some(r, e)
         case _         => None
       }
@@ -72,7 +72,7 @@ object TypeCheckUtils {
     protected def fromTarget(tpe: ScType): Boolean
 
     private def unapplyInner(tpe: ScType): Option[(ScType, ScType, ScType)] =
-      resolveAliases(tpe.widen).flatMap(extractTypeArguments).flatMap {
+      extractAllTypeArguments(tpe).flatMap {
         case Seq(r, e, a) => Some(r, e, a)
         case _            => None
       }
