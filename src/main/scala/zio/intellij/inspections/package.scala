@@ -45,7 +45,7 @@ package object inspections {
     val `.foldCauseM`: Qualified           = invocation("foldCauseM").from(zioLikePackages)
     val `.foldTraceM`: Qualified           = invocation("foldTraceM").from(zioLikePackages)
     val `.tap_notStream`: Qualified        = invocation("tap").from(zioLike_notStream)
-    val `.tapError`: Qualified             = invocation("tapError").from(zioLikePackages)
+    val `.tapError_notStream`: Qualified   = invocation("tapError").from(zioLike_notStream)
     val `.tapBoth`: Qualified              = invocation("tapBoth").from(zioLikePackages)
     val `.orDie`: Qualified                = invocation("orDie").from(zioLikePackages)
     val `.provide`: Qualified              = invocation("provide").from(zioSpecTypes ++ zioLikePackages)

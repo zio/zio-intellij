@@ -99,6 +99,10 @@ class SimplifyTapBothInspectionTest extends BaseSimplifyTapInspectionTest(".tapB
     }
     testQuickFix(text, result, hint)
   }
+
+  def test_stream_no_highlight(): Unit =
+    z(s"$START(ZStream(1): ZStream[Any, Int, Int]).tap(_ => ???).tapError(_ => ???)$END").assertNotHighlighted()
+
 }
 
 class SimplifyTapErrorInspectionTest extends BaseSimplifyTapInspectionTest(".tapError") {

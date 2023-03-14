@@ -1,17 +1,17 @@
 package zio.intellij.inspections.simplifications
 
-import org.jetbrains.plugins.scala.codeInsight.intention.expression.ConvertParameterToUnderscoreIntention
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.extensions.PsiElementExt
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
-import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.{createExpressionFromText, createWildcardNode}
+import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createExpressionFromText
+import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
-import zio.intellij.inspections.{ZInspection, _}
-import zio.intellij.utils.{isElementUsed, LambdaUtils}
+import zio.intellij.utils.LambdaUtils
 import zio.intellij.utils.StringUtils._
+
+import scala.annotation.tailrec
 
 class SimplifyTapInspection
     extends ZInspection(
@@ -35,6 +35,7 @@ object SimplifyTapInspection {
     }
 
   def simplifyFunctionCall(param: ScParameter, body: ScExpression): String = {
+    @tailrec
     def go(body: ScExpression, parent: Option[ScExpression]): String =
       (body, parent) match {
         case (ref: ScReferenceExpression, Some(func)) =>
@@ -103,9 +104,9 @@ object TapBothSimplificationType extends SimplificationType {
         .highlightFrom(qual)
 
     expr match {
-      case qual `.tap` tap `.tapError` tapError => Some(replacement(qual, tapError, tap))
-      case qual `.tapError` tapError `.tap` tap => Some(replacement(qual, tapError, tap))
-      case _                                    => None
+      case qual `.tap_notStream` tap `.tapError_notStream` tapError => Some(replacement(qual, tapError, tap))
+      case qual `.tapError_notStream` tapError `.tap_notStream` tap => Some(replacement(qual, tapError, tap))
+      case _                                                        => None
     }
   }
 
