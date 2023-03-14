@@ -43,7 +43,7 @@ package object inspections {
     val `.foldCause`: Qualified            = invocation("foldCause").from(zioLikePackages)
     val `.foldCauseM`: Qualified           = invocation("foldCauseM").from(zioLikePackages)
     val `.foldTraceM`: Qualified           = invocation("foldTraceM").from(zioLikePackages)
-    val `.tap`: Qualified                  = invocation("tap").from(zioLikePackages)
+    val `.tap_notStream`: Qualified        = invocation("tap").from(zioLike_notStream)
     val `.tapError`: Qualified             = invocation("tapError").from(zioLikePackages)
     val `.tapBoth`: Qualified              = invocation("tapBoth").from(zioLikePackages)
     val `.orDie`: Qualified                = invocation("orDie").from(zioLikePackages)
