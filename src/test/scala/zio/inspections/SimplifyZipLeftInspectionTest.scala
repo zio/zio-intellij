@@ -44,6 +44,9 @@ class SimplifyTapWithZipLeftTest extends ZipLeftInspectionTest(".zipLeft") {
   def test_tap_not_discarding_should_not_highlight(): Unit =
     z(s"""ZIO.succeed("Tarsila do Amaral").${START}tap(x => x)$END""").assertNotHighlighted()
 
+  def test_stream_should_not_highlight(): Unit =
+    z(s"ZStream.succeed(1).${START}tap(_ => ???)$END").assertNotHighlighted()
+
 }
 
 class SimplifyTapWithZipLeftOperatorTest extends ZipLeftInspectionTest("<*") {
@@ -114,6 +117,9 @@ class SimplifyTapWithZipLeftOperatorTest extends ZipLeftInspectionTest("<*") {
 
   def test_tap_not_discarding_should_not_highlight(): Unit =
     z(s"""ZIO.succeed("Benito Quinquela Martín").${START}tap(x => x)$END""").assertNotHighlighted()
+
+  def test_zstream_should_not_highlight(): Unit =
+    z(s"ZStream.succeed(1).${START}tap(_ => ???)$END").assertNotHighlighted()
 
 }
 
