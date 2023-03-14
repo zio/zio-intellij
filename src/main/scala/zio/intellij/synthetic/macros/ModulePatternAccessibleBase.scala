@@ -130,7 +130,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
       val any = StdTypes.instance(tpe.projectContext).Any
 
       def zioTypeArgs(tpe: ScType): (ScType, List[ScType]) =
-        resolveAliases(tpe).flatMap(extractTypeArguments).map(_.toList) match {
+        extractAllTypeArguments(tpe).map(_.toList) match {
           case Some(r :: rest) => (r, rest)
           case _               => (any, List(any))
         }
