@@ -5,8 +5,8 @@ import zio.intellij.inspections.simplifications.SimplifyErrorModificationInspect
 abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toReplaceWith: String)
     extends ZSimplifyInspectionTest[SimplifyErrorModificationInspection] {
 
-  private val methodToReplace     = s"$toReplace(_ => ???, f)"
-  private val methodToReplaceWith = s"$toReplaceWith(f)"
+  protected val methodToReplace     = s"$toReplace(_ => ???, f)"
+  protected val methodToReplaceWith = s"$toReplaceWith(f)"
 
   override protected val hint = s"Replace with .$toReplaceWith"
 
@@ -60,7 +60,11 @@ abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toRepl
 
 class SimplifyMapBothErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("mapBoth", "map")
 class SimplifyTapBothErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("tapBoth", "tap")
-class SimplifyFoldErrorModificationInspectionTest    extends SimplifyErrorModificationInspectionTest("fold", "map")
-class SimplifyFoldMErrorModificationInspectionTest   extends SimplifyErrorModificationInspectionTest("foldM", "flatMap")
+class SimplifyFoldErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("fold", "map") {
+  def testInfallibleStreamNoHighlight(): Unit = z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
+}
+class SimplifyFoldMErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("foldM", "flatMap") {
+  def testInfallibleStreamNoHighlight(): Unit = z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
+}
 class SimplifyFoldTraceMErrorModificationInspectionTest
     extends SimplifyErrorModificationInspectionTest("foldTraceM", "flatMap")
