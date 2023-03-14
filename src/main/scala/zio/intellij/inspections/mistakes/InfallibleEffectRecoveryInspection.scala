@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.collections.{stripped, MethodRepr}
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
-import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
@@ -26,8 +25,22 @@ class InfallibleEffectRecoveryInspection extends LocalInspectionTool {
       case _                                          => false
     }
 
+  // these methods should not be completely removed since they also transform the returned value
+  // they should be handled by other (more specific) inspections
+  private val mightMakeSense: String => Boolean =
+    Set(
+      "fold",
+      "foldTraceM",
+      "foldTraceZIO",
+      "foldM",
+      "foldZIO",
+      "mapBoth",
+      "bimap",
+    )
+
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case MethodRepr(expr, Some(base), Some(toDelete), _) if isInfallibleEffect(base) =>
+    case MethodRepr(expr, Some(base), Some(toDelete), _)
+        if isInfallibleEffect(base) && !mightMakeSense(toDelete.refName) =>
       expr.findImplicitArguments.foreach { args =>
         if (args.map(_.element).exists(isCanFailEv)) {
           holder.registerProblem(
