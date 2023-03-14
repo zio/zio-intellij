@@ -22,6 +22,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import org.jetbrains.plugins.scala.lang.psi.types._
 import org.jetbrains.plugins.scala.lang.psi.types.api.UndefinedType
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
+import org.jetbrains.plugins.scala.lang.psi.types.nonvalue.ScTypePolymorphicType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
@@ -124,8 +125,7 @@ package object utils {
   def extractServiceTypeArgument(accessTypeArg: Option[ScTypeElement]) = for {
     arg           <- accessTypeArg
     tpe           <- arg.`type`().toOption
-    baseType      <- resolveAliases(tpe)
-    innerTypeArgs <- extractTypeArguments(baseType)
+    innerTypeArgs <- extractAllTypeArguments(tpe)
     if innerTypeArgs.size == 1 // should be exactly one argument
   } yield innerTypeArgs.head
 
@@ -155,6 +155,14 @@ package object utils {
     tpe match {
       case parameterizedType: ScParameterizedType => Some(parameterizedType.typeArguments)
       case _                                      => None
+    }
+
+  @tailrec
+  def extractAllTypeArguments(tpe: ScType): Option[Seq[ScType]] =
+    resolveAliases(tpe.widen) match {
+      case Some(parameterizedType: ScParameterizedType) => Some(parameterizedType.typeArguments)
+      case Some(polymorphicType: ScTypePolymorphicType) => extractAllTypeArguments(polymorphicType.internalType)
+      case _                                            => None
     }
 
   def fqnIfIsOfClassFrom(tpe: ScType, patterns: Seq[String]): Option[String] =

@@ -74,6 +74,12 @@ abstract class SimplifyErrorSeparationInspectionTest(toReplace: String, toReplac
     testQuickFix(text, result, hint)
   }
 
+  def testPolymorphicReplacement(): Unit = {
+    val text = zval(s"${methodToReplace("ZIO.succeed(_)")}")
+    val result = zval(s"${methodToReplaceWith("ZIO.succeed(_)")}")
+    testQuickFix(text, result, hint)
+  }
+
   def testFallibleEffectNoHighlighting(): Unit =
     z(s"$START${methodToReplace("Task(_)")}$END").assertNotHighlighted()
 
