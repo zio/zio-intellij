@@ -6,8 +6,10 @@ abstract class InfallibleEffectRecoveryInspectionTest(fromEffect: String => Stri
     extends ZScalaInspectionTest[InfallibleEffectRecoveryInspection] {
   private val faultyMethod = "orElse"
 
-  override protected val description = InfallibleEffectRecoveryInspection.description(faultyMethod)
+  override protected val description = InfallibleEffectRecoveryInspection.description(".*")
   private val hint                   = InfallibleEffectRecoveryInspection.hint(faultyMethod)
+
+  override protected def descriptionMatches(s: String): Boolean = s != null && s.matches(description)
 
   def testInlineHighlighting(): Unit =
     z(s"$START${fromEffect("UIO(1)")}.$faultyMethod(???)$END").assertHighlighted()
@@ -122,7 +124,22 @@ abstract class InfallibleEffectRecoveryInspectionTest(fromEffect: String => Stri
     z(s"$START${fromEffect("Task(1)")}.$faultyMethod(???)$END").assertNotHighlighted()
 }
 
-class InfallibleZIORecoveryInspectionTest extends InfallibleEffectRecoveryInspectionTest(identity)
+class InfallibleZIORecoveryInspectionTest extends InfallibleEffectRecoveryInspectionTest(identity) {
+  def testInfallibleFoldNoHighlighting(): Unit =
+    z(s"${START}ZIO.succeed(1).fold(???, ???)$END").assertNotHighlighted()
+
+  def testInfallibleFoldTraceMNoHighlighting(): Unit =
+    z(s"${START}ZIO.succeed(1).foldTraceM(???, ???)$END").assertNotHighlighted()
+
+  def testInfallibleFoldMNoHighlighting(): Unit =
+    z(s"${START}ZIO.succeed(1).foldM(???, ???)$END").assertNotHighlighted()
+
+  def testInfallibleMapBothNoHighlighting(): Unit =
+    z(s"${START}ZIO.succeed(1).mapBoth(???, ???)$END").assertNotHighlighted()
+
+  def testInfallibleBimapNoHighlighting(): Unit =
+    z(s"${START}ZIO.succeed(1).bimap(???, ???)$END").assertNotHighlighted()
+}
 class InfallibleZManagedRecoveryInspectionTest
     extends InfallibleEffectRecoveryInspectionTest(effect => s"ZManaged.fromEffect($effect)")
 class InfallibleZStreamRecoveryInspectionTest
