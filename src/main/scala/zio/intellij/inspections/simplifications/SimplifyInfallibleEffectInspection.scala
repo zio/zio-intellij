@@ -22,7 +22,9 @@ class SimplifyErrorModificationInspection
       TapBothErrorModificationSimplificationType,
       FoldErrorModificationSimplificationType,
       FoldMErrorModificationSimplificationType,
-      FoldTraceMErrorModificationSimplificationType
+      FoldZIOErrorModificationSimplificationType,
+      FoldTraceMErrorModificationSimplificationType,
+      FoldTraceZIOErrorModificationSimplificationType
     )
 
 class SimplifyErrorRecoveryInspection
@@ -85,8 +87,11 @@ object TapBothErrorModificationSimplificationType extends BaseErrorModificationS
 object FoldErrorModificationSimplificationType extends BaseErrorModificationSimplificationType(`.fold_notStream`, "map")
 object FoldMErrorModificationSimplificationType
     extends BaseErrorModificationSimplificationType(`.foldM_notStream`, "flatMap")
+object FoldZIOErrorModificationSimplificationType extends BaseErrorModificationSimplificationType(`.foldZIO`, "flatMap")
 object FoldTraceMErrorModificationSimplificationType
     extends BaseErrorModificationSimplificationType(`.foldTraceM`, "flatMap")
+object FoldTraceZIOErrorModificationSimplificationType
+  extends BaseErrorModificationSimplificationType(`.foldTraceZIO`, "flatMap")
 
 sealed abstract class BaseErrorRecoverySimplificationType(qual: Qualified, methodStr: String)
     extends BaseInfallibleEffectSimplificationType {
