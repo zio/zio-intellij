@@ -13,11 +13,12 @@ object IgnoreSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression) = replace(expr).withText(invocationText(qual, "ignore"))
     expr match {
-      case qual `.catchAll` `_ => ZIO.unit`()                        => Some(replacement(qual))
-      case qual `.foldCause` (`_ => ()`(), `_ => ()`())              => Some(replacement(qual))
-      case qual `.foldCauseM` (`_ => ZIO.unit`(), `_ => ZIO.unit`()) => Some(replacement(qual))
-      case `.unit`(`.either`(qual))                                  => Some(replacement(qual).highlightFrom(qual))
-      case _                                                         => None
+      case qual `.catchAll` `_ => ZIO.unit`()                          => Some(replacement(qual))
+      case qual `.foldCause` (`_ => ()`(), `_ => ()`())                => Some(replacement(qual))
+      case qual `.foldCauseM` (`_ => ZIO.unit`(), `_ => ZIO.unit`())   => Some(replacement(qual))
+      case qual `.foldCauseZIO` (`_ => ZIO.unit`(), `_ => ZIO.unit`()) => Some(replacement(qual))
+      case `.unit`(`.either`(qual))                                    => Some(replacement(qual).highlightFrom(qual))
+      case _                                                           => None
     }
   }
 }

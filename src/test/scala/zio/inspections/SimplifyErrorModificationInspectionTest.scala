@@ -11,43 +11,43 @@ abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toRepl
   override protected val hint = s"Replace with .$toReplaceWith"
 
   def testInlineHighlighting(): Unit =
-    z(s"${START}UIO(1).$methodToReplace$END").assertHighlighted()
+    z(s"${START}ZIO.succeed(1).$methodToReplace$END").assertHighlighted()
 
   def testInlineReplacement(): Unit = {
-    val text   = z(s"UIO(1).$methodToReplace")
-    val result = z(s"UIO(1).$methodToReplaceWith")
+    val text   = z(s"ZIO.succeed(1).$methodToReplace")
+    val result = z(s"ZIO.succeed(1).$methodToReplaceWith")
     testQuickFix(text, result, hint)
   }
 
   def testValHighlighting(): Unit = z {
-    s"""val foo = UIO(1)
+    s"""val foo = ZIO.succeed(1)
        |${START}foo.$methodToReplace$END""".stripMargin
   }.assertHighlighted()
 
   def testValReplacement(): Unit = {
     val text = z {
-      s"""val foo = UIO(1)
+      s"""val foo = ZIO.succeed(1)
          |foo.$methodToReplace""".stripMargin
     }
     val result = z {
-      s"""val foo = UIO(1)
+      s"""val foo = ZIO.succeed(1)
          |foo.$methodToReplaceWith""".stripMargin
     }
     testQuickFix(text, result, hint)
   }
 
   def testDefHighlighting(): Unit = z {
-    s"""def foo = UIO(1)
+    s"""def foo = ZIO.succeed(1)
        |${START}foo.$methodToReplace$END""".stripMargin
   }.assertHighlighted()
 
   def testDefReplacement(): Unit = {
     val text = z {
-      s"""def foo = UIO(1)
+      s"""def foo = ZIO.succeed(1)
          |foo.$methodToReplace""".stripMargin
     }
     val result = z {
-      s"""def foo = UIO(1)
+      s"""def foo = ZIO.succeed(1)
          |foo.$methodToReplaceWith""".stripMargin
     }
     testQuickFix(text, result, hint)
@@ -61,10 +61,24 @@ abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toRepl
 class SimplifyMapBothErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("mapBoth", "map")
 class SimplifyTapBothErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("tapBoth", "tap")
 class SimplifyFoldErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("fold", "map") {
-  def testInfallibleStreamNoHighlight(): Unit = z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
+  def testInfallibleStreamNoHighlight(): Unit =
+    z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
 }
+
 class SimplifyFoldMErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("foldM", "flatMap") {
-  def testInfallibleStreamNoHighlight(): Unit = z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
+  def testInfallibleStreamNoHighlight(): Unit =
+    z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
 }
+class SimplifyFoldZIOErrorModificationInspectionTest
+    extends SimplifyErrorModificationInspectionTest("foldZIO", "flatMap") {
+  override def isZIO1: Boolean = false
+  def testInfallibleStreamNoHighlight(): Unit =
+    z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
+}
+
 class SimplifyFoldTraceMErrorModificationInspectionTest
     extends SimplifyErrorModificationInspectionTest("foldTraceM", "flatMap")
+class SimplifyFoldTraceZIOErrorModificationInspectionTest
+    extends SimplifyErrorModificationInspectionTest("foldTraceZIO", "flatMap") {
+  override def isZIO1: Boolean = false
+}
