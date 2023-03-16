@@ -14,7 +14,7 @@ import org.jetbrains.plugins.scala.lang.psi.ElementScope
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFor, ScGenerator}
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.{ScNamedElement, ScTypedDefinition}
@@ -122,6 +122,16 @@ package object utils {
   def createExpression(text: String, context: PsiElement): Option[ScExpression] =
     ScalaPsiElementFactory.safe(_.createExpressionFromText(text, context)(context))
 
+  def createForGenerator(name: String, expr: ScExpression): Option[ScGenerator] = {
+    implicit val pc: ProjectContext = expr
+
+    val generator = s"$name <- ${expr.getText}"
+    val text      = s"for {\n $generator \n}"
+    val forStmt   = ScalaPsiElementFactory.safe(_.createElementFromText[ScFor](text, expr))
+
+    forStmt.flatMap(_.enumerators).flatMap(_.generators.headOption)
+  }
+
   def extractServiceTypeArgument(accessTypeArg: Option[ScTypeElement]) = for {
     arg           <- accessTypeArg
     tpe           <- arg.`type`().toOption
@@ -183,6 +193,18 @@ package object utils {
         .map(createParameterizedType)
         .exists(scType.conforms)
     }
+
+  def fromSameClass(e1: ScExpression, e2: ScExpression): Boolean =
+    (typeName(e1), typeName(e2)) match {
+      case (Some(t1), Some(t2)) => t1 == t2
+      case _                    => false
+    }
+
+  private def typeName(e: ScExpression): Option[String] =
+    e.`type`()
+      .toOption
+      .flatMap(_.tryExtractDesignatorSingleton.extractClass)
+      .map(_.qualifiedName)
 
   def createParameterizedType(clazz: PsiClass) = {
     val designatorType = ScDesignatorType(clazz)

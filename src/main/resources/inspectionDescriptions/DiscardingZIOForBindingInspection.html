@@ -1,0 +1,23 @@
+<html>
+<body>
+Detects if an effect is suspiciously used in for-comprehension as a simple binding and not as a generator:
+<pre>
+for {
+  a <- ZIO.succeed(1)
+  _ = ZIO.logInfo("msg")
+  b <- ZIO.succeed(1)
+} yield a + b
+</pre>
+<br/>
+Will highlight the expression <code>_ = ZIO.logInfo("msg")</code>.<br/>
+Fix by using generator syntax:
+<pre>
+for {
+  a <- ZIO.succeed(1)
+  _ <- ZIO.logInfo("msg")
+  b <- ZIO.succeed(1)
+} yield a + b
+</pre>
+
+</body>
+</html>

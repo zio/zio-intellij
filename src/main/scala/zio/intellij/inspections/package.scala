@@ -408,9 +408,18 @@ package object inspections {
 
     def unapply(expr: ScGenerator): Option[(ScPattern, Option[ScExpression])] =
       (expr.pattern, expr.expr) match {
-        case (x, res @ Some(_)) =>
-          Some((x, res.map(stripped)))
-        case _ => None
+        case (x, res @ Some(_)) => Some((x, res.map(stripped)))
+        case _                  => None
+      }
+  }
+
+  // for comprehension `x = xx` binding syntax
+  object forBinding {
+
+    def unapply(expr: ScForBinding): Option[(ScPattern, Option[ScExpression])] =
+      (expr.pattern, expr.expr) match {
+        case (x, res @ Some(_)) => Some((x, res.map(stripped)))
+        case _                  => None
       }
   }
 
@@ -451,10 +460,16 @@ package object inspections {
   }
 
   object `_ <- x` {
-
     def unapply(expr: ScGenerator): Option[ScExpression] = expr match {
       case generator(_: ScWildcardPattern, expr) => expr
       case _                                     => None
+    }
+  }
+
+  object `_ = x` {
+    def unapply(expr: ScForBinding): Option[ScExpression] = expr match {
+      case forBinding(_: ScWildcardPattern, expr) => expr
+      case _                                      => None
     }
   }
 
