@@ -168,6 +168,12 @@
                          shortName="YieldingZIOEffectInspection" level="WEAK WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.mistakes.DiscardingZIOForBindingInspection"
+                         displayName="Detects if an effect is suspiciously used in for-comprehension as a simple binding and not as a generator"
+                         groupPath="Scala,ZIO" groupName="Inspections"
+                         shortName="DiscardingZIOForBindingInspection" level="WEAK WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.mistakes.NothingInContravariantPositionInspection"
                          displayName="Detects Nothing being used in the contravariant position in a ZIO effect"
                          groupPath="Scala,ZIO" groupName="Inspections"

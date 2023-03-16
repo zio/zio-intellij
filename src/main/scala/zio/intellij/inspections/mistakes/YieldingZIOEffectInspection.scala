@@ -3,9 +3,9 @@ package zio.intellij.inspections.mistakes
 import com.intellij.codeInspection._
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
-import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import zio.intellij.inspections.zioLike
+import zio.intellij.utils.fromSameClass
 
 class YieldingZIOEffectInspection extends LocalInspectionTool {
 
@@ -24,18 +24,6 @@ class YieldingZIOEffectInspection extends LocalInspectionTool {
       }
     case _ =>
   }
-
-  private def typeName(e: ScExpression): Option[String] =
-    e.`type`()
-      .toOption
-      .flatMap(_.tryExtractDesignatorSingleton.extractClass)
-      .map(_.qualifiedName)
-
-  private def fromSameClass(e1: ScExpression, e2: ScExpression): Boolean =
-    (typeName(e1), typeName(e2)) match {
-      case (Some(t1), Some(t2)) => t1 == t2
-      case _                    => false
-    }
 
   private def hasGeneratorFromSameClass(forExpr: ScFor, expr: ScExpression): Boolean =
     forExpr.enumerators.toList
