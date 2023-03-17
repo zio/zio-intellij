@@ -3,6 +3,7 @@ package zio.intellij.inspections.macros
 import com.intellij.codeInspection._
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
+import org.jetbrains.plugins.scala.extensions.PsiElementExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGenericCall, ScMethodCall}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.{
   createExpressionFromText,
@@ -25,7 +26,8 @@ class ProvideMacroInspection extends LocalInspectionTool {
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = element => {
     val module = element.module
-    if (module.exists(_.isZio1)) visitZIO1ProvideMethods(holder)(element)
+    if (element.isInScala3File) () // inspection causes lots of false positives in Scala 3. Disable until better times
+    else if (module.exists(_.isZio1)) visitZIO1ProvideMethods(holder)(element)
     else if (module.exists(_.isZio2)) visitZIO2ProvideMethods(holder)(element)
   }
 
