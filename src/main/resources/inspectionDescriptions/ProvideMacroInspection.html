@@ -1,0 +1,23 @@
+<html>
+<body>
+Builds a layer tree similar to how ZIO does it to provide hints on missing layers. E.g.
+<pre>
+val eff: ZIO[Int, Nothing, Int] = ZIO.service[Int].debug
+val uio = eff.provide(ZLayer.succeed(""))
+</pre>
+Will raise an error because there is no `Int` in the environment. It can also detect unnecessary extra layers, e.g.
+<br/>
+<pre>
+val eff: ZIO[Int, Nothing, Int] = ZIO.service[Int].debug
+val uio = eff.provide(ZLayer.succeed(1), ZLayer.succeed(""))
+</pre>
+Will complain because `String` is not required and can be removed. And many more!
+<br/>
+Note: if you need to keep some "unused" layer because of their side effects, you should make it return unit. For example,
+<pre>
+val eff: ZIO[Int, Nothing, Int] = ZIO.service[Int].debug
+val uio = eff.provide(ZLayer.succeed(1), ZLayer.fromZIO(ZIO.debug("Hey, I'm a side effect!")))
+</pre>
+will compile fine and not cause any warnings.
+</body>
+</html>
