@@ -2,7 +2,7 @@ import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
 lazy val scalaPluginVersion = "2022.3.18"
-lazy val pluginVersion      = "2022.3.22" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val pluginVersion      = "2022.3.23" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "223"
@@ -40,10 +40,7 @@ lazy val root =
         <b>Note:</b> Please welcome Nikita Myazin as a maintainer for the plugin, who also contributed the majority of fixes in this release!<br/>
         <b>What's new?</b>
         <ul>
-          <li>Added support for ZLayer alias refactoring (<a href="https://github.com/zio/zio-intellij/pull/409">#409</a>)</li>
-          <li>Added simplification refactoring for <code>assertTrue</code> chains (<a href="https://github.com/zio/zio-intellij/pull/410">#410</a>)</li>
-          <li>Improved detection of unused effects and tests (<a href="https://github.com/zio/zio-intellij/pull/411">#411</a>)</li>
-          <li>Bugfix: a subtyping issue involving ZLayers (<a href="https://github.com/zio/zio-intellij/pull/413">#413</a>)</li>
+          <li>Many bugfixes relating to refactoring suggestions on ZStreams, ZIO 2.0-specific fixes</li>
         </ul>
         ]]>"""
         )
