@@ -4,7 +4,6 @@ import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFor, ScInfixExpr}
 import zio.intellij.inspections._
 import zio.intellij.utils.NegationUtils.{hasNegation, invertedNegationText, removeDoubleNegation}
-import zio.intellij.utils.OptionUtils
 import zio.intellij.utils.StringUtils._
 
 class SimplifyWhenInspection   extends ZInspection(WhenSimplificationType)
@@ -29,15 +28,14 @@ sealed abstract class WhenUnlessSimplificationTypeBase(replacementMethod: String
     shouldHaveNegation: Boolean
   ): Option[Simplification] = {
     val conditionWithoutDoubleNegation = removeDoubleNegation(condition)
-    if (hasNegation(conditionWithoutDoubleNegation)) {
-      OptionUtils.when(shouldHaveNegation) {
+    if (hasNegation(conditionWithoutDoubleNegation))
+      Option.when(shouldHaveNegation) {
         replacement(ifStmt, body, invertedNegationText(conditionWithoutDoubleNegation))
       }
-    } else {
-      OptionUtils.unless(shouldHaveNegation) {
+    else
+      Option.unless(shouldHaveNegation) {
         replacement(ifStmt, body, conditionWithoutDoubleNegation.getText)
       }
-    }
   }
 
 }
