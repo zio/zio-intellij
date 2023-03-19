@@ -9,7 +9,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.{ScType, TypePresentationConte
 import zio.intellij.inspections.suggestions.SuggestTypeAliasInspection.{AliasInfo, TypeAliasQuickFix}
 import zio.intellij.intentions.suggestions.SuggestTypeAlias
 import zio.intellij.utils.TypeCheckUtils.{fromZioLayer, fromZioLike}
-import zio.intellij.utils.{ListSyntax, createTypeElement, extractTypeArguments, OptionUtils => OptionOps}
+import zio.intellij.utils.{ListSyntax, createTypeElement, extractTypeArguments}
 
 class SuggestTypeAliasInspection extends LocalInspectionTool {
 
@@ -28,7 +28,7 @@ class SuggestTypeAliasInspection extends LocalInspectionTool {
               .flatMap(alias => extractTypeArguments(alias).map(_.length).map(AliasInfo(alias, _)))
               .minsBy(_.args)
 
-          OptionOps.when(shouldSuggest(tpe, mostSpecificAliases)) {
+          Option.when(shouldSuggest(tpe, mostSpecificAliases)) {
             implicit val tpc: TypePresentationContext = TypePresentationContext(te)
 
             val typeElements = mostSpecificAliases.flatMap(alias => createTypeElement(alias.tpe, te))
