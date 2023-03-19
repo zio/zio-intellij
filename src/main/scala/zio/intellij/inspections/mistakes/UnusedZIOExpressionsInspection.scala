@@ -2,8 +2,7 @@ package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
 import org.jetbrains.annotations.Nls
-import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
-import org.jetbrains.plugins.scala.codeInspection.codeInspectionHack.expressionResultIsNotUsed
+import org.jetbrains.plugins.scala.codeInspection.{PsiElementVisitorSimple, expressionResultIsNotUsed}
 import zio.intellij.inspections.{zioLike, zioSpec}
 
 class UnusedZIOExpressionsInspection extends LocalInspectionTool {
