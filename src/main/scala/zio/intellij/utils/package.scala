@@ -195,16 +195,19 @@ package object utils {
     }
 
   def fromSameClass(e1: ScExpression, e2: ScExpression): Boolean =
-    (typeName(e1), typeName(e2)) match {
+    (e1.`type`(), e2.`type`()) match {
+      case (Right(t1), Right(t2)) => fromSameClass(t1, t2)
+      case _                      => false
+    }
+
+  def fromSameClass(t1: ScType, t2: ScType): Boolean =
+    (typeName(t1), typeName(t2)) match {
       case (Some(t1), Some(t2)) => t1 == t2
       case _                    => false
     }
 
-  private def typeName(e: ScExpression): Option[String] =
-    e.`type`()
-      .toOption
-      .flatMap(_.tryExtractDesignatorSingleton.extractClass)
-      .map(_.qualifiedName)
+  private def typeName(t: ScType): Option[String] =
+    t.tryExtractDesignatorSingleton.extractClass.map(_.qualifiedName)
 
   def createParameterizedType(clazz: PsiClass) = {
     val designatorType = ScDesignatorType(clazz)

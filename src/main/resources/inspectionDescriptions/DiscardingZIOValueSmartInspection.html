@@ -1,0 +1,17 @@
+<html>
+<body>
+Detects if an effect is suspiciously discarded due to
+<a href="https://www.scala-lang.org/files/archive/spec/2.13/06-expressions.html#value-discarding">value discarding</a>:
+<pre>
+def log(smth: => Any): Task[Unit] =
+  ZIO.attempt(smth).map(ZIO.debug(_))
+</pre>
+In the case above, <code>ZIO.debug(_)</code> is basically ignored and nothing will be printed to console.
+Can be fixed by using <code>.flatMap</code> instead:
+<pre>
+def log(smth: => Any): Task[Unit] =
+  ZIO.attempt(smth).flatMap(ZIO.debug(_))
+</pre>
+
+</body>
+</html>
