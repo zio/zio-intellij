@@ -71,6 +71,10 @@ package object inspections {
     val `.forkWithErrorHandler`: Qualified = invocation("forkWithErrorHandler").from(zioLikePackages)
   }
 
+  object streamMethods {
+    val `.runDrain`: Qualified = invocation("runDrain").from(zioStreamTypes)
+  }
+
   object hasMethods {
     val zioHasLikeClasses: List[String] = List("zio.Has", "zio.Has._")
 

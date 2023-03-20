@@ -112,4 +112,14 @@ class DiscardingZIOForBindingInspectionTest extends ZScalaInspectionTest[Discard
          |  _ <- ZIO.succeed(1)
          |} yield 1
          |""".stripMargin).assertNotHighlighted()
+
+  def test_effect_binding_no_highlight(): Unit =
+    z(s"""
+         |for {
+         |  _ <- ZIO.succeed(1)
+         |  ${START}v = ZIO.succeed(1)$END
+         |  _ <- ZIO.succeed(1)
+         |} yield 1
+         |""".stripMargin).assertNotHighlighted()
+
 }
