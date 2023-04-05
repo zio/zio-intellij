@@ -2,7 +2,7 @@
 <body>Simplify the following expressions to use <code>.as</code> instead:
 <pre>
 ZIO.succeed("Fernando Fader").zipLeft(f("Carlos Alonso")) -> f("Carlos Alonso").as("Fernando Fader")
-ZIO.succeed("Fernando Fader") <* f("Carlos Alonso")       -> f("Carlos Alonso").as("Fernando Fader")
+ZIO.succeed("Fernando Fader") &lt;* f("Carlos Alonso")       -> f("Carlos Alonso").as("Fernando Fader")
 </pre>
 </body>
 </html>

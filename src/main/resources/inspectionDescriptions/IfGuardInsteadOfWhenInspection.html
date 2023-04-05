@@ -5,14 +5,14 @@ Detects if guards mistakenly used in for-comprehension on ZIO effect causing <co
 The guard expression in the following code snippet will be highlighted:
 <pre>
 for {
-    _ <- myService.executeSomething() if config.somethingShouldBeExecuted
+    _ &lt;- myService.executeSomething() if config.somethingShouldBeExecuted
 } yield ???
 </pre>
 <br/>
 And you will also be prompted to fix it using <code>ZIO.when</code>:
 <pre>
 for {
-    _ <- myService.executeSomething().when(config.somethingShouldBeExecuted)
+    _ &lt;- myService.executeSomething().when(config.somethingShouldBeExecuted)
 } yield ???
 </pre>
 <p>
@@ -20,11 +20,11 @@ for {
 <ul>
     <li>Not assigned to a variable, e.g.:
     <pre>
-    _ <- myService.executeSomething() if config.somethingShouldBeExecuted
+    _ &lt;- myService.executeSomething() if config.somethingShouldBeExecuted
     </pre>
         will be highlighted, while
     <pre>
-    executionResult <- myService.executeSomething() if config.somethingShouldBeExecuted
+    executionResult &lt;- myService.executeSomething() if config.somethingShouldBeExecuted
     </pre>
         will not.
     </li>

@@ -8,7 +8,7 @@ recovery.
     uio.option                      => uio.map(Some(_))
     uio.either                      => uio.map(Right(_))
     uio.orElseEither(task)          => uio.map(Left(_))
-    uio <+> task                    => uio.map(Left(_))
+    uio &lt;+> task                    => uio.map(Left(_))
     uio.retryOrElseEither(???, ???) => uio.map(Right(_))
 </pre>
 See <a href="https://zio.dev/docs/can_fail">ZIO documentation</a> for explanation and more examples.
