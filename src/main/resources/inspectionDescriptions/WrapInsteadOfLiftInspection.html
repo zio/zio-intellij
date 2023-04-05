@@ -29,14 +29,14 @@ ZIO.fromFuture(implicit ec => myFuture)
     <li>Do not have usages, e.g.:
     <pre>
     for {
-      a <- ZIO(Option(1))
+      a &lt;- ZIO(Option(1))
     } yield ???
     </pre>
     will be highlighted, while
     <pre>
     for {
-      a <- ZIO(Option(1))
-      b <- doSomethingWith(a)
+      a &lt;- ZIO(Option(1))
+      b &lt;- doSomethingWith(a)
     } yield ???
     </pre>
     will not.

@@ -3,8 +3,8 @@
 Detects if a value returned from the yield part of a for comprehension is explicitly wrapped in a ZIO effect:
 <pre>
 for {
-    x <- ZIO.succeed(1)
-    y <- ZIO.succeed(2)
+    x &lt;- ZIO.succeed(1)
+    y &lt;- ZIO.succeed(2)
 } yield {
     ZIO.effect(x + y)
 }
@@ -14,9 +14,9 @@ Will highlight the expression <code>ZIO.effect(x + y)</code>.<br/>
 Fix by moving effect from yield inside of the for:
 <pre>
 for {
-    x <- ZIO.succeed(1)
-    y <- ZIO.succeed(2)
-    res <- ZIO.effect(x + y)
+    x &lt;- ZIO.succeed(1)
+    y &lt;- ZIO.succeed(2)
+    res &lt;- ZIO.effect(x + y)
 } yield res
 </pre>
 
