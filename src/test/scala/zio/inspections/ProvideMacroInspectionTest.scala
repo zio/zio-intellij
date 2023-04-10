@@ -143,6 +143,26 @@ abstract class ProvideMacroInspectionTest(val provide: String) extends ProvideMa
        |effect.$provide(layer1, ${r("layer2")})""".stripMargin
   }.assertHighlighted()
 
+  def testTheSameNameNoHighlighting(): Unit =
+    s"""$imports
+       |import zio._
+       |
+       |package foo {
+       | class Bar
+       | val bar = ZLayer.succeed(new Bar)
+       |}
+       |
+       |package buzz {
+       | class Bar
+       | val bar = ZLayer.succeed(new Bar)
+       |}
+       |
+       |object Test {
+       | val effect: URIO[${Has("foo.Bar")} with ${Has("buzz.Bar")}, Unit] = ???
+       | effect.$provide(${r("foo.bar")}, ${r("buzz.bar")})
+       |}""".stripMargin
+      .assertNotHighlighted()
+
 }
 
 class ProvideMacroZIO1InspectionTest extends ProvideMacroInspectionTest("inject") {

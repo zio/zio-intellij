@@ -502,7 +502,7 @@ object LayerBuilder {
 
   // dirty hack to make it work
   // ScType and ScExpression don't have equals / hashCode methods, which makes it difficult to use it with the algorithm
-  // besides, original ZIO algorithm uses string comparison too
+  // use canonicalText for comparison to avoid name collisions
   // also, ZType is guaranteed to have meaningful type (non-Any)
   final class ZType private (val value: ScType)(implicit context: TypePresentationContext) {
     def isSubtypeOf(that: ZType): Boolean = this.value.conforms(that.value)
@@ -515,7 +515,7 @@ object LayerBuilder {
     override def toString: String = asStr
 
     private lazy val widened = value.widen
-    private lazy val asStr   = resolveAliases(widened).getOrElse(widened).presentableText
+    private lazy val asStr   = resolveAliases(widened).getOrElse(widened).canonicalText
   }
 
   object ZType {
