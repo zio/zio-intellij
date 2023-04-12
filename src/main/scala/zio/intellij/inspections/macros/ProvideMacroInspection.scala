@@ -268,7 +268,7 @@ final case class LayerBuilder(
   sideEffectNodes: List[Node],
   method: ProvideMethod,
   typeToLayer: ZType => String
-)(implicit tpContext: TypePresentationContext, pContext: ProjectContext, scalaFeatures: ScalaFeatures) {
+)(implicit pContext: ProjectContext, scalaFeatures: ScalaFeatures) {
 
   def tryBuild: Either[ConstructionIssue, Unit] = assertNoAmbiguity.flatMap(_ => tryBuildInternal)
 
@@ -332,9 +332,9 @@ final case class LayerBuilder(
     val unusedRemainderLayers = remainderNodes.filterNot(node => usedLayers(node.value))
     val unusedRemainderLayersWarning =
       method match {
-        case ProvideMethod.Provide => None
-        case ProvideMethod.ProvideSome | ProvideMethod.ProvideSomeShared =>
-          Option.when(!method.isProvideSomeShared && unusedRemainderLayers.nonEmpty) {
+        case ProvideMethod.Provide | ProvideMethod.ProvideSomeShared => None
+        case ProvideMethod.ProvideSome =>
+          Option.when(unusedRemainderLayers.nonEmpty) {
             UnusedProvideSomeLayersWarning(unusedRemainderLayers.map(node => node.outputs.head))
           }
         case ProvideMethod.ProvideCustom =>
@@ -525,7 +525,7 @@ object LayerBuilder {
 
   }
 
-  final class ZExpr(val value: ScExpression)(implicit context: TypePresentationContext) {
+  final class ZExpr(val value: ScExpression) {
     override def equals(other: Any): Boolean = other match {
       case that: ZExpr => this.asStr == that.asStr
       case _           => false

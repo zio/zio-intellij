@@ -7,12 +7,10 @@ import com.intellij.codeInsight.template.postfix.completion.PostfixTemplateLooku
 import com.intellij.codeInsight.template.postfix.templates.{PostfixLiveTemplate, PostfixTemplatesUtils}
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.util.{Disposer, Iconable}
+import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiFile
-import org.jetbrains.plugins.scala.project.ProjectPsiFileExt
-import zio.intellij.ZioIcon
 import zio.intellij.intentions.ZIcon
-import zio.intellij.utils.ModuleSyntax
+import zio.intellij.utils.PsiElementSyntax
 
 import java.util
 import java.util.Collections
@@ -30,7 +28,7 @@ private[this] class ZPostfixLiveTemplateHack extends PostfixLiveTemplate {
     editor: Editor,
     offset: Int
   ): util.Collection[_ <: CustomLiveTemplateLookupElement] = {
-    if (!file.module.exists(_.hasZio)) return Collections.emptyList
+    if (!file.hasZio) return Collections.emptyList
 
     val result           = new util.HashSet[CustomLiveTemplateLookupElement]
     val callback         = new CustomTemplateCallback(editor, file)
