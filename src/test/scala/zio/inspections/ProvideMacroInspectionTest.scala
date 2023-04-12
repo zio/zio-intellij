@@ -518,3 +518,29 @@ abstract class ProvideSomeMacroZIO2SpecInspectionTestBase(val provideSome: Strin
 class ProvideSomeMacroZIO2SpecInspectionTest extends ProvideSomeMacroZIO2SpecInspectionTestBase("provideSome")
 class ProvideSomeSharedMacroZIO2SpecInspectionTest
     extends ProvideSomeMacroZIO2SpecInspectionTestBase("provideSomeShared")
+
+// special test to expect _very_ specific error message
+// checking if types are rendered correctly
+class ProvideMacroInspectionRenderingTest extends ZScalaInspectionTest[ProvideMacroInspection] {
+  override def isZIO1: Boolean = false
+
+  // not 1. _root_.foo.Bar
+  override protected def description =
+  """Please provide layers for the following type:1. Bar""".stripMargin
+
+  override protected def descriptionMatches(s: String): Boolean =
+    s != null && (s.filterNot(c => c == '\r' || c == '\n') == description)
+
+  def testCircularityTopLevelHighlight(): Unit =
+    s"""import zio._
+       |
+       |package foo {
+       | class Bar
+       |}
+       |
+       |object Test {
+       | val effect: URIO[foo.Bar, Unit] = ???
+       | ${r("effect.provide()")}
+       |}""".stripMargin.assertHighlighted()
+
+}

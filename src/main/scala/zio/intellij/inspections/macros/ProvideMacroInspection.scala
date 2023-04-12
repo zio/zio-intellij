@@ -508,14 +508,17 @@ object LayerBuilder {
     def isSubtypeOf(that: ZType): Boolean = this.value.conforms(that.value)
 
     override def equals(other: Any): Boolean = other match {
-      case that: ZType => this.asStr == that.asStr
+      case that: ZType => this.canonicalText == that.canonicalText
       case _           => false
     }
-    override def hashCode(): Int  = asStr.hashCode
-    override def toString: String = asStr
+    override def hashCode: Int    = canonicalText.hashCode
+    override def toString: String = presentableText
 
-    private lazy val widened = value.widen
-    private lazy val asStr   = resolveAliases(widened).getOrElse(widened).canonicalText
+    private lazy val widened   = value.widen
+    private lazy val dealiased = resolveAliases(widened).getOrElse(widened)
+
+    private lazy val canonicalText   = dealiased.canonicalText
+    private lazy val presentableText = dealiased.presentableText
   }
 
   object ZType {
