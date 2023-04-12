@@ -47,6 +47,12 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
        |}
        |""".stripMargin
 
+  def Has(tpe: String): String = if (isZIO1) s"Has[$tpe]" else tpe
+
+  def range(str: String): String = s"$START$str$END"
+
+  @inline def r(str: String): String = range(str)
+
   implicit protected class S(s: String) {
     def assertHighlighted(): Unit = checkTextHasError(s)
 

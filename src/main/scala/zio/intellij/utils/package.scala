@@ -27,7 +27,14 @@ import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
 import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
-import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectContext, ProjectExt, ScalaLanguageLevel}
+import org.jetbrains.plugins.scala.project.{
+  LibraryExt,
+  ModuleExt,
+  ProjectContext,
+  ProjectExt,
+  ProjectPsiElementExt,
+  ScalaLanguageLevel
+}
 import org.jetbrains.sbt.SbtUtil
 import org.jetbrains.sbt.SbtUtil.getDefaultLauncher
 import org.jetbrains.sbt.project.SbtExternalSystemManager
@@ -288,6 +295,12 @@ package object utils {
     }
 
     def isPrerelease = version < Version.scala3Version
+  }
+
+  implicit class PsiElementSyntax(private val element: PsiElement) extends AnyVal {
+    def hasZio: Boolean = element.module.exists(_.hasZio)
+    def isZio1: Boolean = element.module.exists(_.isZio1)
+    def isZio2: Boolean = element.module.exists(_.isZio2)
   }
 
   implicit class TraverseAtHome[A](private val list: List[A]) extends AnyVal {

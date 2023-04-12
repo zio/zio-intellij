@@ -22,10 +22,6 @@ abstract class ProvideMacroInspectionTestBase extends ZScalaInspectionTest[Provi
   override protected def descriptionMatches(s: String): Boolean =
     s != null && allPossibleErrors.exists(s.startsWith)
 
-  protected def r(str: String): String = s"$START$str$END"
-
-  protected def Has(tpe: String): String = if (isZIO1) s"Has[$tpe]" else tpe
-
   protected val imports: String = if (isZIO1) "import zio.magic._" else ""
 
 }
@@ -443,8 +439,6 @@ abstract class ProvideMacroSpecInspectionTestBase extends ZScalaInspectionTest[P
 
   override protected def description                            = "Please provide layers for the following"
   override protected def descriptionMatches(s: String): Boolean = s != null && s.startsWith(description)
-
-  protected def r(str: String): String = s"$START$str$END"
 }
 
 abstract class ProvideMacroZIO1SpecInspectionTestBase(val provide: String) extends ProvideMacroSpecInspectionTestBase {
