@@ -1,16 +1,16 @@
 package zio.intellij.utils
 
 import org.jetbrains.plugins.scala.codeInsight.intention.expression.ConvertParameterToUnderscoreIntention
-import org.jetbrains.plugins.scala.lang.psi.api.expr.ScFunctionExpr
+import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFunctionExpr}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createWildcardNode
 
 object LambdaUtils {
 
-  def lambdaToUnderscore(expr: ScFunctionExpr): String =
+  def lambdaToUnderscore(expr: ScFunctionExpr): ScExpression =
     ConvertParameterToUnderscoreIntention
       .createExpressionToIntroduce(expr, withoutParameterTypes = true)
-      .fold(_ => replaceWithUnderscore(expr).getText, _.getText)
+      .getOrElse(replaceWithUnderscore(expr))
 
   private def replaceWithUnderscore(e: ScFunctionExpr): ScFunctionExpr = {
     val params = e.parameters.filterNot(p => p.isWildcard || p.isImplicitParameter)
