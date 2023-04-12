@@ -44,7 +44,7 @@ object SimplifyTapInspection {
             case _ =>
               val expression = s"${param.name} => ${ref.getText}"
               createExpressionFromText(expression, func)(func) match {
-                case e: ScFunctionExpr => LambdaUtils.lambdaToUnderscore(e)
+                case e: ScFunctionExpr => LambdaUtils.lambdaToUnderscore(e).getText
                 case _                 => expression
               }
           }
