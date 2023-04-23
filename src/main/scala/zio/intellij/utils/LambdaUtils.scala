@@ -2,26 +2,24 @@ package zio.intellij.utils
 
 import org.jetbrains.plugins.scala.codeInsight.intention.expression.ConvertParameterToUnderscoreIntention
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFunctionExpr}
-import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
-import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createWildcardNode
+import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
+import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 
 object LambdaUtils {
 
   def lambdaToUnderscore(expr: ScFunctionExpr): ScExpression =
     ConvertParameterToUnderscoreIntention
       .createExpressionToIntroduce(expr, withoutParameterTypes = true)
-      .getOrElse(replaceWithUnderscore(expr))
+      .getOrElse(replaceUnusedParamWithUnderscore(expr))
 
-  private def replaceWithUnderscore(e: ScFunctionExpr): ScFunctionExpr = {
-    val params = e.parameters.filterNot(p => p.isWildcard || p.isImplicitParameter)
-    params.collectFirst {
-      case named: ScNamedElement if !isElementUsed(named, isOnTheFly = false) =>
-        val wildcard = createWildcardNode(e.features)(e.projectContext).getPsi
-        named.nameId.replace(wildcard)
-        e
+  private def replaceUnusedParamWithUnderscore(e: ScFunctionExpr): ScFunctionExpr =
+    e match {
+      case ScFunctionExpr(Seq(param), Some(body)) if isUnusedNamedParam(param) =>
+        val withWildcard = s"_ => ${body.getText}"
+        ScalaPsiElementFactory.safe(_.createElementFromText[ScFunctionExpr](withWildcard, e)(e)).getOrElse(e)
       case _ => e
     }
-      .getOrElse(e)
-  }
+
+  private def isUnusedNamedParam(named: ScParameter) = !(isElementUsed(named, isOnTheFly = false) || named.isWildcard)
 
 }

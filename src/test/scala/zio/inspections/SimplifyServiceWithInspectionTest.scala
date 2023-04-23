@@ -136,9 +136,15 @@ class SimplifyServiceWithInspectionTestZIO1 extends ZSimplifyInspectionTest[Simp
 
     z(base(assignment(range(reference)))).assertHighlighted()
 
-    val text = z(base(assignment(reference)))
+    val text   = z(base(assignment(reference)))
     val result = z(base(assignment(simplified)))
     testQuickFix(text, result, hint)
+  }
+
+  def test_survive_incomplete_labmda(): Unit = {
+    def assignment(expr: String) = s"val read: URIO[RedisService, Unit] = $expr"
+    val incompleteExpr           = "ZIO.service[Redis].flatMap { redis => }"
+    z(base(range(assignment(incompleteExpr)))).assertNotHighlighted() // just to trigger code analysis
   }
 
 }
@@ -173,7 +179,7 @@ class SimplifyServiceWithInspectionTestZIO2 extends ZSimplifyInspectionTest[Simp
 
     z(base(assignment(range(reference)))).assertHighlighted()
 
-    val text = z(base(assignment(reference)))
+    val text   = z(base(assignment(reference)))
     val result = z(base(assignment("ZIO.serviceWith[Redis](_.readWithEnv)")))
     testQuickFix(text, result, hint)
   }
