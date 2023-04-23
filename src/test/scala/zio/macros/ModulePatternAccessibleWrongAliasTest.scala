@@ -1,14 +1,8 @@
 package zio.macros
 
-import intellij.testfixtures.RichStr
-import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
 import org.junit.Assert._
 
 class ModulePatternAccessibleWrongAliasTest extends MacrosTest {
-
-  override def librariesLoaders: Seq[LibraryLoader] =
-    super.librariesLoaders :+
-      IvyManagedLoader(zioOrg %% "zio-streams" % zioVersion, zioOrg %% "zio-macros" % zioVersion)
 
   override protected val code =
     s"""

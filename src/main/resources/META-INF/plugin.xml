@@ -31,6 +31,7 @@
         <syntheticMemberInjector implementation="zio.intellij.synthetic.macros.ModulePatternAccessibleM"/>
         <syntheticMemberInjector implementation="zio.intellij.synthetic.macros.ModulePatternAccessibleMM"/>
         <syntheticMemberInjector implementation="zio.intellij.synthetic.macros.MockableInjector"/>
+        <syntheticMemberInjector implementation="zio.intellij.synthetic.macros.JsonDerivedCodecInjector"/>
     </extensions>
 
     <applicationListeners>
