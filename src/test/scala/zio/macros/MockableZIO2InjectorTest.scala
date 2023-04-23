@@ -1,22 +1,11 @@
 package zio.macros
 
-import intellij.testfixtures.RichStr
-import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
 import org.junit.Assert.{assertEquals, assertTrue}
-import zio.inspections.ZInspectionTestBase
 import zio.intellij.utils.createType
 
 class MockableZIO2InjectorTest extends MacrosTest {
 
-  override protected def zioVersion = "[2.0,)"
-
-  override def librariesLoaders: Seq[LibraryLoader] =
-    super.librariesLoaders :+
-      IvyManagedLoader(
-        zioOrg %% "zio-streams" % zioVersion,
-        zioOrg %% "zio-test"    % zioVersion,
-        zioOrg %% "zio-mock"    % "1.0.0-RC8"
-      )
+  override protected def isZIO1 = false
 
   override protected val code =
     s"""import zio._

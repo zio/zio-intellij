@@ -1,14 +1,8 @@
 package zio.macros
 
-import intellij.testfixtures.RichStr
-import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
 import org.junit.Assert._
 
 abstract class ModulePatternAccessibleTestBase(injectAlias: Boolean) extends MacrosTest {
-
-  override def librariesLoaders: Seq[LibraryLoader] =
-    super.librariesLoaders :+
-      IvyManagedLoader(zioOrg %% "zio-streams" % zioVersion, zioOrg %% "zio-macros" % zioVersion)
 
   val aliasOrHasService = if (injectAlias) "Example.Example" else "zio.Has[Example.Service]"
 
