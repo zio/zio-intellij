@@ -170,7 +170,7 @@ object MockableInjector {
       case Method(_) | Field(_) => true
       case _                    => false
     }
-      .flatMap(MemberInfo.apply(_))
+      .flatMap(MemberInfo.apply)
       .groupBy(_.signature.name)
 
   private def sortOverloads(infos: Seq[MemberInfo]): Seq[MemberInfo] = {

@@ -180,6 +180,6 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
     }
   }
 
-  override def needsCompanionObject(source: ScTypeDefinition) =
+  override def needsCompanionObject(source: ScTypeDefinition): Boolean =
     source.findAnnotationNoAliases(macroName) != null
 }
