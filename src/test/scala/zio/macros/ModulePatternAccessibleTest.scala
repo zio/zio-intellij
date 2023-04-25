@@ -81,7 +81,7 @@ object E${CARET}xample {
 
   def test_generates_accessor_function_for_generic_ZIO_method_with_type_constraints(): Unit =
     assertEquals(
-      s"def m3[T <: Example.Foo](t: Example.Wrapped[T]): zio.ZIO[$aliasOrHasService, String, List[T]] = " +
+      s"def m3[T <: Foo](t: Wrapped[T]): zio.ZIO[$aliasOrHasService, String, List[T]] = " +
         "zio.ZIO.accessM(_.get[Example.Service].m3[T](t))",
       method("m3").getText
     )

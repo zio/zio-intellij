@@ -37,35 +37,35 @@ abstract class ModulePatternAccessiblePolyTestBase(injectAlias: Boolean) extends
 
   def test_generates_accessor_function_for_field_of_the_polymorphic_service(): Unit =
     assertEquals(
-      s"def v[R, T <: Example.Foo]: zio.ZIO[$aliasOrHasService with R, Throwable, T] = " +
+      s"def v[R, T <: Foo]: zio.ZIO[$aliasOrHasService with R, Throwable, T] = " +
         "zio.ZIO.accessM(_.get[Example.Service[R, T]].v)",
       method("v").getText
     )
 
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_without_argument_lists(): Unit =
     assertEquals(
-      s"def f1[R, T <: Example.Foo]: zio.ZIO[$aliasOrHasService, Nothing, T] = " +
+      s"def f1[R, T <: Foo]: zio.ZIO[$aliasOrHasService, Nothing, T] = " +
         "zio.ZIO.accessM(_.get[Example.Service[R, T]].f1)",
       method("f1").getText
     )
 
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_with_empty_argument_list(): Unit =
     assertEquals(
-      s"def f2[R, T <: Example.Foo](): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
+      s"def f2[R, T <: Foo](): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
         "zio.ZIO.accessM(_.get[Example.Service[R, T]].f2())",
       method("f2").getText
     )
 
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_with_single_argument(): Unit =
     assertEquals(
-      s"def f3[R, T <: Example.Foo](t: T): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
+      s"def f3[R, T <: Foo](t: T): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
         "zio.ZIO.accessM(_.get[Example.Service[R, T]].f3(t))",
       method("f3").getText
     )
 
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_with_multiple_argument_lists(): Unit =
     assertEquals(
-      s"def f4[R, T <: Example.Foo](t1: T)(t2: T): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
+      s"def f4[R, T <: Foo](t1: T)(t2: T): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
         "zio.ZIO.accessM(_.get[Example.Service[R, T]].f4(t1)(t2))",
       method("f4").getText
     )
@@ -73,35 +73,35 @@ abstract class ModulePatternAccessiblePolyTestBase(injectAlias: Boolean) extends
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_with_multiple_argument_lists_including_implicits()
     : Unit =
     assertEquals(
-      s"def f5[R, T <: Example.Foo](t1: T)(implicit t2: T): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
+      s"def f5[R, T <: Foo](t1: T)(implicit t2: T): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
         "zio.ZIO.accessM(_.get[Example.Service[R, T]].f5(t1)(t2))",
       method("f5").getText
     )
 
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_with_varargs(): Unit =
     assertEquals(
-      s"def f6[R, T <: Example.Foo](t: T*): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
+      s"def f6[R, T <: Foo](t: T*): zio.ZIO[$aliasOrHasService, Nothing, T] = " +
         "zio.ZIO.accessM(_.get[Example.Service[R, T]].f6(t: _*))",
       method("f6").getText
     )
 
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_returning_managed(): Unit =
     assertEquals(
-      s"def f7[R, T <: Example.Foo](t: T): zio.ZManaged[$aliasOrHasService, String, T] = " +
+      s"def f7[R, T <: Foo](t: T): zio.ZManaged[$aliasOrHasService, String, T] = " +
         "zio.ZManaged.accessManaged(_.get[Example.Service[R, T]].f7(t))",
       method("f7").getText
     )
 
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_returning_sink(): Unit =
     assertEquals(
-      s"def f8[R, T <: Example.Foo](t: T): zio.stream.ZSink[$aliasOrHasService with R, String, T, T, List[T]] = " +
+      s"def f8[R, T <: Foo](t: T): zio.stream.ZSink[$aliasOrHasService with R, String, T, T, List[T]] = " +
         "zio.stream.ZSink.accessSink(_.get[Example.Service[R, T]].f8(t))",
       method("f8").getText
     )
 
   def test_generates_accessor_function_for_method_of_the_polymorphic_service_returning_stream(): Unit =
     assertEquals(
-      s"def f9[R, T <: Example.Foo](t: T): zio.stream.ZStream[$aliasOrHasService, String, T] = " +
+      s"def f9[R, T <: Foo](t: T): zio.stream.ZStream[$aliasOrHasService, String, T] = " +
         "zio.stream.ZStream.accessStream(_.get[Example.Service[R, T]].f9(t))",
       method("f9").getText
     )
