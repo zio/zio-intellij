@@ -184,7 +184,7 @@ object MockableInjector {
           param       <- clause.parameters
           paramType   <- param.paramType
           tpe         <- paramType.typeElement.`type`().toOption
-          presentation = defaultPresentationStringForScalaType(tpe)
+          presentation = defaultPresentationStringForScalaType(tpe)(paramType)
         } yield presentation
       case _ => Seq.empty
     })

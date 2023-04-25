@@ -66,8 +66,8 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
       def returnType(typeInfo: TypeInfo) =
         s"${typeInfo.zioObject}[$requiredEnv" +
           s"${if (typeInfo.rTypeParam.isAny) ""
-          else s" with ${defaultPresentationStringForScalaType(typeInfo.rTypeParam)}"}, " +
-          s"${typeInfo.otherTypeParams.map(defaultPresentationStringForScalaType).mkString(", ")}]"
+          else s" with ${defaultPresentationStringForScalaType(typeInfo.rTypeParam)(sco)}"}, " +
+          s"${typeInfo.otherTypeParams.map(defaultPresentationStringForScalaType(_)(sco)).mkString(", ")}]"
 
       methods.collect {
         case Field(field) =>

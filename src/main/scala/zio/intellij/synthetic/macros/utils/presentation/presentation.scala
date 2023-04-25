@@ -11,8 +11,10 @@ import org.jetbrains.plugins.scala.lang.refactoring.util.ScTypeUtil
 //  Taken from different versions of Scala plugin source code for compatibility.
 package object presentation {
 
-  private[macros] def defaultPresentationStringForScalaType(scType: ScType): String =
-    scType.presentableText(TypePresentationContext.emptyContext)
+  private[macros] def defaultPresentationStringForScalaType(
+    scType: ScType
+  )(implicit context: TypePresentationContext): String =
+    scType.presentableText
 
   private[macros] def presentationStringForScalaParameters(parameters: ScParameters): String =
     parameters.clauses.map(presentationStringForScalaParameterClause).mkString
@@ -45,6 +47,8 @@ package object presentation {
   ): String = tParams.map(presentationStringForScalaTypeParam(_, showVariance)).mkString("[", ", ", "]")
 
   private[macros] def presentationStringForScalaTypeParam(param: ScTypeParam, showVariance: Boolean): String = {
+    implicit val context: TypePresentationContext = TypePresentationContext(param)
+
     val initialText = if (showVariance) {
       if (param.isContravariant) "-"
       else if (param.isCovariant) "+"
@@ -79,6 +83,8 @@ package object presentation {
   }
 
   private def renderAnnotation(annotation: ScAnnotation): String = {
+    implicit val context: TypePresentationContext = TypePresentationContext(annotation)
+
     val buffer = new StringBuilder("@")
 
     val constrInvocation = annotation.constructorInvocation
@@ -100,6 +106,8 @@ package object presentation {
   }
 
   private def parameterTypeAnnotations(param: ScParameter): String = {
+    implicit val context: TypePresentationContext = TypePresentationContext(param)
+
     val typeText          = defaultPresentationStringForScalaType(param.`type`().getOrAny)
     val typeTextDecorated = decoratedParameterType(param, typeText)
     s": $typeTextDecorated"
