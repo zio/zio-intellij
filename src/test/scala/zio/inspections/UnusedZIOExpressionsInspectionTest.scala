@@ -43,6 +43,8 @@ class UnusedZIOExpressionsInspectionTest extends ZScalaInspectionTest[UnusedZIOE
 
 class UnusedZIOSpecInspectionTest extends ZScalaInspectionTest[UnusedZIOExpressionsInspection] {
 
+  override protected def isZIO1 = false
+
   override protected val description = UnusedZIOExpressionsInspection.unusedZioSpecMessage
 
   def test_two_tests(): Unit =
@@ -71,6 +73,55 @@ class UnusedZIOSpecInspectionTest extends ZScalaInspectionTest[UnusedZIOExpressi
          |  test("first_2")(assertTrue(true))
          |)$END
          |""".stripMargin).assertNotHighlighted()
+
+  def test_suiteAll_no_highlight(): Unit =
+    z(s"""object ZTest extends ZIOSpecDefault {
+         |  override def spec: Spec[Any, Any] =
+         |    suiteAll("first") {
+         |      ${START}test("first_1")(assertTrue(true))$END
+         |      test("first_2")(assertTrue(true))
+         |    }
+         |}
+         |""".stripMargin).assertNotHighlighted()
+
+  def test_suiteAll_block_no_highlight(): Unit =
+    z(s"""object ZTest extends ZIOSpecDefault {
+         |  override def spec: Spec[Any, Any] =
+         |    suiteAll("first") {
+         |      $START{
+         |        test("first_11")(assertTrue(true))
+         |        test("first_12")(assertTrue(true))
+         |      }$END
+         |      test("first_2")(assertTrue(true))
+         |    }
+         |}
+         |""".stripMargin).assertNotHighlighted()
+
+  def test_suiteAll_block_no_nested_highlight(): Unit =
+    z(s"""object ZTest extends ZIOSpecDefault {
+         |  override def spec: Spec[Any, Any] =
+         |    suiteAll("first") {
+         |      {
+         |        ${START}test("first_11")(assertTrue(true))$END
+         |        ${START}test("first_12")(assertTrue(true))$END
+         |      }
+         |      test("first_2")(assertTrue(true))
+         |    }
+         |}
+         |""".stripMargin).assertNotHighlighted()
+
+  def test_suiteAll_nested_function_highlight(): Unit =
+    z(s"""object ZTest extends ZIOSpecDefault {
+         |  override def spec: Spec[Any, Any] =
+         |    suiteAll("first") {
+         |      def foo = {
+         |        ${START}test("first_11")(assertTrue(true))$END
+         |        test("first_12")(assertTrue(true))
+         |      }
+         |      test("first_2")(assertTrue(true))
+         |    }
+         |}
+         |""".stripMargin).assertHighlighted()
 
   def test_entire_scope_highlighted(): Unit =
     z(s"""${START}suite("first")(
