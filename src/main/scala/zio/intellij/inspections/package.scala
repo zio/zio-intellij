@@ -144,6 +144,10 @@ package object inspections {
 
   }
 
+  object suiteMethods {
+    val suiteAll: Unqualified = unqualified("suiteAll").from(zioTestPackage)
+  }
+
   def invocation(methodName: String)  = new Qualified(methodName == _)
   def unqualified(methodName: String) = new Unqualified(methodName == _)
 
