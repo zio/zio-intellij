@@ -37,10 +37,13 @@ lazy val root =
         xml.changeNotes = sys.env.getOrElse(
           "ZIO_INTELLIJ_CHANGE_NOTES",
           s"""<![CDATA[
-        <b>Note:</b> Please welcome Nikita Myazin as a maintainer for the plugin, who also contributed the majority of fixes in this release!<br/>
         <b>What's new?</b>
         <ul>
-          <li>Many bugfixes relating to refactoring suggestions on ZStreams, ZIO 2.0-specific fixes</li>
+          <li>`.serviceWith` inspections are back</li>
+          <li>Type names in `.provide` inspections are fixed (now it's a simple name instead of a fully qualified)</li>
+          <li>Support for @jsonDerive annotation from `zio-json`</li>
+          <li>`@accesible` annotation now works fine when types are defined within package objects</li>
+          <li>Fixed a bug when Specs were marked as unused when defined within `suiteAll` method</li>
         </ul>
         ]]>"""
         )
