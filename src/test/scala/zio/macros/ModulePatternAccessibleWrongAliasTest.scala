@@ -26,8 +26,7 @@ object E${CARET}xample {
 
   def test_generates_accessor_without_alias(): Unit =
     assertEquals(
-      "val v: zio.ZIO[zio.Has[Example.Service] with Example.Environment, Nothing, Boolean] = " +
-        "zio.ZIO.accessM(_.get[Example.Service].v)",
+      "val v: zio.ZIO[zio.Has[Example.Service] with Example.Environment, Nothing, Boolean] = _root_.scala.Predef.???",
       field("v").getText
     )
 }

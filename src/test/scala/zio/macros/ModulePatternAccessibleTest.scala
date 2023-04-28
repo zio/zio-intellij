@@ -53,121 +53,104 @@ object E${CARET}xample {
 
   def test_generates_accessor_value_for_ZIO_field(): Unit =
     assertEquals(
-      s"val v: zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Boolean] = " +
-        "zio.ZIO.accessM(_.get[Example.Service].v)",
+      s"val v: zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Boolean] = _root_.scala.Predef.???",
       field("v").getText
     )
 
   def test_generates_accessor_function_for_ZIO_method_without_arguments(): Unit =
     assertEquals(
-      s"def m0: zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Unit] = " +
-        "zio.ZIO.accessM(_.get[Example.Service].m0)",
+      s"def m0: zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Unit] = _root_.scala.Predef.???",
       method("m0").getText
     )
 
   def test_generates_accessor_function_for_ZIO_method_with_argument(): Unit =
     assertEquals(
-      s"def m1(s: String): zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Int] = " +
-        "zio.ZIO.accessM(_.get[Example.Service].m1(s))",
+      s"def m1(s: String): zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Int] = _root_.scala.Predef.???",
       method("m1").getText
     )
 
   def test_generates_accessor_function_for_generic_ZIO_method_with_multiple_arg_lists_default_args_and_varargs(): Unit =
     assertEquals(
-      s"""def m2[T](s2: String = "")(p: (T, Int))(i2: Int*): zio.ZIO[$aliasOrHasService, Nothing, Double] = """ +
-        "zio.ZIO.accessM(_.get[Example.Service].m2[T](s2)(p)(i2: _*))",
+      s"""def m2[T](s2: String = "")(p: (T, Int))(i2: Int*): zio.ZIO[$aliasOrHasService, Nothing, Double] = _root_.scala.Predef.???""",
       method("m2").getText
     )
 
   def test_generates_accessor_function_for_generic_ZIO_method_with_type_constraints(): Unit =
     assertEquals(
-      s"def m3[T <: Foo](t: Wrapped[T]): zio.ZIO[$aliasOrHasService, String, List[T]] = " +
-        "zio.ZIO.accessM(_.get[Example.Service].m3[T](t))",
+      s"def m3[T <: Foo](t: Wrapped[T]): zio.ZIO[$aliasOrHasService, String, List[T]] = _root_.scala.Predef.???",
       method("m3").getText
     )
 
   def test_generates_accessor_value_for_ZIO_field_with_default_implementation(): Unit =
     assertEquals(
-      s"val defaultPureValue: zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Boolean] = " +
-        "zio.ZIO.accessM(_.get[Example.Service].defaultPureValue)",
+      s"val defaultPureValue: zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Boolean] = _root_.scala.Predef.???",
       field("defaultPureValue").getText
     )
 
   def test_generates_accessor_function_for_ZIO_method_with_argument_with_default_implementation(): Unit =
     assertEquals(
-      s"def defaultPureMethod(s: String): zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Int] = " +
-        "zio.ZIO.accessM(_.get[Example.Service].defaultPureMethod(s))",
+      s"def defaultPureMethod(s: String): zio.ZIO[$aliasOrHasService with Example.Environment, Nothing, Int] = _root_.scala.Predef.???",
       method("defaultPureMethod").getText
     )
 
   def test_generates_accessor_value_for_non_ZIO_field(): Unit =
     assertEquals(
-      s"val vNonZIO: zio.ZIO[$aliasOrHasService, Throwable, Boolean] = " +
-        "zio.ZIO.access(_.get[Example.Service].vNonZIO)",
+      s"val vNonZIO: zio.ZIO[$aliasOrHasService, Throwable, Boolean] = _root_.scala.Predef.???",
       field("vNonZIO").getText
     )
 
   def test_generates_accessor_function_for_non_ZIO_method_without_arguments(): Unit =
     assertEquals(
-      s"def m0NonZIO: zio.ZIO[$aliasOrHasService, Throwable, Unit] = " +
-        "zio.ZIO.access(_.get[Example.Service].m0NonZIO)",
+      s"def m0NonZIO: zio.ZIO[$aliasOrHasService, Throwable, Unit] = _root_.scala.Predef.???",
       method("m0NonZIO").getText
     )
 
   def test_generates_accessor_function_for_non_ZIO_method_with_argument(): Unit =
     assertEquals(
-      s"def m1NonZIO(s: String): zio.ZIO[$aliasOrHasService, Throwable, Int] = " +
-        "zio.ZIO.access(_.get[Example.Service].m1NonZIO(s))",
+      s"def m1NonZIO(s: String): zio.ZIO[$aliasOrHasService, Throwable, Int] = _root_.scala.Predef.???",
       method("m1NonZIO").getText
     )
 
   def test_generates_accessor_function_for_generic_non_ZIO_method_with_multiple_arg_lists_default_args_and_varargs()
     : Unit =
     assertEquals(
-      s"""def m2NonZIO[T](s2: String = "")(p: (T, Int))(i2: Int*): zio.ZIO[$aliasOrHasService, Throwable, Double] = """ +
-        "zio.ZIO.access(_.get[Example.Service].m2NonZIO[T](s2)(p)(i2: _*))",
+      s"""def m2NonZIO[T](s2: String = "")(p: (T, Int))(i2: Int*): zio.ZIO[$aliasOrHasService, Throwable, Double] = _root_.scala.Predef.???""",
       method("m2NonZIO").getText
     )
 
   def test_generates_accessor_function_for_ZIO_method_returning_stream(): Unit =
     assertEquals(
-      s"def stream(n: Int): zio.stream.ZStream[$aliasOrHasService, String, Int] = " +
-        "zio.stream.ZStream.accessStream(_.get[Example.Service].stream(n))",
+      s"def stream(n: Int): zio.stream.ZStream[$aliasOrHasService, String, Int] = _root_.scala.Predef.???",
       method("stream").getText
     )
 
   def test_generates_accessor_function_for_ZIO_method_returning_sink(): Unit =
     assertEquals(
-      s"def sink(n: Int): zio.stream.ZSink[$aliasOrHasService, String, Int, Int, List[Int]] = " +
-        "zio.stream.ZSink.accessSink(_.get[Example.Service].sink(n))",
+      s"def sink(n: Int): zio.stream.ZSink[$aliasOrHasService, String, Int, Int, List[Int]] = _root_.scala.Predef.???",
       method("sink").getText
     )
 
   def test_generates_accessor_value_for_non_ZIO_field_with_default_implementation(): Unit =
     assertEquals(
-      s"val defaultImpureValue: zio.ZIO[$aliasOrHasService, Throwable, Boolean] = " +
-        "zio.ZIO.access(_.get[Example.Service].defaultImpureValue)",
+      s"val defaultImpureValue: zio.ZIO[$aliasOrHasService, Throwable, Boolean] = _root_.scala.Predef.???",
       field("defaultImpureValue").getText
     )
 
   def test_generates_accessor_function_for_non_ZIO_method_with_argument_with_default_implementation(): Unit =
     assertEquals(
-      s"def defaultImpureMethod(s: String): zio.ZIO[$aliasOrHasService, Throwable, Int] = " +
-        "zio.ZIO.access(_.get[Example.Service].defaultImpureMethod(s))",
+      s"def defaultImpureMethod(s: String): zio.ZIO[$aliasOrHasService, Throwable, Int] = _root_.scala.Predef.???",
       method("defaultImpureMethod").getText
     )
 
   def test_generates_accessor_value_for_managed_field(): Unit =
     assertEquals(
-      s"val vManaged: zio.ZManaged[$aliasOrHasService, String, Example.Foo] = " +
-        "zio.ZManaged.accessManaged(_.get[Example.Service].vManaged)",
+      s"val vManaged: zio.ZManaged[$aliasOrHasService, String, Example.Foo] = _root_.scala.Predef.???",
       field("vManaged").getText
     )
 
   def test_generates_accessor_function_for_method_returning_managed(): Unit =
     assertEquals(
-      s"def mManaged(s: String): zio.ZManaged[$aliasOrHasService, Nothing, Example.Bar] = " +
-        "zio.ZManaged.accessManaged(_.get[Example.Service].mManaged(s))",
+      s"def mManaged(s: String): zio.ZManaged[$aliasOrHasService, Nothing, Example.Bar] = _root_.scala.Predef.???",
       method("mManaged").getText
     )
 
@@ -175,3 +158,28 @@ object E${CARET}xample {
 
 class ModulePatternAccessibleTest      extends ModulePatternAccessibleTestBase(injectAlias = false)
 class ModulePatternAccessibleAliasTest extends ModulePatternAccessibleTestBase(injectAlias = true)
+
+class ModulePatternAccessibleZIO2Test extends MacrosTest {
+
+  override protected val isZIO1: Boolean = false
+
+  override protected val code =
+    s"""import zio._
+       |import zio.macros.accessible
+       |
+       |@accessible
+       |trait Example {
+       |  def m0(s: String): URIO[Int, Unit]
+       |}
+       |
+       |object E${CARET}xample""".stripMargin
+
+  // all of the required check are made above
+  // here we just check that it works fine for ZIO2 and doesn't use Has[_]
+  def test_generates_accessor_function_for_ZIO2_method(): Unit =
+    assertEquals(
+      s"def m0(s: String): zio.ZIO[Example with Int, Nothing, Unit] = _root_.scala.Predef.???",
+      method("m0").getText
+    )
+
+}
