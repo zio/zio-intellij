@@ -86,7 +86,8 @@ object ServiceWithSimplificationTypeZIO1 extends ServiceWithSimplificationType {
             if (createType(s"_root_.scala.Any", expr).exists(needsMoreEnv(ref, _))) None
             else replacement(zioType, expr, ref, None)
           // ZIO.accessM[TypeAlias](...)
-          case ScGenericCall(`ZIO.accessM`(zioType, _), Seq(typeArg)) if !typeArg.`type`().exists(needsMoreEnv(ref, _)) =>
+          case ScGenericCall(`ZIO.accessM`(zioType, _), Seq(typeArg))
+              if !typeArg.`type`().exists(needsMoreEnv(ref, _)) =>
             replacement(zioType, expr, ref, extractServiceTypeArgument(Some(typeArg)))
           case _ => None
         }

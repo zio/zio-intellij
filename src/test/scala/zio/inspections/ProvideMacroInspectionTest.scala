@@ -526,7 +526,7 @@ class ProvideMacroInspectionRenderingTest extends ZScalaInspectionTest[ProvideMa
 
   // not 1. _root_.foo.Bar
   override protected def description =
-  """Please provide layers for the following type:1. Bar""".stripMargin
+    """Please provide layers for the following type:1. Bar""".stripMargin
 
   override protected def descriptionMatches(s: String): Boolean =
     s != null && (s.filterNot(c => c == '\r' || c == '\n') == description)

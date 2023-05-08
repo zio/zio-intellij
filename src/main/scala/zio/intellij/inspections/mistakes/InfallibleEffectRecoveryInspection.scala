@@ -35,7 +35,7 @@ class InfallibleEffectRecoveryInspection extends LocalInspectionTool {
       "foldM",
       "foldZIO",
       "mapBoth",
-      "bimap",
+      "bimap"
     )
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {

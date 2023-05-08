@@ -91,7 +91,7 @@ object FoldZIOErrorModificationSimplificationType extends BaseErrorModificationS
 object FoldTraceMErrorModificationSimplificationType
     extends BaseErrorModificationSimplificationType(`.foldTraceM`, "flatMap")
 object FoldTraceZIOErrorModificationSimplificationType
-  extends BaseErrorModificationSimplificationType(`.foldTraceZIO`, "flatMap")
+    extends BaseErrorModificationSimplificationType(`.foldTraceZIO`, "flatMap")
 
 sealed abstract class BaseErrorRecoverySimplificationType(qual: Qualified, methodStr: String)
     extends BaseInfallibleEffectSimplificationType {

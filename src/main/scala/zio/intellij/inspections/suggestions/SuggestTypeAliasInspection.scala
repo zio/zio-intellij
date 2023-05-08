@@ -9,7 +9,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.{ScType, TypePresentationConte
 import zio.intellij.inspections.suggestions.SuggestTypeAliasInspection.{AliasInfo, TypeAliasQuickFix}
 import zio.intellij.intentions.suggestions.SuggestTypeAlias
 import zio.intellij.utils.TypeCheckUtils.{fromZioLayer, fromZioLike}
-import zio.intellij.utils.{ListSyntax, createTypeElement, extractTypeArguments}
+import zio.intellij.utils.{createTypeElement, extractTypeArguments, ListSyntax}
 
 class SuggestTypeAliasInspection extends LocalInspectionTool {
 
