@@ -14,7 +14,7 @@ object TypeCheckUtils {
   val zioStreamTypes  = List("zio.stream.ZStream")
   val managedTypes    = List("zio.ZManaged")
   val extraTypes      = List("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
-  val zioTestAsserts  = List("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM")
+  val zioTestAsserts  = List("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM", "zio.test.Assert")
   val zioTestPackage  = List("zio.test._")
   val zioMagicPackage = List("zio.magic._")
   val zioSpecTypes    = List("zio.test.Spec", "zio.test.SpecVersionSpecific")
@@ -24,6 +24,9 @@ object TypeCheckUtils {
 
   def fromZioLike(r: ScExpression): Boolean =
     isOfClassFrom(r, zioLikePackages)
+
+  def fromZioTestAsserts(r: ScExpression): Boolean =
+    isOfClassFrom(r, zioTestAsserts)
 
   def fromZioLike(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioLikePackages)

@@ -373,6 +373,11 @@ package object inspections {
       }
   }
 
+  object zioTestAssert {
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      Some(expr).filter(fromZioTestAsserts)
+  }
+
   object zioLike {
 
     def unapply(expr: ScExpression): Option[ScExpression] =

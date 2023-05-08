@@ -10,10 +10,6 @@ class UnusedZIOExpressionsInspectionTest extends ZScalaInspectionTest[UnusedZIOE
     z(s"""${START}putStrLn("")$END
          |ZIO.unit""".stripMargin).assertHighlighted()
 
-  def test_two_asserts(): Unit =
-    z(s"""${START}assert(true)(isTrue)$END
-         |assert(true)(isTrue)""".stripMargin).assertHighlighted()
-
   def test_zio_effect_and_assert(): Unit =
     z(s"""${START}ZIO.unit$END
          |assert(true)(isTrue)""".stripMargin).assertHighlighted()
@@ -131,4 +127,21 @@ class UnusedZIOSpecInspectionTest extends ZScalaInspectionTest[UnusedZIOExpressi
          |suite("second")(test("second")(assertTrue(true)))
          |""".stripMargin).assertHighlighted()
 
+}
+
+class UnusedZIOTestAssertionsInspectionTest extends ZScalaInspectionTest[UnusedZIOExpressionsInspection] {
+
+  override protected val description = UnusedZIOExpressionsInspection.unusedZioAssertMessage
+
+  def test_two_asserts(): Unit =
+    z(s"""${START}assert(true)(isTrue)$END
+         |assert(true)(isTrue)""".stripMargin).assertHighlighted()
+
+  def test_two_assertTrue(): Unit =
+    z(s"""${START}assertTrue(true)$END
+         |assertTrue(true)""".stripMargin).assertHighlighted()
+
+  def test_assert_and_assertTrue(): Unit =
+    z(s"""${START}assert(true)(isFalse)$END
+         |assertTrue(true)""".stripMargin).assertHighlighted()
 }

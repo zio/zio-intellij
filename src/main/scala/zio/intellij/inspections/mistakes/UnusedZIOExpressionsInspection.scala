@@ -6,11 +6,17 @@ import org.jetbrains.plugins.scala.codeInspection.{expressionResultIsNotUsed, Ps
 import org.jetbrains.plugins.scala.extensions.PsiElementExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScBlock, ScBlockStatement, ScExpression}
 import zio.intellij.inspections.suiteMethods.suiteAll
-import zio.intellij.inspections.{zioLike, zioSpec}
+import zio.intellij.inspections.{zioLike, zioSpec, zioTestAssert}
 
 class UnusedZIOExpressionsInspection extends LocalInspectionTool {
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
+    case expr @ zioTestAssert(_) if expressionResultIsNotUsed(expr) =>
+      holder.registerProblem(
+        expr,
+        UnusedZIOExpressionsInspection.unusedZioAssertMessage,
+        ProblemHighlightType.LIKE_UNUSED_SYMBOL
+      )
     case expr @ zioLike(_) if expressionResultIsNotUsed(expr) =>
       holder.registerProblem(
         expr,
@@ -48,6 +54,10 @@ class UnusedZIOExpressionsInspection extends LocalInspectionTool {
 object UnusedZIOExpressionsInspection {
   @Nls
   val unusedZioExprMessage = "This expression is unused. Did you mean to compose it with another effect?"
+
+  @Nls
+  val unusedZioAssertMessage = "This assertion is unused. Did you mean to chain it with another assertion?\n" +
+    "Hint: you can chain multiple assertions using the '&&' operator or a comma-separated list inside 'assertTrue'."
 
   @Nls
   val unusedZioSpecMessage = "This test is ignored. Did you mean to compose it with another test using `+`?"
