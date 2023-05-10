@@ -19,7 +19,7 @@ class ZioAccessorUsagesSearcher extends QueryExecutor[PsiReference, ReferencesSe
 
   private val zioTraitNames = Set("Service")
 
-  object ContainingFieldClass {
+  private object ContainingFieldClass {
     def unapply(element: ScFieldId): Option[PsiClass] =
       element.nameContext match {
         case ContainingClass(c) => Some(c)
@@ -27,7 +27,7 @@ class ZioAccessorUsagesSearcher extends QueryExecutor[PsiReference, ReferencesSe
       }
   }
 
-  object ContainingObject {
+  private object ContainingObject {
     def unapply(element: PsiClass): Option[ScObject] =
       element match {
         case ContainingClass(obj: ScObject) => Some(obj)
@@ -62,13 +62,9 @@ class ZioAccessorUsagesSearcher extends QueryExecutor[PsiReference, ReferencesSe
     val containingTrait = Some(method).collect {
       case ContainingClass(tr: ScTrait) => tr
     }
-    val service = containingTrait.filter(tr => zioTraitNames(tr.name))
-    val containingObject =
-      service.collect {
-        case ContainingObject(obj) => obj
-      }
+    val accessorHolders = containingTrait.toSeq.flatMap(findAccessorHolders)
 
-    containingObject.toSeq.flatMap(_.allMethods).find(isAccessorMethod(method, _)).map(_.namedElement)
+    accessorHolders.flatMap(_.allMethods).find(isAccessorMethod(method, _)).map(_.namedElement)
   }
 
   private def findFieldAccessor(field: ScTypedDefinition): Option[PsiElement] = {
@@ -76,19 +72,26 @@ class ZioAccessorUsagesSearcher extends QueryExecutor[PsiReference, ReferencesSe
       case ContainingClass(tr: ScTrait)      => tr
       case ContainingFieldClass(tr: ScTrait) => tr
     }
-    val service = containingTrait.filter(tr => zioTraitNames(tr.name))
-    val containingObject =
-      service.collect {
-        case ContainingObject(obj) => obj
-      }
+    val accessorHolders = containingTrait.toSeq.flatMap(findAccessorHolders)
 
-    containingObject.toSeq.flatMap(_.allVals).find(isAccessorField(field, _)).map(_.namedElement)
+    accessorHolders.flatMap(_.allVals).find(isAccessorField(field, _)).map(_.namedElement)
+  }
+
+  private def findAccessorHolders(containingTrait: ScTrait): Seq[ScObject] = {
+    val containingObject = Option.when(zioTraitNames.contains(containingTrait.name))(containingTrait).collect {
+      case ContainingObject(obj) => obj
+    }
+
+    val companionObject = containingTrait.baseCompanion.collect {
+      case obj: ScObject => obj
+    }.orElse(containingTrait.fakeCompanionModule)
+
+    List(containingObject, companionObject).flatten
   }
 
   private def isAccessorMethod(method: ScFunction, candidate: PhysicalMethodSignature): Boolean = candidate match {
     case Method(acc) =>
-      acc.name == method.name && fromZio(acc.returnType.getOrAny) &&
-        areParamsSame(acc.parameters.toSeq, method.parameters.toSeq)
+      acc.name == method.name && fromZio(acc.returnType.getOrAny) && areParamsSame(acc.parameters, method.parameters)
     case _ => false
   }
 
