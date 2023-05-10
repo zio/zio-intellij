@@ -1,20 +1,18 @@
 package zio.intellij.searchers
 
-import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.plugins.scala.DependencyManagerBase._
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.base.ScalaSdkOwner
 import org.jetbrains.plugins.scala.base.libraryLoaders.{IvyManagedLoader, LibraryLoader}
 import org.jetbrains.plugins.scala.codeInspection.ScalaAnnotatorQuickFixTestBase
+import org.jetbrains.plugins.scala.extensions.StringExt
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.util.Markers
-import org.junit.Ignore
 import zio.inspections.ZInspectionTestBase
 
 import scala.jdk.CollectionConverters._
 
-@Ignore
 class ZioAccessorUsagesSearcherTest extends ScalaAnnotatorQuickFixTestBase with Markers {
 
   override protected def defaultVersionOverride: Option[ScalaVersion] = Some(ScalaSdkOwner.preferableSdkVersion)
@@ -27,7 +25,7 @@ class ZioAccessorUsagesSearcherTest extends ScalaAnnotatorQuickFixTestBase with 
 
   private def doTest(fileText: String): Unit = {
 
-    val (source, expectedUsageRanges) = extractMarker(StringUtil.convertLineSeparators(fileText))
+    val (source, expectedUsageRanges) = extractMarker(fileText.withNormalizedSeparator, caretMarker = Some(CARET))
     configureFromFileText(source)
 
     val elem  = myFixture.getElementAtCaret
@@ -646,6 +644,52 @@ class ZioAccessorUsagesSearcherTest extends ScalaAnnotatorQuickFixTestBase with 
                    |
                    |FindMyAccessors.method(1, "")
       """.stripMargin))
+
+  def testMacrosZIO2StyleVal(): Unit =
+    doTest(base(
+      s"""@accessible
+         |trait FindMyAccessors {
+         |  val method$CARET: UIO[Int] = ???
+         |}
+         |
+         |${start}FindMyAccessors.method$end
+      """.stripMargin))
+
+  def testMacrosZIO2StyleDef(): Unit =
+    doTest(base(
+      s"""@accessible
+         |trait FindMyAccessors {
+         |  def method$CARET: UIO[Int] = ???
+         |}
+         |
+         |${start}FindMyAccessors.method$end
+  """.stripMargin))
+
+  def testZIO2StyleVal(): Unit =
+    doTest(base(
+      s"""trait FindMyAccessors {
+         |  val method$CARET: UIO[Int] = ???
+         |}
+         |
+         |object FindMyAccessors {
+         |  val method: URIO[Has[FindMyAccessors], Int] = ???
+         |}
+         |
+         |${start}FindMyAccessors.method$end
+""".stripMargin))
+
+  def testZIO2StyleDef(): Unit =
+    doTest(base(
+      s"""trait FindMyAccessors {
+         |  def method$CARET: UIO[Int] = ???
+         |}
+         |
+         |object FindMyAccessors {
+         |  def method: URIO[Has[FindMyAccessors], Int] = ???
+         |}
+         |
+         |${start}FindMyAccessors.method$end
+  """.stripMargin))
 
   override protected def description: String = ""
 }
