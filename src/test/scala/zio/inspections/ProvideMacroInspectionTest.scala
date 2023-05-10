@@ -159,6 +159,14 @@ abstract class ProvideMacroInspectionTest(val provide: String) extends ProvideMa
        |}""".stripMargin
       .assertNotHighlighted()
 
+  def testMissingNothingNoHighlighting(): Unit = z {
+    s"""$imports
+       |
+       |val effect: URIO[Nothing, Unit] = ???
+       |val layer: ULayer[${Has("String")}] = ???
+       |${r(s"effect.$provide(layer)")}""".stripMargin
+  }.assertNotHighlighted()
+
 }
 
 class ProvideMacroZIO1InspectionTest extends ProvideMacroInspectionTest("inject") {

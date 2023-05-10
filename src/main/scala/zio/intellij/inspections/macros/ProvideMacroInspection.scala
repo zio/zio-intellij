@@ -448,7 +448,8 @@ object LayerBuilder {
     val remainder0          = remainder.toList.flatMap(toZType)
     val providedLayerNodes0 = providedLayers.toList.flatMap(layerToNode)
 
-    if (nonHasTypes.nonEmpty)
+    if (containsNothingAsRequirement(target, remainder, providedLayerNodes0)) Right(())
+    else if (nonHasTypes.nonEmpty)
       Left(NonHasTypesError(nonHasTypes.toSet))
     else
       LayerBuilder(
@@ -490,15 +491,24 @@ object LayerBuilder {
     val (sideEffectNodes, providedLayerNodes) =
       providedLayers.toList.flatMap(layerToNode).partition(_.outputs.exists(o => api.Unit.conforms(o.value)))
 
-    LayerBuilder(
-      target0 = target.toList.flatMap(ZType(_)),
-      remainder = remainder.toList.flatMap(ZType(_)),
-      providedLayerNodes = providedLayerNodes,
-      sideEffectNodes = sideEffectNodes,
-      method = method,
-      typeToLayer = tpe => s"_root_.zio.ZLayer.environment[$tpe]"
-    ).tryBuild
+    if (containsNothingAsRequirement(target, remainder, providedLayerNodes)) Right(())
+    else
+      LayerBuilder(
+        target0 = target.toList.flatMap(ZType(_)),
+        remainder = remainder.toList.flatMap(ZType(_)),
+        providedLayerNodes = providedLayerNodes,
+        sideEffectNodes = sideEffectNodes,
+        method = method,
+        typeToLayer = tpe => s"_root_.zio.ZLayer.environment[$tpe]"
+      ).tryBuild
   }
+
+  // Sometimes IntelliJ fails to infer actual type and uses `Nothing` instead.
+  // In that case, we should not report an error and just ignore it to not annoy people
+  private def containsNothingAsRequirement(target: Seq[ScType], remainder: Seq[ScType], providedLayerNodes: List[Node])(
+    implicit pc: ProjectContext
+  ): Boolean =
+    (target ++ remainder ++ providedLayerNodes.flatMap(_.inputs.map(_.value))).exists(_.equiv(api.Nothing))
 
   // dirty hack to make it work
   // ScType and ScExpression don't have equals / hashCode methods, which makes it difficult to use it with the algorithm
