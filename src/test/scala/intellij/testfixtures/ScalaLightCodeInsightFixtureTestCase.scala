@@ -26,6 +26,7 @@ import org.junit.Assert.assertNotNull
 
 import scala.jdk.CollectionConverters._
 
+//TODO: try to remove EditorTestUtil.buildInitialFoldingsInBackground(getEditor) and see if tests pass?
 abstract class ScalaLightCodeInsightFixtureTestCase
   extends LightJavaCodeInsightFixtureTestCase
     with ScalaSdkOwner
@@ -93,7 +94,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   //end section: project descriptor
 
   override protected def setUp(): Unit = {
-//    TestUtils.optimizeSearchingForIndexableFiles()
+    TestUtils.optimizeSearchingForIndexableFiles()
     super.setUp()
     TestUtils.disableTimerThread()
   }
@@ -139,7 +140,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected def checkTextHasNoErrors(text: String): Unit = {
     myFixture.configureByText(ScalaFileType.INSTANCE, text)
 
-    CodeFoldingManager.getInstance(getProject).buildInitialFoldings(getEditor)
+    //EditorTestUtil.buildInitialFoldingsInBackground(getEditor)
 
     def doTestHighlighting(virtualFile: VirtualFile): Unit = {
       myFixture.testHighlighting(false, false, false, virtualFile)
