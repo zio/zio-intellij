@@ -19,15 +19,22 @@ private[testsupport] final class TestRunnerProjectNotification(private val proje
       createNotification.notify(project)
     }
 
-  private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean =
-    project.versions.foldLeft(false) {
-      case (flag, (version, scalaVersion)) =>
-        flag | (version.requiresTestRunner && TestRunnerResolveService
-          .instance(project)
-          .resolve(version, scalaVersion, downloadIfMissing)
-          .toOption
-          .isEmpty)
-    }
+  private def shouldSuggestTestRunner(project: Project, downloadIfMissing: Boolean = false): Boolean = {
+   val zioVersions = project.versions.map(_._1)
+    // Sometimes there are mixed ZIO versions in the project.
+    // Only offer downloading the test runner if all projects use ZIO 1.0
+    if (zioVersions.forall(_.requiresTestRunner)) {
+      project.versions.foldLeft(false) {
+        case (flag, (version, scalaVersion)) =>
+          flag | (version.requiresTestRunner && TestRunnerResolveService
+            .instance(project)
+            .resolve(version, scalaVersion, downloadIfMissing)
+            .toOption
+            .isEmpty)
+
+      }
+    } else false
+  }
 
   private def downloadTestRunner(notification: Notification): Unit = {
     val tasks = project.versions.map {
