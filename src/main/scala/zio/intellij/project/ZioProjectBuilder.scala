@@ -24,6 +24,7 @@ import zio.intellij.utils.{ScalaVersionHack, Version => ZioVersion}
 import java.awt.FlowLayout
 import java.io.File
 import javax.swing._
+import scala.annotation.nowarn
 import scala.collection.mutable
 
 private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
@@ -251,7 +252,10 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
     settingsStep.addSettingsField("ZIO:", zioVersionPanel)
     settingsStep.addSettingsField(
       ScalaBundle.message("package.prefix.label"),
-      UI.PanelFactory.panel(packagePrefixField).withTooltip(ScalaBundle.message("package.prefix.help")).createPanel()
+      UI.PanelFactory
+        .panel(packagePrefixField)
+        .withTooltip(ScalaBundle.message("package.prefix.help"))
+        .createPanel(): @nowarn("cat=deprecation")
     )
 
     // TODO Remove the label patching when the External System will use the concise and proper labels natively

@@ -1,11 +1,11 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
-lazy val scalaPluginVersion = "2023.2.5"
-lazy val pluginVersion      = "2023.2.26" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scalaPluginVersion = "2023.2.17"
+lazy val pluginVersion      = "2023.2.27" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "232"
+ThisBuild / intellijBuild := "232.8660.185"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true
@@ -39,9 +39,8 @@ lazy val root =
           s"""<![CDATA[
         <b>What's new?</b>
         <ul>
-          <li>Added support for the <code>@accessible</code> macro in ZIO 2.0.</li>
-          <li>Fixed a bug with detecting an assertion that was not combined with another one.</li>
-          <li>Fixed an erroneous detection of <code>Nothing</code> as a missing value for ZLayer construction.</li>
+          <li>Intellij 2023.2 support.</li>
+          <li>Plugin will offer downloading the test runner only if all projects use ZIO 1.0.</li>
         </ul>
         ]]>"""
         )
