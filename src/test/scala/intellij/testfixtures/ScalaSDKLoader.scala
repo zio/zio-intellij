@@ -2,18 +2,17 @@ package org.jetbrains.plugins.scala
 package base
 package libraryLoaders
 
-import java.io.File
-import java.{util => ju}
-
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar
 import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibraryEditor
-import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.{JarFileSystem, VirtualFile}
 import com.intellij.testFramework.PsiTestUtil
-import org.jetbrains.plugins.scala.extensions.ObjectExt
+import org.jetbrains.plugins.scala.extensions.{ObjectExt, inWriteAction}
 import org.jetbrains.plugins.scala.project.{ModuleExt, ScalaLanguageLevel, ScalaLibraryProperties, ScalaLibraryType, template}
 import org.junit.Assert._
+
+import java.io.File
+import java.{util => ju}
 
 case class ScalaSDKLoader(includeScalaReflect: Boolean = false, includeScalaCompiler: Boolean = false) extends LibraryLoader {
 
