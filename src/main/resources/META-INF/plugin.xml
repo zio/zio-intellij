@@ -19,7 +19,7 @@
 
     <change-notes>replaced-by-build</change-notes>
 
-    <idea-version since-build="232" until-build="232.*"/>
+    <idea-version since-build="233" until-build="233.*"/>
 
     <depends>org.intellij.scala</depends>
     <depends>com.intellij.modules.java</depends>

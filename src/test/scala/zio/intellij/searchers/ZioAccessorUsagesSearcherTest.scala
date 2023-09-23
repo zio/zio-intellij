@@ -646,49 +646,45 @@ class ZioAccessorUsagesSearcherTest extends ScalaAnnotatorQuickFixTestBase with 
       """.stripMargin))
 
   def testMacrosZIO2StyleVal(): Unit =
-    doTest(base(
-      s"""@accessible
-         |trait FindMyAccessors {
-         |  val method$CARET: UIO[Int] = ???
-         |}
-         |
-         |${start}FindMyAccessors.method$end
+    doTest(base(s"""@accessible
+                   |trait FindMyAccessors {
+                   |  val method$CARET: UIO[Int] = ???
+                   |}
+                   |
+                   |${start}FindMyAccessors.method$end
       """.stripMargin))
 
   def testMacrosZIO2StyleDef(): Unit =
-    doTest(base(
-      s"""@accessible
-         |trait FindMyAccessors {
-         |  def method$CARET: UIO[Int] = ???
-         |}
-         |
-         |${start}FindMyAccessors.method$end
+    doTest(base(s"""@accessible
+                   |trait FindMyAccessors {
+                   |  def method$CARET: UIO[Int] = ???
+                   |}
+                   |
+                   |${start}FindMyAccessors.method$end
   """.stripMargin))
 
   def testZIO2StyleVal(): Unit =
-    doTest(base(
-      s"""trait FindMyAccessors {
-         |  val method$CARET: UIO[Int] = ???
-         |}
-         |
-         |object FindMyAccessors {
-         |  val method: URIO[Has[FindMyAccessors], Int] = ???
-         |}
-         |
-         |${start}FindMyAccessors.method$end
+    doTest(base(s"""trait FindMyAccessors {
+                   |  val method$CARET: UIO[Int] = ???
+                   |}
+                   |
+                   |object FindMyAccessors {
+                   |  val method: URIO[Has[FindMyAccessors], Int] = ???
+                   |}
+                   |
+                   |${start}FindMyAccessors.method$end
 """.stripMargin))
 
   def testZIO2StyleDef(): Unit =
-    doTest(base(
-      s"""trait FindMyAccessors {
-         |  def method$CARET: UIO[Int] = ???
-         |}
-         |
-         |object FindMyAccessors {
-         |  def method: URIO[Has[FindMyAccessors], Int] = ???
-         |}
-         |
-         |${start}FindMyAccessors.method$end
+    doTest(base(s"""trait FindMyAccessors {
+                   |  def method$CARET: UIO[Int] = ???
+                   |}
+                   |
+                   |object FindMyAccessors {
+                   |  def method: URIO[Has[FindMyAccessors], Int] = ???
+                   |}
+                   |
+                   |${start}FindMyAccessors.method$end
   """.stripMargin))
 
   override protected def description: String = ""

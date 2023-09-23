@@ -17,6 +17,7 @@ A note about support: this plugin is maintained for the last two IntelliJ IDEA v
 To continue enjoying new features, please upgrade to the latest available IntellJ version!
 
 **Currently supported**:
+ * 2023.3 (EAP)
  * 2023.2 (current release)
  * 2023.1
 

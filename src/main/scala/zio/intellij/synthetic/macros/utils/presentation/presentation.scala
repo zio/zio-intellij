@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringEscapeUtils
 import org.jetbrains.plugins.scala.lang.psi.ScalaPsiUtil
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScAnnotation
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params._
+import org.jetbrains.plugins.scala.lang.psi.types.api.presentation.TextEscaper
 import org.jetbrains.plugins.scala.lang.psi.types.{ScType, TypePresentationContext}
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScTypeUtil
 
@@ -142,5 +143,5 @@ package object presentation {
     buffer.toString()
   }
 
-  private def escape(text: String): String = StringEscapeUtils.escapeHtml(text)
+  private def escape(text: String): String = TextEscaper.Html.escape(text)
 }

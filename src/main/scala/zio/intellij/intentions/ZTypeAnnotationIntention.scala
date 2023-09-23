@@ -59,8 +59,6 @@ object ZStrategy {
 
       override def wildcardPatternWithoutType(pattern: ScWildcardPattern): Boolean = false
 
-      override def patternWithType(pattern: ScTypedPattern): Boolean = false
-
       override def parameterWithoutType(param: ScParameter): Boolean = false
 
       override def parameterWithType(param: ScParameter): Boolean = false

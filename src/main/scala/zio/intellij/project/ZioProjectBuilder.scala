@@ -14,6 +14,7 @@ import org.jetbrains.plugins.scala.extensions.JComponentExt.ActionListenersOwner
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.project.template.ScalaVersionDownloadingDialog
 import org.jetbrains.plugins.scala.project.{ScalaLanguageLevel, Version, Versions}
+import org.jetbrains.plugins.scala.util.HttpDownloadUtil
 import org.jetbrains.plugins.scala.{extensions, ScalaBundle, ScalaVersion}
 import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderBase, ScalaSettingsStepBase}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
@@ -81,7 +82,7 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
 
     def loadVersions = {
       val url   = s"https://repo1.maven.org/maven2/dev/zio/zio_$versionStr/"
-      val lines = Versions.loadLinesFrom(url)
+      val lines = HttpDownloadUtil.loadLinesFrom(url, false, None)
       val versionStrings = lines.fold(
         Function.const(hardcodedZioVersions.versions),
         extractVersions

@@ -1,11 +1,11 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
-lazy val scalaPluginVersion = "2023.2.23"
-lazy val pluginVersion      = "2023.2.27" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scalaPluginVersion = "2023.3.3"
+lazy val pluginVersion      = "2023.3.27" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "232.9921.28"
+ThisBuild / intellijBuild := "233"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true

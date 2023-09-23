@@ -21,7 +21,7 @@ object SimplifyEqualToType extends SimplificationType {
   override def hint: String = "Replace with assertTrue"
 
   def replacement(expr: ScExpression, body: String): Simplification =
-    replace(expr).withText(s"assertTrue($body").highlightAll
+    replace(expr).withText(s"assertTrue($body)").highlightAll
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {

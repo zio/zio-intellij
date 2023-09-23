@@ -1,16 +1,15 @@
 package zio.intellij.inspections
 
-import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.codeInspection.{ProblemHighlightType, ProblemsHolder}
 import com.intellij.psi.PsiElement
-import org.jetbrains.plugins.scala.codeInspection
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
-
-import javax.swing.JComponent
 import org.jetbrains.plugins.scala.codeInspection.collections.OperationOnCollectionInspectionBase.SimplifiableExpression
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.ScalaPsiUtil
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.utils.{ModuleSyntax, Version}
+
+import javax.swing.JComponent
 
 abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOnCollectionInspection {
   final override def getLikeCollectionClasses: Seq[String] = List("zio.ZIO")
@@ -31,7 +30,13 @@ abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOn
       simplifications(expr).foreach {
         case s @ Simplification(toReplace, _, hint, rangeInParent) =>
           val quickFix = OperationOnCollectionQuickFix(s)
-          holder.registerProblem(toReplace.getElement, hint, highlightType, rangeInParent, quickFix)
+          holder.registerProblem(
+            toReplace.getElement,
+            hint,
+            ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
+            rangeInParent,
+            quickFix
+          )
       }
     case _ =>
   }
