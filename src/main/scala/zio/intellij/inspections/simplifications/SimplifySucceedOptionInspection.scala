@@ -17,9 +17,12 @@ object NoneSimplificationType extends SimplificationType {
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case `ZIO.succeed`(zioType, scalaNone())              => Some(replacement(zioType, expr))
-      case `ZIO.apply`(zioType @ (UIO | URIO), scalaNone()) => Some(replacement(zioType, expr))
-      case _                                                => None
+      case `ZIO.succeed`(zioType, scalaNone())     => Some(replacement(zioType, expr))
+      case `ZIO.apply`(zioType, scalaNone())       => Some(replacement(zioType, expr))
+      case `ZIO.attempt`(zioType, scalaNone())     => Some(replacement(zioType, expr))
+      case `ZIO.effect`(zioType, scalaNone())      => Some(replacement(zioType, expr))
+      case `ZIO.effectTotal`(zioType, scalaNone()) => Some(replacement(zioType, expr))
+      case _                                       => None
     }
 }
 

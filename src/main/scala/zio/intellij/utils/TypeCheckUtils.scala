@@ -8,7 +8,10 @@ import zio.intellij.utils.types.{ZLayerTypes, ZioTypes}
 
 object TypeCheckUtils {
 
-  val zioTypes        = ZioTypes.values.map(_.fqName) :+ "zio.ZIOVersionSpecific"
+  val zioCompanionSpecificTypes      = List("zio.ZIOCompanionVersionSpecific", "zio.ZIOCompanionPlatformSpecific")
+  val zioLayerCompanionSpecificTypes = List("zio.ZLayerCompanionVersionSpecific")
+
+  val zioTypes        = ZioTypes.values.map(_.fqName) :+ "zio.ZIOPlatformSpecific" :+ "zio.ZIOVersionSpecific"
   val zioLayerTypes   = ZLayerTypes.values.map(_.fqName)
   val zioSinkTypes    = List("zio.stream.ZSink")
   val zioStreamTypes  = List("zio.stream.ZStream")

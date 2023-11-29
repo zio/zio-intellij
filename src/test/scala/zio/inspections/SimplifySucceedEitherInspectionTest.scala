@@ -7,7 +7,7 @@ abstract class SimplifySucceedEitherInspectionTest(s: String)
   override protected val hint = s"Replace with $s"
 }
 
-class SucceedLeftInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO.left") {
+abstract class SucceedLeftInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO.left") {
 
   def test_succeed_Left(): Unit = {
     z(s"${START}ZIO.succeed(Left(a))$END").assertHighlighted()
@@ -81,6 +81,11 @@ class SucceedLeftInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO
     testQuickFix(text, result, hint)
   }
 
+}
+
+class SucceedLeftInspectionTestZIO1 extends SucceedLeftInspectionTest {
+  override protected def isZIO1 = true
+
   def test_UIO_Left(): Unit = {
     z(s"${START}UIO(Left(a))$END").assertHighlighted()
     val text   = z("UIO(Left(a))")
@@ -108,9 +113,14 @@ class SucceedLeftInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO
     val result = z("UIO.left(a)")
     testQuickFix(text, result, hint)
   }
+
 }
 
-class SucceedRightInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO.right") {
+class SucceedLeftInspectionTestZIO2 extends SucceedLeftInspectionTest {
+  override protected def isZIO1 = false
+}
+
+abstract class SucceedRightInspectionTest extends SimplifySucceedEitherInspectionTest("ZIO.right") {
 
   def test_succeed_Right(): Unit = {
     z(s"${START}ZIO.succeed(Right(a))$END").assertHighlighted()
@@ -183,6 +193,10 @@ class SucceedRightInspectionTest extends SimplifySucceedEitherInspectionTest("ZI
     }
     testQuickFix(text, result, hint)
   }
+}
+
+class SucceedRightInspectionTestZIO1 extends SucceedRightInspectionTest {
+  override protected def isZIO1 = true
 
   def test_UIO_Right(): Unit = {
     z(s"${START}UIO(Right(a))$END").assertHighlighted()
@@ -211,4 +225,9 @@ class SucceedRightInspectionTest extends SimplifySucceedEitherInspectionTest("ZI
     val result = z("UIO.right(a)")
     testQuickFix(text, result, hint)
   }
+
+}
+
+class SucceedRightInspectionTestZIO2 extends SucceedRightInspectionTest {
+  override protected def isZIO1 = false
 }
