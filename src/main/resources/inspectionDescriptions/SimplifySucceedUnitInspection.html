@@ -1,0 +1,13 @@
+<html>
+<body>Simplify the following expressions to use <code>.unit</code> instead:
+<pre>
+ZIO.succeed(())     -> ZIO.unit
+UIO(())             -> UIO.unit
+ZIO.apply(())       -> ZIO.unit
+ZIO.attempt(())     -> ZIO.unit
+ZIO.effect(())      -> ZIO.unit
+ZIO.effectTotal(()) -> ZIO.unit
+</pre>
+Note that some methods depend on project ZIO version
+</body>
+</html>

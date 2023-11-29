@@ -7,11 +7,33 @@ abstract class SimplifyOptionInspectionTest(s: String)
   override protected val hint = s"Replace with $s"
 }
 
-class SucceedNoneInspectionTest extends SimplifyOptionInspectionTest("ZIO.none") {
+abstract class SucceedNoneInspectionTest extends SimplifyOptionInspectionTest("ZIO.none") {
 
   def test_succeed_None(): Unit = {
     z(s"${START}ZIO.succeed(None)$END").assertHighlighted()
     val text   = z("ZIO.succeed(None)")
+    val result = z("ZIO.none")
+    testQuickFix(text, result, hint)
+  }
+
+  def test_succeed_None_type_no_highlight(): Unit =
+    z(s"${START}ZIO.succeed { val x = 1; None }$END").assertNotHighlighted()
+
+}
+
+class SucceedNoneInspectionTestZIO1 extends SucceedNoneInspectionTest {
+  override def isZIO1: Boolean = true
+
+  def test_effectTotal_None(): Unit = {
+    z(s"${START}ZIO.effectTotal(None)$END").assertHighlighted()
+    val text   = z("ZIO.effectTotal(None)")
+    val result = z("ZIO.none")
+    testQuickFix(text, result, hint)
+  }
+
+  def test_effect_None(): Unit = {
+    z(s"${START}ZIO.effect(None)$END").assertHighlighted()
+    val text   = z("ZIO.effect(None)")
     val result = z("ZIO.none")
     testQuickFix(text, result, hint)
   }
@@ -29,9 +51,21 @@ class SucceedNoneInspectionTest extends SimplifyOptionInspectionTest("ZIO.none")
     val result = z("UIO.none")
     testQuickFix(text, result, hint)
   }
+
 }
 
-class SucceedSomeInspectionTest extends SimplifyOptionInspectionTest("ZIO.some") {
+class SucceedNoneInspectionTestZIO2 extends SucceedNoneInspectionTest {
+  override def isZIO1: Boolean = false
+
+  def test_attempt_None(): Unit = {
+    z(s"${START}ZIO.attempt(None)$END").assertHighlighted()
+    val text   = z("ZIO.attempt(None)")
+    val result = z("ZIO.none")
+    testQuickFix(text, result, hint)
+  }
+}
+
+abstract class SucceedSomeInspectionTest extends SimplifyOptionInspectionTest("ZIO.some") {
 
   def test_succeed_Some(): Unit = {
     z(s"${START}ZIO.succeed(Some(a))$END").assertHighlighted()
@@ -69,6 +103,11 @@ class SucceedSomeInspectionTest extends SimplifyOptionInspectionTest("ZIO.some")
     testQuickFix(text, result, hint)
   }
 
+}
+
+class SucceedSomeInspectionTestZIO1 extends SucceedSomeInspectionTest {
+  override def isZIO1: Boolean = true
+
   def test_UIO_Some(): Unit = {
     z(s"${START}UIO(Some(a))$END").assertHighlighted()
     val text   = z("UIO(Some(a))")
@@ -82,4 +121,8 @@ class SucceedSomeInspectionTest extends SimplifyOptionInspectionTest("ZIO.some")
     val result = z("UIO.some(a)")
     testQuickFix(text, result, hint)
   }
+}
+
+class SucceedSomeInspectionTestZIO2 extends SucceedSomeInspectionTest {
+  override def isZIO1: Boolean = false
 }

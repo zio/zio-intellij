@@ -1,13 +1,17 @@
 <html>
 <body>Simplify the following expressions to use <code>.none</code>/<code>.some</code> instead:
 <pre>
-ZIO.succeed(None)    -> ZIO.none
-UIO(None)            -> ZIO.none
-UIO.apply(None)      -> ZIO.none
+ZIO.succeed(None)     -> ZIO.none
+UIO(None)             -> ZIO.none
+UIO.apply(None)       -> ZIO.none
+ZIO.attempt(None)     -> ZIO.none
+ZIO.effect(None)      -> ZIO.none
+ZIO.effectTotal(None) -> ZIO.none
 
 ZIO.succeed(Some(a)) -> ZIO.some(a)
 UIO(Some(a))         -> ZIO.some(a)
 UIO.apply(Some(a))   -> ZIO.some(a)
 </pre>
+Note that some methods depend on project ZIO version
 </body>
 </html>

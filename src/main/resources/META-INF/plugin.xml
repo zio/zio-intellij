@@ -81,6 +81,12 @@
                          shortName="SimplifySucceedEitherInspection" level="WARNING"
                          enabledByDefault="true" language="Scala"/>
 
+        <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedUnitInspection"
+                         displayName="Simplify simple unit values to ZIO.unit" groupPath="Scala,ZIO"
+                         groupName="Simplifications"
+                         shortName="SimplifySucceedUnitInspection" level="WARNING"
+                         enabledByDefault="true" language="Scala"/>
+
         <localInspection implementationClass="zio.intellij.inspections.simplifications.SimplifySucceedOptionInspection"
                          displayName="Simplify optional values to .none/.some" groupPath="Scala,ZIO"
                          groupName="Simplifications"

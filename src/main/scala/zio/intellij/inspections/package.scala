@@ -1,6 +1,6 @@
 package zio.intellij
 
-import com.intellij.psi.PsiAnnotation
+import com.intellij.psi.{PsiAnnotation, PsiElement}
 import org.jetbrains.plugins.scala.codeInspection.collections.{isOfClassFrom, _}
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScPattern, ScReferencePattern, ScWildcardPattern}
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
@@ -9,10 +9,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScObject, ScTemplateDefinition, ScTrait}
 import zio.intellij.utils.TypeCheckUtils._
-import zio.intellij.utils._
 import zio.intellij.utils.types._
-
-import scala.reflect.ClassTag
 
 package object inspections {
 
@@ -216,7 +213,7 @@ package object inspections {
   }
 
   sealed abstract class Curried2StaticMemberReference[T <: Type](
-    extractor: MemberReferenceExtractor[ScTemplateDefinition],
+    extractor: MemberReferenceExtractor,
     refName: String
   ) extends BaseStaticMemberReference[T](refName) {
 
@@ -266,38 +263,58 @@ package object inspections {
     override protected val typeCompanion: TypeCompanion[ZLayerType] = ZLayerTypes
   }
 
-  sealed abstract class MemberReferenceExtractor[+T <: ScTemplateDefinition: ClassTag] {
-    def types: Set[String]
+  sealed trait MemberReferenceExtractor {
+    def isMemberReference(t: ScTemplateDefinition): Boolean
 
-    private def findOverloaded(expr: ScReferenceExpression) =
-      expr.multiResolveScala(incomplete = false) match {
-        case result if result.isEmpty => None
-        case result =>
-          result.flatMap(_.fromType).distinct match {
-            case Array(tpe) => fqnIfIsOfClassFrom(tpe, types.toSeq)
-            case _          => None
-          }
+    private def resolve(ref: ScReferenceExpression): Option[PsiElement] =
+      Option(ref.resolve()).orElse {
+        ref.multiResolveScala(incomplete = false).distinctBy(_.fromType) match {
+          case Array(result) => Some(result.element)
+          case _             => None
+        }
       }
 
     def unapply(ref: ScReferenceExpression): Option[String] =
-      ref.resolve() match {
-        case null                                                       => findOverloaded(ref)
-        case t: ScTemplateDefinition if types.contains(t.qualifiedName) => Some(t.qualifiedName)
+      resolve(ref).flatMap {
+        case d: ScTemplateDefinition if isMemberReference(d) =>
+          Some(d.qualifiedName)
         case f: ScFunctionDefinition =>
-          Option(f.containingClass).collect { case o: T => o.qualifiedName }.filter(types.contains)
-        case _ => None
+          Option(f.containingClass).collect { case d if isMemberReference(d) => d.qualifiedName }
+        case _ =>
+          None
       }
   }
 
-  sealed trait StaticMemberReferenceExtractor extends MemberReferenceExtractor[ScObject]
-  sealed trait TraitMemberReferenceExtractor  extends MemberReferenceExtractor[ScTrait]
+  sealed trait StaticMemberReferenceExtractor extends MemberReferenceExtractor {
+    override def isMemberReference(t: ScTemplateDefinition): Boolean =
+      t match {
+        case _: ScTrait  => companionSpecificTypes.contains(t.qualifiedName)
+        case _: ScObject => commonTypes.contains(t.qualifiedName)
+        case _           => false
+      }
+
+    def commonTypes: Set[String]
+    def companionSpecificTypes: Set[String]
+  }
+
+  sealed trait TraitMemberReferenceExtractor extends MemberReferenceExtractor {
+    override def isMemberReference(t: ScTemplateDefinition): Boolean =
+      t match {
+        case _: ScTrait => types.contains(t.qualifiedName)
+        case _          => false
+      }
+
+    def types: Set[String]
+  }
 
   object ZIOStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
-    override val types: Set[String] = zioTypes.toSet
+    override lazy val commonTypes: Set[String]            = zioTypes.toSet
+    override lazy val companionSpecificTypes: Set[String] = zioCompanionSpecificTypes.toSet
   }
 
   object ZLayerStaticMemberReferenceExtractor extends StaticMemberReferenceExtractor {
-    override val types: Set[String] = zioLayerTypes.toSet
+    override lazy val commonTypes: Set[String]            = zioLayerTypes.toSet
+    override lazy val companionSpecificTypes: Set[String] = zioLayerCompanionSpecificTypes.toSet
   }
 
   class ReturnTypeReference(typeFQNs: Set[String]) {
@@ -340,6 +357,7 @@ package object inspections {
   val `ZIO.collectAll`    = new ZIOStaticMemberReference("collectAll")
   val `ZIO.collectAllPar` = new ZIOStaticMemberReference("collectAllPar")
   val `ZIO.sleep`         = new ZIOStaticMemberReference("sleep")
+  val `ZIO.attempt`       = new ZIOStaticMemberReference("attempt")
   val `ZIO.effect`        = new ZIOStaticMemberReference("effect")
   val `ZIO.effectTotal`   = new ZIOStaticMemberReference("effectTotal")
   val `ZIO.access`        = new ZIOStaticMemberReference("access")
