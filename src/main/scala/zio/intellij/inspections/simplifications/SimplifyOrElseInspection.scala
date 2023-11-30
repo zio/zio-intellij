@@ -14,7 +14,9 @@ object OrElseFailSimplificationType extends SimplificationType {
 
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def blockReplacement(zio: ScExpression, body: Seq[ScBlockStatement]): Simplification = {
-      val separator = System.lineSeparator
+      // new Intellij version doesn't seem to like Windows line separators
+      // if ScalaPsiElementFactory.createBlockWithGivenExpressions can use "\n", so can we
+      val separator = "\n"
       val blockBody = body.map(_.getText).mkString(separator, separator, separator)
       replace(expr).withText(s"${zio.getText}.$replaceWith {$blockBody}")
     }
