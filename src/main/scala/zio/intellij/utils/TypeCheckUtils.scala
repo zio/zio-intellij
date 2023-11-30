@@ -9,7 +9,7 @@ import zio.intellij.utils.types.{ZLayerTypes, ZioTypes}
 object TypeCheckUtils {
 
   val zioCompanionSpecificTypes      = List("zio.ZIOCompanionVersionSpecific", "zio.ZIOCompanionPlatformSpecific")
-  val zioLayerCompanionSpecificTypes = List("zio.ZLayerCompanionVersionSpecific")
+  val zioLayerCompanionSpecificTypes = List("zio.ZLayerCompanionVersionSpecific", "zio.magic.ZLayerCompanionOps")
 
   val zioTypes        = ZioTypes.values.map(_.fqName) :+ "zio.ZIOPlatformSpecific" :+ "zio.ZIOVersionSpecific"
   val zioLayerTypes   = ZLayerTypes.values.map(_.fqName)
@@ -57,6 +57,21 @@ object TypeCheckUtils {
 
   def fromZioSpec(tpe: ScType): Boolean =
     isOfClassFrom(tpe, zioSpecTypes)
+
+  sealed trait TypeArgs1Extractor {
+
+    protected def fromTarget(tpe: ScType): Boolean
+
+    private def unapplyInner(tpe: ScType): Option[ScType] =
+      extractAllTypeArguments(tpe).flatMap {
+        case Seq(r) => Some(r)
+        case _      => None
+      }
+
+    def unapply(tpe: ScType): Option[ScType] =
+      if (fromTarget(tpe)) unapplyInner(tpe) else None
+
+  }
 
   sealed trait TypeArgs2Extractor {
 
@@ -150,6 +165,30 @@ object TypeCheckUtils {
 
   object `ZLayer[RIn, E, ROut]` extends TypeArgs3Extractor {
     override protected def fromTarget(tpe: ScType): Boolean = fromZioLayer(tpe)
+  }
+
+  object `ZLayerMake[R]` extends TypeArgs1Extractor {
+    override protected def fromTarget(tpe: ScType): Boolean =
+      isOfClassFrom(
+        tpe,
+        Seq(
+          "zio.MakePartiallyApplied",
+          "zio.magic.FromMagicLayerPartiallyApplied",
+          "zio.magic.FromMagicLayerDebugPartiallyApplied"
+        )
+      )
+  }
+
+  object `ZLayerMakeSome[R0, R]` extends TypeArgs2Extractor {
+    override protected def fromTarget(tpe: ScType): Boolean =
+      isOfClassFrom(
+        tpe,
+        Seq(
+          "zio.MakeSomePartiallyApplied",
+          "zio.magic.FromSomeMagicLayerPartiallyApplied",
+          "zio.magic.FromSomeMagicLayerDebugPartiallyApplied"
+        )
+      )
   }
 
   object `zio1.Spec[R, E, T]` extends TypeArgs3Extractor {

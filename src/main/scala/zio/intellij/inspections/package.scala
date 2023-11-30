@@ -379,8 +379,42 @@ package object inspections {
   val `ZIO.foreachParN`   = new ZIOCurried3StaticMemberReference("foreachParN")
   val `ZIO.partitionParN` = new ZIOCurried3StaticMemberReference("partitionParN")
 
-  val `ZLayer.fromEffect`     = new ZLayerStaticMemberReference("fromEffect")
-  val `ZLayer.fromEffectMany` = new ZLayerStaticMemberReference("fromEffectMany")
+  val `ZLayer.fromEffect`         = new ZLayerStaticMemberReference("fromEffect")
+  val `ZLayer.fromEffectMany`     = new ZLayerStaticMemberReference("fromEffectMany")
+  val `ZLayer.make`               = new ZLayerStaticMemberReference("make")
+  val `ZLayer.makeSome`           = new ZLayerStaticMemberReference("makeSome")
+  val `ZLayer.wire`               = new ZLayerStaticMemberReference("wire")
+  val `ZLayer.wireDebug`          = new ZLayerStaticMemberReference("wireDebug")
+  val `ZLayer.wireSome`           = new ZLayerStaticMemberReference("wireSome")
+  val `ZLayer.wireSomeDebug`      = new ZLayerStaticMemberReference("wireSomeDebug")
+  val `ZLayer.fromMagic`          = new ZLayerStaticMemberReference("fromMagic")
+  val `ZLayer.fromMagicDebug`     = new ZLayerStaticMemberReference("fromMagicDebug")
+  val `ZLayer.fromSomeMagic`      = new ZLayerStaticMemberReference("fromSomeMagic")
+  val `ZLayer.fromSomeMagicDebug` = new ZLayerStaticMemberReference("fromSomeMagicDebug")
+
+  object `ZLayer.makeLike` {
+    def unapply(expr: ScExpression): Option[(ZLayerType, ScExpression)] =
+      expr match {
+        case `ZLayer.make`(tpe, expr)           => Some((tpe, expr))
+        case `ZLayer.wire`(tpe, expr)           => Some((tpe, expr))
+        case `ZLayer.wireDebug`(tpe, expr)      => Some((tpe, expr))
+        case `ZLayer.fromMagic`(tpe, expr)      => Some((tpe, expr))
+        case `ZLayer.fromMagicDebug`(tpe, expr) => Some((tpe, expr))
+        case _                                  => None
+      }
+  }
+
+  object `ZLayer.makeSomeLike` {
+    def unapply(expr: ScExpression): Option[(ZLayerType, ScExpression)] =
+      expr match {
+        case `ZLayer.makeSome`(tpe, expr)           => Some((tpe, expr))
+        case `ZLayer.wireSome`(tpe, expr)           => Some((tpe, expr))
+        case `ZLayer.wireSomeDebug`(tpe, expr)      => Some((tpe, expr))
+        case `ZLayer.fromSomeMagic`(tpe, expr)      => Some((tpe, expr))
+        case `ZLayer.fromSomeMagicDebug`(tpe, expr) => Some((tpe, expr))
+        case _                                      => None
+      }
+  }
 
   object unit {
 

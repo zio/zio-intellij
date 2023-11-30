@@ -527,6 +527,85 @@ class ProvideSomeMacroZIO2SpecInspectionTest extends ProvideSomeMacroZIO2SpecIns
 class ProvideSomeSharedMacroZIO2SpecInspectionTest
     extends ProvideSomeMacroZIO2SpecInspectionTestBase("provideSomeShared")
 
+abstract class ProvideMacroZLayerInspectionTestBase extends ZScalaInspectionTest[ProvideMacroInspection] {
+  override protected def librariesLoaders: Seq[LibraryLoader] =
+    if (isZIO1) IvyManagedLoader("io.github.kitlangton" %% "zio-magic" % "0.3.12") +: super.librariesLoaders
+    else super.librariesLoaders
+
+  override protected def description                            = "Please provide layers for the following"
+  override protected def descriptionMatches(s: String): Boolean = s != null && s.startsWith(description)
+}
+
+abstract class ProvideMacroZIO1ZLayerInspectionTestBase(wire: String) extends ProvideMacroZLayerInspectionTestBase {
+  def testValidSimpleNoHighlighting(): Unit = z {
+    s"""import zio.magic._
+       |
+       |val layer: ULayer[Has[String]] = ???
+       |${r(s"ZLayer.$wire[Has[String]](layer)")}""".stripMargin
+  }.assertNotHighlighted()
+  def testValidSimpleHighlighting(): Unit = z {
+    s"""import zio.magic._
+       |
+       |val layer: ULayer[Has[String]] = ???
+       |${r(s"ZLayer.$wire[Has[String] with Has[Int]](layer)")}""".stripMargin
+  }.assertHighlighted()
+}
+class ProvideMacroZIO1ZLayerInspectionTest           extends ProvideMacroZIO1ZLayerInspectionTestBase("wire")
+class ProvideDebugMacroZIO1ZLayerInspectionTest      extends ProvideMacroZIO1ZLayerInspectionTestBase("wireDebug")
+class ProvideMagicMacroZIO1ZLayerInspectionTest      extends ProvideMacroZIO1ZLayerInspectionTestBase("fromMagic")
+class ProvideMagicDebugMacroZIO1ZLayerInspectionTest extends ProvideMacroZIO1ZLayerInspectionTestBase("fromMagicDebug")
+
+abstract class ProvideSomeMacroZIO1ZLayerInspectionTestBase(wireSome: String)
+    extends ProvideMacroZLayerInspectionTestBase {
+  def testValidSimpleNoHighlighting(): Unit = z {
+    s"""import zio.magic._
+       |
+       |val layer: ULayer[Has[String]] = ???
+       |${r(s"ZLayer.$wireSome[Has[Boolean], Has[String]](layer)")}""".stripMargin
+  }.assertNotHighlighted()
+  def testValidSimpleHighlighting(): Unit = z {
+    s"""import zio.magic._
+       |
+       |val layer: ULayer[Has[String]] = ???
+       |${r(s"ZLayer.$wireSome[Has[Boolean], Has[String] with Has[Int]](layer)")}""".stripMargin
+  }.assertHighlighted()
+}
+class ProvideSomeMacroZIO1ZLayerInspectionTest extends ProvideSomeMacroZIO1ZLayerInspectionTestBase("wireSome")
+class ProvideSomeDebugMacroZIO1ZLayerInspectionTest
+    extends ProvideSomeMacroZIO1ZLayerInspectionTestBase("wireSomeDebug")
+class ProvideSomeMagicMacroZIO1ZLayerInspectionTest
+    extends ProvideSomeMacroZIO1ZLayerInspectionTestBase("fromSomeMagic")
+class ProvideSomeMagicDebugMacroZIO1ZLayerInspectionTest
+    extends ProvideSomeMacroZIO1ZLayerInspectionTestBase("fromSomeMagicDebug")
+
+class ProvideMacroZIO2ZLayerInspectionTest extends ProvideMacroZLayerInspectionTestBase {
+  override protected def isZIO1 = false
+  def testValidSimpleNoHighlighting(): Unit = z {
+    s"""
+       |val layer: ULayer[String] = ???
+       |${r(s"ZLayer.make[String](layer)")}""".stripMargin
+  }.assertNotHighlighted()
+  def testValidSimpleHighlighting(): Unit = z {
+    s"""
+       |val layer: ULayer[String] = ???
+       |${r(s"ZLayer.make[String with Int](layer)")}""".stripMargin
+  }.assertHighlighted()
+}
+
+class ProvideSomeMacroZIO2ZLayerInspectionTest extends ProvideMacroZLayerInspectionTestBase {
+  override protected def isZIO1 = false
+  def testValidSimpleNoHighlighting(): Unit = z {
+    s"""
+       |val layer: ULayer[String] = ???
+       |${r(s"ZLayer.makeSome[Boolean, String](layer)")}""".stripMargin
+  }.assertNotHighlighted()
+  def testValidSimpleHighlighting(): Unit = z {
+    s"""
+       |val layer: ULayer[String] = ???
+       |${r(s"ZLayer.makeSome[Boolean, String with Int](layer)")}""".stripMargin
+  }.assertHighlighted()
+}
+
 // special test to expect _very_ specific error message
 // checking if types are rendered correctly
 class ProvideMacroInspectionRenderingTest extends ZScalaInspectionTest[ProvideMacroInspection] {
