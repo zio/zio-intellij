@@ -13,6 +13,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.psi.types.{api, ScType, TypePresentationContext}
 import org.jetbrains.plugins.scala.project.{ProjectContext, ProjectPsiElementExt, ScalaFeatures}
+import zio.intellij.inspections._
 import zio.intellij.inspections.macros.LayerBuilder._
 import zio.intellij.inspections.macros.LayerTree.{ComposeH, ComposeV, Empty, Value}
 import zio.intellij.inspections.zioMethods._
@@ -35,11 +36,15 @@ class ProvideMacroInspection extends LocalInspectionTool {
     case expr @ `.inject`(base, layers @ _*) =>
       tryBuildProvideZIO1(base, layers).fold(visitIssue(holder, expr), identity)
     case fullyApplied @ ScMethodCall(partiallyApplied @ `.injectSome`(base, _ @_*), layers) =>
-      visitProvideSomeZIO1(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
+      tryBuildProvideSomeZIO1(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
     case expr @ `.injectShared`(base, layers @ _*) =>
       tryBuildProvideZIO1(base, layers).fold(visitIssue(holder, expr), identity)
     case fullyApplied @ ScMethodCall(partiallyApplied @ `.injectSomeShared`(base, _ @_*), layers) =>
-      visitProvideSomeSharedZIO1(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
+      tryBuildProvideSomeSharedZIO1(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
+    case fullyApplied @ ScMethodCall(partiallyApplied @ ScGenericCall(`ZLayer.makeLike`(_, _), _), layers) =>
+      tryBuildProvideZIO1(partiallyApplied, layers).fold(visitIssue(holder, fullyApplied), identity)
+    case fullyApplied @ ScMethodCall(partiallyApplied @ ScGenericCall(`ZLayer.makeSomeLike`(_, _), _), layers) =>
+      tryBuildProvideSomeZIO1(fullyApplied, partiallyApplied, layers).fold(visitIssue(holder, fullyApplied), identity)
     case _ =>
   }
 
@@ -47,11 +52,15 @@ class ProvideMacroInspection extends LocalInspectionTool {
     case expr @ `.provide`(base, layers @ _*) =>
       tryBuildProvideZIO2(base, layers).fold(visitIssue(holder, expr), identity)
     case fullyApplied @ ScMethodCall(partiallyApplied @ `.provideSome`(base, _ @_*), layers) =>
-      visitProvideSomeZIO2(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
+      tryBuildProvideSomeZIO2(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
     case expr @ `.provideShared`(base, layers @ _*) =>
       tryBuildProvideZIO2(base, layers).fold(visitIssue(holder, expr), identity)
     case fullyApplied @ ScMethodCall(partiallyApplied @ `.provideSomeShared`(base, _ @_*), layers) =>
-      visitProvideSomeSharedZIO2(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
+      tryBuildProvideSomeSharedZIO2(partiallyApplied, base, layers).fold(visitIssue(holder, fullyApplied), identity)
+    case fullyApplied @ ScMethodCall(partiallyApplied @ ScGenericCall(`ZLayer.makeLike`(_, _), _), layers) =>
+      tryBuildProvideZIO2(partiallyApplied, layers).fold(visitIssue(holder, fullyApplied), identity)
+    case fullyApplied @ ScMethodCall(partiallyApplied @ ScGenericCall(`ZLayer.makeSomeLike`(_, _), _), layers) =>
+      tryBuildProvideSomeZIO2(fullyApplied, partiallyApplied, layers).fold(visitIssue(holder, fullyApplied), identity)
     case _ =>
   }
 
@@ -66,6 +75,14 @@ class ProvideMacroInspection extends LocalInspectionTool {
             method = ProvideMethod.Provide
           )
       case Typeable(`zio1.Spec[R, E, T]`(r, _, _)) =>
+        LayerBuilder
+          .tryBuildZIO1(base)(
+            target = split(r),
+            remainder = Nil,
+            providedLayers = layers,
+            method = ProvideMethod.Provide
+          )
+      case Typeable(`ZLayerMake[R]`(r)) =>
         LayerBuilder
           .tryBuildZIO1(base)(
             target = split(r),
@@ -95,11 +112,19 @@ class ProvideMacroInspection extends LocalInspectionTool {
             providedLayers = layers,
             method = ProvideMethod.Provide
           )
+      case Typeable(`ZLayerMake[R]`(r)) =>
+        LayerBuilder
+          .tryBuildZIO2(base)(
+            target = split(r),
+            remainder = Nil,
+            providedLayers = layers,
+            method = ProvideMethod.Provide
+          )
       case _ =>
         Right(())
     }
 
-  private def visitProvideSomeZIO1(
+  private def tryBuildProvideSomeZIO1(
     expr: ScExpression,       // effectLike.injectSome[Foo]
     base: ScExpression,       // effectLike
     layers: Seq[ScExpression] // layer1, layer2
@@ -121,11 +146,19 @@ class ProvideMacroInspection extends LocalInspectionTool {
             providedLayers = layers,
             method = ProvideMethod.ProvideSome
           )
+      case Typeable(`ZLayerMakeSome[R0, R]`(r0, r)) =>
+        LayerBuilder
+          .tryBuildZIO1(expr)(
+            target = split(r),
+            remainder = split(r0),
+            providedLayers = layers,
+            method = ProvideMethod.ProvideSome
+          )
       case _ =>
         Right(())
     }
 
-  private def visitProvideSomeZIO2(
+  private def tryBuildProvideSomeZIO2(
     expr: ScExpression,       // effectLike.provideSome[Foo]
     base: ScExpression,       // effectLike
     layers: Seq[ScExpression] // layer1, layer2
@@ -147,11 +180,19 @@ class ProvideMacroInspection extends LocalInspectionTool {
             providedLayers = layers,
             method = ProvideMethod.ProvideSome
           )
+      case Typeable(`ZLayerMakeSome[R0, R]`(r0, r)) =>
+        LayerBuilder
+          .tryBuildZIO2(expr)(
+            target = split(r),
+            remainder = split(r0),
+            providedLayers = layers,
+            method = ProvideMethod.ProvideSome
+          )
       case _ =>
         Right(())
     }
 
-  private def visitProvideSomeSharedZIO1(
+  private def tryBuildProvideSomeSharedZIO1(
     expr: ScExpression,       // effectLike.injectSome[Foo]
     base: ScExpression,       // effectLike
     layers: Seq[ScExpression] // layer1, layer2
@@ -169,7 +210,7 @@ class ProvideMacroInspection extends LocalInspectionTool {
         Right(())
     }
 
-  private def visitProvideSomeSharedZIO2(
+  private def tryBuildProvideSomeSharedZIO2(
     expr: ScExpression,       // effectLike.provideSome[Foo]
     base: ScExpression,       // effectLike
     layers: Seq[ScExpression] // layer1, layer2
