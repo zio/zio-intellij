@@ -93,7 +93,7 @@ final class QuickFix(
 
   override protected def doApplyFix(element: ScExpression)(implicit project: Project): Unit =
     element.replace(
-      createExpressionFromText(s"${zioType.name}.from$wrappedEffect($prefix${replaceWith.getText}", element)(
+      createExpressionFromText(s"${zioType.name}.from$wrappedEffect($prefix${replaceWith.getText})", element)(
         element.projectContext
       )
     )
