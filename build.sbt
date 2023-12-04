@@ -1,11 +1,11 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
-lazy val scalaPluginVersion = "2023.3.13"
-lazy val pluginVersion      = "2023.3.28" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
+lazy val scalaPluginVersion = "2023.3.17"
+lazy val pluginVersion      = "2023.3.30" + sys.env.get("ZIO_INTELLIJ_BUILD_NUMBER").fold(".0")(v => s".$v")
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "233.11799.30"
+ThisBuild / intellijBuild := "233"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true
@@ -39,8 +39,7 @@ lazy val root =
           s"""<![CDATA[
         <b>What's new?</b>
         <ul>
-          <li>Intellij 2023.2 support.</li>
-          <li>Plugin will offer downloading the test runner only if all projects use ZIO 1.0.</li>
+          <li>Intellij 2023.3 support.</li>
         </ul>
         ]]>"""
         )
