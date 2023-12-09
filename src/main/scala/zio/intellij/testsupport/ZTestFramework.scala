@@ -16,14 +16,14 @@ import zio.intellij.utils.TypeCheckUtils.zioTestPackage
 import javax.swing.Icon
 import scala.annotation.tailrec
 
-final class Zio1TestFramework() extends ZTestFramework(ZIO1SpecFQN)
-final class Zio2TestFramework() extends ZTestFramework(ZIO2SpecFQN)
+final class Zio1TestFramework extends ZTestFramework(ZIO1SpecFQN, "1.x")
+final class Zio2TestFramework extends ZTestFramework(ZIO2SpecFQN, "2.x")
 
-sealed abstract class ZTestFramework(zSpecFqn: String) extends AbstractTestFramework {
+sealed abstract class ZTestFramework(zSpecFqn: String, zioVersion: String) extends AbstractTestFramework {
   override def getMarkerClassFQName: String = zSpecFqn
   override def getDefaultSuperClass: String = zSpecFqn
   override def testFileTemplateName: String = "ZIO Test Suite"
-  override def getName: String              = "ZIO Test"
+  override def getName: String              = s"ZIO Test ($zioVersion)"
   override def getIcon: Icon                = ZioIcon
 
   override def isTestMethod(element: PsiElement): Boolean = isTestMethod(element, checkAbstract = false)
