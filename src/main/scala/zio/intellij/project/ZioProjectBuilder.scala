@@ -16,7 +16,7 @@ import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.project.template.ScalaVersionDownloadingDialog
 import org.jetbrains.plugins.scala.project.{ScalaLanguageLevel, Version, Versions}
 import org.jetbrains.plugins.scala.util.HttpDownloadUtil
-import org.jetbrains.plugins.scala.{ScalaBundle, ScalaVersion, extensions}
+import org.jetbrains.plugins.scala.{extensions, ScalaBundle, ScalaVersion}
 import org.jetbrains.sbt.project.template.{SComboBox, SbtModuleBuilderBase, ScalaSettingsStepBase}
 import org.jetbrains.sbt.{Sbt, SbtBundle}
 import zio.intellij.ZioIcon
@@ -47,7 +47,7 @@ private[zio] class ZioProjectBuilder extends SbtModuleBuilderBase {
 
   val hardcodedZioVersions = Versions(ZIO.`latest-ish`.toString, List("1.0.11", "1.0.10", "1.0.9"))
 
-  private lazy val indicator = new EmptyProgressIndicator
+  private lazy val indicator     = new EmptyProgressIndicator
   private lazy val scalaVersions = ScalaKind.loadVersionsWithProgress(indicator)
   private lazy val sbtVersions   = SbtKind.loadVersionsWithProgress(indicator)
   private lazy val zioVersions = (for {

@@ -7,7 +7,11 @@ import com.intellij.execution.testframework.sm.SMCustomMessagesParsing
 import com.intellij.execution.testframework.sm.runner.OutputToGeneralTestEventsConverter
 import com.intellij.util.ReflectionUtil
 import jetbrains.buildServer.messages.serviceMessages._
-import org.jetbrains.plugins.scala.testingSupport.test.{AbstractTestRunConfiguration, ScalaTestFrameworkConsoleProperties}
+import org.jetbrains.plugins.scala.testingSupport.test.{
+  AbstractTestFramework,
+  AbstractTestRunConfiguration,
+  ScalaTestFrameworkConsoleProperties
+}
 
 import java.io.PrintStream
 import scala.util.control.NoStackTrace
@@ -35,16 +39,25 @@ private[zio] class ZTestFrameworkConsoleProperties(configuration: AbstractTestRu
       .get(self)
       .asInstanceOf[ServiceMessageVisitor]
 
-    private lazy val testVisitor = new ZTestVisitor(underlyingTestVisitor)
+    private lazy val testVisitor = new ZTestVisitor(underlyingTestVisitor, configuration.testFramework)
 
     override def processServiceMessage(message: ServiceMessage, visitor: ServiceMessageVisitor): Unit =
       message.visit(testVisitor)
 
   }
 
-  private class ZTestVisitor(underlying: ServiceMessageVisitor) extends DefaultServiceMessageVisitor {
-    private val regexFromHell =
+  private class ZTestVisitor(underlying: ServiceMessageVisitor, testFramework: AbstractTestFramework)
+      extends DefaultServiceMessageVisitor {
+    private val regexFromHellZio1 =
       raw"\[1m.\[34m([\s\S]*).\[0m.\[0m.*\[31mwas not equal to.*\[1m.\[34m([\s\S]*?).\[0m.\[0m".r
+
+    private val regexFromHellZio2 =
+      raw"\[1m.\[34m([\s\S]*).\[0m.\[0m.*\[31mwas not equal to.\[0m..\[1m.\[34m([\s\S]*).\[0m.\[0m\s+.\[1m".r
+
+    private val regexFromHell = testFramework match {
+      case _: Zio1TestFramework => regexFromHellZio1
+      case _: Zio2TestFramework => regexFromHellZio2
+    }
 
     override def visitTestFailed(testFailed: TestFailed): Unit = {
       val details = testFailed.getStacktrace
