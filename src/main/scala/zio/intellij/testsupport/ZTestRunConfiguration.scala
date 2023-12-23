@@ -125,8 +125,12 @@ sealed abstract class ZTestRunConfiguration(project: Project, configurationFacto
 
       val consoleView: ConsoleView =
         if (useIntegratedRunner) {
-          val consoleProperties = new ScalaTestFrameworkConsoleProperties(self, "ZIO Test", executor)
-          SMTestRunnerConnectionUtil.createAndAttachConsole("ZIO Test", processHandler, consoleProperties)
+          val consoleProperties = new ZTestFrameworkConsoleProperties(self, executor)
+          SMTestRunnerConnectionUtil.createAndAttachConsole(
+            consoleProperties.getTestFrameworkName,
+            processHandler,
+            consoleProperties
+          )
         } else {
           val console = new ConsoleViewImpl(project, true)
           console.attachToProcess(processHandler)
