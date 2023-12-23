@@ -27,17 +27,11 @@ import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
 import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
-import org.jetbrains.plugins.scala.project.{
-  LibraryExt,
-  ModuleExt,
-  ProjectContext,
-  ProjectExt,
-  ProjectPsiElementExt,
-  ScalaLanguageLevel
-}
+import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectContext, ProjectExt, ProjectPsiElementExt, ScalaLanguageLevel}
 import org.jetbrains.sbt.SbtUtil
 import org.jetbrains.sbt.SbtUtil.getDefaultLauncher
 import org.jetbrains.sbt.project.SbtExternalSystemManager
+import zio.intellij.utils.Method.localRegex
 
 import java.io.File
 import scala.annotation.tailrec
@@ -241,6 +235,8 @@ package object utils {
 
   object Method {
 
+    val localRegex = "(\\d+\\.\\d+\\.\\d+)\\S*(?=\\.jar$)".r
+
     def unapply(ts: TermSignature): Option[ScFunction] =
       ts match {
         case PhysicalMethodSignature(method: ScFunctionDeclaration, _) => Some(method)
@@ -258,9 +254,12 @@ package object utils {
         url     <- library.getUrls(OrderRootType.CLASSES)
         if p(url)
         trimmedUrl  = utils.trimAfterSuffix(url, ".jar")
-        versionStr <- LibraryExt.runtimeVersion(trimmedUrl)
+        versionStr <- LibraryExt.runtimeVersion(trimmedUrl) orElse localLibraryVersion(trimmedUrl)
         version    <- Version.parse(versionStr)
       } yield version).headOption
+
+    private def localLibraryVersion(str: String) =
+      localRegex.findFirstMatchIn(str).map(_.group(1))
 
     @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))
     def zioVersion: Option[Version] =
