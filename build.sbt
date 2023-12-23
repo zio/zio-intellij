@@ -2,9 +2,9 @@ import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
 lazy val scalaPluginVersion = "2023.3.19"
-lazy val minorVersion       = "1"
+lazy val minorVersion       = "0"
 lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-lazy val pluginVersion      = s"2023.3.30.$buildVersion"
+lazy val pluginVersion      = s"2023.3.31.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "233"
@@ -41,7 +41,7 @@ lazy val root =
           s"""<![CDATA[
         <b>What's new?</b>
         <ul>
-          <li>Intellij 2023.3 support.</li>
+          <li>Added: "Click to see difference" for non-trivial test assertion failures.</li>
         </ul>
         ]]>"""
         )
