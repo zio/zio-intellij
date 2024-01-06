@@ -1,13 +1,13 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.10"
-lazy val scalaPluginVersion = "2023.3.19"
-lazy val minorVersion       = "3"
+lazy val scalaPluginVersion = "2024.1.6"
+lazy val minorVersion       = "0"
 lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-lazy val pluginVersion      = s"2023.3.31.$buildVersion"
+lazy val pluginVersion      = s"2024.1.32.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "233"
+ThisBuild / intellijBuild := "241"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true
@@ -41,7 +41,7 @@ lazy val root =
           s"""<![CDATA[
         <b>What's new?</b>
         <ul>
-          <li>Added: "Click to see difference" for non-trivial test assertion failures.</li>
+          <li>IntelliJ IDEA 2024.1 support!</li>
         </ul>
         ]]>"""
         )

@@ -13,7 +13,7 @@ object BackgroundTask {
   ): Future[A] = {
     val p = Promise[A]()
 
-    new Task.Backgroundable(project, title, true, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
+    new Task.Backgroundable(project, title, true) {
 
       override def run(indicator: ProgressIndicator): Unit =
         p.complete(Try(f(indicator)))
