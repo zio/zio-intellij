@@ -99,13 +99,18 @@ object ZTestFramework {
     "_root_.zio.test.MutableRunnableSpec.TestBuilder"
   )
 
+  private[ZTestFramework] val additionalMethodsRegex = Set(
+    "_root_.zio.test.*.SuiteBuilder",
+    "_root_.zio.test.*.TestBuilder"
+  )
+
   private def expandsToTestMethod(tpe: ScType) =
     tpe.extractClass.collect {
       case c: ScClassImpl =>
         val qname = c.qualifiedName
         val canonical = (if (qname == null || qname == c.name) c.name
                          else "_root_." + qname) + c.typeParamString
-        testMethodTypes.contains(canonical)
+        testMethodTypes.contains(canonical) || additionalMethodsRegex.exists(canonical.matches)
     }.getOrElse(false)
 
 }
