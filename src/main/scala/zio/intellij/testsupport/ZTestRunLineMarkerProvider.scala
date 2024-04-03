@@ -20,15 +20,15 @@ import javax.swing.Icon
 final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
 
   private val TooltipProvider: java.util.function.Function[PsiElement, String] = (_: PsiElement) => "Run Test"
-  private val TestProtocol                                                     = "java:test"
 
   override def getInfo(element: PsiElement): RunLineMarkerContributor.Info = {
     def buildInfo(td: ScTypeDefinition, tm: Option[ScReferenceExpression]) =
       tm match {
         case Some(method) if method.refName == "suite" =>
-          buildLineInfo(buildUrl(td, tm), td.getProject, isClass = true)
-        case _ =>
-          buildLineInfo(buildUrl(td, tm), td.getProject, tm.isEmpty)
+          buildLineInfo(buildUrl(tm), td.getProject, isClass = true)
+        case Some(method) =>
+          buildLineInfo(buildUrl(tm), td.getProject, tm.isEmpty)
+        case _ => null
       }
 
     element match {
@@ -37,36 +37,35 @@ final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
     }
   }
 
-  def buildUrl(clazz: PsiClass, expr: Option[ScReferenceExpression]): String = {
-    val url = s"$TestProtocol://${clazz.qualifiedName}"
-
-    expr match {
-      case Some(testName(name)) => s"$url.${ScalaSigPrinter.quote(name)}"
-      case _                    => url
-    }
-  }
+  private def buildUrl(expr: Option[ScReferenceExpression]): String =
+    expr.map { e =>
+      val file              = e.getContainingFile
+      val document          = file.getViewProvider.getDocument
+      val urlWithLineNumber = s"${file.getVirtualFile.getUrl}:${document.getLineNumber(e.getTextOffset) + 1}"
+      urlWithLineNumber
+    }.orNull
 
   override def buildLineInfo(url: String, project: Project, isClass: Boolean): RunLineMarkerContributor.Info = {
-    val icon    = iconFor(url, project, isClass)
+    val icon    = iconFor(project, isClass, Option(url))
     val actions = ExecutorAction.getActions(1)
     new ReplacementInfo(icon, actions, TooltipProvider)
   }
 
-  private def iconFor(url: String, project: Project, isClass: Boolean): Icon = {
+  private def iconFor(project: Project, isClass: Boolean, url: Option[String]): Icon = {
     import Magnitude._
 
     def defaultIcon =
       if (isClass) TestState.Run_run
       else TestState.Run
 
-    val testState     = Option(TestStateStorage.getInstance(project).getState(url))
+    val testState     = url.flatMap(url => Option(TestStateStorage.getInstance(project).getState(url)))
     val testMagnitude = testState.map(state => TestIconMapper.getMagnitude(state.magnitude))
 
-    testMagnitude.fold(defaultIcon) {
-      case ERROR_INDEX | FAILED_INDEX    => TestState.Red2
+    testMagnitude.collect {
+      case ERROR_INDEX                   => TestState.Red2
+      case FAILED_INDEX                  => TestState.Yellow2
       case PASSED_INDEX | COMPLETE_INDEX => TestState.Green2
-      case _                             => defaultIcon
-    }
+    }.getOrElse(defaultIcon)
   }
 
   private[this] class ReplacementInfo(
