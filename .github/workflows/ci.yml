@@ -3,7 +3,6 @@ name: CI
 on:
   push:
     branches:
-      - idea231.x
       - idea232.x
       - idea233.x
       - idea241.x
@@ -14,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
