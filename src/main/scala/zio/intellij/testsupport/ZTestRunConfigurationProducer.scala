@@ -2,6 +2,7 @@ package zio.intellij.testsupport
 
 import com.intellij.execution.Location
 import com.intellij.execution.actions.{ConfigurationContext, ConfigurationFromContext}
+import com.intellij.execution.application.ApplicationConfigurationProducer
 import com.intellij.execution.configurations.{ConfigurationFactory, ConfigurationTypeUtil}
 import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.text.StringUtil
@@ -22,7 +23,8 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
   override protected def suitePaths: List[String] = List(ZIO1SpecFQN, ZIO2SpecFQN)
 
   override def shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean =
-    other.isProducedBy(classOf[ScalaApplicationConfigurationProducer])
+    other.isProducedBy(classOf[ScalaApplicationConfigurationProducer]) ||
+      other.isProducedBy(classOf[ApplicationConfigurationProducer])
 
   override def setupConfigurationFromContext(
     configuration: ZTestRunConfiguration,
