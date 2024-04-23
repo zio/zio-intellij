@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # run every day at midnight UTC±00:00
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   fetch-commit-hashes:
@@ -18,7 +18,7 @@ jobs:
         with:
           # 0 indicates all history for all branches and tags.
           fetch-depth: 0
-          
+
       - name: Branch name
         uses: nelonoel/branch-name@v1.0.1
 
@@ -41,14 +41,14 @@ jobs:
     if: needs.fetch-commit-hashes.outputs.latest-commit != needs.fetch-commit-hashes.outputs.latest-tagged-commit
     env:
       ZIO_INTELLIJ_BUILD_NUMBER: ${{ github.run_number }}
-      ZIO_INTELLIJ_CHANGE_NOTES: '—'
+      ZIO_INTELLIJ_CHANGE_NOTES: "—"
       IJ_PLUGIN_REPO_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Set up Scala
-        uses: olafurpg/setup-scala@v13
+        uses: olafurpg/setup-scala@v14
         with:
           java-version: "openjdk@1.17.0"
 

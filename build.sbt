@@ -1,8 +1,8 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.12"
-lazy val scalaPluginVersion = "2024.1.15"
-lazy val minorVersion       = "0"
+lazy val scalaPluginVersion = "2024.1.17"
+lazy val minorVersion       = "1"
 lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
 lazy val pluginVersion      = s"2024.1.32.$buildVersion"
 
@@ -27,7 +27,8 @@ ThisBuild / scalacOptions ++= Seq(
   "-Xfatal-warnings",
   "-language:implicitConversions",
   "-language:reflectiveCalls",
-  "-language:existentials"
+  "-language:existentials",
+  "-Wconf:msg=legacy-binding:s"
 )
 
 lazy val root =
