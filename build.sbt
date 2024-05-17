@@ -1,13 +1,13 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.12"
-lazy val scalaPluginVersion = "2024.1.25"
+lazy val scalaPluginVersion = "2024.2.5"
 lazy val minorVersion       = "0"
 lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-lazy val pluginVersion      = s"2024.1.34.$buildVersion"
+lazy val pluginVersion      = s"2024.2.34.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "241"
+ThisBuild / intellijBuild := "242.16677.21"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true
@@ -42,7 +42,7 @@ lazy val root =
           s"""<![CDATA[
         <b>What's new?</b>
         <ul>
-          <li>Implemented the new Project Wizard API for ZIO <a href="https://github.com/zio/zio-intellij/pull/471">(#471)</a></li>
+          <li>IntelliJ IDEA 2024.2 support!</li>
         </ul>
         ]]>"""
         )

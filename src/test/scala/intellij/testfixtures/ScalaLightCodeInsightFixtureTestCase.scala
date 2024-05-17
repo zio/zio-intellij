@@ -2,7 +2,6 @@ package org.jetbrains.plugins.scala.base
 
 import com.intellij.application.options.CodeStyle
 import com.intellij.codeInsight.daemon.impl.HighlightInfo
-import com.intellij.codeInsight.folding.CodeFoldingManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.module.Module
@@ -16,13 +15,16 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.{CodeStyleSettings, CommonCodeStyleSettings}
 import com.intellij.testFramework.fixtures.{JavaCodeInsightTestFixture, LightJavaCodeInsightFixtureTestCase}
 import com.intellij.testFramework.{EditorTestUtil, LightProjectDescriptor}
+import org.intellij.lang.annotations.Language
 import org.jetbrains.jps.model.java.JavaSourceRootType
 import org.jetbrains.plugins.scala.base.libraryLoaders.{LibraryLoader, ScalaSDKLoader, SmartJDKLoader, SourcesLoader}
 import org.jetbrains.plugins.scala.extensions.StringExt
 import org.jetbrains.plugins.scala.lang.formatting.settings.ScalaCodeStyleSettings
+import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
 import org.jetbrains.plugins.scala.util.TestUtils
 import org.jetbrains.plugins.scala.{ScalaFileType, ScalaLanguage}
-import org.junit.Assert.assertNotNull
+import org.junit.Assert
+import org.junit.Assert.fail
 
 import scala.jdk.CollectionConverters._
 
@@ -36,6 +38,8 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected val CARET = EditorTestUtil.CARET_TAG
   protected val START = EditorTestUtil.SELECTION_START_TAG
   protected val END = EditorTestUtil.SELECTION_END_TAG
+
+  protected lazy val scalaFixture: ScalaCodeInsightTestFixture = new ScalaCodeInsightTestFixture(getFixture)
 
   override def getTestDataPath: String = TestUtils.getTestDataPath + "/"
 
@@ -61,7 +65,8 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   //end section: project libraries configuration
 
   //start section: project descriptor
-  protected def sharedProjectToken: SharedTestProjectToken = SharedTestProjectToken.DoNotShare
+  protected def sharedProjectToken: SharedTestProjectToken =
+    SharedTestProjectToken.ByTestClassAndScalaSdkAndProjectLibraries(this)
 
   override protected def getProjectDescriptor: LightProjectDescriptor = new ScalaLightProjectDescriptor(sharedProjectToken) {
     override def tuneModule(module: Module, project: Project): Unit = {
@@ -79,6 +84,10 @@ abstract class ScalaLightCodeInsightFixtureTestCase
 
   protected def placeSourceFilesInTestContentRoot: Boolean = false
 
+  /**
+   * @note If you are overriding this method, most likely, the light project cannot be shared between subsequent
+   *       test invocations. Look into also overriding [[sharedProjectToken]].
+   */
   protected def afterSetUpProject(project: Project, module: Module): Unit = {
     Registry.get("ast.loading.filter").setValue(true, getTestRootDisposable)
 
@@ -89,13 +98,35 @@ abstract class ScalaLightCodeInsightFixtureTestCase
     if (loadScalaLibrary) {
       myFixture.allowTreeAccessForAllFiles()
       super.setUpLibraries(module)
+
+      val compilerOptions = additionalCompilerOptions
+      if (compilerOptions.nonEmpty) {
+        addCompilerOptions(module, compilerOptions)
+      }
     }
+  }
+
+  protected def additionalCompilerOptions: Seq[String] = Nil
+
+  private def addCompilerOptions(module: Module, options: Seq[String]): Unit = {
+    val compilerConfiguration = ScalaCompilerConfiguration.instanceIn(module.getProject)
+
+    val settings = compilerConfiguration.settingsForHighlighting(module) match {
+      case Seq(s) => s
+      case _ =>
+        Assert.fail("expected single settings for module").asInstanceOf[Nothing]
+    }
+
+    val newSettings =
+      if (options.forall(settings.additionalCompilerOptions.contains)) settings
+      else settings.copy(additionalCompilerOptions = settings.additionalCompilerOptions ++ options)
+    compilerConfiguration.configureSettingsForModule(module, "unit tests", newSettings)
   }
   //end section: project descriptor
 
   override protected def setUp(): Unit = {
-    TestUtils.optimizeSearchingForIndexableFiles()
     super.setUp()
+    scalaFixture //init fixture lazy val
     TestUtils.disableTimerThread()
   }
 
@@ -105,37 +136,19 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   }
 
   //start section: helper methods
-  protected def configureFromFileText(fileText: String): PsiFile =
-    configureFromFileText(ScalaFileType.INSTANCE, fileText)
+  protected final def configureFromFileText(fileText: String): PsiFile = scalaFixture.configureFromFileText(fileText)
+  protected final def configureFromFileText(fileType: FileType, fileText: String): PsiFile = scalaFixture.configureFromFileText(fileType, fileText)
+  protected final def configureFromFileTextWithSomeName(fileType: String, fileText: String): PsiFile = scalaFixture.configureFromFileTextWithSomeName(fileType, fileText)
+  protected final def configureFromFileText(fileName: String, fileText: String): PsiFile = scalaFixture.configureFromFileText(fileName, fileText)
+  protected final def openEditorAtOffset(startOffset: Int): Editor = scalaFixture.openEditorAtOffset(startOffset)
 
-  protected def configureFromFileText(fileType: FileType, fileText: String): PsiFile = {
-    val file = myFixture.configureByText(fileType, fileText.stripMargin.withNormalizedSeparator.trim)
-    assertNotNull(file)
-    file
-  }
-
-  protected def configureFromFileTextWithSomeName(fileType: String, fileText: String): PsiFile = {
-    val file = myFixture.configureByText("Test." + fileType, fileText.withNormalizedSeparator)
-    assertNotNull(file)
-    file
-  }
-
-  protected def configureFromFileText(fileName: String, fileText: String): PsiFile = {
-    val file = myFixture.configureByText(fileName: String, fileText.withNormalizedSeparator)
-    assertNotNull(file)
-    file
-  }
-
-  protected def openEditorAtOffset(startOffset: Int): Editor = {
-    import com.intellij.openapi.fileEditor.{FileEditorManager, OpenFileDescriptor}
-    val project = getProject
-    val editorManager = FileEditorManager.getInstance(project)
-    val vFile = getFile.getVirtualFile
-    val editor = editorManager.openTextEditor(new OpenFileDescriptor(project, vFile, startOffset), false)
-    editor
-  }
+  protected final def configureScalaFromFileText(@Language("Scala") fileText: String): PsiFile = scalaFixture.configureFromFileText(fileText)
+  protected final def configureScala3FromFileText(@Language("Scala 3") fileText: String): PsiFile = scalaFixture.configureFromFileText(fileText)
+  protected final def addScalaFileToProject(relativePath: String, @Language("Scala") fileText: String): PsiFile = myFixture.addFileToProject(relativePath, fileText)
   //end section: helper methods
 
+  //TODO: consider extracting implementation body to ScalaCodeInsightTestFixture
+  // or crete a similar fixture which would be more specific for highlighting
   //start section: check errors
   protected def checkTextHasNoErrors(text: String): Unit = {
     myFixture.configureByText(ScalaFileType.INSTANCE, text)
@@ -171,7 +184,12 @@ abstract class ScalaLightCodeInsightFixtureTestCase
     val warnings = infos.filter(i => StringUtil.isNotEmpty(i.getDescription) && isAroundCaret(i))
 
     if (shouldPass) {
-      assert(warnings.nonEmpty, "No highlightings found")
+      if (warnings.isEmpty) {
+        val message =
+          if (infos.isEmpty) "No highlightings found"
+          else s"No matching highlightings found. All highlightings:\n${infos.map(_.toString).mkString("\n")}"
+        fail(message)
+      }
     } else if (warnings.nonEmpty) {
       throw new RuntimeException(failingPassed)
     }

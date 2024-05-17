@@ -32,6 +32,7 @@ import zio.intellij.project.npw.template.wizard.ZioProjectBuilder
 import zio.intellij.utils.ZioVersion
 import zio.intellij.utils.ZioVersion.ZIO
 
+import java.lang
 import javax.swing.JLabel
 import scala.annotation.nowarn
 
@@ -269,4 +270,6 @@ final class ZioNewProjectWizardStep(parent: ScalaNewProjectWizardStep)
         null
     }
   }
+
+  override private[project] def setGenerateOnboardingTips(value: lang.Boolean): Unit = ()
 }

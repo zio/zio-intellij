@@ -1,20 +1,19 @@
 package org.jetbrains.plugins.scala.util
 
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.{Project, ProjectUtil}
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.util.text.StringUtil
-import com.intellij.openapi.vfs.newvfs.impl.VfsData
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.{PsiComment, PsiFile}
-import com.intellij.testFramework.TestModeFlags
 import com.intellij.testFramework.common.ThreadLeakTracker
 import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenTypes
 import org.junit.Assert
-import org.junit.Assert.fail
+import org.junit.Assert.{assertNotNull, fail}
 
 import java.io.{File, IOException}
 import java.net.URISyntaxException
+import java.nio.file.Path
 import java.util
 
 object TestUtils {
@@ -26,6 +25,9 @@ object TestUtils {
   val END_MARKER = "<end>"
 
   private var TEST_DATA_PATH: String = _
+
+  def getTestDataDir: File =
+    new File(getTestDataPath).getCanonicalFile
 
   def getTestDataPath: String = {
     if (TEST_DATA_PATH == null) {
@@ -51,6 +53,14 @@ object TestUtils {
     // <community-root>/scala/scala-impl/testdata/
     val testDataPath = getTestDataPath
     java.nio.file.Paths.get(testDataPath, "..", "..", "..").normalize.toString + "/"
+  }
+
+  def findCommunityRootPath: Path =
+    Path.of(findCommunityRoot).normalize()
+
+  def findUltimateRootPath: Path = {
+    val community = findCommunityRootPath
+    community.getParent.normalize()
   }
 
   @throws[IOException]
@@ -130,14 +140,6 @@ object TestUtils {
     ThreadLeakTracker.longRunningThreadCreated(UnloadAwareDisposable.scalaPluginDisposable, "ProcessWaitFor")
   }
 
-  def optimizeSearchingForIndexableFiles(): Unit = {
-    // The test flag needs to be set _before_ calling super.setUp() in order to disable repeated searching
-    // for indexable files before each test. Our test environment in light project tests does not change
-    // between test runs and enabling this optimization cuts down test execution time considerably.
-    Registry.get("platform.projectModel.workspace.model.file.index").setValue(false)
-    TestModeFlags.set(VfsData.ENABLE_IS_INDEXED_FLAG_KEY, java.lang.Boolean.TRUE)
-  }
-
   /**
    * @param fileText text of the file without last comment
    * @param expectedResult content of the last comment in teh file
@@ -155,7 +157,8 @@ object TestUtils {
    * }}}
    *
    * @param file file which was created from test data which contains comment in the end of the file
-   * @return 1. file content without last comment 2. last comment content as an expected result
+   * @return 1. file content without last comment<br>
+   *         2. last comment content as an expected result
    */
   def extractExpectedResultFromLastComment(file: PsiFile): ExpectedResultFromLastComment = {
     val fileText = file.getText
@@ -163,7 +166,7 @@ object TestUtils {
     val lastComment = file.findElementAt(fileText.length - 1) match {
       case comment: PsiComment => comment
       case element =>
-        fail(s"Last element in the file is expected to be a comment but got: ${element.getClass}").asInstanceOf[Nothing]
+        fail(s"Last element in the file is expected to be a comment but got: ${element.getClass} with text: ${element.getText}").asInstanceOf[Nothing]
     }
 
     val fileTextWithoutLastComment = file.getText.substring(0, lastComment.getTextOffset).trim
@@ -177,5 +180,13 @@ object TestUtils {
         fail("Test result must be in last comment statement.").asInstanceOf[Nothing]
     }
     ExpectedResultFromLastComment(fileTextWithoutLastComment, commentInnerContent.trim)
+  }
+
+  def getPathRelativeToProject(file: VirtualFile, project: Project): String = {
+    val projectRoot = ProjectUtil.guessProjectDir(project)
+    assertNotNull(s"Can't guess project dir", file)
+    val pathParent = projectRoot.getPath
+    val pathChild = file.getPath
+    pathChild.stripPrefix(pathParent).stripPrefix("/")
   }
 }
