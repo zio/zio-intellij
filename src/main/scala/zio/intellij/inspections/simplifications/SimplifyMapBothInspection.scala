@@ -6,11 +6,11 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
 import zio.intellij.utils.StringUtils._
-import zio.intellij.utils.Version
-import zio.intellij.utils.Version.ZIO
+import zio.intellij.utils.ZioVersion
+import zio.intellij.utils.ZioVersion.ZIO
 
 class SimplifyMapBothInspection extends ZInspection(MapBothSimplificationType) {
-  override protected def isAvailable(zioVersion: Version): Boolean = zioVersion >= ZIO.`1.0.10`
+  override protected def isAvailable(zioVersion: ZioVersion): Boolean = zioVersion >= ZIO.`1.0.10`
 }
 
 object MapBothSimplificationType extends SimplificationType {

@@ -7,7 +7,7 @@ import org.jetbrains.plugins.scala.codeInspection.collections.OperationOnCollect
 import org.jetbrains.plugins.scala.codeInspection.collections._
 import org.jetbrains.plugins.scala.lang.psi.ScalaPsiUtil
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
-import zio.intellij.utils.{ModuleSyntax, Version}
+import zio.intellij.utils.{ModuleSyntax, ZioVersion}
 
 import javax.swing.JComponent
 
@@ -18,7 +18,7 @@ abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOn
 
   final override def possibleSimplificationTypes: Seq[SimplificationType] = simplifiers
 
-  protected def isAvailable(zioVersion: Version): Boolean = zioVersion >= Version.ZIO.`1.0.0`
+  protected def isAvailable(zioVersion: ZioVersion): Boolean = zioVersion >= ZioVersion.ZIO.`1.0.0`
 
   private def isInspectionAvailable(inspection: ZInspection, element: PsiElement): Boolean =
     Option(ScalaPsiUtil.getModule(element))

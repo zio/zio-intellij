@@ -6,7 +6,7 @@ import org.jetbrains.plugins.scala.DependencyManagerBase.DependencyDescription
 import org.jetbrains.plugins.scala.{DependencyManagerBase, ScalaVersion}
 import TestRunnerDownloader.DownloadProgressListener
 import TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
-import zio.intellij.utils.{ScalaVersionHack, Version}
+import zio.intellij.utils.{ScalaVersionHack, ZioVersion}
 
 import java.net.URL
 import java.nio.file.Path
@@ -14,7 +14,7 @@ import scala.util.control.NonFatal
 
 private[runner] class TestRunnerDownloader(progressListener: DownloadProgressListener) {
 
-  def download(version: Version)(implicit scalaVersion: ScalaVersion): Either[DownloadFailure, DownloadSuccess] =
+  def download(version: ZioVersion)(implicit scalaVersion: ScalaVersion): Either[DownloadFailure, DownloadSuccess] =
     try {
       val resolver             = new DependencyResolver(progressListener)
       val resolvedDependencies = resolver.resolve(dependencies(version, scalaVersion): _*)
@@ -26,7 +26,7 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
       case NonFatal(e)                 => Left(DownloadFailure(version, scalaVersion, e))
     }
 
-  private def dependencies(version: Version, scalaVersion: ScalaVersion): Seq[DependencyDescription] =
+  private def dependencies(version: ZioVersion, scalaVersion: ScalaVersion): Seq[DependencyDescription] =
     List(DependencyDescription("dev.zio", s"zio-test-intellij_${scalaVersion.versionStr}", version.toString))
 
   private class DependencyResolver(progressListener: DownloadProgressListener) extends DependencyManagerBase {
@@ -53,9 +53,9 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
 object TestRunnerDownloader {
   sealed trait DownloadResult
   object DownloadResult {
-    final case class DownloadSuccess(version: Version, scalaVersion: ScalaVersion, jarUrls: Seq[URL])
+    final case class DownloadSuccess(version: ZioVersion, scalaVersion: ScalaVersion, jarUrls: Seq[URL])
         extends DownloadResult
-    final case class DownloadFailure(version: Version, scalaVersion: ScalaVersion, cause: Throwable)
+    final case class DownloadFailure(version: ZioVersion, scalaVersion: ScalaVersion, cause: Throwable)
         extends DownloadResult
   }
 

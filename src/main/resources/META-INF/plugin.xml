@@ -342,9 +342,9 @@
 
         <testCreator language="Scala" implementationClass="zio.intellij.testsupport.ZTestCreator" order="first" />
 
-        <!-- Project template -->
-        <projectTemplatesFactory implementation="zio.intellij.project.ZioProjectTemplateFactory" order="last"/>
-
+        <!-- new project wizard -->
+        <moduleBuilder builderClass="zio.intellij.project.npw.ZioModuleBuilderAdapter" />
+        
         <!-- debugging -->
         <debuggerClassFilterProvider implementation="zio.intellij.debugger.ZioSteppingFilterProvider"/>
 
