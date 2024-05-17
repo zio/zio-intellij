@@ -6,11 +6,11 @@ import org.junit.Assert.{assertEquals, assertTrue}
 class VersionParsingTest extends TestCase {
 
   private def assertVersion(
-    version: Version,
-    major: Version.Major,
-    minor: Version.Minor,
-    patch: Version.Patch,
-    postfix: Option[Version.Postfix]
+    version: ZioVersion,
+    major: ZioVersion.Major,
+    minor: ZioVersion.Minor,
+    patch: ZioVersion.Patch,
+    postfix: Option[ZioVersion.Postfix]
   ): Unit = {
     assertEquals(version.major, major)
     assertEquals(version.minor, minor)
@@ -19,124 +19,124 @@ class VersionParsingTest extends TestCase {
   }
 
   def test_should_parse_simple_version(): Unit = {
-    val versionOpt = Version.parse("1.2.3")
+    val versionOpt = ZioVersion.parse("1.2.3")
     assertTrue(versionOpt.isDefined)
     versionOpt.foreach { version =>
       assertVersion(
         version,
-        Version.Major(1),
-        Version.Minor(2),
-        Version.Patch(3),
+        ZioVersion.Major(1),
+        ZioVersion.Minor(2),
+        ZioVersion.Patch(3),
         None
       )
     }
   }
 
   def test_should_parse_rc_version(): Unit = {
-    val versionOpt = Version.parse("1.2.3-RC4")
+    val versionOpt = ZioVersion.parse("1.2.3-RC4")
     assertTrue(versionOpt.isDefined)
     versionOpt.foreach { version =>
       assertVersion(
         version,
-        Version.Major(1),
-        Version.Minor(2),
-        Version.Patch(3),
-        Some(Version.RC(List(Version.PostfixSegment(4))))
+        ZioVersion.Major(1),
+        ZioVersion.Minor(2),
+        ZioVersion.Patch(3),
+        Some(ZioVersion.RC(List(ZioVersion.PostfixSegment(4))))
       )
-      assertEquals(version, Version.parseUnsafe("1.2.3-rc4"))
+      assertEquals(version, ZioVersion.parseUnsafe("1.2.3-rc4"))
     }
   }
 
   def test_should_parse_milestone_version(): Unit = {
-    val versionOpt = Version.parse("1.2.3-M4")
+    val versionOpt = ZioVersion.parse("1.2.3-M4")
     assertTrue(versionOpt.isDefined)
     versionOpt.foreach { version =>
       assertVersion(
         version,
-        Version.Major(1),
-        Version.Minor(2),
-        Version.Patch(3),
-        Some(Version.Milestone(List(Version.PostfixSegment(4))))
+        ZioVersion.Major(1),
+        ZioVersion.Minor(2),
+        ZioVersion.Patch(3),
+        Some(ZioVersion.Milestone(List(ZioVersion.PostfixSegment(4))))
       )
-      assertEquals(version, Version.parseUnsafe("1.2.3-m4"))
+      assertEquals(version, ZioVersion.parseUnsafe("1.2.3-m4"))
     }
   }
 
   def test_should_parse_rc_version_with_minor_part(): Unit = {
-    val versionOpt = Version.parse("1.2.3-RC4-5")
+    val versionOpt = ZioVersion.parse("1.2.3-RC4-5")
     assertTrue(versionOpt.isDefined)
     versionOpt.foreach { version =>
       assertVersion(
         version,
-        Version.Major(1),
-        Version.Minor(2),
-        Version.Patch(3),
-        Some(Version.RC(List(4, 5).map(Version.PostfixSegment)))
+        ZioVersion.Major(1),
+        ZioVersion.Minor(2),
+        ZioVersion.Patch(3),
+        Some(ZioVersion.RC(List(4, 5).map(ZioVersion.PostfixSegment)))
       )
     }
   }
 
   def test_should_parse_milestone_version_with_minor_part(): Unit = {
-    val versionOpt = Version.parse("1.2.3-M4-5")
+    val versionOpt = ZioVersion.parse("1.2.3-M4-5")
     assertTrue(versionOpt.isDefined)
     versionOpt.foreach { version =>
       assertVersion(
         version,
-        Version.Major(1),
-        Version.Minor(2),
-        Version.Patch(3),
-        Some(Version.Milestone(List(4, 5).map(Version.PostfixSegment)))
+        ZioVersion.Major(1),
+        ZioVersion.Minor(2),
+        ZioVersion.Patch(3),
+        Some(ZioVersion.Milestone(List(4, 5).map(ZioVersion.PostfixSegment)))
       )
     }
   }
 
   def test_should_parse_extended_version(): Unit = {
-    val versionOpt = Version.parse("1.0.4-2")
+    val versionOpt = ZioVersion.parse("1.0.4-2")
     assertTrue(versionOpt.isDefined)
     versionOpt.foreach { version =>
       assertVersion(
         version,
-        Version.Major(1),
-        Version.Minor(0),
-        Version.Patch(4),
-        Some(Version.Ext(List(Version.PostfixSegment(2))))
+        ZioVersion.Major(1),
+        ZioVersion.Minor(0),
+        ZioVersion.Patch(4),
+        Some(ZioVersion.Ext(List(ZioVersion.PostfixSegment(2))))
       )
     }
   }
 
   def test_should_parse_very_extended_version(): Unit = {
-    val versionOpt = Version.parse("1.0.4-2-100-500-9000")
+    val versionOpt = ZioVersion.parse("1.0.4-2-100-500-9000")
     assertTrue(versionOpt.isDefined)
     versionOpt.foreach { version =>
       assertVersion(
         version,
-        Version.Major(1),
-        Version.Minor(0),
-        Version.Patch(4),
-        Some(Version.Ext(List(2, 100, 500, 9000).map(Version.PostfixSegment)))
+        ZioVersion.Major(1),
+        ZioVersion.Minor(0),
+        ZioVersion.Patch(4),
+        Some(ZioVersion.Ext(List(2, 100, 500, 9000).map(ZioVersion.PostfixSegment)))
       )
     }
   }
 
   def test_should_fail_to_parse_version_without_minor_and_patch(): Unit =
-    assertEquals(Version.parse("1"), None)
+    assertEquals(ZioVersion.parse("1"), None)
 
   def test_should_fail_to_parse_version_without_patch(): Unit =
-    assertEquals(Version.parse("1.2"), None)
+    assertEquals(ZioVersion.parse("1.2"), None)
 
   def test_should_fail_to_parse_version_with_invalid_postfix_part(): Unit = {
-    assertEquals(Version.parse("1.2.3-"), None)
-    assertEquals(Version.parse("1.2.3-4-"), None)
-    assertEquals(Version.parse("1.2.3-RC"), None)
-    assertEquals(Version.parse("1.2.3-M"), None)
-    assertEquals(Version.parse("1.2.3-RC-"), None)
-    assertEquals(Version.parse("1.2.3-M-"), None)
-    assertEquals(Version.parse("1.2.3-RC-4-"), None)
-    assertEquals(Version.parse("1.2.3-M-4-"), None)
+    assertEquals(ZioVersion.parse("1.2.3-"), None)
+    assertEquals(ZioVersion.parse("1.2.3-4-"), None)
+    assertEquals(ZioVersion.parse("1.2.3-RC"), None)
+    assertEquals(ZioVersion.parse("1.2.3-M"), None)
+    assertEquals(ZioVersion.parse("1.2.3-RC-"), None)
+    assertEquals(ZioVersion.parse("1.2.3-M-"), None)
+    assertEquals(ZioVersion.parse("1.2.3-RC-4-"), None)
+    assertEquals(ZioVersion.parse("1.2.3-M-4-"), None)
   }
 
   def test_should_parse_versions_from_maven(): Unit =
     VersionTestUtils.zioVersionsFromMaven
-      .foreach(versionStr => assertTrue(Version.parse(versionStr).isDefined))
+      .foreach(versionStr => assertTrue(ZioVersion.parse(versionStr).isDefined))
 
 }

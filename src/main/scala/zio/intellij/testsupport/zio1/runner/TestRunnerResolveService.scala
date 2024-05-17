@@ -13,7 +13,7 @@ import TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
 import TestRunnerDownloader.{DownloadProgressListener, NoopProgressListener}
 import TestRunnerResolveService.ResolveError.DownloadError
 import TestRunnerResolveService._
-import zio.intellij.utils.{BackgroundTask, ScalaVersionHack, Version}
+import zio.intellij.utils.{BackgroundTask, ScalaVersionHack, ZioVersion}
 
 import java.net.{URL, URLClassLoader}
 import java.util.concurrent.ConcurrentHashMap
@@ -30,8 +30,8 @@ import scala.util._
 private[testsupport] final class TestRunnerResolveService
     extends PersistentStateComponent[TestRunnerResolveService.ServiceState] {
 
-  private val testRunnerVersions: mutable.Map[(Version, String), ResolveStatus] =
-    new ConcurrentHashMap[(Version, String), ResolveStatus]().asScala
+  private val testRunnerVersions: mutable.Map[(ZioVersion, String), ResolveStatus] =
+    new ConcurrentHashMap[(ZioVersion, String), ResolveStatus]().asScala
 
   private val state: TestRunnerResolveService.ServiceState = new TestRunnerResolveService.ServiceState
 
@@ -40,7 +40,7 @@ private[testsupport] final class TestRunnerResolveService
     XmlSerializerUtil.copyBean(state, this.state)
 
   def resolve(
-    version: Version,
+    version: ZioVersion,
     scalaVersion: ScalaVersion,
     downloadIfMissing: Boolean,
     resolveFast: Boolean = false,
@@ -66,7 +66,7 @@ private[testsupport] final class TestRunnerResolveService
   implicit val ec: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(appExecutorService)
 
   def resolveAsync(
-    version: Version,
+    version: ZioVersion,
     scalaVersion: ScalaVersion,
     project: Project
   ): Future[ResolveResult] =
@@ -89,7 +89,7 @@ private[testsupport] final class TestRunnerResolveService
     }
 
   private def downloadAndResolve(
-    version: Version,
+    version: ZioVersion,
     scalaVersion: ScalaVersion,
     listener: DownloadProgressListener = NoopProgressListener
   ): ResolveResult = {
@@ -99,7 +99,7 @@ private[testsupport] final class TestRunnerResolveService
     }
   }
 
-  private def resolveClassPath(version: Version, scalaVersion: ScalaVersion, jarUrls: Seq[URL]): ResolveResult = {
+  private def resolveClassPath(version: ZioVersion, scalaVersion: ScalaVersion, jarUrls: Seq[URL]): ResolveResult = {
     val urls: Array[URL] = jarUrls.toArray
     Try(new URLClassLoader(urls, null).loadClass(ZTestRunnerName + "$")) match {
       case Success(_) =>
@@ -127,10 +127,12 @@ object TestRunnerResolveService {
 
   sealed trait ResolveError
   object ResolveError {
-    final case class NotFound(version: Version, scalaVersion: ScalaVersion)                        extends ResolveError
-    final case class DownloadInProgress(version: Version, scalaVersion: ScalaVersion)              extends ResolveError
-    final case class DownloadError(version: Version, scalaVersion: ScalaVersion, cause: Throwable) extends ResolveError
-    final case class UnknownError(version: Version, scalaVersion: ScalaVersion, cause: Throwable)  extends ResolveError
+    final case class NotFound(version: ZioVersion, scalaVersion: ScalaVersion)           extends ResolveError
+    final case class DownloadInProgress(version: ZioVersion, scalaVersion: ScalaVersion) extends ResolveError
+    final case class DownloadError(version: ZioVersion, scalaVersion: ScalaVersion, cause: Throwable)
+        extends ResolveError
+    final case class UnknownError(version: ZioVersion, scalaVersion: ScalaVersion, cause: Throwable)
+        extends ResolveError
 
     object DownloadError {
       def apply(f: DownloadFailure): DownloadError = new DownloadError(f.version, f.scalaVersion, f.cause)

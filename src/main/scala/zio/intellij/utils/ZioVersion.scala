@@ -2,29 +2,29 @@ package zio.intellij.utils
 
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.project.ScalaLanguageLevel
-import zio.intellij.utils.Version._
+import zio.intellij.utils.ZioVersion._
 
 import scala.annotation.tailrec
 import scala.util.matching.Regex
 
-sealed abstract case class Version private (major: Major, minor: Minor, patch: Patch, postfix: Option[Postfix])
-    extends Ordered[Version] { self =>
-  def ===(that: Version): Boolean = Version.versionOrdering.equiv(this, that)
+sealed abstract case class ZioVersion private (major: Major, minor: Minor, patch: Patch, postfix: Option[Postfix])
+    extends Ordered[ZioVersion] { self =>
+  def ===(that: ZioVersion): Boolean = ZioVersion.versionOrdering.equiv(this, that)
 
-  override def compare(that: Version): Int =
-    Version.versionOrdering.compare(this, that)
+  override def compare(that: ZioVersion): Int =
+    ZioVersion.versionOrdering.compare(this, that)
 
   override def toString: String =
     s"${major.value}.${minor.value}.${patch.value}${postfix.fold("")("-" + _)}"
 
-  private[intellij] def requiresTestRunner =
+  def requiresTestRunner =
     self >= ZIO.`RC18-2` && self.major < ZIO.`2.0.0`.major // ZIO 2.0 (excluding M1) has the IntelliJ-rendering runner built-in
 }
 
-object Version {
+object ZioVersion {
   val scala3Version = new ScalaVersion(ScalaLanguageLevel.Scala_3_0, "0")
 
-  val versionOrdering: Ordering[Version] = (x: Version, y: Version) => {
+  val versionOrdering: Ordering[ZioVersion] = (x: ZioVersion, y: ZioVersion) => {
     val compareWithoutPostfix = (x.major, x.minor, x.patch).compare((y.major, y.minor, y.patch))
     if (compareWithoutPostfix != 0) compareWithoutPostfix
     else {
@@ -95,7 +95,7 @@ object Version {
   private val versionRegex: Regex = """(\d+).(\d+).(\d+)(-(RC|rc|M|m)?\d+(?:-\d+)*)?""".r
   private val numericRegex: Regex = """\d+""".r
 
-  def parse(str: String): Option[Version] =
+  def parse(str: String): Option[ZioVersion] =
     str match {
       case versionRegex(majorStr, minorStr, patchStr, postfixStr, rcOrMStr) =>
         val major = Major(majorStr.toInt)
@@ -112,26 +112,26 @@ object Version {
           }
         }
 
-        Some(new Version(major, minor, patch, postfix) {})
+        Some(new ZioVersion(major, minor, patch, postfix) {})
       case _ => None
     }
 
-  def parseUnsafe(str: String): Version =
+  def parseUnsafe(str: String): ZioVersion =
     parse(str).getOrElse(throw new IllegalArgumentException(s"Could not parse version: $str"))
 
   object ZIO {
-    val RC18: Version       = Version.parseUnsafe("1.0.0-RC18")
-    val `RC18-2`: Version   = Version.parseUnsafe("1.0.0-RC18-2")
-    val RC19: Version       = Version.parseUnsafe("1.0.0-RC19")
-    val RC21: Version       = Version.parseUnsafe("1.0.0-RC21")
-    val `RC21-2`: Version   = Version.parseUnsafe("1.0.0-RC21-2")
-    val `1.0.0`: Version    = Version.parseUnsafe("1.0.0")
-    val `1.0.6`: Version    = Version.parseUnsafe("1.0.6")
-    val `1.0.8`: Version    = Version.parseUnsafe("1.0.8")    // first version to support Scala 3.0.0
-    val `1.0.10`: Version   = Version.parseUnsafe("1.0.10")
-    val `2.0.0-M2`: Version = Version.parseUnsafe("2.0.0-M2") // first version to support the built-in test runner
-    val `2.0.0`: Version    = Version.parseUnsafe("2.0.0")
-
-    val `latest-ish`: Version = Version.parseUnsafe("1.0.11")
+    val RC18: ZioVersion         = ZioVersion.parseUnsafe("1.0.0-RC18")
+    val `RC18-2`: ZioVersion     = ZioVersion.parseUnsafe("1.0.0-RC18-2")
+    val RC19: ZioVersion         = ZioVersion.parseUnsafe("1.0.0-RC19")
+    val RC21: ZioVersion         = ZioVersion.parseUnsafe("1.0.0-RC21")
+    val `RC21-2`: ZioVersion     = ZioVersion.parseUnsafe("1.0.0-RC21-2")
+    val `1.0.0`: ZioVersion      = ZioVersion.parseUnsafe("1.0.0")
+    val `1.0.6`: ZioVersion      = ZioVersion.parseUnsafe("1.0.6")
+    val `1.0.8`: ZioVersion      = ZioVersion.parseUnsafe("1.0.8")    // first version to support Scala 3.0.0
+    val `1.0.10`: ZioVersion     = ZioVersion.parseUnsafe("1.0.10")
+    val `2.0.0-M2`: ZioVersion   = ZioVersion.parseUnsafe("2.0.0-M2") // first version to support the built-in test runner
+    val `2.0.0`: ZioVersion      = ZioVersion.parseUnsafe("2.0.0")
+    val `1.x.latest`: ZioVersion = ZioVersion.parseUnsafe("1.0.18")
+    val `2.x.latest`: ZioVersion = ZioVersion.parseUnsafe("2.1.1")
   }
 }

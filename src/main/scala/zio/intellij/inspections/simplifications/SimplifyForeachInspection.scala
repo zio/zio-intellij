@@ -5,7 +5,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFor}
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods.`.*>`
 import zio.intellij.utils.StringUtils._
-import zio.intellij.utils.Version
+import zio.intellij.utils.ZioVersion
 import zio.intellij.utils.types.ZioType
 
 class SimplifyForeachInspectionZIO1
@@ -17,8 +17,8 @@ class SimplifyForeachInspectionZIO1
       ForeachParChainSimplificationType("foreachPar_"),
       ForeachParNChainSimplificationType
     ) {
-  override protected def isAvailable(zioVersion: Version): Boolean =
-    zioVersion >= Version.ZIO.`1.0.0` && zioVersion < Version.ZIO.`2.0.0`
+  override protected def isAvailable(zioVersion: ZioVersion): Boolean =
+    zioVersion >= ZioVersion.ZIO.`1.0.0` && zioVersion < ZioVersion.ZIO.`2.0.0`
 }
 
 class SimplifyForeachInspectionZIO2
@@ -28,7 +28,7 @@ class SimplifyForeachInspectionZIO2
       ForeachChainSimplificationType("foreachDiscard"),
       ForeachParChainSimplificationType("foreachParDiscard")
     ) {
-  override protected def isAvailable(zioVersion: Version): Boolean = zioVersion >= Version.ZIO.`2.0.0`
+  override protected def isAvailable(zioVersion: ZioVersion): Boolean = zioVersion >= ZioVersion.ZIO.`2.0.0`
 }
 
 sealed abstract class BaseForeachSimplificationType(methodName: String) extends SimplificationType {

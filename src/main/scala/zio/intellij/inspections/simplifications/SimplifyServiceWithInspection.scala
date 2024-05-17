@@ -20,7 +20,7 @@ class SimplifyServiceWithInspection
       ServiceWithSimplificationTypeZIO2,
       ServiceWithZIOSimplificationTypeZIO2
     ) {
-  override protected def isAvailable(zioVersion: Version): Boolean = zioVersion >= Version.ZIO.`1.0.6`
+  override protected def isAvailable(zioVersion: ZioVersion): Boolean = zioVersion >= ZioVersion.ZIO.`1.0.6`
 }
 
 abstract class ServiceWithSimplificationType extends SimplificationType {

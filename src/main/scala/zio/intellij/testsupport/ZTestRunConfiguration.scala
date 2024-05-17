@@ -19,7 +19,7 @@ import org.jetbrains.plugins.scala.testingSupport.test._
 import org.jetbrains.plugins.scala.testingSupport.test.testdata.{ClassTestData, TestConfigurationData}
 import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
 import zio.intellij.testsupport.zio1.runner.TestRunnerResolveService
-import zio.intellij.utils.Version.ZIO
+import zio.intellij.utils.ZioVersion.ZIO
 import zio.intellij.utils._
 
 import java.net.URL
