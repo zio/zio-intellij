@@ -13,6 +13,9 @@ class NothingInContravariantPositionInspectionTest
   def test_value_def(): Unit =
     z(s"val foo: ZIO[${START}Nothing$END, Nothing, Unit] = ???").assertHighlighted()
 
+  def test_zlayer_def(): Unit =
+    z(s"val foo: ZLayer[${START}Nothing$END, Nothing, Unit] = ???").assertHighlighted()
+
   def test_type_alias(): Unit =
     z(s"type Test[+A] = ZIO[${START}Nothing$END, Nothing, A] = ???").assertHighlighted()
 

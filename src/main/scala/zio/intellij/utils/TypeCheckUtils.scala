@@ -23,7 +23,7 @@ object TypeCheckUtils {
   val zioSpecTypes    = List("zio.test.Spec", "zio.test.SpecVersionSpecific")
   // ZStreams API signatures sometimes slightly differ from regular one (no `.tapBoth`, different `.tap`)
   val zioLike_notStream = zioTypes ++ managedTypes ++ extraTypes ++ zioTestAsserts
-  val zioLikePackages   = zioLike_notStream ++ zioStreamTypes
+  val zioLikePackages   = zioLike_notStream ++ zioStreamTypes ++ zioLayerTypes
 
   def fromZioLike(r: ScExpression): Boolean =
     isOfClassFrom(r, zioLikePackages)
