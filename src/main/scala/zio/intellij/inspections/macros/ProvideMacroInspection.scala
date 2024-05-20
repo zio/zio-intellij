@@ -236,6 +236,7 @@ class ProvideMacroInspection extends LocalInspectionTool {
 
   private def visitIssue(holder: ProblemsHolder, expr: ScExpression)(issue: ConstructionIssue): Unit =
     issue match {
+      case UnsupportedIssue             => ()
       case error: ConstructionError     => visitError(holder, expr)(error)
       case warning: ConstructionWarning => visitWarning(holder, expr)(warning)
     }
@@ -253,7 +254,7 @@ class ProvideMacroInspection extends LocalInspectionTool {
         duplicates.foreach {
           case (tpe, exprs) =>
             exprs.foreach { expr =>
-              holder.registerProblem(expr.value, ambigousLayersError(tpe, exprs), errorHighlight)
+              holder.registerProblem(expr.value, ambiguousLayersError(tpe, exprs), errorHighlight)
             }
         }
       case CircularityError(circular) =>
@@ -311,7 +312,16 @@ final case class LayerBuilder(
   typeToLayer: ZType => String
 )(implicit pContext: ProjectContext, scalaFeatures: ScalaFeatures) {
 
-  def tryBuild: Either[ConstructionIssue, Unit] = assertNoAmbiguity.flatMap(_ => tryBuildInternal)
+  // TODO find a better way!
+  def tryBuild(expr: ScExpression): Either[ConstructionIssue, Unit] = assertNoAmbiguity.flatMap(_ =>
+    layerTreeEither match {
+      case Left(buildErrors) => Left(graphToConstructionErrors(buildErrors))
+      case Right(tree)       =>
+        // forgive me for I have side-effected :(
+        expr.putUserData(GraphDataKey, tree)
+        Right(warnUnused(tree))
+    }
+  )
 
   private val target =
     if (method.isProvideSomeShared) target0.filterNot(t => remainder.exists(_.isSubtypeOf(t)))
@@ -334,27 +344,21 @@ final case class LayerBuilder(
     else Left(DuplicateLayersError(duplicates))
   }
 
-  private def tryBuildInternal: Either[ConstructionIssue, Unit] = {
+  def layerTreeEither: Either[::[GraphError], LayerTree[ZExpr]] = {
 
     /**
      * Build the layer tree. This represents the structure of a successfully
      * constructed ZLayer that will build the target types. This, of course, may
      * fail with one or more GraphErrors.
      */
-    val layerTreeEither: Either[::[GraphError], LayerTree[ZExpr]] = {
-      val nodes = providedLayerNodes ++ remainderNodes ++ sideEffectNodes
-      val graph = Graph(nodes, _.isSubtypeOf(_))
 
-      for {
-        original    <- graph.buildComplete(target)
-        sideEffects <- graph.buildNodes(sideEffectNodes)
-      } yield sideEffects ++ original
-    }
+    val nodes = providedLayerNodes ++ remainderNodes ++ sideEffectNodes
+    val graph = Graph(nodes, _.isSubtypeOf(_))
 
-    layerTreeEither match {
-      case Left(buildErrors) => Left(graphToConstructionErrors(buildErrors))
-      case Right(tree)       => warnUnused(tree)
-    }
+    for {
+      original    <- graph.buildComplete(target)
+      sideEffects <- graph.buildNodes(sideEffectNodes)
+    } yield sideEffects ++ original
   }
 
   /**
@@ -449,6 +453,27 @@ final case class LayerBuilder(
 
 object LayerBuilder {
 
+  final case class MermaidGraph(topLevel: List[String], deps: Map[String, List[String]]) {
+    def ++(that: MermaidGraph): MermaidGraph =
+      MermaidGraph(topLevel ++ that.topLevel, deps ++ that.deps)
+
+    def >>>(that: MermaidGraph): MermaidGraph = {
+      val newDeps =
+        that.deps.map {
+          case (key, values) =>
+            key -> (values ++ topLevel)
+        }
+      MermaidGraph(that.topLevel, deps ++ newDeps)
+    }
+  }
+
+  object MermaidGraph {
+    def empty: MermaidGraph = MermaidGraph(List.empty, Map.empty)
+
+    def make(string: String): MermaidGraph =
+      MermaidGraph(List(string), Map(string -> List.empty))
+  }
+
   // version specific: making sure ScType <: Has[_]
   def tryBuildZIO1(expr: ScExpression)(
     target: Seq[ScType],
@@ -489,7 +514,7 @@ object LayerBuilder {
     val remainder0          = remainder.toList.flatMap(toZType)
     val providedLayerNodes0 = providedLayers.toList.flatMap(layerToNode)
 
-    if (containsNothingAsRequirement(target, remainder, providedLayerNodes0)) Right(())
+    if (containsNothingAsRequirement(target, remainder, providedLayerNodes0)) Left(UnsupportedIssue)
     else if (nonHasTypes.nonEmpty)
       Left(NonHasTypesError(nonHasTypes.toSet))
     else
@@ -500,7 +525,7 @@ object LayerBuilder {
         sideEffectNodes = Nil,
         method = method,
         typeToLayer = tpe => s"_root_.zio.ZLayer.requires[$tpe]"
-      ).tryBuild
+      ).tryBuild(expr)
   }
 
   // version-specific: taking care of Debug and side-effect layers
@@ -532,7 +557,7 @@ object LayerBuilder {
     val (sideEffectNodes, providedLayerNodes) =
       providedLayers.toList.flatMap(layerToNode).partition(_.outputs.exists(o => api.Unit.conforms(o.value)))
 
-    if (containsNothingAsRequirement(target, remainder, providedLayerNodes)) Right(())
+    if (containsNothingAsRequirement(target, remainder, providedLayerNodes)) Left(UnsupportedIssue)
     else
       LayerBuilder(
         target0 = target.toList.flatMap(ZType(_)),
@@ -541,7 +566,7 @@ object LayerBuilder {
         sideEffectNodes = sideEffectNodes,
         method = method,
         typeToLayer = tpe => s"_root_.zio.ZLayer.environment[$tpe]"
-      ).tryBuild
+      ).tryBuild(expr)
   }
 
   // Sometimes IntelliJ fails to infer actual type and uses `Nothing` instead.
@@ -603,6 +628,7 @@ object LayerBuilder {
   }
 
   sealed trait ConstructionIssue
+  case object UnsupportedIssue extends ConstructionIssue // in case of Scala 3 / IntelliJ inference issues
 
   sealed trait ConstructionError                                            extends ConstructionIssue
   final case class DuplicateLayersError(duplicates: Map[ZType, Seq[ZExpr]]) extends ConstructionError
@@ -628,6 +654,9 @@ sealed abstract class LayerTree[+A] { self =>
   def ++[A1 >: A](that: LayerTree[A1]): LayerTree[A1] =
     if (self eq Empty) that else if (that eq Empty) self else ComposeH(self, that)
 
+  def map[B](f: A => B): LayerTree[B] =
+    fold[LayerTree[B]](Empty, a => Value(f(a)), ComposeH(_, _), ComposeV(_, _))
+
   def fold[B](z: B, value: A => B, composeH: (B, B) => B, composeV: (B, B) => B): B = self match {
     case Empty         => z
     case Value(value0) => value(value0)
@@ -638,7 +667,6 @@ sealed abstract class LayerTree[+A] { self =>
   }
 
   def toSet[A1 >: A]: Set[A1] = fold[Set[A1]](Set.empty[A1], Set(_), _ ++ _, _ ++ _)
-
 }
 
 object LayerTree {
@@ -756,7 +784,7 @@ object ErrorRendering {
     List(header, topLevelString, transitiveStrings, footer).flatten.mkString(lineSeparator)
   }
 
-  def ambigousLayersError(tpe: ZType, providedBy: Seq[ZExpr]): String =
+  def ambiguousLayersError(tpe: ZType, providedBy: Seq[ZExpr]): String =
     s"""Ambiguous layers! $tpe is provided by:
        |${providedBy.mkString(lineSeparator)}""".stripMargin
 
@@ -764,9 +792,7 @@ object ErrorRendering {
     s"""|Circular Dependency Detected
         |A layer simultaneously requires and is required by another:
         |  "◉" $b
-
         |  "╰─◉" $a
-
         |    "╰─ ◉" $b""".stripMargin
 
   def nonHasTypeError(types: Set[ZType]): String =

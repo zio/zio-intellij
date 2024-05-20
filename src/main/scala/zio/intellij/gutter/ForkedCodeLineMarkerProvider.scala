@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer.Alignment
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenTypes
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScReferenceExpression
+import zio.intellij.icons.FiberIcon
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
 
@@ -41,7 +42,7 @@ object ForkedCodeLineMarkerProvider {
     new LineMarkerInfo(
       element,
       element.getTextRange,
-      fiberIcon,
+      FiberIcon,
       (_: PsiElement) => s"Effect is explicitly forked via '${element.getText}'",
       null, // the handler executed when the gutter icon is clicked
       Alignment.LEFT,

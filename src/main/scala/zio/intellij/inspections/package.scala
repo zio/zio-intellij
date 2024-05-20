@@ -66,6 +66,8 @@ package object inspections {
     val `.forkAs`: Qualified               = invocation("forkAs").from(zioLikePackages)
     val `.forkOn`: Qualified               = invocation("forkOn").from(zioLikePackages)
     val `.forkWithErrorHandler`: Qualified = invocation("forkWithErrorHandler").from(zioLikePackages)
+    val `.toLayer`: Qualified              = invocation("toLayer").from(zioLikePackages)
+    val `.toLayerMany`: Qualified          = invocation("toLayerMany").from(zioLikePackages)
   }
 
   object streamMethods {

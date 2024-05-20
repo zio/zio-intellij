@@ -27,14 +27,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
 import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
-import org.jetbrains.plugins.scala.project.{
-  LibraryExt,
-  ModuleExt,
-  ProjectContext,
-  ProjectExt,
-  ProjectPsiElementExt,
-  ScalaLanguageLevel
-}
+import org.jetbrains.plugins.scala.project.{LibraryExt, ModuleExt, ProjectContext, ProjectExt, ProjectPsiElementExt, ScalaLanguageLevel}
 import org.jetbrains.sbt.SbtUtil
 import org.jetbrains.sbt.SbtUtil.getDefaultLauncher
 import org.jetbrains.sbt.project.SbtExternalSystemManager
@@ -307,14 +300,6 @@ package object utils {
     def hasZio: Boolean = element.module.exists(_.hasZio)
     def isZio1: Boolean = element.module.exists(_.isZio1)
     def isZio2: Boolean = element.module.exists(_.isZio2)
-  }
-
-  implicit class TraverseAtHome[A](private val list: List[A]) extends AnyVal {
-    def map2[A, B, C](oa: Option[A], ob: Option[B])(f: (A, B) => C): Option[C] =
-      oa.flatMap(a => ob.map(b => f(a, b)))
-
-    def traverse[B](f: A => Option[B]): Option[List[B]] =
-      list.foldRight[Option[List[B]]](Some(Nil))((h, t) => map2(f(h), t)(_ :: _))
   }
 
   implicit final class ListSyntax[A](private val list: List[A]) extends AnyVal {
