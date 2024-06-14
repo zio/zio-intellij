@@ -63,7 +63,10 @@ def newProject(projectName: String, base: File): Project =
     name := projectName,
     scalaVersion := scala213,
     version := pluginVersion,
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test,
+    libraryDependencies ++= Seq(
+      "com.novocode"      % "junit-interface"   % "0.11"   % Test,
+      "org.junit.jupiter" % "junit-jupiter-api" % "5.10.2" % Test
+    ),
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
     intellijPlugins := Seq(
       "com.intellij.java".toPlugin,
