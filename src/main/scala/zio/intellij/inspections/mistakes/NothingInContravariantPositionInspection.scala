@@ -4,11 +4,11 @@ import com.intellij.codeInspection._
 import com.intellij.psi.PsiElement
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
-import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScParameterizedTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.statements._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScTypeParametersOwner
+import zio.intellij.inspections.isOfClassFrom
 import zio.intellij.utils.TypeCheckUtils.zioLikePackages
 
 class NothingInContravariantPositionInspection extends LocalInspectionTool {

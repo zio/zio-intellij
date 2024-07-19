@@ -1,7 +1,6 @@
 package zio.intellij.testsupport
 
 import com.intellij.psi.PsiElement
-import org.jetbrains.plugins.scala.codeInspection.collections.isOfClassFrom
 import org.jetbrains.plugins.scala.extensions.{ObjectExt, PsiElementExt, ResolvesTo}
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
@@ -10,7 +9,8 @@ import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.ScClassImpl
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
 import zio.intellij.ZioIcon
-import zio.intellij.testsupport.ZTestFramework.{expandsToTestMethod, ZIO1SpecFQN, ZIO2SpecFQN}
+import zio.intellij.inspections.isOfClassFrom
+import zio.intellij.testsupport.ZTestFramework.{ZIO1SpecFQN, ZIO2SpecFQN, expandsToTestMethod}
 import zio.intellij.utils.TypeCheckUtils.zioTestPackage
 
 import javax.swing.Icon

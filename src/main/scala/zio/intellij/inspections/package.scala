@@ -1,13 +1,16 @@
 package zio.intellij
 
-import com.intellij.psi.{PsiAnnotation, PsiElement}
-import org.jetbrains.plugins.scala.codeInspection.collections.{isOfClassFrom, _}
+import com.intellij.psi.{PsiAnnotation, PsiClass, PsiElement}
+import org.jetbrains.plugins.scala.codeInspection.collections._
+import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScPattern, ScReferencePattern, ScWildcardPattern}
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScObject, ScTemplateDefinition, ScTrait}
+import org.jetbrains.plugins.scala.lang.psi.types.ScType
+import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
 import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils.types._
 
@@ -16,6 +19,25 @@ package object inspections {
   object collectionMethods {
     private[inspections] val `.map` = invocation("map").from(likeCollectionClasses)
   }
+
+  def isOfClassFrom(expr: ScExpression, patterns: Seq[String]): Boolean = {
+    val typ = expr.`type`().toOption
+    typ.exists(isOfClassFrom(_, patterns))
+  }
+
+  def isOfClassFrom(`type`: ScType, patterns: Seq[String]): Boolean = {
+    val typeExtracted = `type`.tryExtractDesignatorSingleton
+    isOfClassFromForExtractedType(typeExtracted, patterns)
+  }
+
+  private def isOfClassFromForExtractedType(typeExtracted: ScType, patterns: Seq[String]): Boolean = {
+    val clazz = typeExtracted.extractClass
+    clazz.exists(qualifiedNameFitToPatterns(_, patterns))
+  }
+
+  private def qualifiedNameFitToPatterns(clazz: PsiClass, patterns: Seq[String]) =
+    Option(clazz).flatMap(c => Option(c.qualifiedName))
+      .exists(ScalaNamesUtil.nameFitToPatterns(_, patterns, strict = false))
 
   object zioMethods {
     val `.*>` : Qualified                  = invocation("*>").from(zioLikePackages)
