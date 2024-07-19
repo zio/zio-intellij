@@ -1,7 +1,7 @@
 package org.jetbrains.plugins.scala
 package base
 
-import junit.framework.{AssertionFailedError, Test, TestListener, TestResult}
+import _root_.junit.framework.{AssertionFailedError, Test, TestListener, TestResult}
 
 import scala.collection.immutable.SortedSet
 
