@@ -321,6 +321,9 @@
         <codeInsight.lineMarkerProvider implementationClass="zio.intellij.gutter.ForkedCodeLineMarkerProvider"
                                         language="Scala"/>
 
+        <codeInsight.lineMarkerProvider implementationClass="zio.intellij.gutter.ZLayerLineMarkerProvider"
+                                        language="Scala"/>
+
         <referencesSearch implementation="zio.intellij.searchers.ZioAccessorUsagesSearcher"/>
 
         <!-- test support -->
@@ -332,8 +335,6 @@
         <runConfigurationProducer implementation="zio.intellij.testsupport.ZTestRunConfigurationProducer"/>
         <runLineMarkerContributor implementationClass="zio.intellij.testsupport.ZTestRunLineMarkerProvider"
                                   language="Scala" order="first"/>
-
-
 
         <notificationGroup id="Test Runner Download" displayType="BALLOON" isLogByDefault="true"/>
         <notificationGroup id="Test Runner Download Error" displayType="STICKY_BALLOON" isLogByDefault="true"/>
