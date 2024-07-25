@@ -137,7 +137,8 @@ sealed abstract class ZTestRunConfiguration(project: Project, configurationFacto
           console
         }
 
-      createExecutionResult(consoleView, processHandler)
+      // TODO figure out whether we need a dedicated testConsoleView
+      createExecutionResult(consoleView, consoleView, processHandler)
     }
   }
 

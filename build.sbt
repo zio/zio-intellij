@@ -1,8 +1,8 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.12"
-lazy val scalaPluginVersion = "2024.2.11"
-lazy val minorVersion       = "0"
+lazy val scalaPluginVersion = "2024.2.13"
+lazy val minorVersion       = "1"
 lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
 lazy val pluginVersion      = s"2024.2.34.$buildVersion"
 
