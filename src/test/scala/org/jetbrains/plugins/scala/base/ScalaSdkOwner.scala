@@ -1,7 +1,7 @@
 package org.jetbrains.plugins.scala.base
 
 import com.intellij.util.containers.ContainerUtil
-import _root_.junit.framework.{AssertionFailedError, Test, TestListener, TestResult}
+import junit.framework.{AssertionFailedError, Test, TestListener, TestResult}
 import org.jetbrains.plugins.scala.{LatestScalaVersions, ScalaVersion}
 
 import scala.collection.immutable.SortedSet
@@ -23,7 +23,7 @@ trait ScalaSdkOwner extends Test
         val defaultVersion = defaultVersionOverride.getOrElse(defaultSdkVersion)
         val selectedVersion = selectVersion(defaultVersion, supportedVersions)
         selectedVersion.orElse(
-          ScalaVersion.Latest.scalaNext.find(supportedIn)
+          (ScalaVersion.Latest.allScalaNext ++ ScalaVersion.Latest.allReleaseCandidates).find(supportedIn)
         ).getOrElse(sys.error("Could not find a Scala version matching the test criteria"))
     }
   }
@@ -90,7 +90,7 @@ object ScalaSdkOwner {
   //       that should already work in newest version (SCL-15634)
   val defaultSdkVersion: ScalaVersion = LatestScalaVersions.Scala_2_10 // ScalaVersion.default
   val preferableSdkVersion: ScalaVersion = LatestScalaVersions.Scala_2_13
-  val allTestVersions: SortedSet[ScalaVersion] = SortedSet.from(LatestScalaVersions.all.flatMap(_.generateAllMinorVersions()))
+  val allTestVersions: SortedSet[ScalaVersion] = SortedSet.from(LatestScalaVersions.allStableWithoutScalaNext.flatMap(_.generateAllMinorVersions()))
 
   private def selectVersion(wantedVersion: ScalaVersion, possibleVersions0: SortedSet[ScalaVersion]): Option[ScalaVersion] = {
     val possibleVersions = possibleVersions0.iteratorFrom(wantedVersion).toSeq
