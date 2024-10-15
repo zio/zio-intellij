@@ -1,7 +1,6 @@
 package zio.intellij.inspections.simplifications
 
 import org.jetbrains.plugins.scala.codeInspection.collections.{
-  invocationText,
   Qualified,
   Simplification,
   SimplificationType
@@ -71,7 +70,7 @@ sealed abstract class BaseErrorModificationSimplificationType(qual: Qualified, m
   val hint = s"Replace with .$methodName"
 
   private def replacement(expr: ScExpression, zio: ScExpression, g: ScExpression): Simplification =
-    replace(expr).withText(invocationText(zio, methodName, g)).highlightAll
+    replace(expr).withText(invocationTextFor(zio, methodName, g)).highlightAll
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
@@ -99,7 +98,7 @@ sealed abstract class BaseErrorRecoverySimplificationType(qual: Qualified, metho
   val hint = s"Replace with .map($methodStr)"
 
   private def replacement(expr: ScExpression, zio: ScExpression): Option[Simplification] =
-    createExpression(methodStr, expr).map(m => replace(expr).withText(invocationText(zio, "map", m)).highlightAll)
+    createExpression(methodStr, expr).map(m => replace(expr).withText(invocationTextFor(zio, "map", m)).highlightAll)
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {

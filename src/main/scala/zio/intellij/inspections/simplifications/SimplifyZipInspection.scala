@@ -18,7 +18,7 @@ sealed class BaseZipOneSimplificationType(invocation: Qualified, replaceWith: St
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
       case qual invocation `_ => x`(x) =>
-        Some(replace(expr).withText(invocationText(qual, s"$replaceWith${x.getWrappedText}")))
+        Some(replace(expr).withText(invocationTextFor(qual, s"$replaceWith${x.getWrappedText}")))
       case _ => None
     }
 
@@ -57,7 +57,7 @@ sealed abstract class BaseZipToSucceedSimplificationType extends SimplificationT
    * @return a SimplificationBuilder
    */
   protected def simplify(toSimplify: ScExpression, toKeep: ScExpression, zioArg: ScExpression): SimplificationBuilder =
-    replace(toSimplify).withText(invocationText(toKeep, s"as${zioArg.getWrappedText}")).highlightAll
+    replace(toSimplify).withText(invocationTextFor(toKeep, s"as${zioArg.getWrappedText}")).highlightAll
 }
 
 object ZipRightSimplificationType         extends BaseZipOneSimplificationType(`.flatMap`, "zipRight")

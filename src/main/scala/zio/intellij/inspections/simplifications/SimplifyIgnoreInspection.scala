@@ -11,7 +11,7 @@ object IgnoreSimplificationType extends SimplificationType {
   override def hint: String = "Replace with .ignore"
 
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
-    def replacement(qual: ScExpression) = replace(expr).withText(invocationText(qual, "ignore"))
+    def replacement(qual: ScExpression) = replace(expr).withText(invocationTextFor(qual, "ignore"))
     expr match {
       case qual `.catchAll` `_ => ZIO.unit`()                          => Some(replacement(qual))
       case qual `.foldCause` (`_ => ()`(), `_ => ()`())                => Some(replacement(qual))
