@@ -1,9 +1,9 @@
 package zio.intellij.inspections.simplifications
 
-import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, Simplification, SimplificationType}
+import org.jetbrains.plugins.scala.codeInspection.collections.{Simplification, SimplificationType}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScBlock, ScBlockStatement, ScExpression}
 import zio.intellij.inspections.zioMethods.`.orElse`
-import zio.intellij.inspections.{`ZIO.fail`, ZInspection}
+import zio.intellij.inspections.{ZInspection, `ZIO.fail`, invocationTextFor}
 
 class SimplifyOrElseInspection extends ZInspection(OrElseFailSimplificationType)
 
@@ -22,7 +22,7 @@ object OrElseFailSimplificationType extends SimplificationType {
     }
 
     def replacement(zio: ScExpression, error: ScExpression): Simplification =
-      replace(expr).withText(invocationText(zio, replaceWith, error))
+      replace(expr).withText(invocationTextFor(zio, replaceWith, error))
 
     expr match {
       case zio `.orElse` `ZIO.fail`(_, error) => Some(replacement(zio, error))

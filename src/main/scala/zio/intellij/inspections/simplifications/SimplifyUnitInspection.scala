@@ -11,7 +11,7 @@ object UnitSimplificationType extends SimplificationType {
   override def hint: String = "Replace with .unit"
 
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
-    def replacement(qual: ScExpression) = replace(expr).withText(invocationText(qual, "unit"))
+    def replacement(qual: ScExpression) = replace(expr).withText(invocationTextFor(qual, "unit"))
     expr match {
       case qual `.*>` `ZIO.unit`(_, _) => Some(replacement(qual))
       case qual `.as` unit()           => Some(replacement(qual))

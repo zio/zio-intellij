@@ -2,7 +2,7 @@ package zio.intellij
 
 import com.intellij.psi.{PsiAnnotation, PsiClass, PsiElement}
 import org.jetbrains.plugins.scala.codeInspection.collections._
-import org.jetbrains.plugins.scala.extensions.PsiClassExt
+import org.jetbrains.plugins.scala.extensions.{PsiClassExt, childOf}
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScPattern, ScReferencePattern, ScWildcardPattern}
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
@@ -15,6 +15,42 @@ import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils.types._
 
 package object inspections {
+
+  // copied over from the Scala plugin because of some upstream changes
+  // TODO consider removing in the future, replacing with whatever is the new thing
+  // also, renaming from just `invocationText` to ensure using the correct (our) method
+  def invocationTextFor(qual: PsiElement, methName: String, args: ScExpression*): String = {
+    def argsText = argListText(args)
+
+    if (qual == null) {
+      s"$methName$argsText"
+    } else {
+      val qualText = qual.getText
+      qual match {
+        case _ childOf ScInfixExpr(`qual`, _, _) if args.size == 1 =>
+          s"$qualText $methName ${args.head.getText}"
+        case _ childOf ScPostfixExpr(`qual`, _) if args.size == 1 =>
+          s"$qualText $methName ${args.head.getText}"
+        case _: ScInfixExpr => s"($qualText).$methName$argsText"
+        case _: ScFor => s"($qualText).$methName$argsText"
+        case _ => s"$qualText.$methName$argsText"
+      }
+
+    }
+  }
+
+  def argListText(args: Seq[ScExpression]): String = {
+    args match {
+      case Seq(p: ScParenthesisedExpr) => p.getText
+      case Seq(b @ ScBlock(_: ScFunctionExpr)) => b.getText
+      case Seq(ScBlock(stmt: ScBlockStatement)) => s"(${stmt.getText})"
+      case Seq(b: ScBlock) => b.getText
+      case Seq((_: ScFunctionExpr) childOf (b: ScBlockExpr)) => b.getText
+      case Seq(other) => s"(${other.getText})"
+      case seq if seq.size > 1 => seq.map(_.getText).mkString("(", ", ", ")")
+      case _ => ""
+    }
+  }
 
   object collectionMethods {
     private[inspections] val `.map` = invocation("map").from(likeCollectionClasses)

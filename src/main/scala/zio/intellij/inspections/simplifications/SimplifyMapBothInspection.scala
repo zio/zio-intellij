@@ -19,7 +19,7 @@ object MapBothSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression, a: ScExpression, b: ScExpression) =
       replace(expr)
-        .withText(invocationText(qual, s"mapBoth(${b.getBracedText}, ${a.getBracedText})"))
+        .withText(invocationTextFor(qual, s"mapBoth(${b.getBracedText}, ${a.getBracedText})"))
         .highlightFrom(qual)
 
     def toFunctionExpr(e: ScExpression): ScExpression =

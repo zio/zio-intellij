@@ -71,7 +71,7 @@ sealed abstract class BaseRefactoringType(invocation: Qualified, replaceWith: St
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression, param: ScParameter, body: ScExpression) =
       replace(expr)
-        .withText(invocationText(qual, s"$replaceWith(${simplifyFunctionCall(param, body)})"))
+        .withText(invocationTextFor(qual, s"$replaceWith(${simplifyFunctionCall(param, body)})"))
         .highlightFrom(qual)
 
     expr match {
@@ -100,7 +100,7 @@ object TapBothSimplificationType extends SimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression, tapError: ScExpression, tap: ScExpression) =
       replace(expr)
-        .withText(invocationText(qual, s"tapBoth(${tapError.getBracedText}, ${tap.getBracedText})"))
+        .withText(invocationTextFor(qual, s"tapBoth(${tapError.getBracedText}, ${tap.getBracedText})"))
         .highlightFrom(qual)
 
     expr match {

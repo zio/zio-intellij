@@ -1,11 +1,11 @@
 package zio.intellij.inspections.simplifications
 
-import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, Simplification, SimplificationType}
+import org.jetbrains.plugins.scala.codeInspection.collections.{Simplification, SimplificationType}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScReferenceExpression, ScUnderscoreSection}
 import zio.intellij.inspections.layerMethods.`.build`
 import zio.intellij.inspections.managedMethods.`.use`
 import zio.intellij.inspections.zioMethods.`.provide`
-import zio.intellij.inspections.{lambda, ZInspection}
+import zio.intellij.inspections.{ZInspection, invocationTextFor, lambda}
 
 class SimplifyBuildUseInspection extends ZInspection(BuildUseSimplificationType)
 
@@ -13,7 +13,7 @@ object BuildUseSimplificationType extends SimplificationType {
   override def hint: String = "Replace with .provideLayer"
 
   def replacement(expr: ScExpression, zio: ScExpression, layer: ScExpression): Simplification =
-    replace(expr).withText(invocationText(zio, "provideLayer", layer)).highlightAll
+    replace(expr).withText(invocationTextFor(zio, "provideLayer", layer)).highlightAll
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
