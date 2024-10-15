@@ -1,6 +1,6 @@
 package zio.intellij.inspections.simplifications
 
-import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, Simplification, SimplificationType}
+import org.jetbrains.plugins.scala.codeInspection.collections.{Simplification, SimplificationType}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._
@@ -12,7 +12,7 @@ object ExitCodeSimplificationType extends SimplificationType {
 
   override def getSimplification(expr: ScExpression): Option[Simplification] = {
     def replacement(qual: ScExpression) =
-      replace(expr).withText(invocationText(qual, s"exitCode"))
+      replace(expr).withText(invocationTextFor(qual, s"exitCode"))
 
     expr match {
       case qual `.map` `_ => x`(exitCodeSuccess() | exitCodeFailure())             => Some(replacement(qual))

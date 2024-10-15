@@ -18,7 +18,7 @@ sealed abstract class BaseToLayerSimplificationType(methodName: String, methodEx
       case methodExtractor(_, effect) if fromZio(effect) =>
         val replacementText = effect match {
           case _: ScFor => s"${effect.getText.parenthesize(true)}.$methodName"
-          case _        => invocationText(effect, methodName)
+          case _        => invocationTextFor(effect, methodName)
         }
         Some(replace(expr).withText(replacementText).highlightFrom(expr))
       case _ => None
