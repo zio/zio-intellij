@@ -132,6 +132,6 @@ object ZioVersion {
     val `2.0.0-M2`: ZioVersion   = ZioVersion.parseUnsafe("2.0.0-M2") // first version to support the built-in test runner
     val `2.0.0`: ZioVersion      = ZioVersion.parseUnsafe("2.0.0")
     val `1.x.latest`: ZioVersion = ZioVersion.parseUnsafe("1.0.18")
-    val `2.x.latest`: ZioVersion = ZioVersion.parseUnsafe("2.1.1")
+    val `2.x.latest`: ZioVersion = ZioVersion.parseUnsafe("2.1.11")
   }
 }

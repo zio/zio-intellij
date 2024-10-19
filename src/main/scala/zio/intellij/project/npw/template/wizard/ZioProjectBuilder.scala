@@ -2,6 +2,7 @@ package zio.intellij.project.npw.template.wizard
 
 import com.intellij.openapi.module.{ModifiableModuleModel, Module}
 import com.intellij.openapi.util.io
+import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.extensions._
@@ -35,7 +36,7 @@ final class ZioProjectBuilder(_selections: ZioProjectBuilder.Selections) extends
         packagePrefix
       )                = selections
       val sbtVersion   = sbtVersionOpt.getOrElse(Versions.SBT.LatestSbtVersion)
-      val scalaVersion = scalaVersionOpt.getOrElse(ScalaVersion.Latest.Scala_2_13.minor)
+      val scalaVersion = scalaVersionOpt.getOrElse(ScalaVersion.Latest.Scala_3_3.minor)
       val zioVersion   = zioVersionOpt.getOrElse(ZIO.`2.x.latest`.toString)
 
       locally {
@@ -59,6 +60,18 @@ final class ZioProjectBuilder(_selections: ZioProjectBuilder.Selections) extends
     }
 
     super.createModule(moduleModel)
+  }
+
+  // TODO copied over from the Scala plugin:
+  //
+  // TODO customize the path in UI when IDEA-122951 will be implemented
+  /**
+   * By default module file points to the `projectRoot/moduleName.iml`.
+   * We replace ("re-point") it to `projectRoot/.idea/modules/moduleName.iml`
+   */
+  private def moduleFilePathUpdated(pathname: String): String = {
+    val file = new File(pathname)
+    FileUtilRt.toSystemIndependentName(file.getParent) + "/" + Sbt.ModulesDirectory + "/" + file.getName
   }
 
   override def getNodeIcon: Icon = ZioIcon
