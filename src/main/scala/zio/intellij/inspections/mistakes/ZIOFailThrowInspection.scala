@@ -9,14 +9,14 @@ import zio.intellij.inspections.`ZIO.fail`
 class ZIOFailThrowInspection extends LocalInspectionTool {
 
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case f @ `ZIO.fail`(_, b: ScThrow) =>
-      b.expression match {
-        case Some(expr) =>
+    case fail @ `ZIO.fail`(_, scThrow: ScThrow) =>
+      scThrow.expression match {
+        case Some(throwableExpr) =>
           holder.registerProblem(
-            f,
+            fail,
             ZIOFailThrowInspection.message,
             ProblemHighlightType.WARNING,
-            new QuickFix(b, expr)
+            new QuickFix(scThrow, throwableExpr)
           )
         case None =>
       }
