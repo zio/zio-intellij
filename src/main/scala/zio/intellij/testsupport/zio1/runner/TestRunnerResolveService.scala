@@ -15,7 +15,7 @@ import TestRunnerResolveService.ResolveError.DownloadError
 import TestRunnerResolveService._
 import zio.intellij.utils.{BackgroundTask, ScalaVersionHack, ZioVersion}
 
-import java.net.{URI, URL, URLClassLoader}
+import java.net.{URL, URLClassLoader}
 import java.util.concurrent.ConcurrentHashMap
 import scala.beans.BeanProperty
 import scala.collection.mutable
