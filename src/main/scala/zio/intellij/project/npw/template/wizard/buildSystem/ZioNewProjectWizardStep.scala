@@ -39,7 +39,6 @@ import scala.annotation.nowarn
 final class ZioNewProjectWizardStep(parent: ScalaNewProjectWizardMultiStep)
     extends ScalaNewProjectWizardStep(parent)
     with SbtScalaNewProjectWizardData
-    with ScalaGitNewProjectWizardData
     with ScalaSampleCodeNewProjectWizardData
     with ZioModuleStepLike {
 
@@ -49,8 +48,7 @@ final class ZioNewProjectWizardStep(parent: ScalaNewProjectWizardMultiStep)
   @TestOnly override private[project] def setAddSampleCode(value: java.lang.Boolean): Unit =
     addSampleCodeProperty.set(value)
 
-  @TestOnly override private[project] def setGit(value: java.lang.Boolean): Unit = gitProperty.set(value)
-  @TestOnly override def setScalaVersion(version: String): Unit                  = scalaVersionComboBox.setSelectedItemEnsuring(version)
+  @TestOnly override def setScalaVersion(version: String): Unit = scalaVersionComboBox.setSelectedItemEnsuring(version)
   @TestOnly override private[project] def setSbtVersion(version: String): Unit =
     sbtVersionComboBox.setSelectedItemEnsuring(version)
   @TestOnly override private[project] def setPackagePrefix(prefix: String): Unit =
@@ -72,7 +70,6 @@ final class ZioNewProjectWizardStep(parent: ScalaNewProjectWizardMultiStep)
 
   locally {
     getData.putUserData(SbtScalaNewProjectWizardData.KEY, this)
-    getData.putUserData(ScalaGitNewProjectWizardData.KEY, this)
     getData.putUserData(ScalaSampleCodeNewProjectWizardData.KEY, this)
   }
 
@@ -92,11 +89,10 @@ final class ZioNewProjectWizardStep(parent: ScalaNewProjectWizardMultiStep)
     )
   }
 
-  override protected def _addScalaSampleCode(project: Project, projectRoot: Path): Seq[VirtualFile] = {
+  override protected def _addScalaSampleCode(project: Project, projectRoot: Path): Seq[VirtualFile] =
     // TODO migrate to the new Sample Code templates (with rendered onboarding tips)
     // For now, this is handled (*sigh* hardcoded) in the ZioProjectBuilder
     Seq.empty
-  }
 
   override def setupUI(panel: Panel): Unit = {
     panel.row(
@@ -169,17 +165,30 @@ final class ZioNewProjectWizardStep(parent: ScalaNewProjectWizardMultiStep)
     initSelectionsAndUi(getContext.getDisposable)
   }
 
-  override protected def setUpSampleCode(panel: Panel): Unit = {
-    panel.row(null: JLabel, (row: Row) => {
-      val cb = row.checkBox("""Create a "Hello World" main app""")
-      ButtonKt.bindSelected(cb, addSampleCodeProperty: com.intellij.openapi.observable.properties.ObservableMutableProperty[java.lang.Boolean])
-      ButtonKt.whenStateChangedFromUi(cb, null, value => {
-        BSLog.logAddSampleCodeChanged(parent, value): @nowarn("cat=deprecation")
-        KUnit
-      })
-      KUnit
-    }).topGap(TopGap.SMALL)
-  }
+  override protected def setUpSampleCode(panel: Panel): Unit =
+    panel
+      .row(
+        null: JLabel,
+        (row: Row) => {
+          val cb = row.checkBox("""Create a "Hello World" main app""")
+          ButtonKt.bindSelected(
+            cb,
+            addSampleCodeProperty: com.intellij.openapi.observable.properties.ObservableMutableProperty[
+              java.lang.Boolean
+            ]
+          )
+          ButtonKt.whenStateChangedFromUi(
+            cb,
+            null,
+            value => {
+              BSLog.logAddSampleCodeChanged(parent, value): @nowarn("cat=deprecation")
+              KUnit
+            }
+          )
+          KUnit
+        }
+      )
+      .topGap(TopGap.SMALL)
 
   private def validateModuleName(builder: ValidationInfoBuilder, field: JBTextField): ValidationInfo = {
     val moduleName = field.getText
