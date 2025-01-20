@@ -62,7 +62,7 @@ package object utils {
       val sbtSettings = SbtExternalSystemManager.executionSettingsFor(project, workingDirPath)
       val launcher    = sbtSettings.customLauncher.getOrElse(getDefaultLauncher)
 
-      SbtUtil.detectSbtVersion(workingDir, launcher)
+      SbtUtil.detectSbtVersion(workingDir.toPath, launcher.toPath)
     }
   }
 

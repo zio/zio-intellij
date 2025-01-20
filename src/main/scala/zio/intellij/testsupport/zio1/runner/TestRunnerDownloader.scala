@@ -18,7 +18,7 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
     try {
       val resolver             = new DependencyResolver(progressListener)
       val resolvedDependencies = resolver.resolve(dependencies(version, scalaVersion): _*)
-      val jars: Seq[Path]      = resolvedDependencies.map(_.file.toPath)
+      val jars: Seq[Path]      = resolvedDependencies.map(_.file)
       val urls                 = jars.map(_.toUri.toURL).toArray
       Right(DownloadSuccess(version, scalaVersion, urls.toIndexedSeq))
     } catch {
