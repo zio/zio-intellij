@@ -44,6 +44,7 @@ lazy val root =
         <ul>
           <li>IntelliJ IDEA 2025.1 support!</li>
         </ul>
+        <b>Note:</b> The ZIO project wizard is temporarily disabled due to incompatibility issues.
         ]]>"""
         )
       }

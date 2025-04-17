@@ -5,7 +5,7 @@ package libraryLoaders
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
 import com.intellij.testFramework.PsiTestUtil
-import org.jetbrains.plugins.scala.DependencyManagerBase.{DependencyDescription, ResolvedDependency}
+import org.jetbrains.plugins.scala.DependencyManagerBase.{DependencyDescription, ResolvedDependency, Types}
 import org.jetbrains.plugins.scala.util.dependencymanager.TestDependencyManager
 
 import scala.collection.mutable
@@ -20,22 +20,33 @@ abstract class IvyManagedLoaderBase extends LibraryLoader {
     val deps = dependencies(version)
     val resolved = cache.getOrElseUpdate(deps, dependencyManager.resolve(deps: _*))
     resolved.foreach { resolved =>
-      VfsRootAccess.allowRootAccess(module, resolved.file.getCanonicalPath)
-      PsiTestUtil.addLibrary(module, resolved.info.toString, resolved.file.getParent, resolved.file.getName)
+      val resolvedFile = resolved.file.toFile
+      VfsRootAccess.allowRootAccess(module, resolvedFile.getCanonicalPath)
+      PsiTestUtil.addLibrary(module, resolved.info.toString, resolvedFile.getParent, resolvedFile.getName)
     }
   }
 }
 
 final class IvyManagedLoader private(
-  override protected val dependencyManager: DependencyManagerBase,
-  private val _dependencies: DependencyDescription*
-) extends IvyManagedLoaderBase {
+                                      override protected val dependencyManager: DependencyManagerBase,
+                                      private val _dependencies: DependencyDescription*
+                                    ) extends IvyManagedLoaderBase {
+
+  _dependencies.foreach { it =>
+    require(!(it.kind == Types.SRC && it.isTransitive), "Transitive source dependencies are not supported in Ivy") // https://issues.apache.org/jira/browse/IVY-1003
+  }
 
   override protected def cache: mutable.Map[Seq[DependencyDescription], Seq[ResolvedDependency]] =
     IvyManagedLoader.cache
 
   override protected def dependencies(unused: ScalaVersion): Seq[DependencyDescription] =
     _dependencies
+
+  // TODO Support transitive sources directly, via LibraryLoader.init(..., sources: DependencyDescription => Boolean)
+  def resolve(version: ScalaVersion): Seq[ResolvedDependency] = {
+    val deps = dependencies(version)
+    cache.getOrElseUpdate(deps, dependencyManager.resolve(deps: _*))
+  }
 
   /**
    * NOTE: equals & hashCode are needed for test execution time optimization,

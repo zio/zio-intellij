@@ -5,17 +5,18 @@ import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar
 import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibraryEditor
 import com.intellij.openapi.vfs.{JarFileSystem, VirtualFile}
 import com.intellij.testFramework.PsiTestUtil
-import org.jetbrains.plugins.scala.extensions.{ObjectExt, inWriteAction}
+import org.jetbrains.plugins.scala.extensions.{ObjectExt, PathExt, inWriteAction}
 import org.jetbrains.plugins.scala.project.external.ScalaSdkUtils
-import org.jetbrains.plugins.scala.project.{ModuleExt, ScalaLibraryProperties, ScalaLibraryType, Version, template}
+import org.jetbrains.plugins.scala.project.{ModuleExt, ScalaLibraryProperties, ScalaLibraryType, template}
 import org.jetbrains.plugins.scala.{DependencyManager, DependencyManagerBase, ScalaVersion}
 import org.junit.Assert._
 
-import java.io.File
+import java.nio.file.Path
 
 /**
  * @param includeScalaReflectIntoCompilerClasspath also see [[ScalaReflectLibraryLoader]]
  * @param includeScalaLibraryTransitiveDependencies for scala 3 library, also includes scala 2 library
+ * @see [[ScalaLibraryLoader]]
  */
 case class ScalaSDKLoader(
   includeScalaReflectIntoCompilerClasspath: Boolean = false,
@@ -26,7 +27,7 @@ case class ScalaSDKLoader(
   //TODO: by default sources are not needed in all tests
   // make it "false" by default, check which tests fail and set it to true in those tests
   includeScalaLibrarySources: Boolean = true,
-  compilerBridgeBinaryJar: Option[File] = None,
+  compilerBridgeBinaryJar: Option[Path] = None,
   dependencyManager: DependencyManagerBase = DependencyManager
 ) extends LibraryLoader {
 
@@ -74,7 +75,7 @@ case class ScalaSDKLoader(
     resolvedSecondPass.map(_.file).map(findJarFile)
   }
 
-  private def resolveCompilerBridge(version: ScalaVersion): Option[File] = {
+  private def resolveCompilerBridge(version: ScalaVersion): Option[Path] = {
     if (version >= ScalaVersion.fromString("2.13.12").get)
       ScalaSdkUtils.resolveCompilerBridgeJar(version.minor)
     else None
@@ -96,7 +97,7 @@ case class ScalaSDKLoader(
         resolved.size
       )
 
-    val (resolvedOk, resolvedMissing) = resolved.partition(_.file.exists())
+    val (resolvedOk, resolvedMissing) = resolved.partition(_.file.exists)
     val compilerClasspath = resolvedOk.map(_.file)
 
     // Manually resolve a compiler bridge only if it hasn't been provided. This allows testing with a custom bridge.
@@ -111,7 +112,7 @@ case class ScalaSDKLoader(
       compilerClasspath.isEmpty
     )
 
-    val compilerFile = compilerClasspath.find(_.getName.contains("compiler")).getOrElse {
+    val compilerFile = compilerClasspath.find(_.nameContains("compiler")).getOrElse {
       fail(s"Local SDK files should contain compiler jar for : $version\n${compilerClasspath.mkString("\n")}").asInstanceOf[Nothing]
     }
 
@@ -119,7 +120,7 @@ case class ScalaSDKLoader(
       if (includeScalaLibraryFilesInSdk) {
         val files =
           if (includeScalaCompilerIntoLibraryClasspath) compilerClasspath
-          else compilerClasspath.filter(_.getName.matches(".*(scala-library|scala3-library).*"))
+          else compilerClasspath.filter(_.nameMatches(".*(scala-library|scala3-library).*"))
         files.map(findJarFile)
       }
       else Nil
@@ -164,8 +165,8 @@ case class ScalaSDKLoader(
 
 object ScalaSDKLoader {
 
-  private def findJarFile(file: File) =
+  private def findJarFile(file: Path) =
     JarFileSystem.getInstance().refreshAndFindFileByPath {
-      file.getCanonicalPath + "!/"
+      file.toCanonicalPath.toString + "!/"
     }
 }
