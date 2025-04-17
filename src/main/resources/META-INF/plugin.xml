@@ -349,7 +349,9 @@
         <testCreator language="Scala" implementationClass="zio.intellij.testsupport.ZTestCreator" order="first" />
 
         <!-- new project wizard -->
+        <!-- Disabled due to incompatibility with IntelliJ 2025.1
         <moduleBuilder builderClass="zio.intellij.project.npw.ZioModuleBuilderAdapter" />
+        -->
         
         <!-- debugging -->
         <debuggerClassFilterProvider implementation="zio.intellij.debugger.ZioSteppingFilterProvider"/>
