@@ -11,16 +11,28 @@ object TypeCheckUtils {
   val zioCompanionSpecificTypes      = List("zio.ZIOCompanionVersionSpecific", "zio.ZIOCompanionPlatformSpecific")
   val zioLayerCompanionSpecificTypes = List("zio.ZLayerCompanionVersionSpecific", "zio.magic.ZLayerCompanionOps")
 
-  val zioTypes        = ZioTypes.values.map(_.fqName) :+ "zio.ZIOPlatformSpecific" :+ "zio.ZIOVersionSpecific"
+  val zioTypes =
+    ZioTypes.values.map(_.fqName) ++
+      ZioTypes.values.map(_.fqName).map(tpe => s"$tpe._") :+
+      "zio.ZIOPlatformSpecific" :+
+      "zio.ZIOVersionSpecific" :+
+      "zio.ProvideSomeLayerPartiallyApplied"
+
   val zioLayerTypes   = ZLayerTypes.values.map(_.fqName)
   val zioSinkTypes    = List("zio.stream.ZSink")
-  val zioStreamTypes  = List("zio.stream.ZStream")
-  val managedTypes    = List("zio.ZManaged")
+  val zioStreamTypes  = List("zio.stream.ZStream", "zio.stream.ZStream._")
+  val managedTypes    = List("zio.ZManaged", "zio.ZManaged._")
   val extraTypes      = List("zio.Fiber", "zio.ZQueue", "zio.ZRef", "zio.ZRefM", "zio.ZQuery")
   val zioTestAsserts  = List("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM", "zio.test.Assert")
   val zioTestPackage  = List("zio.test._")
   val zioMagicPackage = List("zio.magic._")
-  val zioSpecTypes    = List("zio.test.Spec", "zio.test.SpecVersionSpecific")
+  val zioSpecTypes = List(
+    "zio.test.Spec",
+    "zio.test.SpecVersionSpecific",
+    "zio.test.ProvideSomePartiallyApplied",
+    "zio.test.ProvideSomeSharedPartiallyApplied"
+  )
+
   // ZStreams API signatures sometimes slightly differ from regular one (no `.tapBoth`, different `.tap`)
   val zioLike_notStream = zioTypes ++ managedTypes ++ extraTypes ++ zioTestAsserts
   val zioLikePackages   = zioLike_notStream ++ zioStreamTypes ++ zioLayerTypes
