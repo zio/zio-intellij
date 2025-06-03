@@ -1,10 +1,10 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.16"
-lazy val scalaPluginVersion = "2025.1.724:Nightly"
+lazy val scalaPluginVersion = "2025.1.24"
 lazy val minorVersion       = "0"
 lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-lazy val pluginVersion      = s"2025.1.40.$buildVersion"
+lazy val pluginVersion      = s"2025.1.41.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "251"
@@ -67,7 +67,7 @@ def newProject(projectName: String, base: File): Project =
     libraryDependencies ++= Seq(
       "junit"             % "junit"             % "4.13.2" % Test,
       "com.github.sbt"    % "junit-interface"   % "0.13.3" % Test,
-      "org.junit.jupiter" % "junit-jupiter-api" % "5.11.1" % Test
+      "org.junit.jupiter" % "junit-jupiter-api" % "5.13.0" % Test
     ),
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
     intellijPlugins := Seq(
