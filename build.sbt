@@ -7,7 +7,7 @@ lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", min
 lazy val pluginVersion      = s"2025.1.41.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "251"
+ThisBuild / intellijBuild := "251.26094.121"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 Global / intellijAttachSources := true
