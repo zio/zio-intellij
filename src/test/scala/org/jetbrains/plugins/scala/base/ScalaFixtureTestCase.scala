@@ -21,12 +21,14 @@ abstract class ScalaFixtureTestCase extends CodeInsightFixtureTestCase[ModuleFix
 
   protected val includeCompilerAsLibrary: Boolean = false
 
+  protected val includeScalaLibrarySources: Boolean = false
+
   protected final implicit def projectContext: Project = getProject
 
   protected lazy val jdk: Sdk = IdeaTestUtil.getMockJdk(JavaVersion.compose(17))
 
   override protected def librariesLoaders: Seq[LibraryLoader] = Seq(
-    ScalaSDKLoader(includeScalaCompilerIntoLibraryClasspath = includeCompilerAsLibrary),
+    ScalaSDKLoader(includeScalaCompilerIntoLibraryClasspath = includeCompilerAsLibrary, includeScalaLibrarySources = includeScalaLibrarySources),
     new LibraryLoader {
       override def init(implicit module: Module, version: ScalaVersion): Unit = {
         val jdkTable = JavaAwareProjectJdkTableImpl.getInstanceEx
@@ -60,8 +62,7 @@ abstract class ScalaFixtureTestCase extends CodeInsightFixtureTestCase[ModuleFix
   override def tuneFixture(moduleBuilder: ModuleFixtureBuilder[_]): Unit = {
     super.tuneFixture(moduleBuilder)
 
-    indexingMode = this.findIndexingModeAnnotation()
-      .fold(IndexingMode.SMART)(_.mode())
+    indexingMode = this.getIndexingModeConsideringDumbModeChecks
     myFixture = IndexingModeCodeInsightTestFixture.Companion.wrapFixture(myFixture, indexingMode)
   }
 

@@ -12,10 +12,10 @@ import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
 import com.intellij.pom.java.LanguageLevel
 import com.intellij.testFramework.IdeaTestUtil
 import com.intellij.util.SystemProperties
-import org.jetbrains.plugins.scala.extensions.inWriteAction
+import org.jetbrains.plugins.scala.extensions.{PathExt, inWriteAction}
 import org.junit.Assert
 
-import java.io.File
+import java.nio.file.Path
 import scala.annotation.nowarn
 
 case class InternalJDKLoader() extends SmartJDKLoader() {
@@ -36,7 +36,7 @@ case class HeavyJDKLoader(languageLevel: LanguageLevel = LanguageLevel.JDK_17) e
   override protected def createSdkInstance(): Sdk = SmartJDKLoader.getOrCreateJDK(languageLevel)
 }
 
-abstract class SmartJDKLoader() extends LibraryLoader {
+abstract class SmartJDKLoader extends LibraryLoader {
   private lazy val instance: Sdk = createSdkInstance()
 
   override def init(implicit module: Module, version: ScalaVersion): Unit = {
@@ -61,6 +61,7 @@ object SmartJDKLoader {
       "C:\\Program Files\\Java\\",         // windows style
       "C:\\Program Files (x86)\\Java\\",   // windows 32bit style
       "/Library/Java/JavaVirtualMachines", // mac style
+      s"$userHome\\AppData\\Local\\Programs\\Eclipse Adoptium", // Eclipse Temurin installed for a single user on Windows
       userHome + "/Downloads/jdk", // mac style
       userHome + "/Library/Java/JavaVirtualMachines", // mac style
       userHome + "/.jabba/jdk", // jabba (for github actions)
@@ -134,22 +135,22 @@ object SmartJDKLoader {
   }
 
   private def createNewJdk(jdkVersion: JavaSdkVersion, jdkName: String): Sdk = {
-    val pathOption = SmartJDKLoader.discoverJDK(jdkVersion).map(_.getAbsolutePath)
+    val pathOption = SmartJDKLoader.discoverJDK(jdkVersion).map(_.toAbsolutePath.toString)
     Assert.assertTrue(s"Couldn't find $jdkVersion", pathOption.isDefined)
 
     VfsRootAccess.allowRootAccess(ApplicationManager.getApplication, pathOption.get)
     JavaSdk.getInstance.createJdk(jdkName, pathOption.get, false)
   }
 
-  private def discoverJDK(jdkVersion: JavaSdkVersion): Option[File] =
+  private def discoverJDK(jdkVersion: JavaSdkVersion): Option[Path] =
     discoverJre(jdkPaths, jdkVersion)
 
-  private def discoverJre(paths: Seq[String], jdkVersion: JavaSdkVersion): Option[File] = {
+  private def discoverJre(paths: Seq[String], jdkVersion: JavaSdkVersion): Option[Path] = {
     val versionMajor = jdkVersion.ordinal().toString
     val versionStrings = Seq(s"1.$versionMajor", s"-$versionMajor", s"jdk$versionMajor")
     val fromEnv = sys.env.get(jdkVersion.toString).orElse(sys.env.get(s"${jdkVersion}_0"))
     val fromEnv64 = sys.env.get(s"${jdkVersion}_x64").orElse(sys.env.get(s"${jdkVersion}_0_x64")) // teamcity style
-    val priorityPaths = Seq(currentJava(versionMajor), fromEnv.orElse(fromEnv64)).flatten.map(new File(_))
+    val priorityPaths = Seq(currentJava(versionMajor), fromEnv.orElse(fromEnv64)).flatten.map(Path.of(_))
 
     priorityPaths.headOption
       .orElse {
@@ -159,29 +160,30 @@ object SmartJDKLoader {
       }
   }
 
-  private def findJDK(dir: File) = {
-    val macDir = new File(dir, "/Contents/Home") // mac workaround
-    val candidates = List(macDir, dir, new File(dir, "/Home"))
+  private def findJDK(dir: Path): Option[Path] = {
+    val macDir = dir / "Contents" / "Home" // mac workaround
+    val candidates = List(macDir, dir, dir / "Home")
     candidates
       .filter(_.isDirectory)
-      .find { _
-        .listFiles()
-        .exists { b =>
-          b.getName == "bin" &&
-            b.listFiles().exists(x => x.getName == "javac.exe" || x.getName == "javac")
-        }
+      .find {
+        _
+          .children()
+          .exists { b =>
+            b.getFileName.toString == "bin" &&
+              b.children().exists(x => x.getFileName.toString == "javac.exe" || x.getFileName.toString == "javac")
+          }
       }.orElse(Some(dir))
   }
 
-  private def inJvm(path: String, versionString: String): List[File] =
-    List(new File(path))
-      .filter(_.exists())
+  private def inJvm(path: String, versionString: String): List[Path] =
+    List(Path.of(path))
+      .filter(_.exists)
       .flatMap { dir =>
         dir
-          .listFiles()
-          .sortBy(_.getName) // TODO somehow sort by release number to get the newest actually
+          .children()
+          .sortBy(_.getFileName.toString) // TODO somehow sort by release number to get the newest actually
           .reverse
-          .filter(_.getName.contains(versionString))
+          .filter(_.nameContains(versionString))
           .flatMap(findJDK)
       }
 

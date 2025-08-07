@@ -2,6 +2,7 @@ package org.jetbrains.plugins.scala
 package base
 package libraryLoaders
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
 import com.intellij.testFramework.PsiTestUtil
@@ -16,13 +17,25 @@ abstract class IvyManagedLoaderBase extends LibraryLoader {
   protected def dependencies(scalaVersion: ScalaVersion): Seq[DependencyDescription]
   protected def cache: mutable.Map[Seq[DependencyDescription], Seq[ResolvedDependency]]
 
-  override def init(implicit module: Module, version: ScalaVersion): Unit = {
+  override def init(implicit module: Module, version: ScalaVersion): Unit = init(None)
+
+  /**
+   * Adds resolved dependencies as libraries to the specified module
+   * @param parentDisposable if specified, used to remove libraries from the module on parentDisposable's disposing
+   */
+  def init(parentDisposable: Option[Disposable])(implicit module: Module, version: ScalaVersion): Unit = {
     val deps = dependencies(version)
     val resolved = cache.getOrElseUpdate(deps, dependencyManager.resolve(deps: _*))
     resolved.foreach { resolved =>
       val resolvedFile = resolved.file.toFile
       VfsRootAccess.allowRootAccess(module, resolvedFile.getCanonicalPath)
-      PsiTestUtil.addLibrary(module, resolved.info.toString, resolvedFile.getParent, resolvedFile.getName)
+
+      parentDisposable match {
+        case Some(disposable) =>
+          PsiTestUtil.addLibrary(disposable, module, resolved.info.toString, resolvedFile.getParent, resolvedFile.getName)
+        case _ =>
+          PsiTestUtil.addLibrary(module, resolved.info.toString, resolvedFile.getParent, resolvedFile.getName)
+      }
     }
   }
 }

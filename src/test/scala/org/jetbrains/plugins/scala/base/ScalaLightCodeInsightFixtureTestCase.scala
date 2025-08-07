@@ -21,7 +21,7 @@ import com.intellij.util.lang.JavaVersion
 import org.intellij.lang.annotations.Language
 import org.jetbrains.jps.model.java.JavaSourceRootType
 import org.jetbrains.plugins.scala.base.libraryLoaders.{LibraryLoader, ScalaSDKLoader, SourcesLoader}
-import org.jetbrains.plugins.scala.extensions.{ObjectExt, StringExt}
+import org.jetbrains.plugins.scala.extensions.StringExt
 import org.jetbrains.plugins.scala.lang.formatting.settings.ScalaCodeStyleSettings
 import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
 import org.jetbrains.plugins.scala.util.TestUtils
@@ -29,6 +29,7 @@ import org.jetbrains.plugins.scala.{ScalaFileType, ScalaLanguage}
 import org.junit.Assert
 import org.junit.Assert.fail
 
+import java.nio.file.Path
 import scala.jdk.CollectionConverters._
 
 //TODO: try to remove EditorTestUtil.buildInitialFoldingsInBackground(getEditor) and see if tests pass?
@@ -48,7 +49,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
 
   override def getTestDataPath: String = TestUtils.getTestDataPath + "/"
 
-  protected def sourceRootPath: String = null
+  protected def sourceRootPath: Path = null
 
   //start section: indexing mode setup
   private[this] var indexingMode: IndexingMode = IndexingMode.SMART
@@ -68,10 +69,14 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected def additionalLibraries: Seq[LibraryLoader] = Seq.empty
 
   override protected def librariesLoaders: Seq[LibraryLoader] = {
-    val scalaSdkLoader = ScalaSDKLoader(includeReflectLibrary, includeCompilerAsLibrary, includeScalaLibrarySources = includeScalaLibrarySources)
+    val scalaSdkLoader = ScalaSDKLoader(
+      includeScalaReflectIntoCompilerClasspath = includeReflectLibrary,
+      includeScalaCompilerIntoLibraryClasspath = includeCompilerAsLibrary,
+      includeScalaLibrarySources = includeScalaLibrarySources
+    )
     //note: do we indeed need to register it as libraries?
     // shouldn't source roots be registered just as source roots?
-    val sourceLoaders = Option(sourceRootPath).map(SourcesLoader).toSeq
+    val sourceLoaders = Option(sourceRootPath).map(f => SourcesLoader(f.toAbsolutePath.toString)).toSeq
     val additionalLoaders = additionalLibraries
     scalaSdkLoader +: sourceLoaders :++ additionalLoaders
   }
@@ -83,7 +88,10 @@ abstract class ScalaLightCodeInsightFixtureTestCase
 
   protected def projectJdk: Sdk = IdeaTestUtil.getMockJdk(JavaVersion.compose(17))
 
-  override protected def getProjectDescriptor: LightProjectDescriptor = new ScalaLightProjectDescriptor(sharedProjectToken) {
+  override protected def getProjectDescriptor: LightProjectDescriptor = new MyProjectDescriptor()
+
+  protected class MyProjectDescriptor extends ScalaLightProjectDescriptor(sharedProjectToken) {
+
     override def tuneModule(module: Module, project: Project): Unit = {
       afterSetUpProject(project, module)
     }
@@ -103,7 +111,10 @@ abstract class ScalaLightCodeInsightFixtureTestCase
    * @note If you are overriding this method, most likely, the light project cannot be shared between subsequent
    *       test invocations. Look into also overriding [[sharedProjectToken]].
    */
-  protected def afterSetUpProject(project: Project, module: Module): Unit = {
+  private def afterSetUpProject(project: Project, module: Module): Unit = {
+    if (sourceRootPath ne null) {
+      SourceRootTestUtil.addSourceRoot(module, sourceRootPath)
+    }
     setUpLibraries(module)
   }
 
@@ -137,10 +148,12 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   //end section: project descriptor
 
   override protected def setUp(): Unit = {
+    // Suppress missing template exceptions.
+    sys.props.put("ide.skip.plugin.templates.registered.check", true.toString)
+
     // initialize indexing mode before java test fixture in super.setUp()
     /** see also [[com.intellij.testFramework.fixtures.JavaIndexingModeCodeInsightTestFixture]] */
-    indexingMode = this.findIndexingModeAnnotation()
-      .fold(IndexingMode.SMART)(_.mode())
+    indexingMode = this.getIndexingModeConsideringDumbModeChecks
 
     super.setUp()
 
@@ -149,9 +162,11 @@ abstract class ScalaLightCodeInsightFixtureTestCase
 
     // SCL-21849
     if (getIndexingMode != IndexingMode.SMART) {
-      DaemonCodeAnalyzer.getInstance(getProject())
-        .asOptionOf[DaemonCodeAnalyzerImpl]
-        .foreach(_.mustWaitForSmartMode(false, getTestRootDisposable))
+      val a = DaemonCodeAnalyzer.getInstance(getProject()) match {
+        case impl: DaemonCodeAnalyzerImpl => Some(impl)
+        case _ => None
+      }
+      a.foreach(_.mustWaitForSmartMode(false, getTestRootDisposable))
     }
 
     Registry.get("ast.loading.filter").setValue(true, getTestRootDisposable)
@@ -160,6 +175,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   override protected def tearDown(): Unit = {
     disposeLibraries(getModule)
     super.tearDown()
+    sys.props.put("ide.skip.plugin.templates.registered.check", false.toString)
   }
 
   //start section: helper methods

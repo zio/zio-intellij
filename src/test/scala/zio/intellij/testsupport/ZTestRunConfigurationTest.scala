@@ -6,7 +6,7 @@ import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestCase
 import org.jetbrains.plugins.scala.util.Markers
 import org.junit.Assert.assertArrayEquals
 
-import java.net.URL
+import java.net.{URI, URL}
 import java.nio.file.Paths
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
@@ -14,26 +14,26 @@ import scala.jdk.CollectionConverters._
 class WindowsZTestRunConfigurationTest
     extends ZTestRunConfigurationTestBase(isWindows)(
       path =
-        new URL("file:/C:/Users/taka/.ivy2/cache/dev.zio/zio-test-intellij_2.12/jars/zio-test-intellij_2.12-1.0.4.jar"),
+        new URI("file:/C:/Users/taka/.ivy2/cache/dev.zio/zio-test-intellij_2.12/jars/zio-test-intellij_2.12-1.0.4.jar"),
       assertPath = """C:\Users\taka\.ivy2\cache\dev.zio\zio-test-intellij_2.12\jars\zio-test-intellij_2.12-1.0.4.jar"""
     )
 
 class LinuxZTestRunConfigurationTest
     extends ZTestRunConfigurationTestBase(isLinux)(
       path =
-        new URL("file:/usr/home/taka/.ivy2/cache/dev.zio/zio-test-intellij_2.12/jars/zio-test-intellij_2.12-1.0.4.jar"),
+        new URI("file:/usr/home/taka/.ivy2/cache/dev.zio/zio-test-intellij_2.12/jars/zio-test-intellij_2.12-1.0.4.jar"),
       assertPath = """/usr/home/taka/.ivy2/cache/dev.zio/zio-test-intellij_2.12/jars/zio-test-intellij_2.12-1.0.4.jar"""
     )
 
 class MacOsZTestRunConfigurationTest
     extends ZTestRunConfigurationTestBase(isMac)(
       path =
-        new URL("file:/Users/taka/.ivy2/cache/dev.zio/zio-test-intellij_2.12/jars/zio-test-intellij_2.12-1.0.4.jar"),
+        new URI("file:/Users/taka/.ivy2/cache/dev.zio/zio-test-intellij_2.12/jars/zio-test-intellij_2.12-1.0.4.jar"),
       assertPath = """/Users/taka/.ivy2/cache/dev.zio/zio-test-intellij_2.12/jars/zio-test-intellij_2.12-1.0.4.jar"""
     )
 
 abstract class ZTestRunConfigurationTestBase(shouldRun: Boolean)(
-  path: URL,
+  path: URI,
   assertPath: String
 ) extends ScalaLightCodeInsightFixtureTestCase
     with Markers {
@@ -53,10 +53,10 @@ abstract class ZTestRunConfigurationTestBase(shouldRun: Boolean)(
 
   def testRunStateProvider(): Unit = {
 
-    val paths: Seq[URL] = Seq(path)
+    val paths: Seq[URI] = Seq(path)
 
     val javaParameters = new JavaParameters
-    javaParameters.getClassPath.addAll(paths.map(p => Paths.get(p.toURI).toFile.toString).asJava)
+    javaParameters.getClassPath.addAll(paths.map(p => Paths.get(p).toFile.toString).asJava)
 
     assertArrayEquals(
       "must have same element",

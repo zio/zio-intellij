@@ -8,7 +8,7 @@ import TestRunnerDownloader.DownloadProgressListener
 import TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
 import zio.intellij.utils.{ScalaVersionHack, ZioVersion}
 
-import java.net.URL
+import java.net.URI
 import java.nio.file.Path
 import scala.util.control.NonFatal
 
@@ -19,8 +19,8 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
       val resolver             = new DependencyResolver(progressListener)
       val resolvedDependencies = resolver.resolve(dependencies(version, scalaVersion): _*)
       val jars: Seq[Path]      = resolvedDependencies.map(_.file)
-      val urls                 = jars.map(_.toUri.toURL).toArray
-      Right(DownloadSuccess(version, scalaVersion, urls.toIndexedSeq))
+      val uris: Seq[URI]       = jars.map(_.toUri)
+      Right(DownloadSuccess(version, scalaVersion, uris))
     } catch {
       case e: ProcessCanceledException => throw e
       case NonFatal(e)                 => Left(DownloadFailure(version, scalaVersion, e))
@@ -53,7 +53,7 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
 object TestRunnerDownloader {
   sealed trait DownloadResult
   object DownloadResult {
-    final case class DownloadSuccess(version: ZioVersion, scalaVersion: ScalaVersion, jarUrls: Seq[URL])
+    final case class DownloadSuccess(version: ZioVersion, scalaVersion: ScalaVersion, jarUrls: Seq[URI])
         extends DownloadResult
     final case class DownloadFailure(version: ZioVersion, scalaVersion: ScalaVersion, cause: Throwable)
         extends DownloadResult

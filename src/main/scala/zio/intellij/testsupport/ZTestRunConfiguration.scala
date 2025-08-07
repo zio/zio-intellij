@@ -77,7 +77,11 @@ sealed abstract class ZTestRunConfiguration(project: Project, configurationFacto
   private def resolveTestRunner(module: Module): Option[Seq[URL]] =
     module.zioVersion zip module.scalaVersion match {
       case Some((zioVersion, scalaVersion)) if zioVersion.requiresTestRunner =>
-        TestRunnerResolveService.instance(module.getProject).resolve(zioVersion, scalaVersion, false).toOption
+        TestRunnerResolveService
+          .instance(module.getProject)
+          .resolve(zioVersion, scalaVersion, false)
+          .toOption
+          .map(s => s.map(_.toURL).toIndexedSeq)
       case _ => None
     }
 

@@ -23,24 +23,13 @@ case class ScalaSDKLoader(
   //TODO: drop this parameter and fix tests
   includeScalaCompilerIntoLibraryClasspath: Boolean = false,
   includeScalaLibraryTransitiveDependencies: Boolean = true,
-  includeScalaLibraryFilesInSdk: Boolean = true,
-  //TODO: by default sources are not needed in all tests
-  // make it "false" by default, check which tests fail and set it to true in those tests
-  includeScalaLibrarySources: Boolean = true,
-  compilerBridgeBinaryJar: Option[Path] = None,
-  dependencyManager: DependencyManagerBase = DependencyManager
+  includeScalaLibraryFilesInSdk: Boolean = false,
+  includeScalaLibrarySources: Boolean = false,
+  compilerBridgeBinaryJar: Option[Path] = None
 ) extends LibraryLoader {
 
   import DependencyManagerBase._
-  import ScalaSDKLoader._
   import template.Artifact
-
-  def withResolvers(_resolvers: Seq[Resolver]): ScalaSDKLoader = {
-    val dependencyManager = new DependencyManagerBase {
-      override protected def resolvers: Seq[Resolver] = _resolvers
-    }
-    copy(dependencyManager = dependencyManager)
-  }
 
   protected def binaryDependencies(implicit version: ScalaVersion): List[DependencyDescription] =
     if (version.languageLevel.isScala3) {
@@ -66,12 +55,12 @@ case class ScalaSDKLoader(
     val sourceDependency = scalaLibraryDescription % Types.SRC
     val sourceDependencyActual = if (includeScalaLibraryTransitiveDependencies) sourceDependency.transitive() else sourceDependency
 
-    val resolved = dependencyManager.resolve(sourceDependencyActual)
+    val resolved = DependencyManager.resolve(sourceDependencyActual)
     // This second pass is necessary to resolve Scala 2 library sources, when it's a transitive dependency of a Scala 3 library.
     // For some reason, if I tell Ivy to download dependency sources and set transitive="true" it doesn't download sources for transitive dependencies.
     // Instead, it downloads regular class file jars.
     // As a workaround, I do another pass where I download sources for each such class files jar file independently, non-transitively.
-    val resolvedSecondPass = if (resolved.size == 1) resolved else resolved.map(_.info).map(d => dependencyManager.resolveSingle(d.sources()))
+    val resolvedSecondPass = if (resolved.size == 1) resolved else resolved.map(_.info).map(d => DependencyManager.resolveSingle(d.sources()))
     resolvedSecondPass.map(_.file).map(findJarFile)
   }
 
@@ -83,7 +72,7 @@ case class ScalaSDKLoader(
 
   override final def init(implicit module: Module, version: ScalaVersion): Unit = {
     val dependencies = binaryDependencies
-    val resolved = dependencyManager.resolve(dependencies: _*)
+    val resolved = DependencyManager.resolve(dependencies: _*)
 
     if (version.isScala3)
       assertTrue(
@@ -161,12 +150,7 @@ case class ScalaSDKLoader(
       model.commit()
     }
   }
-}
-
-object ScalaSDKLoader {
 
   private def findJarFile(file: Path) =
-    JarFileSystem.getInstance().refreshAndFindFileByPath {
-      file.toCanonicalPath.toString + "!/"
-    }
+    JarFileSystem.getInstance().refreshAndFindFileByPath(file.toCanonicalPath.toString + "!/")
 }

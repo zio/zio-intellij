@@ -67,7 +67,7 @@ def newProject(projectName: String, base: File): Project =
     libraryDependencies ++= Seq(
       "junit"             % "junit"             % "4.13.2" % Test,
       "com.github.sbt"    % "junit-interface"   % "0.13.3" % Test,
-      "org.junit.jupiter" % "junit-jupiter-api" % "5.13.0" % Test
+      "org.junit.jupiter" % "junit-jupiter-api" % "5.13.4" % Test
     ),
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
     intellijPlugins := Seq(

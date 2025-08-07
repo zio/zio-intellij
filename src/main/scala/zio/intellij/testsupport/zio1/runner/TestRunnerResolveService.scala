@@ -15,7 +15,7 @@ import TestRunnerResolveService.ResolveError.DownloadError
 import TestRunnerResolveService._
 import zio.intellij.utils.{BackgroundTask, ScalaVersionHack, ZioVersion}
 
-import java.net.{URL, URLClassLoader}
+import java.net.{URI, URL, URLClassLoader}
 import java.util.concurrent.ConcurrentHashMap
 import scala.beans.BeanProperty
 import scala.collection.mutable
@@ -52,8 +52,8 @@ private[testsupport] final class TestRunnerResolveService
     case _ =>
       val key = s"${version.toString}###${scalaVersion.versionStr}"
       if (state.resolvedVersions.containsKey(key)) {
-        val jarUrls = state.resolvedVersions.get(key).map(new URL(_))
-        resolveClassPath(version, scalaVersion, jarUrls.toIndexedSeq) match {
+        val jarUris = state.resolvedVersions.get(key).map(new URI(_))
+        resolveClassPath(version, scalaVersion, jarUris.toArray) match {
           case r @ Right(_)                 => r
           case Left(_) if downloadIfMissing => downloadAndResolve(version, scalaVersion, progressListener)
           case _                            => Left(ResolveError.NotFound(version, scalaVersion))
@@ -95,18 +95,17 @@ private[testsupport] final class TestRunnerResolveService
   ): ResolveResult = {
     val downloader = new TestRunnerDownloader(listener)
     downloader.download(version)(scalaVersion).left.map(ResolveError.DownloadError.apply).flatMap {
-      case DownloadSuccess(v, scalaVersion, jarUrls) => resolveClassPath(v, scalaVersion, jarUrls)
+      case DownloadSuccess(v, scalaVersion, jarUris) => resolveClassPath(v, scalaVersion, jarUris.toArray)
     }
   }
 
-  private def resolveClassPath(version: ZioVersion, scalaVersion: ScalaVersion, jarUrls: Seq[URL]): ResolveResult = {
-    val urls: Array[URL] = jarUrls.toArray
-    Try(new URLClassLoader(urls, null).loadClass(ZTestRunnerName + "$")) match {
+  private def resolveClassPath(version: ZioVersion, scalaVersion: ScalaVersion, jarUris: Array[URI]): ResolveResult = {
+    Try(new URLClassLoader(jarUris.map(_.toURL), null).loadClass(ZTestRunnerName + "$")) match {
       case Success(_) =>
         val key = s"${version.toString}###${scalaVersion.versionStr}"
-        state.resolvedVersions.put(key, jarUrls.toArray.map(_.toString))
-        testRunnerVersions((version, scalaVersion.versionStr)) = ResolveStatus.Resolved(jarUrls)
-        Right(jarUrls)
+        state.resolvedVersions.put(key, jarUris.map(_.toString))
+        testRunnerVersions((version, scalaVersion.versionStr)) = ResolveStatus.Resolved(jarUris)
+        Right(jarUris)
       case Failure(e) =>
         Left(ResolveError.UnknownError(version, scalaVersion, e))
     }
@@ -117,12 +116,12 @@ private[testsupport] final class TestRunnerResolveService
 object TestRunnerResolveService {
   def instance(project: Project): TestRunnerResolveService = project.getService(classOf[TestRunnerResolveService])
 
-  type ResolveResult = Either[ResolveError, Seq[URL]]
+  type ResolveResult = Either[ResolveError, Array[URI]]
 
   sealed trait ResolveStatus
   object ResolveStatus {
     object DownloadInProgress                     extends ResolveStatus
-    final case class Resolved(jarPaths: Seq[URL]) extends ResolveStatus
+    final case class Resolved(jarPaths: Array[URI]) extends ResolveStatus
   }
 
   sealed trait ResolveError

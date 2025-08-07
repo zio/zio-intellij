@@ -8,7 +8,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.registry.{Registry, RegistryValue}
 import com.intellij.testFramework.UsefulTestCase
-import org.jetbrains.plugins.scala.project.ModuleExt
 import org.jetbrains.plugins.scala.project.settings.{ScalaCompilerSettings, ScalaCompilerSettingsProfile}
 import org.jetbrains.plugins.scala.settings.ScalaProjectSettings
 import org.jetbrains.plugins.scala.util.RevertableChange.CompositeRevertableChange
@@ -39,7 +38,7 @@ trait RevertableChange {
   final def apply(body: => Any): Unit =
     run(body)
 
-  final def run(body: => Any): Unit = {
+  final def run[T](body: => T): T = {
     this.applyChange()
     try
       body
