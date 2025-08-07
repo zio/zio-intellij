@@ -1,5 +1,7 @@
 package org.jetbrains.plugins.scala
 
+import com.intellij.openapi.util.registry.Registry
+import com.intellij.testFramework.TestIndexingModeSupporter.IndexingMode
 import _root_.junit.framework.TestCase
 import org.jetbrains.plugins.scala.extensions.ObjectExt
 import org.jetbrains.plugins.scala.util.NotNothing
@@ -13,6 +15,25 @@ package object base {
   final implicit class TestCaseExt(private val testCase: TestCase) extends AnyVal {
     // SCL-21849
     def findIndexingModeAnnotation(): Option[WithIndexingMode] = findTestAnnotation[WithIndexingMode]
+
+    /**
+     * Find indexing mode annotation and get its indexing mode.
+     * Return [[IndexingMode.SMART]] if no annotation found.
+     *
+     * Replace [[IndexingMode.DUMB_EMPTY_INDEX]] if `ide.dumb.mode.check.awareness` registry is disabled.
+     * Otherwise, some tests might fail on empty index.
+     * E.g.: `myFixture.doHighlighting()` calls.
+     *
+     * @see [[https://youtrack.jetbrains.com/issue/IJPL-164584 IJPL-164584]]
+     * @see [[findIndexingModeAnnotation]]
+     */
+    def getIndexingModeConsideringDumbModeChecks: IndexingMode =
+      findIndexingModeAnnotation().fold(IndexingMode.SMART) { annotation =>
+        val mode = annotation.mode()
+        if (!Registry.is("ide.dumb.mode.check.awareness") && mode == IndexingMode.DUMB_EMPTY_INDEX)
+          IndexingMode.DUMB_RUNTIME_ONLY_INDEX
+        else mode
+      }
 
     /**
      * Tries to find the specified annotation on the current test method and then on the current class.

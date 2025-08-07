@@ -1,16 +1,16 @@
 package org.jetbrains.plugins.scala.util.dependencymanager
 
 import org.jetbrains.plugins.scala.DependencyManagerBase
-import org.jetbrains.plugins.scala.DependencyManagerBase.{IvyResolver, Resolver}
-import org.jetbrains.plugins.scala.project.Version
+import org.jetbrains.plugins.scala.DependencyManagerBase.Resolver
+import org.jetbrains.sbt.SbtVersion
 
 /**
  * Adds additional resolver for typesafe repository<br>
  * It's needed to be able to resolve sbt 0.13 releases, which is not published to maven central
  */
-final class TestDependencyManagerForSbt(private val sbtVersion: Version) extends DependencyManagerBase {
+final class TestDependencyManagerForSbt(private val sbtVersion: SbtVersion) extends DependencyManagerBase {
 
-  private val includeTypesafeRepo = sbtVersion < Version("1.0.0")
+  private val includeTypesafeRepo = sbtVersion < SbtVersion("1.0.0")
 
   override protected def resolvers: Seq[DependencyManagerBase.Resolver] = {
     val extraResolvers = if (includeTypesafeRepo) Seq(Resolver.TypesafeReleases) else Nil

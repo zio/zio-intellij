@@ -1,11 +1,10 @@
 package zio.inspections
 
 import com.intellij.codeInspection.LocalInspectionTool
-import com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.plugins.scala.DependencyManagerBase._
 import org.jetbrains.plugins.scala.base.libraryLoaders._
 import org.jetbrains.plugins.scala.codeInspection.ScalaInspectionTestBase
-import org.jetbrains.plugins.scala.codeInspection.collections._
+import org.jetbrains.plugins.scala.codeInspection.collections.OperationOnCollectionInspection
 import zio.inspections.ZInspectionTestBase._
 import zio.intellij.inspections.ZInspection
 
@@ -17,7 +16,7 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
 
   override protected def librariesLoaders: Seq[LibraryLoader] =
     Seq(
-      ScalaSDKLoader(),
+      ScalaSDKLoader(includeScalaLibraryFilesInSdk = true),
       IvyManagedLoader(
         "dev.zio" %% "zio"         % versionPattern,
         "dev.zio" %% "zio-streams" % versionPattern,
@@ -92,8 +91,12 @@ object ZInspectionTestBase {
 }
 
 abstract class ZSimplifyInspectionTest[T <: ZInspection: ClassTag]
-    extends OperationsOnCollectionInspectionTest
+    extends ScalaInspectionTestBase
     with ZInspectionTestBase[T] {
+
+  protected val hint: String
+
+  override protected lazy val description: String = hint
 
   final override protected val classOfInspection =
     classTag[T].runtimeClass.asInstanceOf[Class[_ <: ZInspection]]

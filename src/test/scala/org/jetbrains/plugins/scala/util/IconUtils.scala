@@ -1,8 +1,8 @@
 package org.jetbrains.plugins.scala.util
 
 import com.intellij.icons.AllIcons
-import com.intellij.ui.{IconManager, LayeredIcon}
 import com.intellij.ui.icons.CoreIconManager
+import com.intellij.ui.{IconManager, LayeredIcon}
 import org.junit.Assert.fail
 
 import javax.swing.Icon
