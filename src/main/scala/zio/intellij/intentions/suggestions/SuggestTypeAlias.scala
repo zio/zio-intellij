@@ -19,7 +19,13 @@ import org.jetbrains.plugins.scala.lang.psi.types.api.presentation.{NameRenderer
 import org.jetbrains.plugins.scala.lang.psi.types.api.{ParameterizedType, UndefinedType, ValueType}
 import org.jetbrains.plugins.scala.lang.psi.types.recursiveUpdate.ScSubstitutor
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
-import org.jetbrains.plugins.scala.lang.psi.types.{AliasType, ScType, ScalaTypeVisitor, TypePresentationContext}
+import org.jetbrains.plugins.scala.lang.psi.types.{
+  AliasType,
+  Context,
+  ScType,
+  ScalaTypeVisitor,
+  TypePresentationContext
+}
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
 import org.jetbrains.plugins.scala.project.ProjectContext
 import org.jetbrains.plugins.scala.settings.ScalaApplicationSettings
@@ -90,8 +96,8 @@ object SuggestTypeAlias {
 
   private def topLevelType(tpe: ScType): ScType =
     tpe.aliasType match {
-      case Some(AliasType(_, _, Right(value))) => value
-      case _                                   => tpe
+      case Some(AliasType(_, _, Right(value), _)) => value
+      case _                                      => tpe
     }
 
   def equiv(alias: ScTypeAliasDefinition, tpe: ScType): Option[ScType] =
@@ -125,7 +131,7 @@ object SuggestTypeAlias {
     // TODO temp hack: restores the old behavior of canonicalText from before this change:
     // https://github.com/JetBrains/intellij-scala/commit/0669994c02f3eb15d9c67f09f9c696227c83060f
     // which caused some type aliases to be displayed as e.g `zioIO` instead of `zio.IO`
-    override def canonicalText(context: TypePresentationContext): String = {
+    override def canonicalText(tpc: TypePresentationContext)(implicit context: Context): String = {
       val renderer: NameRenderer = new NameRenderer {
         override def renderName(e: PsiNamedElement): String          = nameFun(e, withPoint = false)
         override def renderNameWithPoint(e: PsiNamedElement): String = nameFun(e, withPoint = true)
@@ -157,11 +163,12 @@ object SuggestTypeAlias {
       }
 
       typeSystem.typeText(tpe, renderer, PresentationOptions(renderStdTypes = isPreciseText, canonicalForm = true))(
+        tpc,
         context
       )
     }
 
-    override def presentableText(implicit context: TypePresentationContext): String = tpe.presentableText
+    override def presentableText(implicit tpc: TypePresentationContext, context: Context): String = tpe.presentableText
 
     private def removeKeywords(text: String): String =
       ScalaNamesUtil.escapeKeywordsFqn(text)

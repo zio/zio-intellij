@@ -152,9 +152,9 @@ package object utils {
     if (!tpe.isAliasType) Some(tpe)
     else
       tpe.aliasType match {
-        case Some(AliasType(_: ScTypeAliasDefinition, Right(l), Right(h))) if l == h =>
+        case Some(AliasType(_: ScTypeAliasDefinition, Right(l), Right(h), _)) if l == h =>
           resolveAliases(l)
-        case Some(AliasType(typeDef: ScTypeAliasDefinition, _, _)) =>
+        case Some(AliasType(typeDef: ScTypeAliasDefinition, _, _, _)) =>
           typeDef.aliasedType match {
             case Right(aliasedType) => resolveAliases(aliasedType)
             case Left(_)            => None
