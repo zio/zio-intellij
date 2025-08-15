@@ -28,7 +28,10 @@ abstract class ScalaFixtureTestCase extends CodeInsightFixtureTestCase[ModuleFix
   protected lazy val jdk: Sdk = IdeaTestUtil.getMockJdk(JavaVersion.compose(17))
 
   override protected def librariesLoaders: Seq[LibraryLoader] = Seq(
-    ScalaSDKLoader(includeScalaCompilerIntoLibraryClasspath = includeCompilerAsLibrary, includeScalaLibrarySources = includeScalaLibrarySources),
+    ScalaSDKLoader(
+      includeScalaCompilerIntoLibraryClasspath = includeCompilerAsLibrary,
+      includeScalaLibrarySources = includeScalaLibrarySources
+    ),
     new LibraryLoader {
       override def init(implicit module: Module, version: ScalaVersion): Unit = {
         val jdkTable = JavaAwareProjectJdkTableImpl.getInstanceEx
@@ -48,7 +51,7 @@ abstract class ScalaFixtureTestCase extends CodeInsightFixtureTestCase[ModuleFix
   private[this] var indexingMode: IndexingMode = IndexingMode.SMART
 
   // SCL-21849
-  protected def getIndexingMode: IndexingMode = indexingMode
+  protected def getIndexingMode: IndexingMode             = indexingMode
   protected def setIndexingMode(mode: IndexingMode): Unit = indexingMode = mode
   //end section: indexing mode setup
 

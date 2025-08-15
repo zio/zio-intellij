@@ -38,7 +38,7 @@ private object MultipleScalaVersionsRunner {
     Seq(
       TestScalaVersion.Scala_2_11,
       TestScalaVersion.Scala_2_12,
-      TestScalaVersion.Scala_2_13,
+      TestScalaVersion.Scala_2_13
     )
 
   private val DefaultJdkVersionToRun: TestJdkVersion =
@@ -46,7 +46,9 @@ private object MultipleScalaVersionsRunner {
 
   lazy val filterJdkVersionRegistry: Option[TestJdkVersion] = {
     val result = Option(System.getProperty("filter.test.jdk.version")).map(TestJdkVersion.valueOf)
-    result.foreach(v => TeamcityUtils.logUnderTeamcity(s"MultipleScalaVersionsRunner: running jdk filter: $v", status = Warning))
+    result.foreach(v =>
+      TeamcityUtils.logUnderTeamcity(s"MultipleScalaVersionsRunner: running jdk filter: $v", status = Warning)
+    )
     result
   }
 
@@ -60,7 +62,7 @@ private object MultipleScalaVersionsRunner {
           test.filter(filter)
         case (test, testIdx) =>
           val description = makeDescription(test.getClass, test)
-          val shouldRun = filter.shouldRun(description)
+          val shouldRun   = filter.shouldRun(description)
           if (!shouldRun) {
             markSkipped(test, description)
             mutedTestsIndexes ::= testIdx
@@ -71,24 +73,20 @@ private object MultipleScalaVersionsRunner {
       mutedTestsIndexes.foreach(myTests.remove)
     }
 
-    private def markSkipped(test: Test, description: Description): Unit = {
+    private def markSkipped(test: Test, description: Description): Unit =
       println(s"Test skipped: ${description.getDisplayName}")
-    }
 
     private val myTests: util.List[Test] = new util.ArrayList[Test]
-    private def myTestsScala: Seq[Test] = {
+    private def myTestsScala: Seq[Test]  =
       //noinspection ScalaRedundantCast
       // asInstanceOf is needed. we have multiple junit versions in compiler classpath (3.8, 4.11, 4.12) and jar files order is undefined. See: SCL-18768
       myTests.asScala.toSeq.asInstanceOf[Seq[Test]]
-    }
 
-    override def addTest(test: Test): Unit = {
+    override def addTest(test: Test): Unit =
       myTests.add(test)
-    }
 
-    override def addTestSuite(testClass: Class[_ <: TestCase]): Unit = {
+    override def addTestSuite(testClass: Class[_ <: TestCase]): Unit =
       super.addTestSuite(testClass)
-    }
 
     override def tests(): util.Enumeration[Test] =
       util.Collections.enumeration(myTests)
@@ -104,8 +102,7 @@ private object MultipleScalaVersionsRunner {
       for (each <- myTestsScala if continue) {
         if (result.shouldStop) {
           continue = false
-        }
-        else {
+        } else {
           runTest(each, result)
         }
       }
@@ -129,14 +126,15 @@ private object MultipleScalaVersionsRunner {
     val suite = new MyBaseTestSuite(klass.getName)
 
     val classScalaVersions = scalaVersionsToRun(klass)
-    val classJdkVersions = jdkVersionsToRun(klass)
+    val classJdkVersions   = jdkVersionsToRun(klass)
     assert(classScalaVersions.nonEmpty, "at least one scala version should be specified")
     assert(classJdkVersions.nonEmpty, "at least one jdk version should be specified")
 
     val allTestCases: Seq[(TestCase, ScalaVersion, JdkVersion)] = {
       val collected = new ScalaVersionAwareTestsCollector(klass, classScalaVersions, classJdkVersions).collectTests()
-      collected.collect { case (test, sv, jv) if filterJdkVersionRegistry.forall(_ == jv) =>
-        (test, sv.toProductionVersion, jv.toProductionVersion)
+      collected.collect {
+        case (test, sv, jv) if filterJdkVersionRegistry.forall(_ == jv) =>
+          (test, sv.toProductionVersion, jv.toProductionVersion)
       }
     }
 
@@ -170,7 +168,8 @@ private object MultipleScalaVersionsRunner {
 
   private def childTestsByScalaVersion(testCases: Seq[(TestCase, ScalaVersion, JdkVersion)]): Seq[Test] = {
     val scalaVersionToTests: Map[ScalaVersion, Seq[Test]] =
-      testCases.groupBy(_._2)
+      testCases
+        .groupBy(_._2)
         .view
         .mapValues(_.map(t => (t._1, t._3)))
         .mapValues(childTestsByJdkVersion)
@@ -207,12 +206,14 @@ private object MultipleScalaVersionsRunner {
 
   private def childTestsByJdkVersion(testCases: Seq[(TestCase, JdkVersion)]): Seq[Test] = {
     val jdkVersionToTests: Map[JdkVersion, Seq[Test]] =
-      testCases.groupBy(_._2)
+      testCases
+        .groupBy(_._2)
         .view
         .mapValues(_.map(_._1))
         .toMap
 
-    if (jdkVersionToTests.size == 1) jdkVersionToTests.head._2 else {
+    if (jdkVersionToTests.size == 1) jdkVersionToTests.head._2
+    else {
       for {
         (version, tests) <- jdkVersionToTests.toSeq.sortBy(_._1)
         if tests.nonEmpty
@@ -243,7 +244,7 @@ private object MultipleScalaVersionsRunner {
     def inner(c: Class[_]): Annotation = c.getAnnotation(annotationClass) match {
       case null =>
         c.getSuperclass match {
-          case null => null
+          case null   => null
           case parent => inner(parent)
         }
       case annotation => annotation
@@ -255,24 +256,23 @@ private object MultipleScalaVersionsRunner {
   @unused
   private def debugLog(d: Description, deep: Int = 0): Unit = {
     val annotations = d.getAnnotations.asScala.map(_.annotationType.getName).mkString(",")
-    val details = s"${d.getMethodName}, ${d.getClassName}, ${d.getTestClass}, $annotations"
-    val prefix = "##" + "    " * deep
+    val details     = s"${d.getMethodName}, ${d.getClassName}, ${d.getTestClass}, $annotations"
+    val prefix      = "##" + "    " * deep
     System.out.println(s"$prefix ${d.toString} ($details)")
     d.getChildren.forEach(debugLog(_, deep + 1))
   }
 
-  private def isTestSkipped(test: TestCase): Boolean = {
+  private def isTestSkipped(test: TestCase): Boolean =
     // Implement logic to determine if the test is skipped (e.g., based on annotations or configuration)
     false
-  }
 
   // Copied from JUnit38ClassRunner, added "Category" annotation propagation for ScalaVersionTestSuite
   private def makeDescription(klass: Class[_], test: Test): Description = test match {
     case tc: TestCase if isTestSkipped(tc) =>
       Description.createSuiteDescription(s"[SKIPPED] ${tc.getName}", tc.getClass)
     case ts: TestSuite =>
-      val name = Option(ts.getName).getOrElse(createSuiteDescriptionName(ts))
-      val annotations =  findAnnotation(klass, classOf[Category]).toSeq
+      val name        = Option(ts.getName).getOrElse(createSuiteDescriptionName(ts))
+      val annotations = findAnnotation(klass, classOf[Category]).toSeq
       val description = Description.createSuiteDescription(name, annotations: _*)
       ts.tests.asScala.foreach { childTest =>
         // compiler fails on TeamCity without this case, no idea why
@@ -288,7 +288,7 @@ private object MultipleScalaVersionsRunner {
   }
 
   private def createSuiteDescriptionName(ts: TestSuite): String = {
-    val count = ts.countTestCases
+    val count   = ts.countTestCases
     val example = if (count == 0) "" else " [example: %s]".format(ts.testAt(0))
     "TestSuite with %s tests%s".format(count, example)
   }

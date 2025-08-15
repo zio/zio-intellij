@@ -16,10 +16,10 @@ class EditorHintFixtureEx(parentDisposable: Disposable) extends EditorHintFixtur
     assertNotNull("Current hint text is empty", text)
 
     val BodyStartTag = "<body>"
-    val BodyEndTag = "</body>"
+    val BodyEndTag   = "</body>"
 
     val bodyStart = text.indexOf(BodyStartTag)
-    val bodyEnd = text.indexOf(BodyEndTag, bodyStart)
+    val bodyEnd   = text.indexOf(BodyEndTag, bodyStart)
     if (bodyStart >= 0 || bodyEnd >= 0)
       text.substring(bodyStart + BodyStartTag.length, bodyEnd)
     else

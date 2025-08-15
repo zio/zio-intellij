@@ -42,5 +42,4 @@ trait ExceptionAssertions {
     assertExceptionMessage(None)(code)
 }
 
-
 object ExceptionAssertions extends ExceptionAssertions

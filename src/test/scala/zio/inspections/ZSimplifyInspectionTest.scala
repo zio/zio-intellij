@@ -4,7 +4,6 @@ import com.intellij.codeInspection.LocalInspectionTool
 import org.jetbrains.plugins.scala.DependencyManagerBase._
 import org.jetbrains.plugins.scala.base.libraryLoaders._
 import org.jetbrains.plugins.scala.codeInspection.ScalaInspectionTestBase
-import org.jetbrains.plugins.scala.codeInspection.collections.OperationOnCollectionInspection
 import zio.inspections.ZInspectionTestBase._
 import zio.intellij.inspections.ZInspection
 

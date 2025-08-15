@@ -20,7 +20,7 @@ trait MatcherAssertions extends FailableTest {
         def message = if (shouldPass) {
           val actualValueFancy = value match {
             case seq: Seq[_] => seq.mkString(s"${seq.getClass.getSimpleName}(\n  ", ",\n  ", "\n)")
-            case v                  => v.toString
+            case v           => v.toString
           }
           "actual: " + actualValueFancy
         } else {
@@ -46,7 +46,9 @@ trait MatcherAssertions extends FailableTest {
     if (classTag.runtimeClass.isInstance(obj)) {
       obj.asInstanceOf[T]
     } else {
-      Assert.fail(s"wrong object class\nexpected ${classTag.runtimeClass.getName}\nactual:${obj.getClass.getName}").asInstanceOf[Nothing]
+      Assert
+        .fail(s"wrong object class\nexpected ${classTag.runtimeClass.getName}\nactual:${obj.getClass.getName}")
+        .asInstanceOf[Nothing]
     }
 
   case class ContainsPattern(fragment: String) {

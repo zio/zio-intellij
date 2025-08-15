@@ -10,7 +10,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.ScType
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestFramework
 import zio.intellij.ZioIcon
 import zio.intellij.inspections.isOfClassFrom
-import zio.intellij.testsupport.ZTestFramework.{ZIO1SpecFQN, ZIO2SpecFQN, expandsToTestMethod}
+import zio.intellij.testsupport.ZTestFramework.{expandsToTestMethod, ZIO1SpecFQN, ZIO2SpecFQN}
 import zio.intellij.utils.TypeCheckUtils.zioTestPackage
 
 import javax.swing.Icon

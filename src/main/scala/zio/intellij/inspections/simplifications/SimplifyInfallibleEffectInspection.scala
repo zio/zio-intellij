@@ -1,6 +1,11 @@
 package zio.intellij.inspections.simplifications
 
-import org.jetbrains.plugins.scala.codeInspection.collections.{Qualified, Simplification, SimplificationType, invocationText}
+import org.jetbrains.plugins.scala.codeInspection.collections.{
+  invocationText,
+  Qualified,
+  Simplification,
+  SimplificationType
+}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScReferenceExpression}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunction
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable

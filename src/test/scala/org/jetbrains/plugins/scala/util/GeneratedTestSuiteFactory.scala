@@ -9,7 +9,6 @@ import org.jetbrains.plugins.scala.util.GeneratedTestSuiteFactory.{SimpleTestDat
 import org.jetbrains.plugins.scala.util.assertions.AssertionMatchers
 import org.junit.Ignore
 
-
 abstract class GeneratedTestSuiteFactory {
   type TestData = GeneratedTestSuiteFactory.TestData
   type TD <: TestData
@@ -27,22 +26,27 @@ abstract class GeneratedTestSuiteFactory {
 
   //noinspection JUnitMalformedDeclaration
   @Ignore
-  protected class SimpleHighlightingActualTest(testData: SingleCodeTestData, minScalaVersion: ScalaVersion) extends ScalaLightCodeInsightFixtureTestCase with AssertionMatchers {
+  protected class SimpleHighlightingActualTest(testData: SingleCodeTestData, minScalaVersion: ScalaVersion)
+      extends ScalaLightCodeInsightFixtureTestCase
+      with AssertionMatchers {
     this.setName(testData.testName)
 
-    override protected def sharedProjectToken: SharedTestProjectToken = SharedTestProjectToken(GeneratedTestSuiteFactory)
+    override protected def sharedProjectToken: SharedTestProjectToken = SharedTestProjectToken(
+      GeneratedTestSuiteFactory
+    )
     override protected def supportedIn(version: ScalaVersion): Boolean = version >= minScalaVersion
 
-    override def runTestRunnable(testRunnable: ThrowableRunnable[Throwable]): Unit = {
+    override def runTestRunnable(testRunnable: ThrowableRunnable[Throwable]): Unit =
       checkTextHasNoErrors(testData.testCode)
-    }
 
     override protected def shouldPass: Boolean = !testData.isFailing
   }
 
   //noinspection JUnitMalformedDeclaration
   @Ignore
-  protected abstract class SimpleActualTest(testData: TestData, minScalaVersion: ScalaVersion) extends SimpleTestCase with AssertionMatchers {
+  protected abstract class SimpleActualTest(testData: TestData, minScalaVersion: ScalaVersion)
+      extends SimpleTestCase
+      with AssertionMatchers {
     this.setName(testData.testName)
 
     override protected def scalaVersion: ScalaVersion = ScalaVersion.Latest.Scala_3
@@ -64,12 +68,19 @@ object GeneratedTestSuiteFactory {
     final def isFailing: Boolean = failureExpectation.nonEmpty
   }
 
-  sealed case class FailureExpectation(errors: Seq[TestDataError])(val linesCovered: Boolean, val messagesCovered: Boolean) {
+  sealed case class FailureExpectation(errors: Seq[TestDataError])(
+    val linesCovered: Boolean,
+    val messagesCovered: Boolean
+  ) {
     assert(!linesCovered || errors.forall(_.line.nonEmpty))
     assert(!messagesCovered || errors.forall(_.message.nonEmpty))
   }
   object FailureExpectation {
-    def fromErrors(errors: Seq[TestDataError], linesCovered: Boolean = false, messagesCovered: Boolean = false): Option[FailureExpectation] =
+    def fromErrors(
+      errors: Seq[TestDataError],
+      linesCovered: Boolean = false,
+      messagesCovered: Boolean = false
+    ): Option[FailureExpectation] =
       errors.nonEmpty.option(FailureExpectation(errors)(linesCovered, messagesCovered))
   }
 
@@ -83,9 +94,11 @@ object GeneratedTestSuiteFactory {
 
   final case class TestDataErrorMessage(scalaPluginMessage: String, scalaCompilerMessage: String)
 
-  final case class SimpleTestData(override val testName: String,
-                                  override val testCode: String,
-                                  override val failureExpectation: Option[FailureExpectation]) extends SingleCodeTestData {
+  final case class SimpleTestData(
+    override val testName: String,
+    override val testCode: String,
+    override val failureExpectation: Option[FailureExpectation]
+  ) extends SingleCodeTestData {
     override def checkCodeFragment: String = testCode
   }
 
@@ -108,6 +121,7 @@ object GeneratedTestSuiteFactory {
 
   abstract class withHighlightingTest(minScalaVersion: ScalaVersion) extends GeneratedTestSuiteFactory {
     override type TD = SingleCodeTestData
-    final def makeActualTest(testData: SingleCodeTestData): Test = new SimpleHighlightingActualTest(testData, minScalaVersion)
+    final def makeActualTest(testData: SingleCodeTestData): Test =
+      new SimpleHighlightingActualTest(testData, minScalaVersion)
   }
 }

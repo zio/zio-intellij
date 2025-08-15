@@ -8,8 +8,7 @@ import org.hamcrest.{BaseMatcher, Description}
  *
  * @tparam V type of the actual and expected value
  */
-abstract class ScalaBaseMatcher[V]
-  extends BaseMatcher[V] {
+abstract class ScalaBaseMatcher[V] extends BaseMatcher[V] {
 
   /**
    * Checks if actual value is matches matcher.

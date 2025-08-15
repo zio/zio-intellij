@@ -8,9 +8,11 @@ import java.lang.reflect.{Method, Modifier}
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class ScalaVersionAwareTestsCollector(klass: Class[_ <: TestCase],
-                                      classScalaVersion: Seq[TestScalaVersion],
-                                      classJdkVersion: Seq[TestJdkVersion]) {
+class ScalaVersionAwareTestsCollector(
+  klass: Class[_ <: TestCase],
+  classScalaVersion: Seq[TestScalaVersion],
+  classJdkVersion: Seq[TestJdkVersion]
+) {
 
   def collectTests(): Seq[(TestCase, TestScalaVersion, TestJdkVersion)] = {
     val result = ArrayBuffer.empty[(Test, TestScalaVersion, TestJdkVersion)]
@@ -19,7 +21,7 @@ class ScalaVersionAwareTestsCollector(klass: Class[_ <: TestCase],
     tests.foreach {
       case (test: ScalaSdkOwner, _, scalaVersion, jdkVersion) =>
         val scalaVersionProd = scalaVersion.toProductionVersion
-        val jdkVersionProd = jdkVersion.toProductionVersion
+        val jdkVersionProd   = jdkVersion.toProductionVersion
 
         test.injectedScalaVersion = scalaVersionProd // !! should be set before calling test.skip
         test.injectedJdkVersion = jdkVersionProd
@@ -38,7 +40,8 @@ class ScalaVersionAwareTestsCollector(klass: Class[_ <: TestCase],
   private def testsFromTestCase(klass: Class[_]): Seq[(Test, Method, TestScalaVersion, TestJdkVersion)] = {
     def warn(text: String) = Seq((TestSuite.warning(text), null, null, null))
 
-    try TestSuite.getTestConstructor(klass) catch {
+    try TestSuite.getTestConstructor(klass)
+    catch {
       case _: NoSuchMethodException =>
         return warn(s"Class ${klass.getName} has no public constructor TestCase(String name) or TestCase()")
     }
@@ -46,7 +49,8 @@ class ScalaVersionAwareTestsCollector(klass: Class[_ <: TestCase],
     if (!Modifier.isPublic(klass.getModifiers))
       return warn(s"Class ${klass.getName} is not public")
 
-    val withSuperClasses = Iterator.iterate[Class[_]](klass)(_.getSuperclass)
+    val withSuperClasses = Iterator
+      .iterate[Class[_]](klass)(_.getSuperclass)
       .takeWhile(_ != null)
       .takeWhile(classOf[Test].isAssignableFrom)
       .toArray
@@ -86,10 +90,10 @@ class ScalaVersionAwareTestsCollector(klass: Class[_ <: TestCase],
       val isPublic = isPublicMethod(method)
 
       val effectiveScalaVersions = methodEffectiveScalaVersions(method, classScalaVersion)
-      val effectiveJdkVersions = methodEffectiveJdkVersions(method, classJdkVersion)
+      val effectiveJdkVersions   = methodEffectiveJdkVersions(method, classJdkVersion)
       for {
         scalaVersion <- effectiveScalaVersions
-        jdkVersion <- effectiveJdkVersions
+        jdkVersion   <- effectiveJdkVersions
       } yield {
         val test = if (isPublic) {
           TestSuite.createTest(theClass, name)
@@ -103,7 +107,10 @@ class ScalaVersionAwareTestsCollector(klass: Class[_ <: TestCase],
     }
   }
 
-  private def methodEffectiveScalaVersions(method: Method, classVersions: Seq[TestScalaVersion]): Seq[TestScalaVersion] =
+  private def methodEffectiveScalaVersions(
+    method: Method,
+    classVersions: Seq[TestScalaVersion]
+  ): Seq[TestScalaVersion] =
     method.getAnnotation(classOf[RunWithScalaVersions]) match {
       case null =>
         classVersions

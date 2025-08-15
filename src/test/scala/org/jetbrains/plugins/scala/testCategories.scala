@@ -2,7 +2,6 @@ package org.jetbrains.plugins.scala
 
 // tests marked with these categories will be run as a separate step
 
-
 trait SlowTests
 
 trait DebuggerTests
@@ -25,8 +24,10 @@ trait WorksheetEvaluationTests
 trait RandomTypingTests
 trait HighlightingTests
 
-/** Tests that may fail intermittently or depending on environment.
- * Eg run locally but not on build server. */
+/**
+ * Tests that may fail intermittently or depending on environment.
+ * Eg run locally but not on build server.
+ */
 trait FlakyTests
 
 /** Test cases generated from testdata file sets. Mostly contains lexer and parser tests. */

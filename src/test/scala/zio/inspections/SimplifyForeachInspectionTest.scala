@@ -1,8 +1,7 @@
 package zio.inspections
 
 import zio.intellij.inspections.ZInspection
-import zio.intellij.inspections.simplifications.SimplifyForeachInspectionZIO1
-import zio.intellij.inspections.simplifications.SimplifyForeachInspectionZIO2
+import zio.intellij.inspections.simplifications.{SimplifyForeachInspectionZIO1, SimplifyForeachInspectionZIO2}
 
 import scala.reflect.ClassTag
 
@@ -44,7 +43,6 @@ abstract class SimplifyForeachInspectionTest[S <: ZInspection: ClassTag](
        |        _ <- ZIO.fail(???)
        |      } yield ()
        |  }""".stripMargin
-
 
   override protected val hint: String = s"Replace with ZIO.$methodToReplaceWith"
 

@@ -12,9 +12,9 @@ trait PsiAssertions {
       val document = PsiDocumentManager.getInstance(file.getProject).getDocument(file)
       val fileText = file.getText
       val errorsReadable: Seq[String] = errorElements.map { e =>
-        val range = e.getTextRange
-        val line = document.getLineNumber(range.getStartOffset)
-        val code = fileText.substring(range.getStartOffset, range.getEndOffset)
+        val range        = e.getTextRange
+        val line         = document.getLineNumber(range.getStartOffset)
+        val code         = fileText.substring(range.getStartOffset, range.getEndOffset)
         val errorMessage = e.getErrorDescription
         s"$line: $code - $errorMessage"
       }

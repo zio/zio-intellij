@@ -9,8 +9,8 @@ object FindCaretOffset {
     val (textActual, caretOffsets) = findCaretOffsets(text, stripTrailingSpaces)
     caretOffsets match {
       case Seq(caretIdx) => (textActual, caretIdx)
-      case Seq() => (textActual, -1)
-      case _ => fail(s"single caret expected but found: ${caretOffsets.size}").asInstanceOf[Nothing]
+      case Seq()         => (textActual, -1)
+      case _             => fail(s"single caret expected but found: ${caretOffsets.size}").asInstanceOf[Nothing]
     }
   }
 
@@ -22,13 +22,16 @@ object FindCaretOffset {
 
     @scala.annotation.tailrec
     def collectCaretIndices(idx: Int)(indices: Seq[Int]): Seq[Int] =
-      if (idx < 0) indices else {
+      if (idx < 0) indices
+      else {
         val nextIdx = caretIndex(idx + 1)
         collectCaretIndices(nextIdx)(indices :+ idx)
       }
 
     val caretIndices = collectCaretIndices(caretIndex(0))(Seq[Int]())
-    val caretIndicesNormalized = caretIndices.zipWithIndex.map { case (caretIdx, idx) => caretIdx - idx * CARET_TAG.length }
+    val caretIndicesNormalized = caretIndices.zipWithIndex.map {
+      case (caretIdx, idx) => caretIdx - idx * CARET_TAG.length
+    }
     (
       textNormalized.replace(CARET_TAG, ""),
       caretIndicesNormalized

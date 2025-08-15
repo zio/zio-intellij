@@ -5,7 +5,7 @@ import org.jetbrains.plugins.scala.util.HashBuilder._
 
 import java.util.Objects
 
-class HashBuilderTest extends TestCase  {
+class HashBuilderTest extends TestCase {
 
   def testHashBuilder(): Unit = {
     val a = "a"
@@ -20,8 +20,7 @@ class HashBuilderTest extends TestCase  {
     assertEqual(a #+ null #+ b, Objects.hash(a, null, b))
     assertEqual(1 #+ 2 #+ 3, Objects.hash(1: Integer, 2: Integer, 3: Integer))
 
-    assertEqual(1 #+ 2L #+ true,
-      Objects.hash(1: Integer, java.lang.Long.valueOf(2L), java.lang.Boolean.TRUE))
+    assertEqual(1 #+ 2L #+ true, Objects.hash(1: Integer, java.lang.Long.valueOf(2L), java.lang.Boolean.TRUE))
   }
 
   private def assertEqual(builder: HashBuilder, value: Int): Unit =

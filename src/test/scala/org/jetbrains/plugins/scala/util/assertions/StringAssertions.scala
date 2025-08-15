@@ -55,7 +55,8 @@ trait StringAssertions {
       fail(s"expected blank string but got:\n${string}")
 
   private def display(str: String): String =
-    str.replace("\\n", "\\\\n")
+    str
+      .replace("\\n", "\\\\n")
       .replace("\\r", "\\\\r")
       .replace("\n", "\\n")
       .replace("\r", "\\r")

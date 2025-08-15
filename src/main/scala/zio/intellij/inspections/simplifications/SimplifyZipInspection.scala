@@ -33,8 +33,9 @@ sealed class BaseZipOneOperatorSimplificationType(invocation: Qualified, replace
 
     def replacement(qual: ScExpression, x: ScExpression) =
       x match {
-        case _: ScInfixExpr => replace(expr).withText(s"${qual.getBracedText} $replaceWith (${x.getBracedText})").highlightFrom(qual)
-        case _              => replace(expr).withText(s"${qual.getBracedText} $replaceWith ${x.getBracedText}").highlightFrom(qual)
+        case _: ScInfixExpr =>
+          replace(expr).withText(s"${qual.getBracedText} $replaceWith (${x.getBracedText})").highlightFrom(qual)
+        case _ => replace(expr).withText(s"${qual.getBracedText} $replaceWith ${x.getBracedText}").highlightFrom(qual)
       }
 
     expr match {

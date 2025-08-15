@@ -49,7 +49,7 @@ trait HamcrestMatchers {
       keys.forall { key =>
         (actualValue.get(key), matchers.get(key)) match {
           case (Some(actual), Some(matcher)) => matcher.matches(actual)
-          case _ => false
+          case _                             => false
         }
       }
     }

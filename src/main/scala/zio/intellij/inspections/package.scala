@@ -2,7 +2,7 @@ package zio.intellij
 
 import com.intellij.psi.{PsiAnnotation, PsiClass, PsiElement}
 import org.jetbrains.plugins.scala.codeInspection.collections._
-import org.jetbrains.plugins.scala.extensions.{PsiClassExt, childOf}
+import org.jetbrains.plugins.scala.extensions.{childOf, PsiClassExt}
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScPattern, ScReferencePattern, ScWildcardPattern}
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
@@ -36,7 +36,8 @@ package object inspections {
   }
 
   private def qualifiedNameFitToPatterns(clazz: PsiClass, patterns: Seq[String]) =
-    Option(clazz).flatMap(c => Option(c.qualifiedName))
+    Option(clazz)
+      .flatMap(c => Option(c.qualifiedName))
       .exists(ScalaNamesUtil.nameFitToPatterns(_, patterns, strict = false))
 
   object zioMethods {

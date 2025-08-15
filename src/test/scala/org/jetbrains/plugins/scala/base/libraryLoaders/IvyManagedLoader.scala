@@ -24,7 +24,7 @@ abstract class IvyManagedLoaderBase extends LibraryLoader {
    * @param parentDisposable if specified, used to remove libraries from the module on parentDisposable's disposing
    */
   def init(parentDisposable: Option[Disposable])(implicit module: Module, version: ScalaVersion): Unit = {
-    val deps = dependencies(version)
+    val deps     = dependencies(version)
     val resolved = cache.getOrElseUpdate(deps, dependencyManager.resolve(deps: _*))
     resolved.foreach { resolved =>
       val resolvedFile = resolved.file.toFile
@@ -32,7 +32,13 @@ abstract class IvyManagedLoaderBase extends LibraryLoader {
 
       parentDisposable match {
         case Some(disposable) =>
-          PsiTestUtil.addLibrary(disposable, module, resolved.info.toString, resolvedFile.getParent, resolvedFile.getName)
+          PsiTestUtil.addLibrary(
+            disposable,
+            module,
+            resolved.info.toString,
+            resolvedFile.getParent,
+            resolvedFile.getName
+          )
         case _ =>
           PsiTestUtil.addLibrary(module, resolved.info.toString, resolvedFile.getParent, resolvedFile.getName)
       }
@@ -40,13 +46,16 @@ abstract class IvyManagedLoaderBase extends LibraryLoader {
   }
 }
 
-final class IvyManagedLoader private(
-                                      override protected val dependencyManager: DependencyManagerBase,
-                                      private val _dependencies: DependencyDescription*
-                                    ) extends IvyManagedLoaderBase {
+final class IvyManagedLoader private (
+  override protected val dependencyManager: DependencyManagerBase,
+  private val _dependencies: DependencyDescription*
+) extends IvyManagedLoaderBase {
 
   _dependencies.foreach { it =>
-    require(!(it.kind == Types.SRC && it.isTransitive), "Transitive source dependencies are not supported in Ivy") // https://issues.apache.org/jira/browse/IVY-1003
+    require(
+      !(it.kind == Types.SRC && it.isTransitive),
+      "Transitive source dependencies are not supported in Ivy"
+    ) // https://issues.apache.org/jira/browse/IVY-1003
   }
 
   override protected def cache: mutable.Map[Seq[DependencyDescription], Seq[ResolvedDependency]] =

@@ -11,26 +11,29 @@ import scala.util.Try
 object CompilerTestUtil {
 
   private def compileServerSettings: ScalaCompileServerSettings =
-    ScalaCompileServerSettings.getInstance().ensuring(
-      _ != null,
-      "could not get instance of compileServerSettings. Was plugin artifact built before running test?"
-    )
+    ScalaCompileServerSettings
+      .getInstance()
+      .ensuring(
+        _ != null,
+        "could not get instance of compileServerSettings. Was plugin artifact built before running test?"
+      )
 
-  def withModifiedCompileServerSettings(body: ScalaCompileServerSettings => Unit): RevertableChange = new RevertableChange {
-    private var settingsBefore: ScalaCompileServerSettings = _
-    private lazy val settings: ScalaCompileServerSettings = compileServerSettings
+  def withModifiedCompileServerSettings(body: ScalaCompileServerSettings => Unit): RevertableChange =
+    new RevertableChange {
+      private var settingsBefore: ScalaCompileServerSettings = _
+      private lazy val settings: ScalaCompileServerSettings  = compileServerSettings
 
-    override def applyChange(): Unit = {
-      settingsBefore = XmlSerializerUtil.createCopy(settings)
-      body(settings)
-      com.intellij.compiler.CompilerTestUtil.saveApplicationComponent(settings)
+      override def applyChange(): Unit = {
+        settingsBefore = XmlSerializerUtil.createCopy(settings)
+        body(settings)
+        com.intellij.compiler.CompilerTestUtil.saveApplicationComponent(settings)
+      }
+
+      override def revertChange(): Unit = {
+        XmlSerializerUtil.copyBean(settingsBefore, settings)
+        com.intellij.compiler.CompilerTestUtil.saveApplicationComponent(settings)
+      }
     }
-
-    override def revertChange(): Unit = {
-      XmlSerializerUtil.copyBean(settingsBefore, settings)
-      com.intellij.compiler.CompilerTestUtil.saveApplicationComponent(settings)
-    }
-  }
 
   def withEnabledCompileServer(enable: Boolean): RevertableChange = {
     val settings = compileServerSettings
@@ -55,7 +58,7 @@ object CompilerTestUtil {
   def withForcedJdkForBuildProcess(jdk: Sdk): RevertableChange = new RevertableChange {
     private var jdkBefore: Option[String] = None
 
-    override def applyChange(): Unit = {
+    override def applyChange(): Unit =
       jdk.getHomeDirectory match {
         case null =>
           throw new RuntimeException(s"Failed to set up JDK, got: $jdk")
@@ -66,7 +69,6 @@ object CompilerTestUtil {
           jdkBefore = Try(registry.asString).toOption
           registry.setValue(jdkHome)
       }
-    }
 
     override def revertChange(): Unit =
       jdkBefore.foreach { jdk =>

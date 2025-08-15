@@ -99,7 +99,7 @@ private[testsupport] final class TestRunnerResolveService
     }
   }
 
-  private def resolveClassPath(version: ZioVersion, scalaVersion: ScalaVersion, jarUris: Array[URI]): ResolveResult = {
+  private def resolveClassPath(version: ZioVersion, scalaVersion: ScalaVersion, jarUris: Array[URI]): ResolveResult =
     Try(new URLClassLoader(jarUris.map(_.toURL), null).loadClass(ZTestRunnerName + "$")) match {
       case Success(_) =>
         val key = s"${version.toString}###${scalaVersion.versionStr}"
@@ -109,7 +109,6 @@ private[testsupport] final class TestRunnerResolveService
       case Failure(e) =>
         Left(ResolveError.UnknownError(version, scalaVersion, e))
     }
-  }
 
   private[runner] def clearCaches() = testRunnerVersions.clear()
 }
@@ -120,7 +119,7 @@ object TestRunnerResolveService {
 
   sealed trait ResolveStatus
   object ResolveStatus {
-    object DownloadInProgress                     extends ResolveStatus
+    object DownloadInProgress                       extends ResolveStatus
     final case class Resolved(jarPaths: Array[URI]) extends ResolveStatus
   }
 

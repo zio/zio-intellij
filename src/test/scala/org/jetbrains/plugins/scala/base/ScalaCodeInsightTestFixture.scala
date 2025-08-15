@@ -14,20 +14,18 @@ import org.junit.Assert.assertNotNull
 final class ScalaCodeInsightTestFixture(
   val javaFixture: JavaCodeInsightTestFixture
 ) {
-  private var fileTextPatcher: String => String = identity
-  private var defaultFileType: FileType = ScalaFileType.INSTANCE
+  private var fileTextPatcher: String => String                                  = identity
+  private var defaultFileType: FileType                                          = ScalaFileType.INSTANCE
   private var customCheckResultByTextFunction: Option[(String, Boolean) => Unit] = None
 
   def setFileTextPatcher(patcher: String => String): Unit =
     fileTextPatcher = patcher
 
-  def setDefaultFileType(fileType: FileType): Unit = {
+  def setDefaultFileType(fileType: FileType): Unit =
     defaultFileType = fileType
-  }
 
-  def setCustomCheckResultByTextFunction(f: (String, Boolean) => Unit): Unit = {
+  def setCustomCheckResultByTextFunction(f: (String, Boolean) => Unit): Unit =
     customCheckResultByTextFunction = Some(f)
-  }
 
   /////////////////////////////////////////////////////////
   // Section start: helper setup methods
@@ -49,31 +47,31 @@ final class ScalaCodeInsightTestFixture(
   //TODO 1: do not trim expected text here, trim it at usage place
   def configureFromFileText(fileType: FileType, fileText: String): PsiFile = {
     val fileTextPatched = fileTextPatcher(fileText.withNormalizedSeparator.trim)
-    val file = javaFixture.configureByText(fileType, fileTextPatched)
+    val file            = javaFixture.configureByText(fileType, fileTextPatched)
     assertNotNull(file)
     file
   }
 
   def configureFromFileTextWithSomeName(fileType: String, fileText: String): PsiFile = {
     val fileTextPatched = fileTextPatcher(fileText.withNormalizedSeparator)
-    val file = javaFixture.configureByText("Test." + fileType, fileTextPatched)
+    val file            = javaFixture.configureByText("Test." + fileType, fileTextPatched)
     assertNotNull(file)
     file
   }
 
   def configureFromFileText(fileName: String, fileText: String): PsiFile = {
     val fileTextPatched = fileTextPatcher(fileText.withNormalizedSeparator)
-    val file = javaFixture.configureByText(fileName: String, fileTextPatched)
+    val file            = javaFixture.configureByText(fileName: String, fileTextPatched)
     assertNotNull(file)
     file
   }
 
   def openEditorAtOffset(startOffset: Int): Editor = {
     import com.intellij.openapi.fileEditor.{FileEditorManager, OpenFileDescriptor}
-    val project = javaFixture.getProject
+    val project       = javaFixture.getProject
     val editorManager = FileEditorManager.getInstance(project)
-    val vFile = javaFixture.getFile.getVirtualFile
-    val editor = editorManager.openTextEditor(new OpenFileDescriptor(project, vFile, startOffset), false)
+    val vFile         = javaFixture.getFile.getVirtualFile
+    val editor        = editorManager.openTextEditor(new OpenFileDescriptor(project, vFile, startOffset), false)
     editor
   }
   /////////////////////////////////////////////////////////

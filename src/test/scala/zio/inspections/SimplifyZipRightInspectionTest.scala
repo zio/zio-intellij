@@ -41,7 +41,7 @@ class SimplifyFlatmapWithZipRightTest extends ZipRightInspectionTest(".zipRight"
     testQuickFix(text, result, hint)
   }
 
-  def test_flatMap_not_discarding_should_not_highlight(): Unit = 
+  def test_flatMap_not_discarding_should_not_highlight(): Unit =
     z(s"""ZIO.succeed("Tarsila do Amaral").${START}flatMap(x => x)$END""").assertNotHighlighted()
 
 }
@@ -112,7 +112,7 @@ class SimplifyFlatmapWithZipRightOperatorTest extends ZipRightInspectionTest("*>
     testQuickFix(text, result, hint)
   }
 
-  def test_flatMap_not_discarding_should_not_highlight(): Unit = 
+  def test_flatMap_not_discarding_should_not_highlight(): Unit =
     z(s"""ZIO.succeed("Benito Quinquela Martín").${START}flatMap(x => x)$END""").assertNotHighlighted()
 
 }

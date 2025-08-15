@@ -24,6 +24,7 @@ abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestCase {
   protected var extendedObject: ScObject                                  = _
   implicit protected var typePresentationContext: TypePresentationContext = _
   override protected def defaultVersionOverride: Option[ScalaVersion]     = Some(ScalaSdkOwner.preferableSdkVersion)
+  override protected def includeScalaLibraryFilesInSdk: Boolean           = true
 
   protected def code: String
 

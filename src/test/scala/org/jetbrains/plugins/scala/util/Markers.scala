@@ -2,9 +2,7 @@ package org.jetbrains.plugins.scala.util
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.EditorTestUtil
-import junit.framework.TestCase
 import org.jetbrains.plugins.scala.extensions._
-import org.jetbrains.plugins.scala.util.assertions.AssertionMatchers
 import org.junit.Assert._
 
 import scala.collection.immutable.SortedMap
@@ -13,14 +11,14 @@ import scala.collection.mutable
 trait Markers {
 
   def startMarker(i: Int) = s"/*start$i*/"
-  def endMarker(i: Int) = s"/*end$i*/"
-  val startMarker = "/*start*/"
-  val endMarker = "/*end*/"
+  def endMarker(i: Int)   = s"/*end$i*/"
+  val startMarker         = "/*start*/"
+  val endMarker           = "/*end*/"
 
   def start(i: Int = 0): String = startMarker(i)
-  def end (i: Int = 0): String = endMarker(i)
-  def start: String = startMarker
-  def end: String = endMarker
+  def end(i: Int = 0): String   = endMarker(i)
+  def start: String             = startMarker
+  def end: String               = endMarker
 
   /**
    * @example
@@ -34,11 +32,11 @@ trait Markers {
       normalizedInput.contains(startName) && normalizedInput.contains(endName)
 
     val hasNormalStartMarker = hasMarker(startMarker, endMarker)
-    val numberedMarkers = LazyList.from(0).takeWhile(i => hasMarker(startMarker(i), endMarker(i)))
+    val numberedMarkers      = LazyList.from(0).takeWhile(i => hasMarker(startMarker(i), endMarker(i)))
 
     val markers1 = if (hasNormalStartMarker) Seq((startMarker, endMarker)) else Seq.empty
     val markers2 = numberedMarkers.map(i => (startMarker(i), endMarker(i)))
-    val markers = markers1 ++ markers2
+    val markers  = markers1 ++ markers2
     val (resultText, ranges) = extractMarkers(
       normalizedInput,
       markers,
@@ -46,7 +44,6 @@ trait Markers {
     )
     (resultText, ranges.map(_._1))
   }
-
 
   /**
    * Used to extract ranges that may be nested.
@@ -117,16 +114,14 @@ trait Markers {
       idx - idxAdjust(idx) - caretAdjust
     }
 
-    val rangesFixed = ranges
-      .sortBy{ case (TextRangeExt(s, e), _) => (s, -e) }
-      .map {
-        case (TextRangeExt(start, end), markerIdx) =>
-          val newRange = TextRange.create(
-            adjustIndexForMarkersAndCaret(start),
-            adjustIndexForMarkersAndCaret(end),
-          )
-          (newRange, markerIdx)
-      }
+    val rangesFixed = ranges.sortBy { case (TextRangeExt(s, e), _) => (s, -e) }.map {
+      case (TextRangeExt(start, end), markerIdx) =>
+        val newRange = TextRange.create(
+          adjustIndexForMarkersAndCaret(start),
+          adjustIndexForMarkersAndCaret(end)
+        )
+        (newRange, markerIdx)
+    }
 
     val textFixed = markers.foldLeft(normalizedInput) {
       case (text, (startMarker, endMarker)) =>
@@ -141,14 +136,18 @@ trait Markers {
   def findRanges(inputText: String, startMarker: String, endMarker: String): Seq[TextRange] =
     findRangesAndAdjustment(inputText, startMarker, endMarker)._1
 
-  private def findRangesAndAdjustment(inputText: String, startMarker: String, endMarker: String): (Seq[TextRange], Int => Int) = {
+  private def findRangesAndAdjustment(
+    inputText: String,
+    startMarker: String,
+    endMarker: String
+  ): (Seq[TextRange], Int => Int) = {
     assertNoWindowsLineSeparator(inputText)
 
     val startReg = s"\\Q$startMarker\\E".r
-    val endReg = s"\\Q$endMarker\\E".r
+    val endReg   = s"\\Q$endMarker\\E".r
 
     val startIndexes = startReg.findAllMatchIn(inputText).map(_.start).toList
-    val endIndexes = endReg.findAllMatchIn(inputText).map(_.start).toList
+    val endIndexes   = endReg.findAllMatchIn(inputText).map(_.start).toList
     assertEquals(
       s"""start & end markers counts are not equal
          |start indexes: $startIndexes,
@@ -160,8 +159,8 @@ trait Markers {
       endIndexes.size
     )
 
-    val allIndices = (startIndexes.map(_ -> true) ++ endIndexes.map(_ -> false)).sortBy(_._1)
-    val rangesBuilder = Seq.newBuilder[TextRange]
+    val allIndices          = (startIndexes.map(_ -> true) ++ endIndexes.map(_ -> false)).sortBy(_._1)
+    val rangesBuilder       = Seq.newBuilder[TextRange]
     val unclosedRangeStarts = mutable.Stack.empty[Int]
 
     for ((idx, isStart) <- allIndices)
@@ -172,7 +171,6 @@ trait Markers {
           .getOrElse(throw new AssertionError(s"No matching start marker for end marker at $idx"))
         rangesBuilder += TextRange.create(start, idx)
       }
-
 
     val ranges = rangesBuilder.result()
     ranges.foreach { range =>
@@ -185,10 +183,12 @@ trait Markers {
     // note that this list has one more element than allIndices,
     // because the last entry corresponds to the end of the input text
     val adjustmentsBeforeMarker =
-    allIndices.foldLeft(List(0)) {
-      case (prevs, (_, isStart)) =>
-        prevs.head + (if (isStart) startMarker.length else endMarker.length) :: prevs
-    }.reverse
+      allIndices
+        .foldLeft(List(0)) {
+          case (prevs, (_, isStart)) =>
+            prevs.head + (if (isStart) startMarker.length else endMarker.length) :: prevs
+        }
+        .reverse
 
     val adjustments =
       (allIndices.map(_._1) :+ inputText.length)
@@ -198,7 +198,7 @@ trait Markers {
     (ranges, adjustments.valuesIteratorFrom(_).next())
   }
 
-  private def assertNoWindowsLineSeparator(text: String): Unit = {
+  private def assertNoWindowsLineSeparator(text: String): Unit =
     assertFalse(
       """Windows line separator '\r' detected in test data. Please normalise your test data using one of the following helpers:
         |  1. org.jetbrains.plugins.scala.extensions.StringExt.withNormalizedSeparator
@@ -207,7 +207,6 @@ trait Markers {
         |""".stripMargin,
       text.contains("\r")
     )
-  }
 }
 
 object MarkersUtils extends Markers

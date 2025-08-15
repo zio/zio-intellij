@@ -5,7 +5,7 @@ import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.psi.PsiFile
 import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestCase
-import org.jetbrains.plugins.scala.codeInspection.ScalaQuickFixTestFixture.{ExpectedHighlight, TestPrepareResult}
+import org.jetbrains.plugins.scala.codeInspection.ScalaQuickFixTestFixture.ExpectedHighlight
 import org.jetbrains.plugins.scala.extensions.{HighlightInfoExt, StringExt}
 import org.jetbrains.plugins.scala.{EditorTests, ScalaFileType}
 import org.junit.Assert.assertTrue
@@ -39,12 +39,12 @@ abstract class ScalaAnnotatorQuickFixTestBase extends ScalaLightCodeInsightFixtu
   }
 
   protected def description: String
-  protected def fileType: LanguageFileType = ScalaFileType.INSTANCE
-  protected def isScratchFile: Boolean = false
+  protected def fileType: LanguageFileType             = ScalaFileType.INSTANCE
+  protected def isScratchFile: Boolean                 = false
   protected def descriptionMatches(s: String): Boolean = s == description.withNormalizedSeparator.trim
-  protected def onFileCreated(file: PsiFile): Unit = ()
-  protected def createTestText(text: String): String = text
-  protected def trimExpectedText: Boolean = true
+  protected def onFileCreated(file: PsiFile): Unit     = ()
+  protected def createTestText(text: String): String   = text
+  protected def trimExpectedText: Boolean              = true
 
   protected override def checkTextHasNoErrors(text: String): Unit = {
     configureByText(text)
@@ -55,7 +55,8 @@ abstract class ScalaAnnotatorQuickFixTestBase extends ScalaLightCodeInsightFixtu
     def rangeText = ranges.mkString(", ")
 
     assertTrue(
-      if (shouldPass) s"Highlights found at: $rangeText:\n${scalaQuickFixFixture.highlightsDebugText(highlights, getFile.getText)}"
+      if (shouldPass)
+        s"Highlights found at: $rangeText:\n${scalaQuickFixFixture.highlightsDebugText(highlights, getFile.getText)}"
       else failingPassed,
       !shouldPass ^ ranges.isEmpty
     )
@@ -103,11 +104,11 @@ abstract class ScalaAnnotatorQuickFixTestBase extends ScalaLightCodeInsightFixtu
   protected def assertTextHasError(
     expectedHighlights: Seq[ExpectedHighlight],
     actualHighlights: Seq[HighlightInfo],
-    allowAdditionalHighlights: Boolean,
+    allowAdditionalHighlights: Boolean
   ): Unit =
     scalaQuickFixFixture.assertTextHasError(
       expectedHighlights,
       actualHighlights,
-      allowAdditionalHighlights,
+      allowAdditionalHighlights
     )
 }
