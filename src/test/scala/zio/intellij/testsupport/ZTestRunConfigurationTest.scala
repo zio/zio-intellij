@@ -6,7 +6,7 @@ import org.jetbrains.plugins.scala.base.ScalaLightCodeInsightFixtureTestCase
 import org.jetbrains.plugins.scala.util.Markers
 import org.junit.Assert.assertArrayEquals
 
-import java.net.{URI, URL}
+import java.net.URI
 import java.nio.file.Paths
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._

@@ -18,7 +18,7 @@ trait HelperFixtureEditorOps {
   }
 
   final def changePsiAt(offset: Int): Unit = {
-    val settings = ScalaApplicationSettings.getInstance()
+    val settings             = ScalaApplicationSettings.getInstance()
     val oldAutoBraceSettings = settings.HANDLE_BLOCK_BRACES_INSERTION_AUTOMATICALLY
     settings.HANDLE_BLOCK_BRACES_INSERTION_AUTOMATICALLY = false
     try {
@@ -36,12 +36,11 @@ trait HelperFixtureEditorOps {
     commitDocumentInEditor()
   }
 
-  protected def insertAtOffset(offset: Int, text: String): Unit = {
+  protected def insertAtOffset(offset: Int, text: String): Unit =
     invokeAndWait {
       inWriteCommandAction {
         getFixture.getEditor.getDocument.insertString(offset, text)
         commitDocumentInEditor()
       }(getProject)
     }
-  }
 }

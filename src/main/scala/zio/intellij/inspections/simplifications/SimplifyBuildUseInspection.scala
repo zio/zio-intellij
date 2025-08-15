@@ -1,11 +1,11 @@
 package zio.intellij.inspections.simplifications
 
-import org.jetbrains.plugins.scala.codeInspection.collections.{Simplification, SimplificationType, invocationText}
+import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, Simplification, SimplificationType}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScReferenceExpression, ScUnderscoreSection}
 import zio.intellij.inspections.layerMethods.`.build`
 import zio.intellij.inspections.managedMethods.`.use`
 import zio.intellij.inspections.zioMethods.`.provide`
-import zio.intellij.inspections.{ZInspection, lambda}
+import zio.intellij.inspections.{lambda, ZInspection}
 
 class SimplifyBuildUseInspection extends ZInspection(BuildUseSimplificationType)
 

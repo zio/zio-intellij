@@ -5,12 +5,10 @@ import com.intellij.testFramework.LightPlatformTestCase
 import org.jetbrains.plugins.scala.extensions.inWriteAction
 
 object ConfigureJavaFile {
-  def configureJavaFile(fileText: String,
-                        className: String,
-                        packageName: String = null): Unit = inWriteAction {
+  def configureJavaFile(fileText: String, className: String, packageName: String = null): Unit = inWriteAction {
     val root = LightPlatformTestCase.getSourceRoot match {
       case sourceRoot if packageName == null => sourceRoot
-      case sourceRoot => sourceRoot.createChildDirectory(null, packageName)
+      case sourceRoot                        => sourceRoot.createChildDirectory(null, packageName)
     }
 
     val file = root.createChildData(null, className + ".java")

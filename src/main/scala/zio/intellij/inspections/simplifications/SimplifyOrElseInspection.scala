@@ -1,9 +1,9 @@
 package zio.intellij.inspections.simplifications
 
-import org.jetbrains.plugins.scala.codeInspection.collections.{Simplification, SimplificationType, invocationText}
+import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, Simplification, SimplificationType}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScBlock, ScBlockStatement, ScExpression}
 import zio.intellij.inspections.zioMethods.`.orElse`
-import zio.intellij.inspections.{ZInspection, `ZIO.fail`}
+import zio.intellij.inspections.{`ZIO.fail`, ZInspection}
 
 class SimplifyOrElseInspection extends ZInspection(OrElseFailSimplificationType)
 

@@ -1,6 +1,6 @@
 package zio.intellij.inspections.simplifications
 
-import org.jetbrains.plugins.scala.codeInspection.collections.{Simplification, SimplificationType, invocationText}
+import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, Simplification, SimplificationType}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import zio.intellij.inspections._
 import zio.intellij.inspections.zioMethods._

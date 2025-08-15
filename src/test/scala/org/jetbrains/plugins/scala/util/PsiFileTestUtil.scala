@@ -25,8 +25,8 @@ object PsiFileTestUtil {
 
     def createVFile(path: Path): VirtualFile = {
       val sourceRoot = LightPlatformTestCase.getSourceRoot
-      val dir = dirNames(path).foldLeft(sourceRoot)(createDir)
-      val vFile = dir.createChildData(null, fileName)
+      val dir        = dirNames(path).foldLeft(sourceRoot)(createDir)
+      val vFile      = dir.createChildData(null, fileName)
       vFile
     }
 

@@ -17,22 +17,20 @@ trait ScalaCodeParsing {
   def parseScalaFile(
     @InputLanguage("Scala") text: String,
     scalaVersion: ScalaVersion
-  )(implicit project: ProjectContext): ScalaFile = {
+  )(implicit project: ProjectContext): ScalaFile =
     parseScalaFile(text, scalaVersion, enableEventSystem = false)
-  }
 
   def parseScalaFile(
     @InputLanguage("Scala") text: String,
     enableEventSystem: Boolean = false
-  )(implicit project: ProjectContext): ScalaFile = {
+  )(implicit project: ProjectContext): ScalaFile =
     parseScalaFile(text, scalaVersion, enableEventSystem)
-  }
 
   def parseScalaFileAndGetCaretPosition(
     @InputLanguage("Scala") text: String,
     caretMarker: String
   )(implicit project: ProjectContext): (ScalaFile, Int) = {
-    val trimmed = text.trim
+    val trimmed  = text.trim
     val caretPos = trimmed.indexOf(caretMarker)
     (parseScalaFile(trimmed.replaceAll(caretMarker, "")), caretPos)
   }
@@ -40,15 +38,21 @@ trait ScalaCodeParsing {
   private def parseScalaFile(
     @InputLanguage("Scala") text: String,
     scalaVersion: ScalaVersion,
-    enableEventSystem: Boolean,
+    enableEventSystem: Boolean
   )(implicit project: ProjectContext): ScalaFile = {
     val scalaFeatures = ScalaFeatures.onlyByVersion(scalaVersion)
-    ScalaPsiElementFactory.createScalaFileFromText(text, scalaFeatures, eventSystemEnabled = enableEventSystem, shouldTrimText = false)
+    ScalaPsiElementFactory.createScalaFileFromText(
+      text,
+      scalaFeatures,
+      eventSystemEnabled = enableEventSystem,
+      shouldTrimText = false
+    )
   }
 
   implicit class ScalaCode(@InputLanguage("Scala") private val text: String) {
     def stripComments: String =
-      text.replaceAll("""(?s)/\*.*?\*/""", "")
+      text
+        .replaceAll("""(?s)/\*.*?\*/""", "")
         .replaceAll("""(?m)//.*$""", "")
 
     def parse(implicit project: ProjectContext): ScalaFile =
@@ -60,10 +64,12 @@ trait ScalaCodeParsing {
     def parseWithEventSystem(implicit project: ProjectContext): ScalaFile =
       parseScalaFile(text, enableEventSystem = true)
 
-    def parse[T <: PsiElement : ClassTag](implicit project: ProjectContext): T =
+    def parse[T <: PsiElement: ClassTag](implicit project: ProjectContext): T =
       parse(project).depthFirst().findByType[T].getOrElse {
-        throw new RuntimeException("Unable to find PSI element with type " +
-          implicitly[ClassTag[T]].runtimeClass.getSimpleName)
+        throw new RuntimeException(
+          "Unable to find PSI element with type " +
+            implicitly[ClassTag[T]].runtimeClass.getSimpleName
+        )
       }
   }
 }

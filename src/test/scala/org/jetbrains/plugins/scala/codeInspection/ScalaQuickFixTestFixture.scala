@@ -1,5 +1,3 @@
-
-
 package org.jetbrains.plugins.scala.codeInspection
 
 import com.intellij.codeInsight.daemon.impl.HighlightInfo
@@ -13,8 +11,12 @@ import com.intellij.psi.PsiFile
 import com.intellij.testFramework.EditorTestUtil
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import org.jetbrains.plugins.scala.ScalaFileType
-import org.jetbrains.plugins.scala.codeInspection.ScalaQuickFixTestFixture.{ExpectedHighlight, checkOffset, findRegisteredQuickFixes}
-import org.jetbrains.plugins.scala.extensions.{HighlightInfoExt, NonNullObjectExt, StringExt, executeWriteActionCommand}
+import org.jetbrains.plugins.scala.codeInspection.ScalaQuickFixTestFixture.{
+  checkOffset,
+  findRegisteredQuickFixes,
+  ExpectedHighlight
+}
+import org.jetbrains.plugins.scala.extensions.{executeWriteActionCommand, HighlightInfoExt, NonNullObjectExt, StringExt}
 import org.jetbrains.plugins.scala.util.MarkersUtils
 import org.junit.Assert.{assertFalse, assertTrue, fail}
 
@@ -43,13 +45,13 @@ final class ScalaQuickFixTestFixture(
   var descriptionMatcher: String => Boolean = _ == description.withNormalizedSeparator.trim
 
   private def getProject: Project = baseFixture.getProject
-  private def getEditor: Editor = baseFixture.getEditor
-  private def getFile: PsiFile = baseFixture.getFile
+  private def getEditor: Editor   = baseFixture.getEditor
+  private def getFile: PsiFile    = baseFixture.getFile
 
   protected val failingPassed: String = "Test has passed, but was supposed to fail"
 
   protected val START: String = EditorTestUtil.SELECTION_START_TAG
-  protected val END: String = EditorTestUtil.SELECTION_END_TAG
+  protected val END: String   = EditorTestUtil.SELECTION_END_TAG
   protected val CARET: String = EditorTestUtil.CARET_TAG
 
   def testQuickFix(text: String, expected: String, hint: String): Unit = {
@@ -78,14 +80,13 @@ final class ScalaQuickFixTestFixture(
       actions.foreach(_.invoke(getProject, getEditor, getFile))
     }(getProject)
 
-    val expectedFileText = createTestText(expected)
+    val expectedFileText          = createTestText(expected)
     val expectedFileTextProcessed = expectedFileText.withNormalizedSeparator.pipeIf(trimExpectedText)(_.trim)
     baseFixture.checkResult(expectedFileTextProcessed, true)
   }
 
-  def checkNotFixable(text: String, hint: String): Unit = {
+  def checkNotFixable(text: String, hint: String): Unit =
     checkNotFixable(text, _ == hint)
-  }
 
   def checkNotFixable(text: String, hintFilter: String => Boolean): Unit = {
     val maybeAction = findQuickFix(text, hintFilter)
@@ -109,10 +110,11 @@ final class ScalaQuickFixTestFixture(
     doFindQuickFixes(text, Seq(hint), failOnEmptyErrors)
 
   def doFindQuickFixes(text: String, hints: Seq[String], failOnEmptyErrors: Boolean): Seq[IntentionAction] = {
-    val actions = findAllQuickFixes(text, failOnEmptyErrors)
-    val hintSet = hints.toSet
+    val actions         = findAllQuickFixes(text, failOnEmptyErrors)
+    val hintSet         = hints.toSet
     val actionsMatching = actions.filter(a => hintSet.contains(a.getText))
-    assert(actionsMatching.nonEmpty,
+    assert(
+      actionsMatching.nonEmpty,
       s"""Quick fixes not found.
          |Expected actions:
          |  ${hints.mkString("  \n")}
@@ -128,37 +130,36 @@ final class ScalaQuickFixTestFixture(
     val highlights = findMatchingHighlights(text)
     if (highlights.isEmpty && failOnEmptyErrors) {
       fail("Errors not found.").asInstanceOf[Nothing]
-    }
-    else {
+    } else {
       highlights.flatMap(findRegisteredQuickFixes)
     }
   }
 
   def highlightsDebugText(highlights: Seq[HighlightInfo], fileText: String): String = {
     val strings = highlights.map(highlightsDebugText(_, fileText))
-    val indent = "  "
+    val indent  = "  "
     strings.mkString(indent, indent + "\n", "")
   }
 
   def highlightsDebugText(info: HighlightInfo, fileText: String): String = {
-    val range = info.range
+    val range     = info.range
     val rangeText = fileText.substring(range.getStartOffset, range.getEndOffset)
     s"$range[$rangeText]: ${info.getDescription}"
   }
 
   def checkTextHasError(text: String, allowAdditionalHighlights: Boolean = false): Unit = {
     val expectedHighlights = configureByText(text)
-    val actualHighlights = findMatchingHighlights(text)
+    val actualHighlights   = findMatchingHighlights(text)
     assertTextHasError(expectedHighlights, actualHighlights, allowAdditionalHighlights)
   }
 
   def assertTextHasError(
     expectedHighlights: Seq[ExpectedHighlight],
     actualHighlights: Seq[HighlightInfo],
-    allowAdditionalHighlights: Boolean,
+    allowAdditionalHighlights: Boolean
   ): Unit = {
     val expectedHighlightRanges = expectedHighlights.map(_.range)
-    val actualHighlightRanges = actualHighlights.map(_.range)
+    val actualHighlightRanges   = actualHighlights.map(_.range)
 
     val expectedRangesNotFound = expectedHighlightRanges.filterNot(actualHighlightRanges.contains)
     if (shouldPass: @nowarn("cat=deprecation")) {
@@ -191,7 +192,8 @@ final class ScalaQuickFixTestFixture(
 
   private def assertNoDuplicates(highlights: Seq[HighlightInfo], fileText: String): Unit = {
     val duplicatedHighlights = highlights
-      .groupBy(_.range).toSeq
+      .groupBy(_.range)
+      .toSeq
       .collect { case (_, highlights) if highlights.size > 1 => highlights }
       .flatten
     assertTrue(
@@ -212,7 +214,7 @@ final class ScalaQuickFixTestFixture(
     }
 
     val (_, expectedRanges) = MarkersUtils.extractMarker(fileTextNormalized, START, END, caretMarker = Some(CARET))
-    val expectedHighlights = expectedRanges.map(ExpectedHighlight)
+    val expectedHighlights  = expectedRanges.map(ExpectedHighlight)
 
     onFileCreated(baseFixture.getFile)
     expectedHighlights
@@ -229,10 +231,10 @@ final class ScalaQuickFixTestFixture(
 
   def findMatchingHighlights(caretOffset: Option[Int] = None): Seq[HighlightInfo] = {
     val highlightsAll = baseFixture.doHighlighting().asScala.toSeq
-    val highlightsMatchingDescription = highlightsAll.filter(highlightInfo => {
+    val highlightsMatchingDescription = highlightsAll.filter { highlightInfo =>
       val description = highlightInfo.getDescription
       description != null && descriptionMatcher(description)
-    })
+    }
     val highlightsInRange = highlightsMatchingDescription.filter(checkOffset(_, caretOffset))
     highlightsInRange
   }
@@ -260,10 +262,9 @@ object ScalaQuickFixTestFixture {
   private def highlightedRange(info: HighlightInfo): TextRange =
     new TextRange(info.getStartOffset, info.getEndOffset)
 
-  private def checkOffset(highlightInfo: HighlightInfo, caretOffset: Option[Int]): Boolean = {
+  private def checkOffset(highlightInfo: HighlightInfo, caretOffset: Option[Int]): Boolean =
     caretOffset.forall { offset =>
       val range = highlightedRange(highlightInfo)
       range.containsOffset(offset)
     }
-  }
 }

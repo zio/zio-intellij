@@ -51,10 +51,9 @@ class BitMaskTest extends TestCase with AssertionMatchers {
             val Seq(a, b) = Seq(rand.nextInt(), rand.nextInt()).sorted
             int(a min b, a max b, s"i$i")
           case _ => ???
-        }
-        catch {
+        } catch {
           case a: AssertionError if a.getMessage.contains("Do not have space") =>
-            // cheap hack so we don't have to test if there is still space left
+          // cheap hack so we don't have to test if there is still space left
         }
       }
 
@@ -63,24 +62,24 @@ class BitMaskTest extends TestCase with AssertionMatchers {
 
     def makeRandomValueFor(mask: BitMask): mask.T = {
       val v = mask match {
-        case BitMask.Bool(_) => rand.nextBoolean()
-        case BitMask.Nat(_, max) => rand.nextInt(max + 1)
+        case BitMask.Bool(_)              => rand.nextBoolean()
+        case BitMask.Nat(_, max)          => rand.nextInt(max + 1)
         case BitMask.Integer(_, min, max) => rand.between(min, max + 1)
-        case _ => ???
+        case _                            => ???
       }
       v.asInstanceOf[mask.T]
     }
 
     for (_ <- 0 to 10000) {
       val storage = makeRandomMaskStorage()
-      val masks = storage.members.values.to(ArraySeq)
+      val masks   = storage.members.values.to(ArraySeq)
       var current = 0
 
       for (_ <- 0 to 1000) {
         val oldValues = masks.map(_.read(current))
 
-        val i = rand.nextInt(masks.length)
-        val mask = masks(i)
+        val i        = rand.nextInt(masks.length)
+        val mask     = masks(i)
         val newValue = makeRandomValueFor(mask)
 
         val newCurrent = mask.write(current, newValue)

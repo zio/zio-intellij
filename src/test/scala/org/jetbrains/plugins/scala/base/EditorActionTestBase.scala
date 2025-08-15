@@ -1,7 +1,11 @@
 package org.jetbrains.plugins.scala
 package base
 
-import com.intellij.openapi.actionSystem.IdeActions.{ACTION_EDITOR_BACKSPACE, ACTION_EDITOR_ENTER, ACTION_EXPAND_LIVE_TEMPLATE_BY_TAB}
+import com.intellij.openapi.actionSystem.IdeActions.{
+  ACTION_EDITOR_BACKSPACE,
+  ACTION_EDITOR_ENTER,
+  ACTION_EXPAND_LIVE_TEMPLATE_BY_TAB
+}
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.impl.NonBlockingReadActionImpl
 import com.intellij.openapi.editor.CaretState
@@ -28,8 +32,8 @@ import scala.util.control.NonFatal
 @Category(Array(classOf[EditorTests]))
 abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase with ShortCaretMarker {
 
-  protected val q  : String = "\""
-  protected val qq : String = "\"\""
+  protected val q: String   = "\""
+  protected val qq: String  = "\"\""
   protected val qqq: String = "\"\"\""
 
   private implicit def p: Project = getProject
@@ -38,9 +42,7 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
 
   protected def defaultFileName: String = s"aaa.${fileType.getDefaultExtension}"
 
-  protected def configureByText(text: String,
-                                fileName: String = defaultFileName,
-                                trimText: Boolean = false): Unit = {
+  protected def configureByText(text: String, fileName: String = defaultFileName, trimText: Boolean = false): Unit = {
     val (textActual, caretOffsets) = findCaretOffsets(text, trimText)
 
     assertTrue("expected at least one caret", caretOffsets.nonEmpty)
@@ -58,7 +60,7 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
     }
     val editor = myFixture.getEditor
     editor.getCaretModel.moveToOffset(caretOffsets.head)
-    val caretStates = caretOffsets.map { offset => new CaretState(editor.offsetToLogicalPosition(offset), null, null) }
+    val caretStates = caretOffsets.map(offset => new CaretState(editor.offsetToLogicalPosition(offset), null, null))
     editor.getCaretModel.setCaretsAndSelections(caretStates.asJava)
   }
 
@@ -73,7 +75,7 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
     textAfter: String,
     fileName: String = defaultFileName,
     trimTestDataText: Boolean = false,
-    stripTrailingSpacesAfterAction: Boolean = false,
+    stripTrailingSpacesAfterAction: Boolean = false
   )(testBody: () => Unit): Unit = try {
     configureByText(textBefore, fileName, trimTestDataText)
 
@@ -112,14 +114,22 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
   protected def performTypingAction(text: String): Unit =
     myFixture.`type`(text)
 
-  protected def checkGeneratedTextAfterTyping(textBefore: String, textAfter: String, charTyped: Char,
-                                              fileName: String = defaultFileName): Unit =
+  protected def checkGeneratedTextAfterTyping(
+    textBefore: String,
+    textAfter: String,
+    charTyped: Char,
+    fileName: String = defaultFileName
+  ): Unit =
     performTest(textBefore, textAfter, fileName) { () =>
       performTypingAction(charTyped)
     }
 
-  protected def checkGeneratedTextAfterTypingText(textBefore: String, textAfter: String, textTyped: String,
-                                                  fileName: String = defaultFileName): Unit =
+  protected def checkGeneratedTextAfterTypingText(
+    textBefore: String,
+    textAfter: String,
+    textTyped: String,
+    fileName: String = defaultFileName
+  ): Unit =
     performTest(textBefore, textAfter, fileName) { () =>
       performTypingAction(textTyped)
     }
@@ -209,12 +219,13 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
         .foldLeft(text)(_.patch(_, CARET, 0))
 
     val expected0 = patchTextWithCarets(expectedText, expectedCarets)
-    val expected = if (stripTrailingSpaces) doStripTrailingSpaces(expected0) else expected0
+    val expected  = if (stripTrailingSpaces) doStripTrailingSpaces(expected0) else expected0
 
-    val actual = if (expectedCarets.nonEmpty)
-      patchTextWithCarets(actualText, actualCarets)
-    else
-      actualText //if expected text doesn't contain any carets, just don't assert carets positions then
+    val actual =
+      if (expectedCarets.nonEmpty)
+        patchTextWithCarets(actualText, actualCarets)
+      else
+        actualText //if expected text doesn't contain any carets, just don't assert carets positions then
     assertEquals(expected, actual)
   }
 }

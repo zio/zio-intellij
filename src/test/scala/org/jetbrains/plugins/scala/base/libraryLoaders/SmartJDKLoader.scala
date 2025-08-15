@@ -12,7 +12,7 @@ import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
 import com.intellij.pom.java.LanguageLevel
 import com.intellij.testFramework.IdeaTestUtil
 import com.intellij.util.SystemProperties
-import org.jetbrains.plugins.scala.extensions.{PathExt, inWriteAction}
+import org.jetbrains.plugins.scala.extensions.{inWriteAction, PathExt}
 import org.junit.Assert
 
 import java.nio.file.Path
@@ -20,14 +20,13 @@ import scala.annotation.nowarn
 
 case class InternalJDKLoader() extends SmartJDKLoader() {
   //noinspection ScalaDeprecation
-  override protected def createSdkInstance(): Sdk = {
+  override protected def createSdkInstance(): Sdk =
     JavaAwareProjectJdkTableImpl.getInstanceEx.getInternalJdk: @nowarn("cat=deprecation")
-  }
 }
 
 /**
-  * Consider using this instead of HeavyJDKLoader if you don't need java interop in your tests
-  */
+ * Consider using this instead of HeavyJDKLoader if you don't need java interop in your tests
+ */
 case class MockJDKLoader(languageLevel: LanguageLevel = LanguageLevel.JDK_17) extends SmartJDKLoader() {
   override protected def createSdkInstance(): Sdk = IdeaTestUtil.getMockJdk(languageLevel.toJavaVersion)
 }
@@ -39,9 +38,8 @@ case class HeavyJDKLoader(languageLevel: LanguageLevel = LanguageLevel.JDK_17) e
 abstract class SmartJDKLoader extends LibraryLoader {
   private lazy val instance: Sdk = createSdkInstance()
 
-  override def init(implicit module: Module, version: ScalaVersion): Unit = {
+  override def init(implicit module: Module, version: ScalaVersion): Unit =
     ModuleRootModificationUtil.setModuleSdk(module, instance)
-  }
 
   override def clean(implicit module: Module): Unit = {
     ModuleRootModificationUtil.setModuleSdk(module, null)
@@ -57,24 +55,24 @@ object SmartJDKLoader {
   private val jdkPaths = {
     val userHome = SystemProperties.getUserHome
     Seq(
-      "/usr/lib/jvm",                      // linux style
-      "C:\\Program Files\\Java\\",         // windows style
-      "C:\\Program Files (x86)\\Java\\",   // windows 32bit style
-      "/Library/Java/JavaVirtualMachines", // mac style
+      "/usr/lib/jvm",                                           // linux style
+      "C:\\Program Files\\Java\\",                              // windows style
+      "C:\\Program Files (x86)\\Java\\",                        // windows 32bit style
+      "/Library/Java/JavaVirtualMachines",                      // mac style
       s"$userHome\\AppData\\Local\\Programs\\Eclipse Adoptium", // Eclipse Temurin installed for a single user on Windows
-      userHome + "/Downloads/jdk", // mac style
-      userHome + "/Library/Java/JavaVirtualMachines", // mac style
-      userHome + "/.jabba/jdk", // jabba (for github actions)
-      userHome + "/.jdks", // by default IDEA downloads JDKs here
-      userHome + "/.sdkman/candidates/java" // SDKMAN style
+      userHome + "/Downloads/jdk",                              // mac style
+      userHome + "/Library/Java/JavaVirtualMachines",           // mac style
+      userHome + "/.jabba/jdk",                                 // jabba (for github actions)
+      userHome + "/.jdks",                                      // by default IDEA downloads JDKs here
+      userHome + "/.sdkman/candidates/java"                     // SDKMAN style
     )
   }
 
   def getOrCreateJDK(languageLevel: LanguageLevel = LanguageLevel.JDK_17): Sdk = {
     val jdkVersion = JavaSdkVersion.fromLanguageLevel(languageLevel)
-    val jdkName = jdkVersion.getDescription
+    val jdkName    = jdkVersion.getDescription
 
-    val jdkTable = JavaAwareProjectJdkTableImpl.getInstanceEx
+    val jdkTable               = JavaAwareProjectJdkTableImpl.getInstanceEx
     val registeredJdkFromTable = Option(jdkTable.findJdk(jdkName))
     registeredJdkFromTable.getOrElse {
       val jdk = createNewJdk(jdkVersion, jdkName)
@@ -87,7 +85,7 @@ object SmartJDKLoader {
 
   def createJdk(languageLevel: LanguageLevel): Sdk = {
     val jdkVersion = JavaSdkVersion.fromLanguageLevel(languageLevel)
-    val jdkName = jdkVersion.getDescription
+    val jdkName    = jdkVersion.getDescription
     createNewJdk(jdkVersion, jdkName)
   }
 
@@ -126,10 +124,19 @@ object SmartJDKLoader {
     val filterFn = (url: String) => modulePaths.exists(url.endsWith)
     // If sources and docs should be included, keep only sources and docs from the specified modules, otherwise remove all sources and docs.
     val filterSrcsDocsFn = (url: String) => includeSourcesAndDocs && filterFn(url)
-    val modificator = jdk.getSdkModificator
-    modificator.getUrls(OrderRootType.CLASSES).filterNot(filterFn).foreach(modificator.removeRoot(_, OrderRootType.CLASSES))
-    modificator.getUrls(OrderRootType.SOURCES).filterNot(filterSrcsDocsFn).foreach(modificator.removeRoot(_, OrderRootType.SOURCES))
-    modificator.getUrls(OrderRootType.DOCUMENTATION).filterNot(filterSrcsDocsFn).foreach(modificator.removeRoot(_, OrderRootType.DOCUMENTATION))
+    val modificator      = jdk.getSdkModificator
+    modificator
+      .getUrls(OrderRootType.CLASSES)
+      .filterNot(filterFn)
+      .foreach(modificator.removeRoot(_, OrderRootType.CLASSES))
+    modificator
+      .getUrls(OrderRootType.SOURCES)
+      .filterNot(filterSrcsDocsFn)
+      .foreach(modificator.removeRoot(_, OrderRootType.SOURCES))
+    modificator
+      .getUrls(OrderRootType.DOCUMENTATION)
+      .filterNot(filterSrcsDocsFn)
+      .foreach(modificator.removeRoot(_, OrderRootType.DOCUMENTATION))
     inWriteAction(modificator.commitChanges())
     jdk
   }
@@ -146,33 +153,31 @@ object SmartJDKLoader {
     discoverJre(jdkPaths, jdkVersion)
 
   private def discoverJre(paths: Seq[String], jdkVersion: JavaSdkVersion): Option[Path] = {
-    val versionMajor = jdkVersion.ordinal().toString
+    val versionMajor   = jdkVersion.ordinal().toString
     val versionStrings = Seq(s"1.$versionMajor", s"-$versionMajor", s"jdk$versionMajor")
-    val fromEnv = sys.env.get(jdkVersion.toString).orElse(sys.env.get(s"${jdkVersion}_0"))
-    val fromEnv64 = sys.env.get(s"${jdkVersion}_x64").orElse(sys.env.get(s"${jdkVersion}_0_x64")) // teamcity style
-    val priorityPaths = Seq(currentJava(versionMajor), fromEnv.orElse(fromEnv64)).flatten.map(Path.of(_))
+    val fromEnv        = sys.env.get(jdkVersion.toString).orElse(sys.env.get(s"${jdkVersion}_0"))
+    val fromEnv64      = sys.env.get(s"${jdkVersion}_x64").orElse(sys.env.get(s"${jdkVersion}_0_x64")) // teamcity style
+    val priorityPaths  = Seq(currentJava(versionMajor), fromEnv.orElse(fromEnv64)).flatten.map(Path.of(_))
 
-    priorityPaths.headOption
-      .orElse {
-        val fullSearchPaths = paths.flatMap { p => versionStrings.map((p, _)) }
-        val validPaths = fullSearchPaths.flatMap((inJvm _).tupled)
-        validPaths.headOption
-      }
+    priorityPaths.headOption.orElse {
+      val fullSearchPaths = paths.flatMap(p => versionStrings.map((p, _)))
+      val validPaths      = fullSearchPaths.flatMap((inJvm _).tupled)
+      validPaths.headOption
+    }
   }
 
   private def findJDK(dir: Path): Option[Path] = {
-    val macDir = dir / "Contents" / "Home" // mac workaround
+    val macDir     = dir / "Contents" / "Home" // mac workaround
     val candidates = List(macDir, dir, dir / "Home")
     candidates
       .filter(_.isDirectory)
       .find {
-        _
-          .children()
-          .exists { b =>
-            b.getFileName.toString == "bin" &&
-              b.children().exists(x => x.getFileName.toString == "javac.exe" || x.getFileName.toString == "javac")
-          }
-      }.orElse(Some(dir))
+        _.children().exists { b =>
+          b.getFileName.toString == "bin" &&
+          b.children().exists(x => x.getFileName.toString == "javac.exe" || x.getFileName.toString == "javac")
+        }
+      }
+      .orElse(Some(dir))
   }
 
   private def inJvm(path: String, versionString: String): List[Path] =
@@ -192,5 +197,3 @@ object SmartJDKLoader {
       .filter(v => v.startsWith(s"1.$versionMajor") || v.startsWith(versionMajor))
       .flatMap(_ => sys.props.get("java.home"))
 }
-
-

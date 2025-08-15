@@ -3,7 +3,7 @@ package zio.intellij.inspections.mistakes
 import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
-import org.jetbrains.plugins.scala.codeInspection.collections.{Simplification, SimplificationType, invocationText}
+import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, Simplification, SimplificationType}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScFunctionExpr, ScReferenceExpression}
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunction
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
@@ -12,7 +12,7 @@ import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import zio.intellij.inspections.mistakes.DiscardingZIOValueInspectionBase.ReturnType
 import zio.intellij.inspections.streamMethods.`.runDrain`
 import zio.intellij.inspections.zioMethods.`.map`
-import zio.intellij.inspections.{ZInspection, lambda}
+import zio.intellij.inspections.{lambda, ZInspection}
 import zio.intellij.utils.StringUtils.ScExpressionExt
 import zio.intellij.utils.TypeCheckUtils.{`ZStream[R, E, O]`, fromZioLike}
 import zio.intellij.utils.fromSameClass

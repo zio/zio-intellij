@@ -24,7 +24,7 @@ object TestUtils {
 
   val CARET_MARKER = "<caret>"
   val BEGIN_MARKER = "<begin>"
-  val END_MARKER = "<end>"
+  val END_MARKER   = "<end>"
 
   private var TEST_DATA_PATH: String = _
 
@@ -41,7 +41,7 @@ object TestUtils {
           else
             Path.of(resource.toURI).systemIndependentPathString
       } catch {
-        case e@(_: URISyntaxException | _: IOException) =>
+        case e @ (_: URISyntaxException | _: IOException) =>
           LOG.error(e)
           // just rethrowing here because that's a clearer way to make tests fail than some NPE somewhere else
           throw new RuntimeException(e)
@@ -109,7 +109,7 @@ object TestUtils {
 
     if (allowEmptyFiles && content.isEmpty) return util.Collections.emptyList()
 
-    val input = new util.ArrayList[String]
+    val input          = new util.ArrayList[String]
     var separatorIndex = 0
     content = StringUtil.replace(content, "\r", "") // for MACs
 
@@ -161,16 +161,18 @@ object TestUtils {
     val lastComment = file.findElementAt(fileText.length - 1) match {
       case comment: PsiComment => comment
       case element =>
-        fail(s"Last element in the file is expected to be a comment but got: ${element.getClass} with text: ${element.getText}").asInstanceOf[Nothing]
+        fail(
+          s"Last element in the file is expected to be a comment but got: ${element.getClass} with text: ${element.getText}"
+        ).asInstanceOf[Nothing]
     }
 
     val fileTextWithoutLastComment = file.getText.substring(0, lastComment.getTextOffset).trim
 
     val commentText = lastComment.getText
     val commentInnerContent = lastComment.getNode.getElementType match {
-      case ScalaTokenTypes.tLINE_COMMENT => commentText.substring(2)
-      case ScalaTokenTypes.tBLOCK_COMMENT=> commentText.substring(2, commentText.length - 2)
-      case ScalaTokenTypes.tDOC_COMMENT => commentText.substring(3, commentText.length - 2)
+      case ScalaTokenTypes.tLINE_COMMENT  => commentText.substring(2)
+      case ScalaTokenTypes.tBLOCK_COMMENT => commentText.substring(2, commentText.length - 2)
+      case ScalaTokenTypes.tDOC_COMMENT   => commentText.substring(3, commentText.length - 2)
       case _ =>
         fail("Test result must be in last comment statement.").asInstanceOf[Nothing]
     }
@@ -186,8 +188,8 @@ object TestUtils {
   @throws[AssertionError]
   def getPathRelativeToProject(file: VirtualFile, @NotNull project: Project): String = {
     val projectRoot = guessProjectDir(project)
-    val pathParent = projectRoot.getPath
-    val pathChild = file.getPath
+    val pathParent  = projectRoot.getPath
+    val pathChild   = file.getPath
     pathChild.stripPrefix(pathParent).stripPrefix("/")
   }
 

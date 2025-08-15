@@ -5,7 +5,6 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.{PsiComment, PsiElement, PsiWhiteSpace}
 import com.intellij.testFramework.fixtures._
 import com.intellij.testFramework.{LightProjectDescriptor, UsefulTestCase}
-import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.ScalaFile
 import org.jetbrains.plugins.scala.project.ProjectContext
@@ -42,7 +41,8 @@ abstract class SimpleTestCase extends UsefulTestCase with MatcherAssertions with
   }
 
   implicit class Findable(private val element: ScalaFile) {
-    def target: PsiElement = element.depthFirst()
+    def target: PsiElement = element
+      .depthFirst()
       .dropWhile(!_.is[PsiComment])
       .drop(1)
       .dropWhile(_.is[PsiWhiteSpace])
@@ -53,8 +53,10 @@ abstract class SimpleTestCase extends UsefulTestCase with MatcherAssertions with
 
   private def toString(root: PsiElement, level: Int): String = {
     val indent = List.fill(level)("  ").mkString
-    val content = if (root.is[LeafPsiElement])
-      "\"%s\"".format(root.getText) else root.getClass.getSimpleName
+    val content =
+      if (root.is[LeafPsiElement])
+        "\"%s\"".format(root.getText)
+      else root.getClass.getSimpleName
     val title = "%s%s\n".format(indent, content)
     title + root.children.map(toString(_, level + 1)).mkString
   }

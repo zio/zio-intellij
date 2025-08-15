@@ -40,8 +40,7 @@ abstract class InspectionSeverityForcingScalaInspectionTestBase extends ScalaIns
   }
 
   private def inspectionEP =
-    LocalInspectionEP.LOCAL_INSPECTION
-      .getExtensions
+    LocalInspectionEP.LOCAL_INSPECTION.getExtensions
       .find(_.implementationClass == classOfInspection.getCanonicalName)
       .get
 

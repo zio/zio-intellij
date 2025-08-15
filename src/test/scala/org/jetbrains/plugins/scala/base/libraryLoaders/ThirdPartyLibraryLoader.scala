@@ -14,7 +14,8 @@ trait ThirdPartyLibraryLoader extends LibraryLoader {
 
   override def init(implicit module: Module, version: ScalaVersion): Unit = {
     val alreadyExistsInModule =
-      module.libraries.map(_.getName)
+      module.libraries
+        .map(_.getName)
         .contains(name)
 
     if (alreadyExistsInModule) return

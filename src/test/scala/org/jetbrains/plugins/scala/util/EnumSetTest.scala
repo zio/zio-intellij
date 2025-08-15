@@ -9,7 +9,7 @@ class EnumSetTest extends TestCase {
 
   def testEnumSet(): Unit = {
 
-    val ab = EnumSet(A, B, B, B, B, A, B)
+    val ab  = EnumSet(A, B, B, B, B, A, B)
     val ab2 = EnumSet.empty[JavaEnum] ++ A ++ B
 
     assertTrue(ab.contains(A) && ab.contains(B) && !ab.contains(C) && !ab.contains(D))
