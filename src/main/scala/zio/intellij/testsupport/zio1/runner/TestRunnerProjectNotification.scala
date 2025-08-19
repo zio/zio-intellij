@@ -4,11 +4,10 @@ import com.intellij.ide.BrowserUtil
 import com.intellij.notification._
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
-import TestRunnerNotifications.{displayError, displayInfo}
-import TestRunnerResolveService.ResolveError
-import zio.intellij.testsupport.zio1.runner.TestRunnerResolveService.ResolveError
-import zio.intellij.utils.{ProjectSyntax, ScalaVersionHack}
-import zio.intellij.{ErrorReporter, ZioIcon}
+import zio.intellij.testsupport.zio1.runner.TestRunnerNotifications.{displayError, displayInfo}
+import zio.intellij.testsupport.zio1.runner.TestRunnerResolveService.ResolveException
+import zio.intellij.utils.ProjectSyntax
+import zio.intellij.ZioIcon
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -47,51 +46,15 @@ private[testsupport] final class TestRunnerProjectNotification(private val proje
             project
           )
     }
-
     Future.sequence(tasks).foreach { results =>
       if (results.forall(_.isRight)) displayInfo("ZIO Test runner was downloaded successfully!")
-      else
-        displayError(
-          "Unable to download one or more required files. Please try again, or report this issue on GitHub, if the problem persists.",
-          Seq(
-            new NotificationAction("Try again") {
-              override def actionPerformed(e: AnActionEvent, notification: Notification): Unit =
-                downloadTestRunner(notification)
-            },
-            new NotificationAction("Report on GitHub (opens a browser)") {
-              override def actionPerformed(e: AnActionEvent, notification: Notification): Unit = {
-                val errors = results.collect {
-                  case Left(error) =>
-                    error match {
-                      case ResolveError.NotFound(version, scalaVersion) =>
-                        s"Not found: zio-test-intellij_${scalaVersion.versionStr}:$version"
-                      case ResolveError.DownloadInProgress(version, scalaVersion) =>
-                        s"Download in progress: zio-test-intellij_${scalaVersion.versionStr}:$version"
-                      case ResolveError.DownloadError(version, scalaVersion, cause) =>
-                        s"""Download error: zio-test-intellij_${scalaVersion.versionStr}:$version"
-                           |Cause:
-                           |${cause.toString}""".stripMargin
-                      case ResolveError.UnknownError(version, scalaVersion, cause) =>
-                        s"""Unknown error: zio-test-intellij_${scalaVersion.versionStr}:$version"
-                           |Cause:
-                           |${cause.toString}""".stripMargin
-                    }
-                }
-
-                try ErrorReporter.reportErrorOnGithub(
-                  "Problem downloading the test runner",
-                  "The following error(s) occurred while downloading the ZIO Test runner files:",
-                  None,
-                  errors,
-                  "test-runner",
-                  project
-                )
-                finally notification.expire()
-              }
-            }
-          ),
-          icon = Some(ZioIcon)
-        )
+      else {
+	    displayError("Unable to download one or more required files. Please try again, or report this issue on GitHub, " +
+		    "if the problem persists.", Seq(), icon = Some(ZioIcon)
+	    )
+        val errors = results.collect { case Left(error) => error }
+        throw new ResolveException(errors)
+      }
     }
     notification.expire()
   }

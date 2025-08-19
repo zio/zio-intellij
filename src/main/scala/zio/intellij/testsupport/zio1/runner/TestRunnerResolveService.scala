@@ -1,6 +1,5 @@
 package zio.intellij.testsupport.zio1.runner
 
-import com.intellij.notification.Notification
 import com.intellij.openapi.components.{PersistentStateComponent, State, Storage}
 import com.intellij.openapi.progress.{ProcessCanceledException, ProgressIndicator}
 import com.intellij.openapi.project.Project
@@ -9,10 +8,10 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.{Nls, NonNls}
 import org.jetbrains.plugins.scala.ScalaVersion
 import zio.intellij.testsupport.ZTestRunConfiguration.ZTestRunnerName
-import TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
-import TestRunnerDownloader.{DownloadProgressListener, NoopProgressListener}
-import TestRunnerResolveService.ResolveError.DownloadError
-import TestRunnerResolveService._
+import zio.intellij.testsupport.zio1.runner.TestRunnerDownloader.{DownloadProgressListener, NoopProgressListener}
+import zio.intellij.testsupport.zio1.runner.TestRunnerDownloader.DownloadResult.{DownloadFailure, DownloadSuccess}
+import zio.intellij.testsupport.zio1.runner.TestRunnerResolveService._
+import zio.intellij.testsupport.zio1.runner.TestRunnerResolveService.ResolveError.DownloadError
 import zio.intellij.utils.{BackgroundTask, ScalaVersionHack, ZioVersion}
 
 import java.net.{URI, URL, URLClassLoader}
@@ -21,7 +20,6 @@ import scala.beans.BeanProperty
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.jdk.CollectionConverters.ConcurrentMapHasAsScala
-import scala.ref.WeakReference
 import scala.util._
 
 // Borrowed from ScalafmtDynamicServiceImpl and friends
@@ -135,6 +133,27 @@ object TestRunnerResolveService {
     object DownloadError {
       def apply(f: DownloadFailure): DownloadError = new DownloadError(f.version, f.scalaVersion, f.cause)
     }
+  }
+
+  class ResolveException(val errors: Seq[ResolveError]) extends RuntimeException {
+    override def getMessage: String =
+      """|Problem downloading the test runner.
+         |The following error(s) occurred while downloading the ZIO Test runner files:""".stripMargin +
+        errors.map {
+          case ResolveError.NotFound(version, scalaVersion) =>
+            s"Not found: zio-test-intellij_${scalaVersion.versionStr}:$version"
+          case ResolveError.DownloadInProgress(version, scalaVersion) =>
+            s"Download in progress: zio-test-intellij_${scalaVersion.versionStr}:$version"
+          case ResolveError.DownloadError(version, scalaVersion, cause) =>
+            s"""Download error: zio-test-intellij_${scalaVersion.versionStr}:$version"
+               |Cause:
+               |${cause.toString}""".stripMargin
+          case ResolveError.UnknownError(version, scalaVersion, cause) =>
+            s"""Unknown error: zio-test-intellij_${scalaVersion.versionStr}:$version"
+               |Cause:
+               |${cause.toString}""".stripMargin
+
+        }.mkString("\n")
   }
 
   final class ServiceState() {
