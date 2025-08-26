@@ -1,19 +1,27 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
 lazy val scala213           = "2.13.16"
-lazy val scalaPluginVersion = "2025.2.26"
+lazy val scalaPluginVersion = "2025.2.29"
 lazy val minorVersion       = "0"
 lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
 lazy val pluginVersion      = s"2025.2.43.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "252.23892.409"
+ThisBuild / intellijBuild := "252.25557.77"
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
+
+ThisBuild / autoRemoveOldCachedIntelliJSDK := true
+ThisBuild / autoRemoveOldCachedDownloads := true
 
 Global / intellijAttachSources := true
 
 addCommandAlias("fmt", "scalafmtAll")
 addCommandAlias("check", "scalafmtCheckAll")
+
+addCommandAlias(
+  "packZipVerbose",
+  ";show intellijVMOptions; show intellijBuild; packageArtifactZip"
+)
 
 (Global / javacOptions) := Seq("--release", "17")
 
@@ -70,7 +78,7 @@ def newProject(projectName: String, base: File): Project =
       "org.junit.jupiter" % "junit-jupiter-api" % "5.13.4" % Test
     ),
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
-    intellijPlugins := Seq(
+    intellijPlugins ++= Seq(
       "com.intellij.java".toPlugin,
       s"org.intellij.scala:$scalaPluginVersion".toPlugin,
       "org.intellij.intelliLang".toPlugin
