@@ -32,6 +32,10 @@ jobs:
         if: steps.coursier-cache.outputs.cache-hit-coursier != 'true'
         run: sbt +update
 
+      - name: Try packaging
+        # Just to check that plugin can be packaged for release
+        run: sbt clean && sbt packageArtifact && sbt packageArtifactZip
+
       - name: Run tests
         run: sbt test
         shell: bash
