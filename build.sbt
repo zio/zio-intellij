@@ -4,7 +4,7 @@ lazy val scala213           = "2.13.16"
 lazy val scalaPluginVersion = "2025.2.26"
 lazy val minorVersion       = "0"
 lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-lazy val pluginVersion      = s"2025.2.42.$buildVersion"
+lazy val pluginVersion      = s"2025.2.43.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := "252.23892.409"
