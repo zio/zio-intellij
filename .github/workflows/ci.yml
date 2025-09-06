@@ -53,3 +53,9 @@ jobs:
         continue-on-error: true
         run: |
           cat /home/runner/.zio-intellijPluginIC/sdk/252.25557.77/plugins_index.xml || true
+
+      - name: Show idea.log
+        if: always()
+        continue-on-error: true
+        run: |
+          cat /home/runner/.zio-intellijPluginIC/system/log/idea.log
