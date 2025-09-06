@@ -2,7 +2,7 @@ package zio.intellij
 
 import com.intellij.psi.{PsiAnnotation, PsiClass, PsiElement}
 import org.jetbrains.plugins.scala.codeInspection.collections._
-import org.jetbrains.plugins.scala.extensions.{childOf, PsiClassExt}
+import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.{ScPattern, ScReferencePattern, ScWildcardPattern}
 import org.jetbrains.plugins.scala.lang.psi.api.expr._
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
@@ -10,6 +10,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.ScNamedElement
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScMember, ScObject, ScTemplateDefinition, ScTrait}
 import org.jetbrains.plugins.scala.lang.psi.types.ScType
+import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.util.ScalaNamesUtil
 import zio.intellij.utils.TypeCheckUtils._
 import zio.intellij.utils.types._
@@ -572,6 +573,22 @@ package object inspections {
             case _                                           => None
           }
         case _ => None
+      }
+  }
+
+  object NonUnit {
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      expr match {
+        case Typeable(tpe) if !tpe.isUnit => Some(expr)
+        case _                            => None
+      }
+  }
+
+  object NonZIOUnit {
+    def unapply(expr: ScExpression): Option[ScExpression] =
+      expr match {
+        case Typeable(`ZIO[R, E, A]`(_, _, a)) if !a.isUnit => Some(expr)
+        case _                                              => None
       }
   }
 

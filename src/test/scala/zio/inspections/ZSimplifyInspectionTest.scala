@@ -34,8 +34,9 @@ trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestB
        |  val a: String = "hello"
        |  val b = ZIO.unit
        |  val o: Option[Int] = Some(1)
-       |  def f(a: Any): ZIO[Any, Throwable, Unit] = ???
-       |  def f(a: Any, b: Any): ZIO[Any, Throwable, Unit] = ???
+       |  def f(a: Any): ZIO[Any, Throwable, Any] = ???
+       |  def f(a: Any, b: Any): ZIO[Any, Throwable, Any] = ???
+       |  def unit(): Unit = ()
        |
        |  def foo = {
        |${s.split("\n").map(l => "    " + l).mkString("\n")}
