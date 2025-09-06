@@ -54,8 +54,11 @@ jobs:
         run: |
           cat /home/runner/.zio-intellijPluginIC/sdk/252.25557.77/plugins_index.xml || true
 
-      - name: Show idea.log
+      - name: Upload idea.log
         if: always()
-        continue-on-error: true
-        run: |
-          cat /home/runner/.zio-intellijPluginIC/system/log/idea.log
+        uses: actions/upload-artifact@v4
+        with:
+          name: idea-logs
+          path: /home/runner/.zio-intellijPluginIC/system/log/idea.log
+          if-no-files-found: error
+          retention-days: 7
