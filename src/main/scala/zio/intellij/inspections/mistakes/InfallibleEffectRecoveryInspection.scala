@@ -41,15 +41,13 @@ class InfallibleEffectRecoveryInspection extends LocalInspectionTool {
   override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
     case MethodRepr(expr, Some(base), Some(toDelete), _)
         if isInfallibleEffect(base) && !mightMakeSense(toDelete.refName) =>
-      expr.findImplicitArguments.foreach { args =>
-        if (args.map(_.element).exists(isCanFailEv)) {
-          holder.registerProblem(
-            expr,
-            description(toDelete.refName),
-            ProblemHighlightType.GENERIC_ERROR,
-            new RecoveryQuickFix(expr, base, toDelete.refName)
-          )
-        }
+      if (expr.findImplicitArguments.flatMap(_.args).map(_.element).exists(isCanFailEv)) {
+        holder.registerProblem(
+          expr,
+          description(toDelete.refName),
+          ProblemHighlightType.GENERIC_ERROR,
+          new RecoveryQuickFix(expr, base, toDelete.refName)
+        )
       }
     case _ =>
   }

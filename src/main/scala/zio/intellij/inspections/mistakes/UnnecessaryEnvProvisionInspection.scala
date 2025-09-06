@@ -41,15 +41,13 @@ class UnnecessaryEnvProvisionInspection extends LocalInspectionTool {
     base: ScExpression,
     toDelete: ScReference
   ): Unit =
-    expr.findImplicitArguments.foreach { args =>
-      if (args.map(_.element).exists(isNeedsEnvEv)) {
-        holder.registerProblem(
-          expr,
-          getDisplayName,
-          ProblemHighlightType.ERROR,
-          new ProvideQuickFix(expr, base, toDelete.refName)
-        )
-      }
+    if (expr.findImplicitArguments.flatMap(_.args).map(_.element).exists(isNeedsEnvEv)) {
+      holder.registerProblem(
+        expr,
+        getDisplayName,
+        ProblemHighlightType.ERROR,
+        new ProvideQuickFix(expr, base, toDelete.refName)
+      )
     }
 }
 
