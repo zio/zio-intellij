@@ -147,4 +147,22 @@ class SimplifySucceedToZipLeftInspectionTest extends ZSimplifyInspectionTest[Sim
     testQuickFix(text, result, hint)
   }
 
+  def test_succeed_to_zipLeft_left_unit_no_highlight(): Unit =
+    z(s"""${START}ZIO.succeed(unit()).zipLeft(f("Carlos Alonso"))$END""").assertNotHighlighted()
+
+  def test_zipLeft_infix_invocation_to_succeed_left_unit_no_highlight(): Unit =
+    z(s"""${START}ZIO.succeed(unit()) zipLeft f("Carlos Alonso")$END""").assertNotHighlighted()
+
+  def test_zipLeft_operator_to_succeed_left_unit_no_highlight(): Unit =
+    z(s"""${START}ZIO.succeed(unit()) <* f("Carlos Alonso")$END""").assertNotHighlighted()
+
+  def test_succeed_to_zipLeft_right_unit_no_highlight(): Unit =
+    z(s"""${START}ZIO.succeed("Fernando Fader").zipLeft(logger.log("Carlos Alonso"))$END""").assertNotHighlighted()
+
+  def test_zipLeft_infix_invocation_to_succeed_right_unit_no_highlight(): Unit =
+    z(s"""${START}ZIO.succeed("Fernando Fader") zipLeft logger.log("Carlos Alonso")$END""").assertNotHighlighted()
+
+  def test_zipLeft_operator_to_succeed_right_unit_no_highlight(): Unit =
+    z(s"""${START}ZIO.succeed("Fernando Fader") <* logger.log("Carlos Alonso")$END""").assertNotHighlighted()
+
 }

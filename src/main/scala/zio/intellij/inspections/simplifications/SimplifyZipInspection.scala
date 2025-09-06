@@ -65,9 +65,9 @@ object ZipRightSimplificationType         extends BaseZipOneSimplificationType(`
 object ZipRightOperatorSimplificationType extends BaseZipOneOperatorSimplificationType(`.flatMap`, "*>")
 object ZipRightToSucceedSimplificationType extends BaseZipToSucceedSimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = expr match {
-    case qual `.*>` `ZIO.succeed`(_, arg)       => Some(simplify(expr, qual, arg))
-    case qual `.zipRight` `ZIO.succeed`(_, arg) => Some(simplify(expr, qual, arg))
-    case _                                      => None
+    case qual `.*>` `ZIO.succeed`(_, NonUnit(arg))       => Some(simplify(expr, qual, arg))
+    case qual `.zipRight` `ZIO.succeed`(_, NonUnit(arg)) => Some(simplify(expr, qual, arg))
+    case _                                               => None
   }
 }
 
@@ -75,8 +75,8 @@ object ZipLeftSimplificationType         extends BaseZipOneSimplificationType(`.
 object ZipLeftOperatorSimplificationType extends BaseZipOneOperatorSimplificationType(`.tap_notStream`, "<*")
 object ZipLeftToSucceedSimplificationType extends BaseZipToSucceedSimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = expr match {
-    case `ZIO.succeed`(_, arg) `.<*` qual      => Some(simplify(expr, qual, arg))
-    case `ZIO.succeed`(_, arg) `.zipLeft` qual => Some(simplify(expr, qual, arg))
-    case _                                     => None
+    case `ZIO.succeed`(_, NonUnit(arg)) `.<*` NonZIOUnit(qual)      => Some(simplify(expr, qual, arg))
+    case `ZIO.succeed`(_, NonUnit(arg)) `.zipLeft` NonZIOUnit(qual) => Some(simplify(expr, qual, arg))
+    case _                                                          => None
   }
 }

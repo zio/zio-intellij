@@ -141,4 +141,13 @@ class SimplifyZipRightToSucceedInspectionTest extends ZSimplifyInspectionTest[Si
     testQuickFix(text, result, hint)
   }
 
+  def test_zipRight_to_succeed_unit_no_highlight(): Unit =
+    z(s"""${START}f("Fernando Fader").zipRight(ZIO.succeed(unit()))$END""").assertNotHighlighted()
+
+  def test_zipRight_infix_invocation_to_succeed_unit_no_highlight(): Unit =
+    z(s"""${START}f("Fernando Fader") zipRight ZIO.succeed(unit())$END""").assertNotHighlighted()
+
+  def test_zipRight_operator_to_succeed_unit_no_highlight(): Unit =
+    z(s"""${START}f("Fernando Fader") *> ZIO.succeed(unit())$END""").assertNotHighlighted()
+
 }
