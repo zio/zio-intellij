@@ -351,10 +351,11 @@ package object inspections {
       }
   }
 
-  val scalaFuture = new ReturnTypeReference(Set("scala.concurrent.Future"))
-  val scalaTry    = new ReturnTypeReference(Set("scala.util.Try", "scala.util.Success", "scala.util.Failure"))
-  val scalaOption = new ReturnTypeReference(Set("scala.Option", "scala.Some", "scala.None"))
-  val scalaEither = new ReturnTypeReference(Set("scala.util.Either", "scala.util.Left", "scala.util.Right"))
+  val scalaFuture       = new ReturnTypeReference(Set("scala.concurrent.Future"))
+  val scalaTry          = new ReturnTypeReference(Set("scala.util.Try", "scala.util.Success", "scala.util.Failure"))
+  val scalaOption       = new ReturnTypeReference(Set("scala.Option", "scala.Some", "scala.None"))
+  val scalaEither       = new ReturnTypeReference(Set("scala.util.Either", "scala.util.Left", "scala.util.Right"))
+  val scalaImmutableMap = new ReturnTypeReference(Set("scala.collection.immutable.Map"))
 
   class TypeReference(typeFQNs: Set[String]) {
 
