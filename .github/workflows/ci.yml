@@ -3,9 +3,9 @@ name: CI
 on:
   push:
     branches:
-      - idea243.x
       - idea251.x
       - idea252.x
+      - idea253.x
   pull_request:
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -22,19 +22,23 @@ jobs:
       - name: Set up Scala
         uses: coursier/setup-action@v1
         with:
-          jvm: adoptium:1.17
-          apps: sbtn sbt
+          jvm: adoptium:21
+          apps: sbt sbtn
 
       - uses: coursier/cache-action@v6
-        id: coursier-cache
 
       - name: Fetch Dependencies
-        if: steps.coursier-cache.outputs.cache-hit-coursier != 'true'
         run: sbt +update
 
-      - name: Try packaging
         # Just to check that plugin can be packaged for release
-        run: sbt clean && sbt packageArtifact && sbt packageArtifactZip
+        # TODO: remove copying of searchableOptions, they should be generated automatically by packageArtifactZip
+      - name: Try packaging
+        shell: bash
+        run: |
+          sbt clean
+          mkdir -p "$GITHUB_WORKSPACE/target/searchableOptions"
+          cp -r "$GITHUB_WORKSPACE/src/main/resources/searchableOptions" "$GITHUB_WORKSPACE/target/"
+          sbt packageArtifact && sbt packageArtifactZip
 
       - name: Run tests
         run: sbt test

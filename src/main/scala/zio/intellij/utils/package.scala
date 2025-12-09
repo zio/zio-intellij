@@ -36,7 +36,7 @@ import org.jetbrains.plugins.scala.project.{
   ScalaLanguageLevel
 }
 import org.jetbrains.sbt.SbtUtil
-import org.jetbrains.sbt.SbtUtil.getDefaultLauncher
+import org.jetbrains.sbt.SbtUtil.defaultLauncherPath
 import org.jetbrains.sbt.project.SbtExternalSystemManager
 import zio.intellij.utils.Method.localRegex
 
@@ -60,9 +60,9 @@ package object utils {
       val workingDir = new File(workingDirPath)
 
       val sbtSettings = SbtExternalSystemManager.executionSettingsFor(project, workingDirPath)
-      val launcher    = sbtSettings.customLauncher.getOrElse(getDefaultLauncher)
+      val launcher    = sbtSettings.customLauncher.map(_.toPath).getOrElse(defaultLauncherPath)
 
-      SbtUtil.detectSbtVersion(workingDir.toPath, launcher.toPath)
+      SbtUtil.detectSbtVersion(workingDir.toPath, launcher)
     }
   }
 
