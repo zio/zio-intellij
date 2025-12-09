@@ -12,16 +12,27 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Scala
-        uses: olafurpg/setup-scala@v14
+        uses: coursier/setup-action@v1
         with:
-          java-version: "openjdk@1.17.0"
+          jvm: adoptium:21
+          apps: sbt sbtn
+
+      - uses: coursier/cache-action@v6
+
+      - name: Fetch Dependencies
+        run: sbt +update
 
       - name: Package plugin
         # The first packageArtifact creates the files (including plugin.xml).
         # The second packageArtifactZip allows the patchPluginXML task to run
         #   on those files and patch the plugin.xml.
         # Then it packages files into a single zip archive.
-        run: sbt clean && sbt packageArtifact && sbt packageArtifactZip
+        # TODO: remove copying of searchableOptions, they should be generated automatically by packageArtifactZip
+        run: |
+          sbt clean
+          mkdir -p "$GITHUB_WORKSPACE/target/searchableOptions"
+          cp -r "$GITHUB_WORKSPACE/src/main/resources/searchableOptions" "$GITHUB_WORKSPACE/target/"
+          sbt packageArtifact && sbt packageArtifactZip
 
       - name: Publish plugin
         run: sbt "publishPlugin Stable"

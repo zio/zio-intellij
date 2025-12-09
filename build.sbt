@@ -1,14 +1,20 @@
 import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
 
-lazy val scala213           = "2.13.16"
-lazy val scalaPluginVersion = "2025.2.628:Nightly"
-lazy val minorVersion       = "0"
-lazy val buildVersion       = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-lazy val pluginVersion      = s"2025.2.44.$buildVersion"
+lazy val scala213 = "2.13.18"
+
+lazy val intellijVersion    = "253.28294.251"
+lazy val scalaPluginVersion = "2025.3.23"
+
+lazy val minorVersion  = "0"
+lazy val buildVersion  = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
+lazy val pluginVersion = s"2025.3.45.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := "252.26199.7"
+ThisBuild / intellijBuild := intellijVersion
 ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
+
+ThisBuild / autoRemoveOldCachedIntelliJSDK := true
+ThisBuild / autoRemoveOldCachedDownloads := true
 
 Global / intellijAttachSources := true
 
@@ -28,7 +34,8 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:implicitConversions",
   "-language:reflectiveCalls",
   "-language:existentials",
-  "-Wconf:msg=legacy-binding:s"
+  "-Wconf:msg=legacy-binding:s",
+  "-Ytasty-reader"
 )
 
 lazy val root =
@@ -42,7 +49,7 @@ lazy val root =
           s"""<![CDATA[
         <b>What's new?</b>
         <ul>
-          <li>IntelliJ IDEA 2025.2 support!</li>
+          <li>IntelliJ IDEA 2025.3 support!</li>
         </ul>
         <b>Note:</b> The ZIO project wizard is temporarily disabled due to incompatibility issues.
         ]]>"""
@@ -51,29 +58,30 @@ lazy val root =
     )
     .dependsOn(macros)
 
-lazy val macros = newProject("macros", file("macros"))
-  .enablePlugins(SbtIdeaPlugin)
-  .settings(
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scala213 intransitive ()
+lazy val macros =
+  newProject("macros", file("macros"))
+    .enablePlugins(SbtIdeaPlugin)
+    .settings(
+      libraryDependencies ++= Seq(
+        "org.scala-lang" % "scala-reflect" % scala213 intransitive ()
+      )
     )
-  )
 
 def newProject(projectName: String, base: File): Project =
-  Project(projectName, base).settings(
-    name := projectName,
-    scalaVersion := scala213,
-    version := pluginVersion,
-    libraryDependencies ++= Seq(
-      "junit"             % "junit"             % "4.13.2" % Test,
-      "com.github.sbt"    % "junit-interface"   % "0.13.3" % Test,
-      "org.junit.jupiter" % "junit-jupiter-api" % "5.13.4" % Test
-    ),
-    testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
-    intellijPlugins := Seq(
-      "com.intellij.java".toPlugin,
-      s"org.intellij.scala:$scalaPluginVersion".toPlugin,
-      "org.intellij.intelliLang".toPlugin
-    ),
-    (Test / scalacOptions) += "-Xmacro-settings:enable-expression-tracers"
-  )
+  Project(projectName, base)
+    .settings(
+      name := projectName,
+      scalaVersion := scala213,
+      version := pluginVersion,
+      libraryDependencies ++= Seq(
+        "junit"          % "junit"           % "4.13.2" % Test,
+        "com.github.sbt" % "junit-interface" % "0.13.3" % Test,
+        "org.opentest4j" % "opentest4j"      % "1.3.0"  % Test
+      ),
+      testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
+      intellijPlugins := Seq(
+        "com.intellij.java".toPlugin,
+        s"org.intellij.scala:$scalaPluginVersion".toPlugin
+      ),
+      (Test / scalacOptions) += "-Xmacro-settings:enable-expression-tracers"
+    )

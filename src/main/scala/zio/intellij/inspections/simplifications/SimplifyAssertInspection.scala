@@ -1,7 +1,7 @@
 package zio.intellij.inspections.simplifications
 
 import com.intellij.psi.PsiClass
-import org.jetbrains.plugins.scala.codeInspection.collections._
+import org.jetbrains.plugins.scala.codeInspection.collections.{&& => _, _}
 import org.jetbrains.plugins.scala.lang.psi.ElementScope
 import org.jetbrains.plugins.scala.lang.psi.api.base.literals.{ScBooleanLiteral, ScStringLiteral}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression

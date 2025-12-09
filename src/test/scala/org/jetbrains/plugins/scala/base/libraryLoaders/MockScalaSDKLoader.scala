@@ -5,8 +5,8 @@ import com.intellij.openapi.roots.libraries.{Library, LibraryTablesRegistrar}
 import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibraryEditor
 import com.intellij.testFramework.PsiTestUtil
 import org.jetbrains.plugins.scala.ScalaVersion
-import org.jetbrains.plugins.scala.extensions.{inWriteAction, ObjectExt}
-import org.jetbrains.plugins.scala.project.{ModuleExt, ScalaLibraryProperties, ScalaLibraryType}
+import org.jetbrains.plugins.scala.extensions.{ObjectExt, inWriteAction}
+import org.jetbrains.plugins.scala.project.{ModuleExt, ReplClasspath, ScalaLibraryProperties, ScalaLibraryType}
 
 import java.{util => ju}
 
@@ -32,7 +32,7 @@ final class MockScalaSDKLoader() extends LibraryLoader {
         .getOrElse(createNewLibrary)
 
     inWriteAction {
-      val properties = ScalaLibraryProperties(Some(version.minor), Seq.empty, Seq.empty)
+      val properties = ScalaLibraryProperties(Some(version.minor), Seq.empty, Seq.empty, None, ReplClasspath.Bundled)
 
       val editor = new ExistingLibraryEditor(library, null)
       editor.setType(ScalaLibraryType())
