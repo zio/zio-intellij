@@ -63,12 +63,7 @@ jobs:
         # The second packageArtifactZip allows the patchPluginXML task to run
         #   on those files and patch the plugin.xml.
         # Then it packages files into a single zip archive.
-        # TODO: remove copying of searchableOptions, they should be generated automatically by packageArtifactZip
-        run: |
-          sbt clean
-          mkdir -p "$GITHUB_WORKSPACE/target/searchableOptions"
-          cp -r "$GITHUB_WORKSPACE/src/main/resources/searchableOptions" "$GITHUB_WORKSPACE/target/"
-          sbt packageArtifact && sbt packageArtifactZip
+        run: sbt clean && sbt packageArtifact && sbt packageArtifactZip
 
       - name: Publish plugin
         run: sbt "publishPlugin EAP"

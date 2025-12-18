@@ -11,7 +11,6 @@ lazy val pluginVersion = s"2025.3.45.$buildVersion"
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := intellijVersion
-ThisBuild / jbrInfo := AutoJbr(explicitPlatform = Some(JbrPlatform.osx_aarch64))
 
 ThisBuild / autoRemoveOldCachedIntelliJSDK := true
 ThisBuild / autoRemoveOldCachedDownloads := true
