@@ -30,15 +30,9 @@ jobs:
       - name: Fetch Dependencies
         run: sbt +update
 
-        # Just to check that plugin can be packaged for release
-        # TODO: remove copying of searchableOptions, they should be generated automatically by packageArtifactZip
       - name: Try packaging
-        shell: bash
-        run: |
-          sbt clean
-          mkdir -p "$GITHUB_WORKSPACE/target/searchableOptions"
-          cp -r "$GITHUB_WORKSPACE/src/main/resources/searchableOptions" "$GITHUB_WORKSPACE/target/"
-          sbt packageArtifact && sbt packageArtifactZip
+        # Just to check that plugin can be packaged for release
+        run: sbt clean && sbt packageArtifact && sbt packageArtifactZip
 
       - name: Run tests
         run: sbt test
