@@ -12,7 +12,7 @@ object Versions {
   val intellijVersion: String      = "261.19799.12"
   val intellijHumanVersion: String = "2026.1"
 
-  val scalaPluginVersion: String   = "2026.1.2"
+  val scalaPluginVersion: String = "2026.1.2"
 
   val minorVersion: String  = "0"
   val buildVersion: String  = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)

@@ -5,7 +5,7 @@ import com.intellij.openapi.roots.libraries.{Library, LibraryTablesRegistrar}
 import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibraryEditor
 import com.intellij.testFramework.PsiTestUtil
 import org.jetbrains.plugins.scala.ScalaVersion
-import org.jetbrains.plugins.scala.extensions.{ObjectExt, inWriteAction}
+import org.jetbrains.plugins.scala.extensions.{inWriteAction, ObjectExt}
 import org.jetbrains.plugins.scala.project.{ModuleExt, ReplClasspath, ScalaLibraryProperties, ScalaLibraryType}
 
 import java.{util => ju}

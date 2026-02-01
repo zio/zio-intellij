@@ -25,9 +25,9 @@ sealed abstract class BaseCollectAllSimplificationType(methodName: String, metho
         .highlightAll
 
     expr match {
-      case methodExtractor(zioType, xs `.map` f)
-        if scalaImmutableMap.unapply(xs).isEmpty => Some(replacement(zioType, xs, f))
-      case _                                     => None
+      case methodExtractor(zioType, xs `.map` f) if scalaImmutableMap.unapply(xs).isEmpty =>
+        Some(replacement(zioType, xs, f))
+      case _ => None
     }
   }
 }

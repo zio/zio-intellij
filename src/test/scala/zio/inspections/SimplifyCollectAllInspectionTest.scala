@@ -60,10 +60,9 @@ abstract class CollectAllInspectionTest(methodToReplace: String, methodToReplace
   }
 
   def testMapReplacement(): Unit = if (methodToReplace != "collectAllParN") {
-    val text = z(
-      s"""
-         |val m: Map[Int, Int] = Map(1 -> 2)
-         |ZIO.$methodToReplace(m map { case (k, v) => ZIO.succeed(v) })""".stripMargin)
+    val text = z(s"""
+                    |val m: Map[Int, Int] = Map(1 -> 2)
+                    |ZIO.$methodToReplace(m map { case (k, v) => ZIO.succeed(v) })""".stripMargin)
     checkTextHasNoErrors(text)
   }
 }
