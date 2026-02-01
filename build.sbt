@@ -1,13 +1,4 @@
-import org.jetbrains.sbtidea.{AutoJbr, JbrPlatform}
-
-lazy val scala213 = "2.13.18"
-
-lazy val intellijVersion    = "253.30387.90"
-lazy val scalaPluginVersion = "2025.3.28"
-
-lazy val minorVersion  = "0"
-lazy val buildVersion  = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-lazy val pluginVersion = s"2025.3.46.$buildVersion"
+import Versions.*
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := intellijVersion
@@ -44,11 +35,11 @@ lazy val root =
       patchPluginXml := pluginXmlOptions { xml =>
         xml.version = version.value
         xml.changeNotes = sys.env.getOrElse(
-          "ZIO_INTELLIJ_CHANGE_NOTES",
+          s"ZIO_INTELLIJ_CHANGE_NOTES",
           s"""<![CDATA[
         <b>What's new?</b>
         <ul>
-          <li>IntelliJ IDEA 2025.3 support!</li>
+          <li>IntelliJ IDEA $intellijHumanVersion support!</li>
         </ul>
         <b>Note:</b> The ZIO project wizard is temporarily disabled due to incompatibility issues.
         ]]>"""
@@ -72,15 +63,10 @@ def newProject(projectName: String, base: File): Project =
       name := projectName,
       scalaVersion := scala213,
       version := pluginVersion,
-      libraryDependencies ++= Seq(
-        "junit"          % "junit"           % "4.13.2" % Test,
-        "com.github.sbt" % "junit-interface" % "0.13.3" % Test,
-        "org.opentest4j" % "opentest4j"      % "1.3.0"  % Test
-      ),
+      resolvers += Versions.intellijRepository_ForManagedIntellijDependencies,
+      libraryDependencies ++= Dependencies.junit,
+      libraryDependencies ++= Dependencies.intellijTestFrameworkAll,
+      intellijPlugins := Dependencies.intellijPlugins,
       testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
-      intellijPlugins := Seq(
-        "com.intellij.java".toPlugin,
-        s"org.intellij.scala:$scalaPluginVersion".toPlugin
-      ),
       (Test / scalacOptions) += "-Xmacro-settings:enable-expression-tracers"
     )

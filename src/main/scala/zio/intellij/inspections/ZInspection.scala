@@ -1,6 +1,6 @@
 package zio.intellij.inspections
 
-import com.intellij.codeInspection.{ProblemHighlightType, ProblemsHolder}
+import com.intellij.codeInspection.{LocalQuickFix, ProblemHighlightType, ProblemsHolder}
 import com.intellij.psi.PsiElement
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.codeInspection.collections.OperationOnCollectionInspectionBase.SimplifiableExpression
@@ -35,7 +35,7 @@ abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOn
             hint,
             ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
             rangeInParent,
-            quickFix
+            LocalQuickFix.from(quickFix)
           )
       }
     case _ =>

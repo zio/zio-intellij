@@ -3,9 +3,9 @@ name: CI
 on:
   push:
     branches:
-      - idea251.x
       - idea252.x
       - idea253.x
+      - idea261.x
   pull_request:
 
 jobs:
