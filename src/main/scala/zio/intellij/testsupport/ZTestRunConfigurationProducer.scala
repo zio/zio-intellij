@@ -12,6 +12,7 @@ import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfiguration
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer.CreateFromContextInfo
 import org.jetbrains.plugins.scala.testingSupport.test.AbstractTestConfigurationProducer.CreateFromContextInfo._
 import zio.intellij.testsupport.ZTestFramework.{ZIO1SpecFQN, ZIO2SpecFQN}
+import zio.intellij.utils._
 
 final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProducer[ZTestRunConfiguration] {
 
@@ -34,8 +35,13 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
     Option(context.getLocation).fold(false) { location =>
       val psiElement = location.getPsiElement
       psiElement match {
-        case _: PsiDirectory | _: PsiPackage => false // TODO: disabled until the test runner supports multiple specs
-        case _                               => super.setupConfigurationFromContext(configuration, context, sourceElement)
+        case _: PsiDirectory | _: PsiPackage =>
+          // "All in package" is supported for ZIO 2.x only
+          if (Option(context.getModule).exists(_.isZio2))
+            super.setupConfigurationFromContext(configuration, context, sourceElement)
+          else
+            false
+        case _ => super.setupConfigurationFromContext(configuration, context, sourceElement)
       }
     }
 

@@ -49,9 +49,12 @@ private[testsupport] final class TestRunnerProjectNotification(private val proje
     Future.sequence(tasks).foreach { results =>
       if (results.forall(_.isRight)) displayInfo("ZIO Test runner was downloaded successfully!")
       else {
-	    displayError("Unable to download one or more required files. Please try again, or report this issue on GitHub, " +
-		    "if the problem persists.", Seq(), icon = Some(ZioIcon)
-	    )
+        displayError(
+          "Unable to download one or more required files. Please try again, or report this issue on GitHub, " +
+            "if the problem persists.",
+          Seq(),
+          icon = Some(ZioIcon)
+        )
         val errors = results.collect { case Left(error) => error }
         throw new ResolveException(errors)
       }

@@ -1,4 +1,5 @@
 import Versions.*
+import org.jetbrains.sbtidea.packaging.PackagingMethod
 
 ThisBuild / intellijPluginName := "zio-intellij"
 ThisBuild / intellijBuild := intellijVersion
@@ -28,6 +29,14 @@ ThisBuild / scalacOptions ++= Seq(
   "-Ytasty-reader"
 )
 
+lazy val zio2TestRunner =
+  Project("zio2-test-runner", file("zio2-test-runner"))
+    .settings(
+      name          := "zio2-test-runner",
+      scalaVersion  := scala213,
+      packageMethod := PackagingMethod.Standalone()
+    )
+
 lazy val root =
   newProject("zio-intellij", file("."))
     .enablePlugins(SbtIdeaPlugin)
@@ -44,7 +53,10 @@ lazy val root =
         <b>Note:</b> The ZIO project wizard is temporarily disabled due to incompatibility issues.
         ]]>"""
         )
-      }
+      },
+      // zio2-test-runner.jar is packaged as a standalone JAR (lib/zio2-test-runner.jar in the plugin distribution)
+      // using PackagingMethod.Standalone, mirroring the pattern used by the Scala plugin for other test runners
+      packageAdditionalProjects += zio2TestRunner
     )
     .dependsOn(macros)
 
