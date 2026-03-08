@@ -120,17 +120,11 @@ object ZioVersion {
     parse(str).getOrElse(throw new IllegalArgumentException(s"Could not parse version: $str"))
 
   object ZIO {
-    val RC18: ZioVersion         = ZioVersion.parseUnsafe("1.0.0-RC18")
+    // note: 1.0.8 was the first version to support Scala 3.0.0
     val `RC18-2`: ZioVersion     = ZioVersion.parseUnsafe("1.0.0-RC18-2")
-    val RC19: ZioVersion         = ZioVersion.parseUnsafe("1.0.0-RC19")
-    val RC21: ZioVersion         = ZioVersion.parseUnsafe("1.0.0-RC21")
-    val `RC21-2`: ZioVersion     = ZioVersion.parseUnsafe("1.0.0-RC21-2")
     val `1.0.0`: ZioVersion      = ZioVersion.parseUnsafe("1.0.0")
     val `1.0.6`: ZioVersion      = ZioVersion.parseUnsafe("1.0.6")
-    val `1.0.8`: ZioVersion      = ZioVersion.parseUnsafe("1.0.8")    // first version to support Scala 3.0.0
     val `1.0.10`: ZioVersion     = ZioVersion.parseUnsafe("1.0.10")
     val `2.0.0`: ZioVersion      = ZioVersion.parseUnsafe("2.0.0")
-    val `1.x.latest`: ZioVersion = ZioVersion.parseUnsafe("1.0.18")
-    val `2.x.latest`: ZioVersion = ZioVersion.parseUnsafe("2.1.11")
   }
 }
