@@ -341,6 +341,9 @@
 
 
 
+        <postStartupActivity implementation="zio.intellij.startup.ZioPluginVersionCheckActivity"/>
+
+        <notificationGroup id="ZIO Plugin Version Mismatch" displayType="STICKY_BALLOON" isLogByDefault="true"/>
         <notificationGroup id="Test Runner Download" displayType="BALLOON" isLogByDefault="true"/>
         <notificationGroup id="Test Runner Download Error" displayType="STICKY_BALLOON" isLogByDefault="true"/>
 
