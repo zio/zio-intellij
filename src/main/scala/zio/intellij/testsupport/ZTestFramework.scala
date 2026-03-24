@@ -107,7 +107,7 @@ object ZTestFramework {
   private def expandsToTestMethod(tpe: ScType) =
     tpe.extractClass.collect {
       case c: ScClassImpl =>
-        val qname = c.qualifiedName
+        val qname     = c.qualifiedName
         val canonical = (if (qname == null || qname == c.name) c.name
                          else "_root_." + qname) + c.typeParamString
         testMethodTypes.contains(canonical) || additionalMethodsRegex.exists(canonical.matches)

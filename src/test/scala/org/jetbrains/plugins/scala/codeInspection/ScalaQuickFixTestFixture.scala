@@ -24,12 +24,13 @@ import scala.annotation.nowarn
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 /**
- * @param description this is only used in assertion errors, for actual comparison logic see [[descriptionMatcher]]
- *                    It is lazy (by-name parameter) for historical reasons.
- *                    Some inheritors of ScalaAnnotatorQuickFixTestBase don't implement this method and jut use `???`
- * @param shouldPass whether the test should pass<br>.
- *                   Avoid using this parameter, it's left for legacy tests.
- *                   Instead, specify explicitly what is the expected (even failed) result
+ *  @param description
+ *    this is only used in assertion errors, for actual comparison logic see [[descriptionMatcher]] It is lazy (by-name
+ *    parameter) for historical reasons. Some inheritors of ScalaAnnotatorQuickFixTestBase don't implement this method
+ *    and jut use `???`
+ *  @param shouldPass
+ *    whether the test should pass<br>. Avoid using this parameter, it's left for legacy tests. Instead, specify
+ *    explicitly what is the expected (even failed) result
  */
 final class ScalaQuickFixTestFixture(
   baseFixture: CodeInsightTestFixture,
@@ -221,8 +222,9 @@ final class ScalaQuickFixTestFixture(
   }
 
   /**
-   * @param text the original text is only used to check if there is an explicit caret marker inside it.
-   *             If there is a caret marker, only highlightings at caret are checked.
+   *  @param text
+   *    the original text is only used to check if there is an explicit caret marker inside it. If there is a caret
+   *    marker, only highlightings at caret are checked.
    */
   def findMatchingHighlights(text: String): Seq[HighlightInfo] = {
     val caretOffset = if (text.contains(CARET)) Some(getEditor.getCaretModel.getOffset) else None
@@ -230,7 +232,7 @@ final class ScalaQuickFixTestFixture(
   }
 
   def findMatchingHighlights(caretOffset: Option[Int] = None): Seq[HighlightInfo] = {
-    val highlightsAll = baseFixture.doHighlighting().asScala.toSeq
+    val highlightsAll                 = baseFixture.doHighlighting().asScala.toSeq
     val highlightsMatchingDescription = highlightsAll.filter { highlightInfo =>
       val description = highlightInfo.getDescription
       description != null && descriptionMatcher(description)

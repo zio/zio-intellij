@@ -2,7 +2,7 @@ package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
+import com.intellij.psi.{PsiElement, PsiElementVisitor}
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.base.patterns.ScReferencePattern
@@ -19,8 +19,8 @@ import scala.annotation.tailrec
 
 class WrapInsteadOfLiftInspection extends LocalInspectionTool {
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple =
-    (element: PsiElement) => {
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) { element =>
       @tailrec
       def isUsed(expr: Option[PsiElement]): Boolean = {
         val _isUsed: PsiElement => Boolean = {

@@ -42,9 +42,9 @@ package object inspections {
       .exists(ScalaNamesUtil.nameFitToPatterns(_, patterns, strict = false))
 
   object zioMethods {
-    val `.*>` : Qualified                  = invocation("*>").from(zioLikePackages)
+    val `.*>`: Qualified                   = invocation("*>").from(zioLikePackages)
     val `.zipRight`: Qualified             = invocation("zipRight").from(zioLikePackages)
-    val `.<*` : Qualified                  = invocation("<*").from(zioLikePackages)
+    val `.<*`: Qualified                   = invocation("<*").from(zioLikePackages)
     val `.zipLeft`: Qualified              = invocation("zipLeft").from(zioLikePackages)
     val `.as`: Qualified                   = invocation("as").from(zioLikePackages)
     val `.map`: Qualified                  = invocation("map").from(zioLikePackages)
@@ -56,7 +56,7 @@ package object inspections {
     val `.orElse`: Qualified               = invocation("orElse").from(zioLikePackages)
     val `.orElseFail`: Qualified           = invocation("orElseFail").from(zioLikePackages)
     val `.orElseEither`: Qualified         = invocation("orElseEither").from(zioLikePackages)
-    val `.<+>` : Qualified                 = invocation("<+>").from(zioLikePackages)
+    val `.<+>`: Qualified                  = invocation("<+>").from(zioLikePackages)
     val `.retryOrElseEither`: Qualified    = invocation("retryOrElseEither").from(zioLikePackages)
     val `.catchAll`: Qualified             = invocation("catchAll").from(zioLikePackages)
     val `.fold`: Qualified                 = invocation("fold").from(zioLikePackages)
@@ -154,14 +154,14 @@ package object inspections {
     }
 
     val assertTrue = unqualified("assertTrue").from(zioTestPackage)
-    val assert = new Curried2StaticMemberReference[ZioType](AssertReferenceExtractor, "assert") {
+    val assert     = new Curried2StaticMemberReference[ZioType](AssertReferenceExtractor, "assert") {
       override protected val typeCompanion: TypeCompanion[ZioType] = new TypeCompanion[ZioType] {
         override def values: List[ZioType] = List(assertFqn)
         override def defaultValue: ZioType = assertFqn
       }
     }
 
-    val `&&` : Qualified = invocation("&&").from(zioTestPackage)
+    val `&&`: Qualified = invocation("&&").from(zioTestPackage)
 
   }
 

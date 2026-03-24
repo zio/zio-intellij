@@ -1,8 +1,7 @@
 package org.jetbrains.plugins.scala.base
 
 import com.intellij.application.options.CodeStyle
-import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
-import com.intellij.codeInsight.daemon.impl.{DaemonCodeAnalyzerImpl, HighlightInfo}
+import com.intellij.codeInsight.daemon.impl.HighlightInfo
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.module.Module
@@ -15,12 +14,13 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.{CodeStyleSettings, CommonCodeStyleSettings}
 import com.intellij.testFramework.TestIndexingModeSupporter.IndexingMode
+import com.intellij.testFramework.fixtures.impl.CodeInsightTestFixtureImpl
 import com.intellij.testFramework.fixtures.{JavaCodeInsightTestFixture, LightJavaCodeInsightFixtureTestCase}
 import com.intellij.testFramework.{EditorTestUtil, IdeaTestUtil, LightProjectDescriptor}
 import com.intellij.util.lang.JavaVersion
 import org.intellij.lang.annotations.Language
 import org.jetbrains.jps.model.java.JavaSourceRootType
-import org.jetbrains.plugins.scala.base.libraryLoaders.{LibraryLoader, ScalaSDKLoader, SourcesLoader}
+import org.jetbrains.plugins.scala.base.libraryLoaders.{LibraryLoader, ScalaSDKLoader}
 import org.jetbrains.plugins.scala.extensions.StringExt
 import org.jetbrains.plugins.scala.lang.formatting.settings.ScalaCodeStyleSettings
 import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
@@ -38,7 +38,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
     with ScalaSdkOwner
     with FailableTest {
 
-  //common useful constants
+  // common useful constants
   protected val CARET = EditorTestUtil.CARET_TAG
   protected val START = EditorTestUtil.SELECTION_START_TAG
   protected val END   = EditorTestUtil.SELECTION_END_TAG
@@ -51,21 +51,21 @@ abstract class ScalaLightCodeInsightFixtureTestCase
 
   protected def sourceRootPath: Path = null
 
-  //start section: indexing mode setup
+  // start section: indexing mode setup
   private[this] var indexingMode: IndexingMode = IndexingMode.SMART
 
   // SCL-21849
   override def getIndexingMode: IndexingMode             = indexingMode
   override def setIndexingMode(mode: IndexingMode): Unit = indexingMode = mode
-  //end section: indexing mode setup
+  // end section: indexing mode setup
 
-  //start section: project libraries configuration
+  // start section: project libraries configuration
   protected def loadScalaLibrary: Boolean = true
 
   protected def includeReflectLibrary: Boolean         = false
   protected def includeCompilerAsLibrary: Boolean      = false
   protected def includeScalaLibraryFilesInSdk: Boolean = false
-  protected def includeScalaLibrarySources: Boolean    = true
+  protected def includeScalaLibrarySources: Boolean    = false
 
   protected def additionalLibraries: Seq[LibraryLoader] = Seq.empty
 
@@ -76,15 +76,12 @@ abstract class ScalaLightCodeInsightFixtureTestCase
       includeScalaLibraryFilesInSdk = includeScalaLibraryFilesInSdk,
       includeScalaLibrarySources = includeScalaLibrarySources
     )
-    //note: do we indeed need to register it as libraries?
-    // shouldn't source roots be registered just as source roots?
-    val sourceLoaders     = Option(sourceRootPath).map(f => SourcesLoader(f.toAbsolutePath.toString)).toSeq
     val additionalLoaders = additionalLibraries
-    scalaSdkLoader +: sourceLoaders :++ additionalLoaders
+    scalaSdkLoader +: additionalLoaders
   }
-  //end section: project libraries configuration
+  // end section: project libraries configuration
 
-  //start section: project descriptor
+  // start section: project descriptor
   protected def sharedProjectToken: SharedTestProjectToken =
     SharedTestProjectToken.ByTestClassAndScalaSdkAndProjectLibraries(this)
 
@@ -109,8 +106,9 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected def placeSourceFilesInTestContentRoot: Boolean = false
 
   /**
-   * @note If you are overriding this method, most likely, the light project cannot be shared between subsequent
-   *       test invocations. Look into also overriding [[sharedProjectToken]].
+   *  @note
+   *    If you are overriding this method, most likely, the light project cannot be shared between subsequent test
+   *    invocations. Look into also overriding [[sharedProjectToken]].
    */
   private def afterSetUpProject(project: Project, module: Module): Unit = {
     if (sourceRootPath ne null) {
@@ -136,7 +134,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
 
     val settings = compilerConfiguration.settingsForHighlighting(module) match {
       case Seq(s) => s
-      case _ =>
+      case _      =>
         Assert.fail("expected single settings for module").asInstanceOf[Nothing]
     }
 
@@ -145,7 +143,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
       else settings.copy(additionalCompilerOptions = settings.additionalCompilerOptions ++ options)
     compilerConfiguration.configureSettingsForModule(module, "unit tests", newSettings)
   }
-  //end section: project descriptor
+  // end section: project descriptor
 
   override protected def setUp(): Unit = {
     // Suppress missing template exceptions.
@@ -162,11 +160,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
 
     // SCL-21849
     if (getIndexingMode != IndexingMode.SMART) {
-      val a = DaemonCodeAnalyzer.getInstance(getProject()) match {
-        case impl: DaemonCodeAnalyzerImpl => Some(impl)
-        case _                            => None
-      }
-      a.foreach(_.mustWaitForSmartMode(false, getTestRootDisposable))
+      CodeInsightTestFixtureImpl.mustWaitForSmartMode(false, getTestRootDisposable)
     }
 
     Registry.get("ast.loading.filter").setValue(true, getTestRootDisposable)
@@ -178,8 +172,8 @@ abstract class ScalaLightCodeInsightFixtureTestCase
     sys.props.put("ide.skip.plugin.templates.registered.check", false.toString)
   }
 
-  //start section: helper methods
-  protected final def configureFromFileText(fileText: String): PsiFile = scalaFixture.configureFromFileText(fileText)
+  // start section: helper methods
+  protected final def configureFromFileText(fileText: String): PsiFile                     = scalaFixture.configureFromFileText(fileText)
   protected final def configureFromFileText(fileType: FileType, fileText: String): PsiFile =
     scalaFixture.configureFromFileText(fileType, fileText)
   protected final def configureFromFileTextWithSomeName(fileType: String, fileText: String): PsiFile =
@@ -194,15 +188,15 @@ abstract class ScalaLightCodeInsightFixtureTestCase
     scalaFixture.configureFromFileText(fileText)
   protected final def addScalaFileToProject(relativePath: String, @Language("Scala") fileText: String): PsiFile =
     myFixture.addFileToProject(relativePath, fileText)
-  //end section: helper methods
+  // end section: helper methods
 
-  //TODO: consider extracting implementation body to ScalaCodeInsightTestFixture
+  // TODO: consider extracting implementation body to ScalaCodeInsightTestFixture
   // or crete a similar fixture which would be more specific for highlighting
-  //start section: check errors
+  // start section: check errors
   protected def checkTextHasNoErrors(text: String): Unit = {
     myFixture.configureByText(ScalaFileType.INSTANCE, text)
 
-    //EditorTestUtil.buildInitialFoldingsInBackground(getEditor)
+    // EditorTestUtil.buildInitialFoldingsInBackground(getEditor)
 
     def doTestHighlighting(virtualFile: VirtualFile): Unit =
       myFixture.testHighlighting(false, false, false, virtualFile)
@@ -243,9 +237,9 @@ abstract class ScalaLightCodeInsightFixtureTestCase
       throw new RuntimeException(failingPassed)
     }
   }
-  //end section: check errors
+  // end section: check errors
 
-  //code style settings
+  // code style settings
   private def getCurrentCodeStyleSettings: CodeStyleSettings =
     CodeStyle.getSettings(getProject)
 
@@ -255,12 +249,12 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected def getScalaCodeStyleSettings: ScalaCodeStyleSettings =
     getCurrentCodeStyleSettings.getCustomSettings(classOf[ScalaCodeStyleSettings])
 
-  //start section: workaround methods
-  //Workarounds to make the method callable from traits (using cake pattern)
-  //Also needed to workaround https://github.com/scala/bug/issues/3564
+  // start section: workaround methods
+  // Workarounds to make the method callable from traits (using cake pattern)
+  // Also needed to workaround https://github.com/scala/bug/issues/3564
   override protected def getProject: Project = super.getProject
 
-  //don't use getFixture, use `myFixture` directly
+  // don't use getFixture, use `myFixture` directly
   protected def getFixture: JavaCodeInsightTestFixture = myFixture
-  //end section: workaround methods
+  // end section: workaround methods
 }

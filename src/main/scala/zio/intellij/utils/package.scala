@@ -74,7 +74,7 @@ package object utils {
   // taken from ScalaUnusedSymbolInspection
   def isElementUsed(element: ScNamedElement, isOnTheFly: Boolean): Boolean =
     if (isOnTheFly) {
-      //we can trust RefCounter because references are counted during highlighting
+      // we can trust RefCounter because references are counted during highlighting
       val refCounter = ScalaRefCountHolder(element)
       var used       = false
 
@@ -82,9 +82,9 @@ package object utils {
         used |= refCounter.isValueReadUsed(element) || refCounter.isValueWriteUsed(element)
       }
 
-      !success || used //want to return true if it was a failure
+      !success || used // want to return true if it was a failure
     } else
-      //need to look for references because file is not highlighted
+      // need to look for references because file is not highlighted
       ReferencesSearch.search(element, element.getUseScope).findFirst() != null
 
   // CompositeOrdering is taken from https://stackoverflow.com/a/14696410
@@ -287,11 +287,11 @@ package object utils {
   }
 
   /**
-   * The release version of Scala 3 changes the classifier used to resolve dependencies,
-   * whereas in pre-3.0.0 it used the Scala 2 scheme, e.g. artifact_name:3.0.0-RC2,
-   * the release version uses a single major version digit, i.e. artifact_name:3.
+   *  The release version of Scala 3 changes the classifier used to resolve dependencies, whereas in pre-3.0.0 it used
+   *  the Scala 2 scheme, e.g. artifact_name:3.0.0-RC2, the release version uses a single major version digit, i.e.
+   *  artifact_name:3.
    *
-   * More info: https://www.scala-lang.org/blog/2021/04/08/scala-3-in-sbt.html
+   *  More info: https://www.scala-lang.org/blog/2021/04/08/scala-3-in-sbt.html
    */
   implicit class ScalaVersionHack(private val version: ScalaVersion) extends AnyVal {
     def versionStr = version.languageLevel match {
@@ -324,7 +324,7 @@ package object utils {
       @tailrec
       def loop(currMin: B, list: List[A], acc: List[A]): List[A] =
         list match {
-          case Nil => acc.reverse
+          case Nil          => acc.reverse
           case head :: tail =>
             val currRes = f(head)
 

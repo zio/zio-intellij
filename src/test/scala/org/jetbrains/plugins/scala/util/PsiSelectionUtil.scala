@@ -15,7 +15,7 @@ trait PsiSelectionUtil {
     path: NamedElementPath,
     searchElement: Boolean = false
   ): R = {
-    val typeName = implicitly[ClassTag[R]].runtimeClass.getName
+    val typeName                                                          = implicitly[ClassTag[R]].runtimeClass.getName
     def getInner(elem: PsiElement, path: List[String]): Either[String, R] = {
       def pathString = "/" + path.mkString("/")
       path match {
@@ -35,7 +35,7 @@ trait PsiSelectionUtil {
           foundElements match {
             case LazyList(foundElement) => Right(foundElement)
             case LazyList()             => Left(s"Found no element of type $typeName in $pathString")
-            case elements =>
+            case elements               =>
               Left(
                 s"Found ${elements.length} elements of type $typeName in $pathString:\n${elements.map(_.getText).mkString("\n")}"
               )
@@ -43,7 +43,7 @@ trait PsiSelectionUtil {
         case _ =>
           elem match {
             case e: R => Right(e)
-            case e =>
+            case e    =>
               Left(
                 s"Found element at path $pathString, but it is of type ${e.getClass.getName}, not expected $typeName"
               )

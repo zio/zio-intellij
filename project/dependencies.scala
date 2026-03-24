@@ -9,14 +9,14 @@ object Versions {
 
   val scala213: String = "2.13.18"
 
-  val intellijVersion: String      = "261.19799.12"
-  val intellijHumanVersion: String = "2026.1"
+  val intellijVersion: String      = "261.22158.277"
+  val intellijHumanVersion: String = "2026.1" // just for `What's new?`
 
-  val scalaPluginVersion: String = "2026.1.2"
+  val scalaPluginVersion: String = "2026.1.16"
 
   val minorVersion: String  = "0"
   val buildVersion: String  = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-  val pluginVersion: String = s"2026.1.1.$buildVersion"
+  val pluginVersion: String = s"2026.1.2.$buildVersion"
 
   val IntellijTestFrameworkVersion: String = intellijVersion_ForManagedIntellijDependencies
 

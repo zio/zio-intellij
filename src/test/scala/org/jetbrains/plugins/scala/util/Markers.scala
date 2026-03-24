@@ -21,9 +21,8 @@ trait Markers {
   def end: String               = endMarker
 
   /**
-   * @example
-   * line /start/ 1 content /end/
-   * line /start0/ /start1/ 2 /end1/ content/end0/
+   *  @example
+   *    line /start/ 1 content /end/ line /start0/ /start1/ 2 /end1/ content/end0/
    */
   def extractNumberedMarkers(inputText: String): (String, Seq[TextRange]) = {
     val normalizedInput = inputText.withNormalizedSeparator
@@ -34,9 +33,9 @@ trait Markers {
     val hasNormalStartMarker = hasMarker(startMarker, endMarker)
     val numberedMarkers      = LazyList.from(0).takeWhile(i => hasMarker(startMarker(i), endMarker(i)))
 
-    val markers1 = if (hasNormalStartMarker) Seq((startMarker, endMarker)) else Seq.empty
-    val markers2 = numberedMarkers.map(i => (startMarker(i), endMarker(i)))
-    val markers  = markers1 ++ markers2
+    val markers1             = if (hasNormalStartMarker) Seq((startMarker, endMarker)) else Seq.empty
+    val markers2             = numberedMarkers.map(i => (startMarker(i), endMarker(i)))
+    val markers              = markers1 ++ markers2
     val (resultText, ranges) = extractMarkers(
       normalizedInput,
       markers,
@@ -46,11 +45,10 @@ trait Markers {
   }
 
   /**
-   * Used to extract ranges that may be nested.
+   *  Used to extract ranges that may be nested.
    *
-   * @example
-   * line /start/ 1 content /end/
-   * line /start/ /start/ 1 /end/ content /start/ 2 /end/ /end/
+   *  @example
+   *    line /start/ 1 content /end/ line /start/ /start/ 1 /end/ content /start/ 2 /end/ /end/
    */
   def extractMarker(
     inputText: String,
@@ -74,23 +72,21 @@ trait Markers {
   }
 
   /**
-   * Ultimate function to extract ranges from an input sequence.
-   * Multiple marker-kinds are supported and markers of different kinds
-   * do not interfere with one another.
-   * Markers of the same kind may be nested, but may not be interleaved.
-   * (In fact they cannot be interleaved, now that I think about it).
+   *  Ultimate function to extract ranges from an input sequence. Multiple marker-kinds are supported and markers of
+   *  different kinds do not interfere with one another. Markers of the same kind may be nested, but may not be
+   *  interleaved. (In fact they cannot be interleaved, now that I think about it).
    *
-   * @param inputText   example: {{{
-   *   line /start/ some content /start/ inner content /end/ some more content /end/
-   *   line <foldStart> 2 </foldEnd> [[ content ]]
-   * }}}
-   * @param markers     example: {{{
-   *   Seq(("/start/", "/end/"), ("<foldStart>", "<foldEnd>"), ("[[", "]]"))
-   * }}}
-   * @param caretMarker example {{{<caret>}}}<br>
-   *                    None if text is assumed to have no caret marker
-   * @return pair: 1. text without markers 2. markers ranges (range + index of the marker)
-   * @example see [[org.jetbrains.plugins.scala.util.MarkerUtilsTest.test_super_multi_nested]] for example
+   *  @param inputText
+   *    example: {{{ line /start/ some content /start/ inner content /end/ some more content /end/ line <foldStart> 2
+   *    </foldEnd> [[content]] }}}
+   *  @param markers
+   *    example: {{{Seq(("/start/", "/end/"), ("<foldStart>", "<foldEnd>"), ("[[", "]]"))}}}
+   *  @param caretMarker
+   *    example {{{<caret>}}}<br> None if text is assumed to have no caret marker
+   *  @return
+   *    pair: 1. text without markers 2. markers ranges (range + index of the marker)
+   *  @example
+   *    see [[org.jetbrains.plugins.scala.util.MarkerUtilsTest.test_super_multi_nested]] for example
    */
   def extractMarkers(
     inputText: String,

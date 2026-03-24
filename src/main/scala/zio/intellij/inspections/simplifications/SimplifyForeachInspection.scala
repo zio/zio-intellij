@@ -72,7 +72,7 @@ sealed abstract class BaseForeachForCompSimplificationType(
       case ScFor(enumerators, _) =>
         enumerators.generators.collect {
           case `_ <- x`(expr @ methodExtractor(zioType, iterable, func)) => replacement(zioType, expr, iterable, func)
-        }.toSeq
+        }
       case _ => Nil
     }
 }
@@ -103,7 +103,7 @@ sealed abstract class BaseForeachChainSimplificationType(
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case (expr @ methodExtractor(zioType, iterable, func)) `.*>` _ => Some(replacement(zioType, expr, iterable, func))
+      case (expr @ methodExtractor(zioType, iterable, func)) `.*>` _         => Some(replacement(zioType, expr, iterable, func))
       case _ `.*>` (expr @ methodExtractor(zioType, iterable, func)) `.*>` _ =>
         Some(replacement(zioType, expr, iterable, func))
       case _ => None

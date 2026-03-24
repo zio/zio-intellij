@@ -11,10 +11,11 @@ import java.nio.file.Path
 import java.{util => ju}
 
 /**
- * The loader loads and registers only a scala library (with sources) without transitive dependencies
- * It doesn't load compiler classpath jars and creates a simple library
+ *  The loader loads and registers only a scala library (with sources) without transitive dependencies It doesn't load
+ *  compiler classpath jars and creates a simple library
  *
- * @see [[ScalaSDKLoader]]
+ *  @see
+ *    [[ScalaSDKLoader]]
  */
 final case class ScalaLibraryLoader(
   scalaVersion: ScalaVersion,
@@ -24,7 +25,7 @@ final case class ScalaLibraryLoader(
   import DependencyManagerBase._
   import ScalaLibraryLoader.findJarFile
 
-  //NOTE: we ignore implicitly passed ScalaVersion and use version explicitly set in the parameters
+  // NOTE: we ignore implicitly passed ScalaVersion and use version explicitly set in the parameters
   override def init(implicit module: Module, ignored: ScalaVersion): Unit =
     initImpl(module)
 
@@ -66,8 +67,8 @@ object ScalaLibraryLoader {
     }
 
   /**
-   * This utility "overrides" default scala sdk loader. use non-standard resolvers
-   * It uses separate scala libraries with specified versions
+   *  This utility "overrides" default scala sdk loader. use non-standard resolvers It uses separate scala libraries
+   *  with specified versions
    */
   def libraryLoadersWithSeparateScalaLibraries(
     superLibraryLoaders: Seq[LibraryLoader],
@@ -77,7 +78,7 @@ object ScalaLibraryLoader {
     val scala2LibraryLoader = ScalaLibraryLoader(scala2Version)
     val scala3LibraryLoader = ScalaLibraryLoader(scala3Version)
 
-    //We use resolveScalaLibraryTransitiveDependencies = false in order to use the latest 2.13.14 RC version
+    // We use resolveScalaLibraryTransitiveDependencies = false in order to use the latest 2.13.14 RC version
     val scala3SdkLoader = ScalaSDKLoader(includeScalaLibraryFilesInSdk = false)
 
     Seq(

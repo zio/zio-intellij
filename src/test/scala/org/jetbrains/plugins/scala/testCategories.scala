@@ -17,16 +17,15 @@ trait UltimateTests
 trait WorksheetEvaluationTests
 
 /**
- * Will only be run at night.
+ *  Will only be run at night.
  *
- * Especially, they will not be run to decide whether a branch should be merged or not.
+ *  Especially, they will not be run to decide whether a branch should be merged or not.
  */
 trait RandomTypingTests
 trait HighlightingTests
 
 /**
- * Tests that may fail intermittently or depending on environment.
- * Eg run locally but not on build server.
+ *  Tests that may fail intermittently or depending on environment. Eg run locally but not on build server.
  */
 trait FlakyTests
 
@@ -37,16 +36,16 @@ trait FileSetTests
 trait CompletionTests
 
 /**
- * Applied to [[org.jetbrains.plugins.scala.codeInspection.ScalaAnnotatorQuickFixTestBase]],
- * [[org.jetbrains.plugins.scala.codeInsight.intentions.ScalaIntentionTestBase]],
- * [[org.jetbrains.plugins.scala.base.EditorActionTestBase]] and
- * `org.jetbrains.plugins.scala.codeInsight.InlayHintsTestBase`.
+ *  Applied to [[org.jetbrains.plugins.scala.codeInspection.ScalaAnnotatorQuickFixTestBase]],
+ *  [[org.jetbrains.plugins.scala.codeInsight.intentions.ScalaIntentionTestBase]],
+ *  [[org.jetbrains.plugins.scala.base.EditorActionTestBase]] and
+ *  `org.jetbrains.plugins.scala.codeInsight.InlayHintsTestBase`.
  */
 trait EditorTests
 
 trait CompilationTests
 
 /**
- * See [[org.jetbrains.plugins.scala.internal.bundle.ScalaBundleSortingTest]]
+ *  See [[org.jetbrains.plugins.scala.internal.bundle.ScalaBundleSortingTest]]
  */
 trait BundleSortingTests

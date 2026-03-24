@@ -33,7 +33,7 @@ private[testsupport] final class TestRunnerResolveService
 
   private val state: TestRunnerResolveService.ServiceState = new TestRunnerResolveService.ServiceState
 
-  override def getState: TestRunnerResolveService.ServiceState = state
+  override def getState: TestRunnerResolveService.ServiceState               = state
   override def loadState(state: TestRunnerResolveService.ServiceState): Unit =
     XmlSerializerUtil.copyBean(state, this.state)
 
@@ -47,7 +47,7 @@ private[testsupport] final class TestRunnerResolveService
     case Some(ResolveStatus.Resolved(jarPaths)) => Right(jarPaths)
     case _ if resolveFast                       => Left(ResolveError.NotFound(version, scalaVersion))
     case Some(ResolveStatus.DownloadInProgress) => Left(ResolveError.DownloadInProgress(version, scalaVersion))
-    case _ =>
+    case _                                      =>
       val key = s"${version.toString}###${scalaVersion.versionStr}"
       if (state.resolvedVersions.containsKey(key)) {
         val jarUris = state.resolvedVersions.get(key).map(new URI(_))
@@ -75,7 +75,7 @@ private[testsupport] final class TestRunnerResolveService
         Future.successful(Left(ResolveError.DownloadInProgress(version, scalaVersion)))
       case _ =>
         @NonNls val title = s"Downloading the ZIO Test runner for ZIO $version"
-        val task = BackgroundTask(project, title = title, cancelText = "Cancel downloading ZIO Test runner...") {
+        val task          = BackgroundTask(project, title = title, cancelText = "Cancel downloading ZIO Test runner...") {
           indicator =>
             val progressListener = new ProgressIndicatorDownloadListener(indicator, title)
             resolve(version, scalaVersion, downloadIfMissing = true, progressListener = progressListener)
@@ -166,7 +166,7 @@ object TestRunnerResolveService {
       extends DownloadProgressListener {
     override def progressUpdate(message: String): Unit = {
       if (message.nonEmpty) {
-        //noinspection ReferencePassedToNls,ScalaExtractStringToBundle
+        // noinspection ReferencePassedToNls,ScalaExtractStringToBundle
         indicator.setText(prefix + ": " + message)
       }
       indicator.checkCanceled()

@@ -57,7 +57,7 @@ object CompilerTestUtil {
           throw new RuntimeException(s"Failed to set up JDK, got: $jdk")
         case homeDirectory =>
           val jdkHome = homeDirectory.getCanonicalPath
-          //see com.intellij.compiler.server.BuildManager.COMPILER_PROCESS_JDK_PROPERTY
+          // see com.intellij.compiler.server.BuildManager.COMPILER_PROCESS_JDK_PROPERTY
           val registry = Registry.get("compiler.process.jdk")
           jdkBefore = Try(registry.asString).toOption
           registry.setValue(jdkHome)

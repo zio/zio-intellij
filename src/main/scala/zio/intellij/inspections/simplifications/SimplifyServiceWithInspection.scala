@@ -101,10 +101,10 @@ object ServiceWithSimplificationTypeZIO1 extends ServiceWithSimplificationType {
   object InvokedExpression {
 
     /**
-     * 1. _.get.foo is a reference expression, qualified with _.get (or x => x.get)
-     * 2. _.get.foo(param) is a method call with an inner reference expr (1)
-     * 3. x => x.get.foo is a function expression with an inner reference expr (1)
-     * 4. { _.get.foo } is a block with an inner reference expr (1)
+     *    1. _.get.foo is a reference expression, qualified with _.get (or x => x.get)
+     *    2. _.get.foo(param) is a method call with an inner reference expr (1)
+     *    3. x => x.get.foo is a function expression with an inner reference expr (1)
+     *    4. { _.get.foo } is a block with an inner reference expr (1)
      */
     def unapply(expr: ScExpression): Option[ScExpression] = expr match {
       case ref @ ScReferenceExpression.withQualifier(`.get`(_) | lambda(_, `.get`(_))) => Some(ref)

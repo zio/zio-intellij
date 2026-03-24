@@ -13,7 +13,7 @@ package object assertions {
     Try(body) match {
       case Failure(_: AssertionError) => // as expected
       case Failure(exception)         => throw exception
-      case Success(_) =>
+      case Success(_)                 =>
         fail("Test is expected to fail but is passed successfully")
     }
 }

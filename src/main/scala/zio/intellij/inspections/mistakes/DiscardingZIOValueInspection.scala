@@ -1,6 +1,7 @@
 package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
+import com.intellij.psi.PsiElementVisitor
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, Simplification, SimplificationType}
@@ -21,17 +22,18 @@ import zio.intellij.utils.fromSameClass
 class DiscardingZIOValueSmartInspection extends ZInspection(DiscardingZIOValueMapToFlatMapSmartInspection)
 // general things that we might not know how to fix automatically
 class DiscardingZIOValueInspection extends LocalInspectionTool with DiscardingZIOValueInspectionBase {
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case qual `.map` f =>
-      returnType(f).foreach {
-        case returnType if zioLikeReplacedWithUnit(returnType) && !exprIsOfSameClass(qual, returnType.actual) =>
-          holder.registerProblem(f, DiscardingZIOValueInspection.mapDiscardMsg, ProblemHighlightType.WEAK_WARNING)
-        case _ =>
-      }
-    case expr @ `.runDrain`(Typeable(`ZStream[R, E, O]`(_, _, out))) if fromZioLike(out) =>
-      holder.registerProblem(expr, DiscardingZIOValueInspection.runDrainDiscardMsg, ProblemHighlightType.WEAK_WARNING)
-    case _ =>
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case qual `.map` f =>
+        returnType(f).foreach {
+          case returnType if zioLikeReplacedWithUnit(returnType) && !exprIsOfSameClass(qual, returnType.actual) =>
+            holder.registerProblem(f, DiscardingZIOValueInspection.mapDiscardMsg, ProblemHighlightType.WEAK_WARNING)
+          case _ =>
+        }
+      case expr @ `.runDrain`(Typeable(`ZStream[R, E, O]`(_, _, out))) if fromZioLike(out) =>
+        holder.registerProblem(expr, DiscardingZIOValueInspection.runDrainDiscardMsg, ProblemHighlightType.WEAK_WARNING)
+      case _ =>
+    }
 }
 
 object DiscardingZIOValueInspection {

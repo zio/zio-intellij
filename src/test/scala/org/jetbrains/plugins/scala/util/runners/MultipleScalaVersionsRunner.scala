@@ -24,7 +24,7 @@ class MultipleScalaVersionsRunner(private val myTest: Test, klass: Class[_]) ext
 
   override def getDescription: Description = {
     val description = MultipleScalaVersionsRunner.makeDescription(klass, myTest)
-    //debugLog(description)
+    // debugLog(description)
     description
   }
 
@@ -69,7 +69,7 @@ private object MultipleScalaVersionsRunner {
           }
       }
 
-      //the list is already in the reversed order
+      // the list is already in the reversed order
       mutedTestsIndexes.foreach(myTests.remove)
     }
 
@@ -78,7 +78,7 @@ private object MultipleScalaVersionsRunner {
 
     private val myTests: util.List[Test] = new util.ArrayList[Test]
     private def myTestsScala: Seq[Test]  =
-      //noinspection ScalaRedundantCast
+      // noinspection ScalaRedundantCast
       // asInstanceOf is needed. we have multiple junit versions in compiler classpath (3.8, 4.11, 4.12) and jar files order is undefined. See: SCL-18768
       myTests.asScala.toSeq.asInstanceOf[Seq[Test]]
 
@@ -138,7 +138,7 @@ private object MultipleScalaVersionsRunner {
       }
     }
 
-    //NOTE: the tests can be empty only if there were some filters specified (e.g. JDK filter)
+    // NOTE: the tests can be empty only if there were some filters specified (e.g. JDK filter)
     val childTests = childTestsByScalaVersion(allTestCases)
     childTests.foreach { childTest =>
       suite.addTest(childTest)
@@ -183,7 +183,7 @@ private object MultipleScalaVersionsRunner {
         if tests.nonEmpty
       } yield {
         val firstTest = tests.head
-        val suite = firstTest match {
+        val suite     = firstTest match {
           case _: JdkVersionTestSuite =>
             new ScalaVersionTestSuite(version)
           case s: ScalaSdkOwner =>
@@ -192,9 +192,11 @@ private object MultipleScalaVersionsRunner {
             new ScalaVersionTestSuite(version, jdkVersion)
           case _: TestCase =>
             /**
-             * In case test initialization in runner has failed<br>
-             * @see [[junit.framework.TestSuite.warning]]
-             * @see [[junit.framework.TestSuite.createTest]]
+             *  In case test initialization in runner has failed<br>
+             *  @see
+             *    [[junit.framework.TestSuite.warning]]
+             *  @see
+             *    [[junit.framework.TestSuite.createTest]]
              */
             new ScalaVersionTestSuite(version)
         }
@@ -276,7 +278,7 @@ private object MultipleScalaVersionsRunner {
       val description = Description.createSuiteDescription(name, annotations: _*)
       ts.tests.asScala.foreach { childTest =>
         // compiler fails on TeamCity without this case, no idea why
-        //noinspection ScalaRedundantCast
+        // noinspection ScalaRedundantCast
         val childDescription = makeDescription(klass, childTest.asInstanceOf[Test])
         description.addChild(childDescription)
       }

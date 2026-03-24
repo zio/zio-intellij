@@ -31,7 +31,7 @@ object ChainToForSimplificationType extends SimplificationType {
             )
           ) =>
         val exprs = collectFromChain(x, y :: Nil)
-        val text =
+        val text  =
           s"""for {
              |${exprs.init.map(e => s"_ <- ${e.getText}").mkString(System.lineSeparator())}
              |r <- ${exprs.last.getText}

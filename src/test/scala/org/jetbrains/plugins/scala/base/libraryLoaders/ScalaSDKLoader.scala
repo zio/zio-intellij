@@ -1,6 +1,7 @@
 package org.jetbrains.plugins.scala.base.libraryLoaders
 
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar
 import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibraryEditor
 import com.intellij.openapi.vfs.{JarFileSystem, VirtualFile}
@@ -20,18 +21,22 @@ import org.junit.Assert._
 import java.nio.file.Path
 
 /**
- * @param includeScalaReflectIntoCompilerClasspath also see [[ScalaReflectLibraryLoader]]
- * @param includeScalaLibraryTransitiveDependencies for scala 3 library, also includes scala 2 library
- * @see [[ScalaLibraryLoader]]
+ *  @param includeScalaReflectIntoCompilerClasspath
+ *    also see [[ScalaReflectLibraryLoader]]
+ *  @param includeScalaLibraryTransitiveDependencies
+ *    for scala 3 library, also includes scala 2 library
+ *  @see
+ *    [[ScalaLibraryLoader]]
  */
 case class ScalaSDKLoader(
   includeScalaReflectIntoCompilerClasspath: Boolean = false,
-  //TODO: drop this parameter and fix tests
+  // TODO: drop this parameter and fix tests
   includeScalaCompilerIntoLibraryClasspath: Boolean = false,
   includeScalaLibraryTransitiveDependencies: Boolean = true,
-  includeScalaLibraryFilesInSdk: Boolean = false,
+  includeScalaLibraryFilesInSdk: Boolean = true,
   includeScalaLibrarySources: Boolean = false,
-  compilerBridgeBinaryJar: Option[Path] = None
+  compilerBridgeBinaryJar: Option[Path] = None,
+  dependencyManager: DependencyManagerBase = DependencyManager
 ) extends LibraryLoader {
 
   import DependencyManagerBase._
@@ -54,32 +59,35 @@ case class ScalaSDKLoader(
     }
 
   /**
-   * Resolves scala library sources for a given version and returns it's jars.
-   * For Scala 3 version it returns two roots - for Scala 2 and Scala 3 libraries
+   *  Resolves scala library sources for a given version and returns it's jars. For Scala 3 version it returns two roots -
+   *  for Scala 2 and Scala 3 libraries
    */
   final def scalaLibrarySources(implicit version: ScalaVersion): Seq[VirtualFile] = {
-    val sourceDependency = scalaLibraryDescription % Types.SRC
+    val sourceDependency       = scalaLibraryDescription % Types.SRC
     val sourceDependencyActual =
       if (includeScalaLibraryTransitiveDependencies) sourceDependency.transitive() else sourceDependency
 
-    val resolved = DependencyManager.resolve(sourceDependencyActual)
+    val resolved = dependencyManager.resolve(sourceDependencyActual)
     // This second pass is necessary to resolve Scala 2 library sources, when it's a transitive dependency of a Scala 3 library.
     // For some reason, if I tell Ivy to download dependency sources and set transitive="true" it doesn't download sources for transitive dependencies.
     // Instead, it downloads regular class file jars.
     // As a workaround, I do another pass where I download sources for each such class files jar file independently, non-transitively.
     val resolvedSecondPass =
-      if (resolved.size == 1) resolved else resolved.map(_.info).map(d => DependencyManager.resolveSingle(d.sources()))
+      if (resolved.size == 1) resolved else resolved.map(_.info).map(d => dependencyManager.resolveSingle(d.sources()))
     resolvedSecondPass.map(_.file).map(findJarFile)
   }
 
-  private def resolveCompilerBridge(version: ScalaVersion): Option[Path] =
+  private def resolveCompilerBridge(project: Project, version: ScalaVersion): Option[Path] =
     if (version >= ScalaVersion.fromString("2.13.12").get)
-      ScalaSdkUtils.resolveCompilerBridgeJar(version.minor)
+      ScalaSdkUtils.resolveCompilerBridgeJar(project, version.minor)
     else None
+
+  private def resolveReplClasspath(project: Project, version: ScalaVersion): ReplClasspath =
+    ScalaSdkUtils.resolveReplClasspath(project, version.minor)
 
   override final def init(implicit module: Module, version: ScalaVersion): Unit = {
     val dependencies = binaryDependencies
-    val resolved     = DependencyManager.resolve(dependencies: _*)
+    val resolved     = dependencyManager.resolve(dependencies: _*)
 
     if (version.isScala3)
       assertTrue(
@@ -96,8 +104,11 @@ case class ScalaSDKLoader(
     val (resolvedOk, resolvedMissing) = resolved.partition(_.file.exists)
     val compilerClasspath             = resolvedOk.map(_.file)
 
+    val project = module.getProject
+
     // Manually resolve a compiler bridge only if it hasn't been provided. This allows testing with a custom bridge.
-    val compilerBridge = compilerBridgeBinaryJar.orElse(resolveCompilerBridge(version))
+    val compilerBridge = compilerBridgeBinaryJar.orElse(resolveCompilerBridge(project, version))
+    val replClasspath  = resolveReplClasspath(project, version)
 
     assertTrue(
       s"Some SDK jars were resolved but for some reason do not exist:\n$resolvedMissing",
@@ -125,8 +136,18 @@ case class ScalaSDKLoader(
       if (includeScalaLibrarySources) scalaLibrarySources
       else Nil
 
-    val libraryTable = LibraryTablesRegistrar.getInstance.getLibraryTable(module.getProject)
-    val scalaSdkName = s"scala-sdk-${version.minor}"
+    val libraryTable = LibraryTablesRegistrar.getInstance.getLibraryTable(project)
+
+    val featuresHash = Seq[Any](
+      includeScalaReflectIntoCompilerClasspath,
+      includeScalaCompilerIntoLibraryClasspath,
+      includeScalaLibraryTransitiveDependencies,
+      includeScalaLibraryFilesInSdk,
+      includeScalaLibrarySources,
+      compilerBridgeBinaryJar
+    ).##
+
+    val scalaSdkName = s"test-${featuresHash.toHexString}-scala-sdk-${version.minor}"
 
     import scala.jdk.CollectionConverters._
 
@@ -145,15 +166,8 @@ case class ScalaSDKLoader(
         .getOrElse(createNewLibrary)
 
     inWriteAction {
-      val version = Artifact.ScalaCompiler.versionOf(compilerFile)
-      val properties =
-        ScalaLibraryProperties(
-          version = version,
-          compilerClasspath = compilerClasspath,
-          scaladocExtraClasspath = Seq.empty,
-          compilerBridgeBinaryJar = compilerBridge,
-          replClasspath = ReplClasspath.Bundled
-        )
+      val version    = Artifact.ScalaCompiler.versionOf(compilerFile)
+      val properties = ScalaLibraryProperties(version, compilerClasspath, Seq.empty, compilerBridge, replClasspath)
 
       val editor = new ExistingLibraryEditor(library, null)
       editor.setType(ScalaLibraryType())
@@ -168,4 +182,8 @@ case class ScalaSDKLoader(
 
   private def findJarFile(file: Path) =
     JarFileSystem.getInstance().refreshAndFindFileByPath(file.toCanonicalPath.toString + "!/")
+}
+
+object ScalaSDKLoader {
+  def default(): ScalaSDKLoader = ScalaSDKLoader()
 }

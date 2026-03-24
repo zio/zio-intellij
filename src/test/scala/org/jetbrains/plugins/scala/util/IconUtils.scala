@@ -10,9 +10,9 @@ import javax.swing.Icon
 object IconUtils {
 
   /**
-   * By default IconManager is deactivated and `com.intellij.ui.DummyIconManager` is used
-   * We need a proper IconManager implementation, in order layered icons are properly built in structure view tests.
-   * (see [[org.jetbrains.plugins.scala.util.BaseIconProvider.getIcon]])
+   *  By default IconManager is deactivated and `com.intellij.ui.DummyIconManager` is used We need a proper IconManager
+   *  implementation, in order layered icons are properly built in structure view tests. (see
+   *  [[org.jetbrains.plugins.scala.util.BaseIconProvider.getIcon]])
    */
   def registerIconLayersInIconManager(): Unit =
     IconManager.getInstance() match {

@@ -17,15 +17,15 @@ package object base {
     def findIndexingModeAnnotation(): Option[WithIndexingMode] = findTestAnnotation[WithIndexingMode]
 
     /**
-     * Find indexing mode annotation and get its indexing mode.
-     * Return [[IndexingMode.SMART]] if no annotation found.
+     *  Find indexing mode annotation and get its indexing mode. Return [[IndexingMode.SMART]] if no annotation found.
      *
-     * Replace [[IndexingMode.DUMB_EMPTY_INDEX]] if `ide.dumb.mode.check.awareness` registry is disabled.
-     * Otherwise, some tests might fail on empty index.
-     * E.g.: `myFixture.doHighlighting()` calls.
+     *  Replace [[IndexingMode.DUMB_EMPTY_INDEX]] if `ide.dumb.mode.check.awareness` registry is disabled. Otherwise,
+     *  some tests might fail on empty index. E.g.: `myFixture.doHighlighting()` calls.
      *
-     * @see [[https://youtrack.jetbrains.com/issue/IJPL-164584 IJPL-164584]]
-     * @see [[findIndexingModeAnnotation]]
+     *  @see
+     *    [[https://youtrack.jetbrains.com/issue/IJPL-164584 IJPL-164584]]
+     *  @see
+     *    [[findIndexingModeAnnotation]]
      */
     def getIndexingModeConsideringDumbModeChecks: IndexingMode =
       findIndexingModeAnnotation().fold(IndexingMode.SMART) { annotation =>
@@ -36,8 +36,8 @@ package object base {
       }
 
     /**
-     * Tries to find the specified annotation on the current test method and then on the current class.
-     * And then on the superclass if marked as [[java.lang.annotation.Inherited]].
+     *  Tries to find the specified annotation on the current test method and then on the current class. And then on the
+     *  superclass if marked as [[java.lang.annotation.Inherited]].
      */
     def findTestAnnotation[A <: Annotation: ClassTag: NotNothing]: Option[A] =
       testMethodAnnotation[A].orElse(classAnnotation[A])

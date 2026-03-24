@@ -62,7 +62,7 @@ abstract class SimplifyErrorModificationInspectionTest(toReplace: String, toRepl
 
 class SimplifyMapBothErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("mapBoth", "map")
 class SimplifyTapBothErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("tapBoth", "tap")
-class SimplifyFoldErrorModificationInspectionTest extends SimplifyErrorModificationInspectionTest("fold", "map") {
+class SimplifyFoldErrorModificationInspectionTest    extends SimplifyErrorModificationInspectionTest("fold", "map") {
   def testInfallibleStreamNoHighlight(): Unit =
     z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
 }
@@ -73,7 +73,7 @@ class SimplifyFoldMErrorModificationInspectionTest extends SimplifyErrorModifica
 }
 class SimplifyFoldZIOErrorModificationInspectionTest
     extends SimplifyErrorModificationInspectionTest("foldZIO", "flatMap") {
-  override def isZIO1: Boolean = false
+  override def isZIO1: Boolean                = false
   def testInfallibleStreamNoHighlight(): Unit =
     z(s"${START}ZStream.succeed(1).$methodToReplace$END").assertNotHighlighted()
 }

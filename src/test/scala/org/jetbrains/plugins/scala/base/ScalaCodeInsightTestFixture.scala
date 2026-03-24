@@ -30,7 +30,7 @@ final class ScalaCodeInsightTestFixture(
   /////////////////////////////////////////////////////////
   // Section start: helper setup methods
   /////////////////////////////////////////////////////////
-  //TODO: do not trim expected text here, trim it at usage place
+  // TODO: do not trim expected text here, trim it at usage place
   def checkResultByText(expectedFileText: String, ignoreTrailingSpaces: Boolean = true): Unit = {
     val expectedPatched = fileTextPatcher(expectedFileText.withNormalizedSeparator.trim)
     customCheckResultByTextFunction match {
@@ -44,7 +44,7 @@ final class ScalaCodeInsightTestFixture(
   def configureFromFileText(fileText: String): PsiFile =
     configureFromFileText(defaultFileType, fileText)
 
-  //TODO 1: do not trim expected text here, trim it at usage place
+  // TODO 1: do not trim expected text here, trim it at usage place
   def configureFromFileText(fileType: FileType, fileText: String): PsiFile = {
     val fileTextPatched = fileTextPatcher(fileText.withNormalizedSeparator.trim)
     val file            = javaFixture.configureByText(fileType, fileTextPatched)

@@ -56,7 +56,7 @@ final class ZTestCreator extends ScalaTestCreator with ItemPresentation {
 }
 
 object ZTestCreator {
-  private val LOG = Logger.getInstance("zio.intellij.testsupport.ZTestCreator")
+  private val LOG                                     = Logger.getInstance("zio.intellij.testsupport.ZTestCreator")
   private def findElement(file: PsiFile, offset: Int) = {
     var element = file.findElementAt(offset)
     if (element == null && offset == file.getTextLength) element = file.findElementAt(offset - 1)

@@ -28,9 +28,10 @@ object FindCaretOffset {
         collectCaretIndices(nextIdx)(indices :+ idx)
       }
 
-    val caretIndices = collectCaretIndices(caretIndex(0))(Seq[Int]())
+    val caretIndices           = collectCaretIndices(caretIndex(0))(Seq[Int]())
     val caretIndicesNormalized = caretIndices.zipWithIndex.map {
-      case (caretIdx, idx) => caretIdx - idx * CARET_TAG.length
+      case (caretIdx, idx) =>
+        caretIdx - idx * CARET_TAG.length
     }
     (
       textNormalized.replace(CARET_TAG, ""),

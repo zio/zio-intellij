@@ -5,8 +5,8 @@ import org.jetbrains.plugins.scala.DependencyManagerBase.Resolver
 import org.jetbrains.sbt.SbtVersion
 
 /**
- * Adds additional resolver for typesafe repository<br>
- * It's needed to be able to resolve sbt 0.13 releases, which is not published to maven central
+ *  Adds additional resolver for typesafe repository<br> It's needed to be able to resolve sbt 0.13 releases, which is
+ *  not published to maven central
  */
 final class TestDependencyManagerForSbt(private val sbtVersion: SbtVersion) extends DependencyManagerBase {
 

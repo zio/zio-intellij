@@ -14,7 +14,7 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
   def test_option_reference_ctor(): Unit = {
     z(s"""val o: Option[Int] = Option(42)
          |${START}ZIO(o)$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val o: Option[Int] = Option(42)
+    val text = z(s"""val o: Option[Int] = Option(42)
                     |ZIO(o)""".stripMargin)
     val result = z(s"""val o: Option[Int] = Option(42)
                       |ZIO.fromOption(o)""".stripMargin)
@@ -24,7 +24,7 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
   def test_option_reference_apply(): Unit = {
     z(s"""val o: Option[Int] = Option(42)
          |${START}ZIO.apply(o)$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val o: Option[Int] = Option(42)
+    val text = z(s"""val o: Option[Int] = Option(42)
                     |ZIO.apply(o)""".stripMargin)
     val result = z(s"""val o: Option[Int] = Option(42)
                       |ZIO.fromOption(o)""".stripMargin)
@@ -66,7 +66,7 @@ class OptionWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Opti
   def test_option_map(): Unit = {
     z(s"""val o: Option[String] = ???
          |${START}ZIO.effect(o.map(_ + " foo"))$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val o: Option[String] = ???
+    val text = z(s"""val o: Option[String] = ???
                     |ZIO.effect(o.map(_ + " foo"))""".stripMargin)
     val result = z(s"""val o: Option[String] = ???
                       |ZIO.fromOption(o.map(_ + " foo"))""".stripMargin)
@@ -90,7 +90,7 @@ class TryWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Try") {
   def test_try_reference_ctor(): Unit = {
     z(s"""val t: Try[Int] = Try(42)
          |${START}ZIO(t)$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val t: Try[Int] = Try(42)
+    val text = z(s"""val t: Try[Int] = Try(42)
                     |ZIO(t)""".stripMargin)
     val result = z(s"""val t: Try[Int] = Try(42)
                       |ZIO.fromTry(t)""".stripMargin)
@@ -100,7 +100,7 @@ class TryWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Try") {
   def test_try_reference_apply(): Unit = {
     z(s"""val t: Try[Int] = Try(42)
          |${START}ZIO.apply(t)$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val t: Try[Int] = Try(42)
+    val text = z(s"""val t: Try[Int] = Try(42)
                     |ZIO.apply(t)""".stripMargin)
     val result = z(s"""val t: Try[Int] = Try(42)
                       |ZIO.fromTry(t)""".stripMargin)
@@ -152,7 +152,7 @@ class EitherWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Eith
   def test_either_reference_ctor(): Unit = {
     z(s"""val either: Either[String, Int] = Right(42)
          |${START}ZIO(either)$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val either: Either[String, Int] = Right(42)
+    val text = z(s"""val either: Either[String, Int] = Right(42)
                     |ZIO(either)""".stripMargin)
     val result = z(s"""val either: Either[String, Int] = Right(42)
                       |ZIO.fromEither(either)""".stripMargin)
@@ -162,7 +162,7 @@ class EitherWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Eith
   def test_either_reference_apply(): Unit = {
     z(s"""val either: Either[String, Int] = Right(42)
          |${START}ZIO.apply(either)$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val either: Either[String, Int] = Right(42)
+    val text = z(s"""val either: Either[String, Int] = Right(42)
                     |ZIO.apply(either)""".stripMargin)
     val result = z(s"""val either: Either[String, Int] = Right(42)
                       |ZIO.fromEither(either)""".stripMargin)
@@ -214,7 +214,7 @@ class FutureWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Futu
   def test_future_reference_ctor(): Unit = {
     z(s"""val future = Future(42)
          |${START}ZIO(future)$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val future = Future(42)
+    val text = z(s"""val future = Future(42)
                     |ZIO(future)""".stripMargin)
     val result = z(s"""val future = Future(42)
                       |ZIO.fromFuture(implicit ec => future)""".stripMargin)
@@ -224,7 +224,7 @@ class FutureWrapInspectionTest extends BaseWrapInsteadOfLiftInspectionTest("Futu
   def test_future_reference_apply(): Unit = {
     z(s"""val future = Future(42)
          |${START}ZIO.apply(future)$END""".stripMargin).assertHighlighted()
-    val text   = z(s"""val future = Future(42)
+    val text = z(s"""val future = Future(42)
                     |ZIO.apply(future)""".stripMargin)
     val result = z(s"""val future = Future(42)
                       |ZIO.fromFuture(implicit ec => future)""".stripMargin)

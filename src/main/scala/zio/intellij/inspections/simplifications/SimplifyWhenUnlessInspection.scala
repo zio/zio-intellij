@@ -16,7 +16,7 @@ sealed abstract class WhenUnlessSimplificationTypeBase(method: ReplacementMethod
   protected def replacement(ifStmt: ScExpression, body: ScExpression, conditionText: String): Simplification = {
     val replacementText = method match {
       case `ZIO.when` | `ZIO.unless` => s"$method($conditionText)${body.getWrappedText}"
-      case `.when` | `.unless` =>
+      case `.when` | `.unless`       =>
         val bodyText = body match {
           case _: ScInfixExpr | _: ScFor => body.getParenthesizedText
           case _                         => body.getText

@@ -24,7 +24,7 @@ abstract class GeneratedTestSuiteFactory {
 
   protected final def testDataFromCode(code: String): SimpleTestData = SimpleTestData.fromCode(code)
 
-  //noinspection JUnitMalformedDeclaration
+  // noinspection JUnitMalformedDeclaration
   @Ignore
   protected class SimpleHighlightingActualTest(testData: SingleCodeTestData, minScalaVersion: ScalaVersion)
       extends ScalaLightCodeInsightFixtureTestCase
@@ -42,7 +42,7 @@ abstract class GeneratedTestSuiteFactory {
     override protected def shouldPass: Boolean = !testData.isFailing
   }
 
-  //noinspection JUnitMalformedDeclaration
+  // noinspection JUnitMalformedDeclaration
   @Ignore
   protected abstract class SimpleActualTest(testData: TestData, minScalaVersion: ScalaVersion)
       extends SimpleTestCase

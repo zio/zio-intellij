@@ -1,7 +1,7 @@
 package zio.intellij.inspections
 
 import com.intellij.codeInspection.{LocalQuickFix, ProblemHighlightType, ProblemsHolder}
-import com.intellij.psi.PsiElement
+import com.intellij.psi.{PsiElement, PsiElementVisitor}
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.codeInspection.collections.OperationOnCollectionInspectionBase.SimplifiableExpression
 import org.jetbrains.plugins.scala.codeInspection.collections._
@@ -25,21 +25,22 @@ abstract class ZInspection(simplifiers: SimplificationType*) extends OperationOn
       .flatMap(_.zioVersion)
       .exists(zioVersion => inspection.isAvailable(zioVersion))
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case SimplifiableExpression(expr) if isInspectionAvailable(this, expr) =>
-      simplifications(expr).foreach {
-        case s @ Simplification(toReplace, _, hint, rangeInParent) =>
-          val quickFix = OperationOnCollectionQuickFix(s)
-          holder.registerProblem(
-            toReplace.getElement,
-            hint,
-            ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
-            rangeInParent,
-            LocalQuickFix.from(quickFix)
-          )
-      }
-    case _ =>
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case SimplifiableExpression(expr) if isInspectionAvailable(this, expr) =>
+        simplifications(expr).foreach {
+          case s @ Simplification(toReplace, _, hint, rangeInParent) =>
+            val quickFix = OperationOnCollectionQuickFix(s)
+            holder.registerProblem(
+              toReplace.getElement,
+              hint,
+              ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
+              rangeInParent,
+              LocalQuickFix.from(quickFix)
+            )
+        }
+      case _ =>
+    }
 
   private def simplifications(expr: ScExpression): Seq[Simplification] = {
     def simplificationTypes = for {

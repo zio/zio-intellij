@@ -3,6 +3,7 @@ package zio.intellij.inspections.mistakes
 import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
 import com.intellij.execution.junit.JUnitUtil
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElementVisitor
 import org.jetbrains.plugins.scala.annotator.template.isAbstract
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.lang.lexer.ScalaTokenType.ObjectKeyword
@@ -14,16 +15,17 @@ import zio.intellij.testsupport.ZTestFramework.{ZIO1SpecFQN, ZIO2SpecFQN}
 
 class IncorrectTestClassInspection extends LocalInspectionTool {
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case c: ScClass if extendsZSpec(c) =>
-      holder.registerProblem(
-        c.targetToken,
-        "ZIO Spec must be an 'object' instead of 'class'",
-        ProblemHighlightType.GENERIC_ERROR,
-        new ConvertToObject(c)
-      )
-    case _ =>
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case c: ScClass if extendsZSpec(c) =>
+        holder.registerProblem(
+          c.targetToken,
+          "ZIO Spec must be an 'object' instead of 'class'",
+          ProblemHighlightType.GENERIC_ERROR,
+          new ConvertToObject(c)
+        )
+      case _ =>
+    }
 
   private def extendsZSpec(definition: ScClass) =
     if (isJUnitSpec(definition)) false

@@ -227,7 +227,7 @@ class SimplifyZIOUnlessInspectionTest
 
     locally {
       z(base(s"${START}if (a) ZIO.unit else $complexExpr$END")).assertHighlighted()
-      val text = z(base(s"if (a) ZIO.unit else $complexExpr"))
+      val text   = z(base(s"if (a) ZIO.unit else $complexExpr"))
       val result = z {
         base {
           s"""ZIO.unless(a) {
@@ -240,7 +240,7 @@ class SimplifyZIOUnlessInspectionTest
 
     locally {
       z(base(s"${START}if (!a) $complexExpr else ZIO.unit$END")).assertHighlighted()
-      val text = z(base(s"if (!a) $complexExpr else ZIO.unit"))
+      val text   = z(base(s"if (!a) $complexExpr else ZIO.unit"))
       val result = z {
         base {
           s"""ZIO.unless(a) {
