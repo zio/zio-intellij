@@ -23,7 +23,7 @@ sealed abstract class BaseToLayerInspectionTest(methodToReplace: String, methodT
   }
 
   def testForComprehension(): Unit = {
-    val text   = z(base(s"""
+    val text = z(base(s"""
                          |ZLayer.$methodToReplace {
                          |  for {
                          |    s <- serviceEffect

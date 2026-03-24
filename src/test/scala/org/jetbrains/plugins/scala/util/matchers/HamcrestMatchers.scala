@@ -18,7 +18,7 @@ trait HamcrestMatchers {
     hasSize(0)
 
   /**
-   * Checks if actual value is greater than specified
+   *  Checks if actual value is greater than specified
    */
   def greaterThan[V: Ordering](value: V): Matcher[V] = new ScalaBaseMatcher[V] {
     override protected def valueMatches(actualValue: V): Boolean =
@@ -29,7 +29,7 @@ trait HamcrestMatchers {
   }
 
   /**
-   * Checks if actual value is less than specified
+   *  Checks if actual value is less than specified
    */
   def lessThan[V: Ordering](value: V): Matcher[V] = new ScalaBaseMatcher[V] {
 
@@ -41,7 +41,7 @@ trait HamcrestMatchers {
   }
 
   /**
-   * Checks if every map value satisfies to corresponding matcher.
+   *  Checks if every map value satisfies to corresponding matcher.
    */
   def everyValue[K, V](matchers: Map[K, Matcher[V]]): Matcher[Map[K, V]] = new ScalaBaseMatcher[Map[K, V]] {
     override protected def valueMatches(actualValue: Map[K, V]): Boolean = {

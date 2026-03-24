@@ -7,9 +7,9 @@ import org.junit.Assert.assertNotNull
 class EditorHintFixtureEx(parentDisposable: Disposable) extends EditorHintFixture(parentDisposable) {
 
   /**
-   * The whole hint text can have a lot of boilerplate HTML code,
-   * added by [[com.intellij.codeInsight.hint.HintUtil.createInformationLabel]] which is used when showing the hint test.
-   * During the tests we are mostly interested in the generated body text.
+   *  The whole hint text can have a lot of boilerplate HTML code, added by
+   *  [[com.intellij.codeInsight.hint.HintUtil.createInformationLabel]] which is used when showing the hint test. During
+   *  the tests we are mostly interested in the generated body text.
    */
   def getCurrentHintBodyText: String = {
     val text = super.getCurrentHintText

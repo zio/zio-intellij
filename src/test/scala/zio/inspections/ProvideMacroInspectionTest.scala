@@ -490,7 +490,7 @@ class ProvideSomeSharedMacroZIO1SpecInspectionTest
     extends ProvideSomeMacroZIO1SpecInspectionTestBase("injectSomeShared")
 
 abstract class ProvideMacroZIO2SpecInspectionTestBase(val provide: String) extends ProvideMacroSpecInspectionTestBase {
-  override protected def isZIO1 = false
+  override protected def isZIO1             = false
   def testValidSimpleNoHighlighting(): Unit = z {
     s"""
        |val spec: Spec[String, Unit] = ???
@@ -509,7 +509,7 @@ class ProvideSharedMacroZIO2SpecInspectionTest extends ProvideMacroZIO2SpecInspe
 
 abstract class ProvideSomeMacroZIO2SpecInspectionTestBase(val provideSome: String)
     extends ProvideMacroSpecInspectionTestBase {
-  override protected def isZIO1 = false
+  override protected def isZIO1             = false
   def testValidSimpleNoHighlighting(): Unit = z {
     s"""
        |val spec: Spec[String with Boolean, Unit] = ???
@@ -579,7 +579,7 @@ class ProvideSomeMagicDebugMacroZIO1ZLayerInspectionTest
     extends ProvideSomeMacroZIO1ZLayerInspectionTestBase("fromSomeMagicDebug")
 
 class ProvideMacroZIO2ZLayerInspectionTest extends ProvideMacroZLayerInspectionTestBase {
-  override protected def isZIO1 = false
+  override protected def isZIO1             = false
   def testValidSimpleNoHighlighting(): Unit = z {
     s"""
        |val layer: ULayer[String] = ???
@@ -593,7 +593,7 @@ class ProvideMacroZIO2ZLayerInspectionTest extends ProvideMacroZLayerInspectionT
 }
 
 class ProvideSomeMacroZIO2ZLayerInspectionTest extends ProvideMacroZLayerInspectionTestBase {
-  override protected def isZIO1 = false
+  override protected def isZIO1             = false
   def testValidSimpleNoHighlighting(): Unit = z {
     s"""
        |val layer: ULayer[String] = ???

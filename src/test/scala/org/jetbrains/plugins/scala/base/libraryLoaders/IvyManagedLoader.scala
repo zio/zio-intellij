@@ -20,8 +20,9 @@ abstract class IvyManagedLoaderBase extends LibraryLoader {
   override def init(implicit module: Module, version: ScalaVersion): Unit = init(None)
 
   /**
-   * Adds resolved dependencies as libraries to the specified module
-   * @param parentDisposable if specified, used to remove libraries from the module on parentDisposable's disposing
+   *  Adds resolved dependencies as libraries to the specified module
+   *  @param parentDisposable
+   *    if specified, used to remove libraries from the module on parentDisposable's disposing
    */
   def init(parentDisposable: Option[Disposable])(implicit module: Module, version: ScalaVersion): Unit = {
     val deps     = dependencies(version)
@@ -71,14 +72,14 @@ final class IvyManagedLoader private (
   }
 
   /**
-   * NOTE: equals & hashCode are needed for test execution time optimization,
-   * in order [[org.jetbrains.plugins.scala.base.SharedTestProjectToken.ByTestClassAndScalaSdkAndProjectLibraries]]
-   * correctly identifies uniqueness of libraries
+   *  NOTE: equals & hashCode are needed for test execution time optimization, in order
+   *  [[org.jetbrains.plugins.scala.base.SharedTestProjectToken.ByTestClassAndScalaSdkAndProjectLibraries]] correctly
+   *  identifies uniqueness of libraries
    */
   override def equals(other: Any): Boolean = other match {
     case that: IvyManagedLoader =>
       dependencyManager == that.dependencyManager &&
-        _dependencies == that._dependencies
+      _dependencies == that._dependencies
     case _ => false
   }
 

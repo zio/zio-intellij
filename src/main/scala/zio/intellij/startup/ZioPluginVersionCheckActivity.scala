@@ -74,7 +74,7 @@ object ZioPluginVersionCheckActivity {
   }
 
   /**
-   * Stable releases are published without ZIO_INTELLIJ_BUILD_NUMBER, which defaults to "0".
+   *  Stable releases are published without ZIO_INTELLIJ_BUILD_NUMBER, which defaults to "0".
    */
   private def isZioPluginStable: Boolean =
     Option(PluginManagerCore.getPlugin(ZioPluginId))

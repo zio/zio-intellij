@@ -12,9 +12,8 @@ import org.junit.Assert.assertTrue
 import org.junit.experimental.categories.Category
 
 /**
- * This is a base test to test quick fixes.
- * It simply delegates all implementations to [[ScalaQuickFixTestFixture]].
- * If you want to use a different base test class, use [[ScalaQuickFixTestFixture]] directly
+ *  This is a base test to test quick fixes. It simply delegates all implementations to [[ScalaQuickFixTestFixture]]. If
+ *  you want to use a different base test class, use [[ScalaQuickFixTestFixture]] directly
  */
 @Category(Array(classOf[EditorTests]))
 abstract class ScalaAnnotatorQuickFixTestBase extends ScalaLightCodeInsightFixtureTestCase {

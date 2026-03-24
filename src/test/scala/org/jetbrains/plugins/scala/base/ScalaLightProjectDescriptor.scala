@@ -5,9 +5,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.testFramework.LightProjectDescriptor
 
 /**
- * See other examples:
- *  - [[com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase.ProjectDescriptor]]
- *  - [[com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor]]
+ *  See other examples:
+ *    - [[com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase.ProjectDescriptor]]
+ *    - [[com.intellij.testFramework.fixtures.DefaultLightProjectDescriptor]]
  */
 class ScalaLightProjectDescriptor(
   private val sharedProjectToken: SharedTestProjectToken = SharedTestProjectToken.DoNotShare

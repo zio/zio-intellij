@@ -41,7 +41,7 @@ object SimplifyTapInspection {
         case (ref: ScReferenceExpression, Some(func)) =>
           ref.firstChild match {
             case Some(mc: ScMethodCall) if !callOnParameter(mc, param) => go(mc, Some(body))
-            case _ =>
+            case _                                                     =>
               val expression = s"${param.name} => ${ref.getText}"
               createExpressionFromText(expression, func)(func) match {
                 case e: ScFunctionExpr => LambdaUtils.lambdaToUnderscore(e).getText

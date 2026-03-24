@@ -2,6 +2,7 @@ package zio.intellij.inspections.suggestions
 
 import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElementVisitor
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
@@ -18,31 +19,32 @@ class SuggestTypeAliasInspection extends LocalInspectionTool {
       .map(_.length)
       .exists(args => aliases.exists(_.args < args))
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case te: ScTypeElement if isOnTheFly =>
-      te match {
-        case Typeable(tpe) if fromZioLike(tpe) || fromZioLayer(tpe) =>
-          val allAliases = SuggestTypeAlias.findMatchingAliases(te, tpe)
-          val mostSpecificAliases =
-            allAliases
-              .flatMap(alias => extractTypeArguments(alias).map(_.length).map(AliasInfo(alias, _)))
-              .minsBy(_.args)
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case te: ScTypeElement if isOnTheFly =>
+        te match {
+          case Typeable(tpe) if fromZioLike(tpe) || fromZioLayer(tpe) =>
+            val allAliases          = SuggestTypeAlias.findMatchingAliases(te, tpe)
+            val mostSpecificAliases =
+              allAliases
+                .flatMap(alias => extractTypeArguments(alias).map(_.length).map(AliasInfo(alias, _)))
+                .minsBy(_.args)
 
-          Option.when(shouldSuggest(tpe, mostSpecificAliases)) {
-            implicit val tpc: TypePresentationContext = TypePresentationContext(te)
+            Option.when(shouldSuggest(tpe, mostSpecificAliases)) {
+              implicit val tpc: TypePresentationContext = TypePresentationContext(te)
 
-            val typeElements = mostSpecificAliases.flatMap(alias => createTypeElement(alias.tpe, te))
-            holder.registerProblem(
-              te,
-              getDisplayName,
-              ProblemHighlightType.INFORMATION,
-              typeElements.map(new TypeAliasQuickFix(te, _)): _*
-            )
-          }
-        case _ =>
-      }
-    case _ =>
-  }
+              val typeElements = mostSpecificAliases.flatMap(alias => createTypeElement(alias.tpe, te))
+              holder.registerProblem(
+                te,
+                getDisplayName,
+                ProblemHighlightType.INFORMATION,
+                typeElements.map(new TypeAliasQuickFix(te, _)): _*
+              )
+            }
+          case _ =>
+        }
+      case _ =>
+    }
 }
 
 object SuggestTypeAliasInspection {

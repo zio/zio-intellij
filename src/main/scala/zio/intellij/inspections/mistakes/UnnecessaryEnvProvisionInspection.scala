@@ -2,7 +2,7 @@ package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
+import com.intellij.psi.{PsiElement, PsiElementVisitor}
 import org.jetbrains.plugins.scala.codeInspection.collections.{stripped, MethodRepr}
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScReference
@@ -26,14 +26,15 @@ class UnnecessaryEnvProvisionInspection extends LocalInspectionTool {
       case _                                          => false
     }
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case MethodRepr(expr, Some(base), Some(ref), _) if isAnyEnvEffect(base) =>
-      createPossibleFix(holder, expr, base, ref)
-    case MethodRepr(expr @ `.provideSomeLayer`(_, _), Some(MethodRepr(_, Some(base), Some(ref), _)), _, _)
-        if isAnyEnvEffect(base) =>
-      createPossibleFix(holder, expr, base, ref)
-    case _ =>
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case MethodRepr(expr, Some(base), Some(ref), _) if isAnyEnvEffect(base) =>
+        createPossibleFix(holder, expr, base, ref)
+      case MethodRepr(expr @ `.provideSomeLayer`(_, _), Some(MethodRepr(_, Some(base), Some(ref), _)), _, _)
+          if isAnyEnvEffect(base) =>
+        createPossibleFix(holder, expr, base, ref)
+      case _ =>
+    }
 
   private def createPossibleFix(
     holder: ProblemsHolder,

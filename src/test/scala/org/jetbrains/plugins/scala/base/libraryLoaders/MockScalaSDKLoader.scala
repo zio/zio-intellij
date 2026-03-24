@@ -11,10 +11,9 @@ import org.jetbrains.plugins.scala.project.{ModuleExt, ReplClasspath, ScalaLibra
 import java.{util => ju}
 
 /**
- * This loader creates a lightweight scala sdk.
- * It can be useful when you just want to tell that a module has Scala SDK with some version
- * (e.g. in order Scala 3 files are properly parsed)
- * and when you do not need everything else (compiler classpath, sources)
+ *  This loader creates a lightweight scala sdk. It can be useful when you just want to tell that a module has Scala SDK
+ *  with some version (e.g. in order Scala 3 files are properly parsed) and when you do not need everything else
+ *  (compiler classpath, sources)
  */
 final class MockScalaSDKLoader() extends LibraryLoader {
 

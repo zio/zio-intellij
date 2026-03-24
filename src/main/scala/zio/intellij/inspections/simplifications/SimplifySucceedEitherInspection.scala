@@ -27,7 +27,7 @@ sealed abstract class EitherSimplificationType(extractor: TypeReference, zioMeth
 
   override def getSimplification(expr: ScExpression): Option[Simplification] =
     expr match {
-      case `ZIO.succeed`(zioType, extractor(eitherExpr)) => getArg(eitherExpr).map(replacement(zioType, expr, _))
+      case `ZIO.succeed`(zioType, extractor(eitherExpr))              => getArg(eitherExpr).map(replacement(zioType, expr, _))
       case `ZIO.apply`(zioType @ (UIO | URIO), extractor(eitherExpr)) =>
         getArg(eitherExpr).map(replacement(zioType, expr, _))
       case _ => None

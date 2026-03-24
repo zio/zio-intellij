@@ -50,19 +50,23 @@ sealed abstract class BaseZipToSucceedSimplificationType extends SimplificationT
   override def hint: String = "Replace with .as"
 
   /**
-   * Simplifies the `toSimplify` expression, replacing it with a `toKeep` expression followed by `.as(zioArg)`
+   *  Simplifies the `toSimplify` expression, replacing it with a `toKeep` expression followed by `.as(zioArg)`
    *
-   * @param toSimplify Expression to simplify (full one)
-   * @param toKeep Subexpression to keep
-   * @param zioArg Argument to the `ZIO.succeed()` call
-   * @return a SimplificationBuilder
+   *  @param toSimplify
+   *    Expression to simplify (full one)
+   *  @param toKeep
+   *    Subexpression to keep
+   *  @param zioArg
+   *    Argument to the `ZIO.succeed()` call
+   *  @return
+   *    a SimplificationBuilder
    */
   protected def simplify(toSimplify: ScExpression, toKeep: ScExpression, zioArg: ScExpression): SimplificationBuilder =
     replace(toSimplify).withText(invocationText(toKeep, s"as${zioArg.getWrappedText}")).highlightAll
 }
 
-object ZipRightSimplificationType         extends BaseZipOneSimplificationType(`.flatMap`, "zipRight")
-object ZipRightOperatorSimplificationType extends BaseZipOneOperatorSimplificationType(`.flatMap`, "*>")
+object ZipRightSimplificationType          extends BaseZipOneSimplificationType(`.flatMap`, "zipRight")
+object ZipRightOperatorSimplificationType  extends BaseZipOneOperatorSimplificationType(`.flatMap`, "*>")
 object ZipRightToSucceedSimplificationType extends BaseZipToSucceedSimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = expr match {
     case qual `.*>` `ZIO.succeed`(_, NonUnit(arg))       => Some(simplify(expr, qual, arg))
@@ -71,8 +75,8 @@ object ZipRightToSucceedSimplificationType extends BaseZipToSucceedSimplificatio
   }
 }
 
-object ZipLeftSimplificationType         extends BaseZipOneSimplificationType(`.tap_notStream`, "zipLeft")
-object ZipLeftOperatorSimplificationType extends BaseZipOneOperatorSimplificationType(`.tap_notStream`, "<*")
+object ZipLeftSimplificationType          extends BaseZipOneSimplificationType(`.tap_notStream`, "zipLeft")
+object ZipLeftOperatorSimplificationType  extends BaseZipOneOperatorSimplificationType(`.tap_notStream`, "<*")
 object ZipLeftToSucceedSimplificationType extends BaseZipToSucceedSimplificationType {
   override def getSimplification(expr: ScExpression): Option[Simplification] = expr match {
     case `ZIO.succeed`(_, NonUnit(arg)) `.<*` NonZIOUnit(qual)      => Some(simplify(expr, qual, arg))

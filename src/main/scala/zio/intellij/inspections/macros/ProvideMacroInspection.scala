@@ -1,7 +1,7 @@
 package zio.intellij.inspections.macros
 
 import com.intellij.codeInspection._
-import com.intellij.psi.PsiElement
+import com.intellij.psi.{PsiElement, PsiElementVisitor}
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.extensions.PsiElementExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGenericCall, ScMethodCall}
@@ -25,12 +25,13 @@ import scala.util.chaining.scalaUtilChainingOps
 
 class ProvideMacroInspection extends LocalInspectionTool {
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = element => {
-    val module = element.module
-    if (element.isInScala3File) () // inspection causes lots of false positives in Scala 3. Disable until better times
-    else if (module.exists(_.isZio1)) visitZIO1ProvideMethods(holder)(element)
-    else if (module.exists(_.isZio2)) visitZIO2ProvideMethods(holder)(element)
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) { (element) =>
+      val module = element.module
+      if (element.isInScala3File) () // inspection causes lots of false positives in Scala 3. Disable until better times
+      else if (module.exists(_.isZio1)) visitZIO1ProvideMethods(holder)(element)
+      else if (module.exists(_.isZio2)) visitZIO2ProvideMethods(holder)(element)
+    }
 
   private def visitZIO1ProvideMethods(holder: ProblemsHolder)(element: PsiElement): Unit = element match {
     case expr @ `.inject`(base, layers @ _*) =>

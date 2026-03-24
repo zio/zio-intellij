@@ -24,7 +24,7 @@ final class ForkedCodeLineMarkerProvider extends LineMarkerProvider {
     else
       element.getParent match {
         case `.fork`(_) | `.forkDaemon`(_) | `.forkManaged`(_) => createLineMarkerInfo(element)
-        case ref: ScReferenceExpression =>
+        case ref: ScReferenceExpression                        =>
           ref.getParent match {
             case `.forkAs`(_) | `.forkOn`(_) | `.forkWithErrorHandler`(_) | `ZIO.forkAll`(_, _) |
                 `ZIO.forkAll_`(_, _) =>

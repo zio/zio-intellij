@@ -56,7 +56,7 @@ class ScalaVersionAwareTestsCollector(
       .toArray
 
     val visitedMethods = mutable.ArrayBuffer.empty[Method]
-    val tests = for {
+    val tests          = for {
       superClass <- withSuperClasses
       method     <- MethodSorter.getDeclaredMethods(superClass)
       if !isShadowed(method, visitedMethods)

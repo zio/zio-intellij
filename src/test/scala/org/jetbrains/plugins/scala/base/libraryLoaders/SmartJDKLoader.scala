@@ -19,13 +19,13 @@ import java.nio.file.Path
 import scala.annotation.nowarn
 
 case class InternalJDKLoader() extends SmartJDKLoader() {
-  //noinspection ScalaDeprecation
+  // noinspection ScalaDeprecation
   override protected def createSdkInstance(): Sdk =
     JavaAwareProjectJdkTableImpl.getInstanceEx.getInternalJdk: @nowarn("cat=deprecation")
 }
 
 /**
- * Consider using this instead of HeavyJDKLoader if you don't need java interop in your tests
+ *  Consider using this instead of HeavyJDKLoader if you don't need java interop in your tests
  */
 case class MockJDKLoader(languageLevel: LanguageLevel = LanguageLevel.JDK_17) extends SmartJDKLoader() {
   override protected def createSdkInstance(): Sdk = IdeaTestUtil.getMockJdk(languageLevel.toJavaVersion)
@@ -90,11 +90,12 @@ object SmartJDKLoader {
   }
 
   /**
-   * Creates a JDK that contains classes from the specified modules without registering it to the ProjectJdkTable.
-   * Useful in subclasses of [[ScalaLightCodeInsightFixtureTestCase]] which require more classes than the mock JDKs
-   * contain.
+   *  Creates a JDK that contains classes from the specified modules without registering it to the ProjectJdkTable.
+   *  Useful in subclasses of [[ScalaLightCodeInsightFixtureTestCase]] which require more classes than the mock JDKs
+   *  contain.
    *
-   * @note [[ScalaLightCodeInsightFixtureTestCase]] automatically registers the project SDK to the JDK table.
+   *  @note
+   *    [[ScalaLightCodeInsightFixtureTestCase]] automatically registers the project SDK to the JDK table.
    */
   def createFilteredJdk(
     languageLevel: LanguageLevel,
@@ -109,7 +110,7 @@ object SmartJDKLoader {
     }
 
     val jdkVersion = JavaSdkVersion.fromLanguageLevel(languageLevel)
-    val jdkName = {
+    val jdkName    = {
       val description = jdkVersion.getDescription
       if (jdkModuleNames.isEmpty) description else s"$description-${jdkModuleNames.mkString("{", ",", "}")}"
     }

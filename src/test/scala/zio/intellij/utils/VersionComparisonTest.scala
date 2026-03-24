@@ -122,7 +122,8 @@ class VersionComparisonTest extends TestCase {
     val versions       = VersionTestUtils.zioVersionsFromMaven.map(ZioVersion.parseUnsafe)
     val sortedVersions = versions.sorted(ZioVersion.versionOrdering.reverse)
     versions.reverse.zip(sortedVersions).foreach {
-      case (v1, v2) => assertEquals(v1, v2)
+      case (v1, v2) =>
+        assertEquals(v1, v2)
     }
   }
 

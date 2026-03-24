@@ -9,7 +9,7 @@ trait StringAssertions {
   def assertStringMatches(string: String, regex: Regex): Unit =
     regex.findAllMatchIn(string).toSeq match {
       case Seq(_) =>
-      case _ =>
+      case _      =>
         fail(
           s"""string doesn't match regular expression:
              |regex: $regex
@@ -19,7 +19,7 @@ trait StringAssertions {
 
   def assertStringNotMatches(string: String, regex: Regex): Unit =
     regex.findAllMatchIn(string).toSeq match {
-      case Seq() =>
+      case Seq()   =>
       case matches =>
         fail(
           s"""string should't match regular expression:

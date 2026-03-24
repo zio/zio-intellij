@@ -32,7 +32,7 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
   private class DependencyResolver(progressListener: DownloadProgressListener) extends DependencyManagerBase {
     override protected val artifactBlackList: Set[String] = Set()
     override protected val logLevel: Int                  = org.apache.ivy.util.Message.MSG_INFO
-    override def createLogger: MessageLogger = new AbstractMessageLogger {
+    override def createLogger: MessageLogger              = new AbstractMessageLogger {
       override def doEndProgress(msg: String): Unit      = progressListener.progressUpdate(format(msg))
       override def log(msg: String, level: Int): Unit    = progressListener.progressUpdate(format(msg))
       override def rawlog(msg: String, level: Int): Unit = ()

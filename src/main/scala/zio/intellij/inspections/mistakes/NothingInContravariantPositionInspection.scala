@@ -1,7 +1,7 @@
 package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection._
-import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiElementVisitor
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.PsiElementVisitorSimple
 import org.jetbrains.plugins.scala.extensions._
@@ -13,8 +13,8 @@ import zio.intellij.utils.TypeCheckUtils.zioLikePackages
 
 class NothingInContravariantPositionInspection extends LocalInspectionTool {
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple =
-    (element: PsiElement) =>
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) { element =>
       (element.parent, element) match {
         case (
               Some(_: ScTypeAliasDefinition | _: ScFunctionDefinition | _: ScPatternDefinition),
@@ -43,6 +43,7 @@ class NothingInContravariantPositionInspection extends LocalInspectionTool {
           }
         case _ =>
       }
+    }
 }
 
 object NothingInContravariantPositionInspection {

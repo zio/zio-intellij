@@ -52,7 +52,7 @@ abstract class SimpleTestCase extends UsefulTestCase with MatcherAssertions with
   def describe(tree: PsiElement): String = toString(tree, 0)
 
   private def toString(root: PsiElement, level: Int): String = {
-    val indent = List.fill(level)("  ").mkString
+    val indent  = List.fill(level)("  ").mkString
     val content =
       if (root.is[LeafPsiElement])
         "\"%s\"".format(root.getText)

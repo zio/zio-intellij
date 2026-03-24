@@ -1,6 +1,7 @@
 package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
+import com.intellij.psi.PsiElementVisitor
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.{expressionResultIsNotUsed, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.extensions.PsiElementExt
@@ -10,27 +11,28 @@ import zio.intellij.inspections.{zioLike, zioSpec, zioTestAssert}
 
 class UnusedZIOExpressionsInspection extends LocalInspectionTool {
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case expr @ zioTestAssert(_) if expressionResultIsNotUsed(expr) =>
-      holder.registerProblem(
-        expr,
-        UnusedZIOExpressionsInspection.unusedZioAssertMessage,
-        ProblemHighlightType.LIKE_UNUSED_SYMBOL
-      )
-    case expr @ zioLike(_) if expressionResultIsNotUsed(expr) =>
-      holder.registerProblem(
-        expr,
-        UnusedZIOExpressionsInspection.unusedZioExprMessage,
-        ProblemHighlightType.LIKE_UNUSED_SYMBOL
-      )
-    case expr @ zioSpec(_) if expressionResultIsNotUsed(expr) && !withinSuiteAll(expr) =>
-      holder.registerProblem(
-        expr,
-        UnusedZIOExpressionsInspection.unusedZioSpecMessage,
-        ProblemHighlightType.LIKE_UNUSED_SYMBOL
-      )
-    case _ =>
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case expr @ zioTestAssert(_) if expressionResultIsNotUsed(expr) =>
+        holder.registerProblem(
+          expr,
+          UnusedZIOExpressionsInspection.unusedZioAssertMessage,
+          ProblemHighlightType.LIKE_UNUSED_SYMBOL
+        )
+      case expr @ zioLike(_) if expressionResultIsNotUsed(expr) =>
+        holder.registerProblem(
+          expr,
+          UnusedZIOExpressionsInspection.unusedZioExprMessage,
+          ProblemHighlightType.LIKE_UNUSED_SYMBOL
+        )
+      case expr @ zioSpec(_) if expressionResultIsNotUsed(expr) && !withinSuiteAll(expr) =>
+        holder.registerProblem(
+          expr,
+          UnusedZIOExpressionsInspection.unusedZioSpecMessage,
+          ProblemHighlightType.LIKE_UNUSED_SYMBOL
+        )
+      case _ =>
+    }
 
   // suiteAll is a macro and Intellij doesn't know about it (yet?)
   private def withinSuiteAll(expr: ScExpression): Boolean =
@@ -41,7 +43,7 @@ class UnusedZIOExpressionsInspection extends LocalInspectionTool {
 
   private def isTheSameOrIncludes(expr: ScExpression)(stmt: ScBlockStatement): Boolean = {
     def isTheSame = expr == stmt
-    def includes = stmt match {
+    def includes  = stmt match {
       case ScBlock(statements @ _*) => statements.exists(isTheSameOrIncludes(expr))
       case _                        => false
     }

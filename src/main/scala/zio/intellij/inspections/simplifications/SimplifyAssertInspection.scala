@@ -82,10 +82,10 @@ object SimplifyEqualToType extends SimplificationType {
     isExpressionOfType("java.lang.String", "_root_.scala.Predef.String")
 
   private def isExpressionOfType(fqns: String*): ScExpression => Boolean = {
-    case ScStringLiteral(_) => true
+    case ScStringLiteral(_)            => true
     case expression @ Typeable(scType) =>
       fqns.exists(conforms(scType, _)(expression)) ||
-        fqns.contains(scType.canonicalText)
+      fqns.contains(scType.canonicalText)
     case _ => false
   }
 
@@ -132,7 +132,7 @@ object SimplifyAssertTrueChain extends SimplificationType {
     (expr, expr.getParent) match {
       // if there's an `assertTrue` parent, we've already handled this case
       case (_, stripped(parent @ (_ && assertTrue(_ @_*)))) if parent ne expr => None
-      case (_ `&&` assertTrue(topLevel @ _*), _) =>
+      case (_ `&&` assertTrue(topLevel @ _*), _)                              =>
         val assertions = extractAssertions(expr)
         Option.when(assertions.assertions != topLevel)(replacement(expr, assertions))
       case _ => None

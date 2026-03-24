@@ -9,8 +9,8 @@ trait PsiAssertions {
     val errorElements = file.elements.filterByType[PsiErrorElement].toSeq
 
     if (errorElements.nonEmpty) {
-      val document = PsiDocumentManager.getInstance(file.getProject).getDocument(file)
-      val fileText = file.getText
+      val document                    = PsiDocumentManager.getInstance(file.getProject).getDocument(file)
+      val fileText                    = file.getText
       val errorsReadable: Seq[String] = errorElements.map { e =>
         val range        = e.getTextRange
         val line         = document.getLineNumber(range.getStartOffset)

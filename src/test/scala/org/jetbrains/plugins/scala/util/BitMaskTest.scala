@@ -9,7 +9,7 @@ import scala.util.Random
 
 class BitMaskTest extends TestCase with AssertionMatchers {
 
-  //noinspection TypeAnnotation
+  // noinspection TypeAnnotation
   object ExampleMask extends BitMaskStorage {
     val b1 = bool("b1")
     val n1 = nat(max = 5, "n1")
@@ -44,14 +44,16 @@ class BitMaskTest extends TestCase with AssertionMatchers {
 
     def makeRandomMaskStorage(): BitMaskStorage = new BitMaskStorage {
       for (i <- 0 to rand.nextInt(8)) {
-        try rand.nextInt(3) match {
-          case 0 => bool(s"b$i")
-          case 1 => nat(max = math.abs(rand.nextInt()) min 1, s"n$i")
-          case 2 =>
-            val Seq(a, b) = Seq(rand.nextInt(), rand.nextInt()).sorted
-            int(a min b, a max b, s"i$i")
-          case _ => ???
-        } catch {
+        try
+          rand.nextInt(3) match {
+            case 0 => bool(s"b$i")
+            case 1 => nat(max = math.abs(rand.nextInt()) min 1, s"n$i")
+            case 2 =>
+              val Seq(a, b) = Seq(rand.nextInt(), rand.nextInt()).sorted
+              int(a min b, a max b, s"i$i")
+            case _ => ???
+          }
+        catch {
           case a: AssertionError if a.getMessage.contains("Do not have space") =>
           // cheap hack so we don't have to test if there is still space left
         }

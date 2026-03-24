@@ -64,7 +64,7 @@ trait ScalaSdkOwner extends Test with InjectableJdk with ScalaVersionProvider wi
             override def addError(test: Test, t: Throwable): Unit              = shouldLogVersionFor.add(test)
             override def addFailure(test: Test, t: AssertionFailedError): Unit = shouldLogVersionFor.add(test)
             override def startTest(test: Test): Unit                           = ()
-            override def endTest(test: Test): Unit =
+            override def endTest(test: Test): Unit                             =
               if (shouldLogVersionFor.contains(test)) {
                 System.err.println(versionsDetailMessage)
                 shouldLogVersionFor.remove(test)
@@ -84,8 +84,8 @@ object ScalaSdkOwner {
   //       (or better, move ScalaLanguageLevel.getDefault to Scala_2_13 and use ScalaVersion.default again)
   //       for now just use defaultVersionOverride with Some(preferableSdkVersion) for test-(base)classes
   //       that should already work in newest version (SCL-15634)
-  val defaultSdkVersion: ScalaVersion    = LatestScalaVersions.Scala_2_10 // ScalaVersion.default
-  val preferableSdkVersion: ScalaVersion = LatestScalaVersions.Scala_2_13
+  val defaultSdkVersion: ScalaVersion          = LatestScalaVersions.Scala_2_10 // ScalaVersion.default
+  val preferableSdkVersion: ScalaVersion       = LatestScalaVersions.Scala_2_13
   val allTestVersions: SortedSet[ScalaVersion] =
     SortedSet.from(LatestScalaVersions.allStableWithoutScalaNext.flatMap(_.generateAllMinorVersions))
 
@@ -98,13 +98,13 @@ object ScalaSdkOwner {
       val first = possibleVersions.head
       if (first.isScala3) {
         // choose latest possible Scala 3 version
-        //e.g. `supportedIn >= 3.0.2` -> 3.2.1
-        //e.g. `supportedIn == 3.0.2` -> 3.0.2
+        // e.g. `supportedIn >= 3.0.2` -> 3.2.1
+        // e.g. `supportedIn == 3.0.2` -> 3.0.2
         Some(possibleVersions.last)
       } else {
-        //otherwise choose version closes to the "supportedIn"
-        //e.g. `supportedIn >= 2.12.10` -> 2.12.10
-        //TODO: unify this with Scala 3, test failures are expected
+        // otherwise choose version closes to the "supportedIn"
+        // e.g. `supportedIn >= 2.12.10` -> 2.12.10
+        // TODO: unify this with Scala 3, test failures are expected
         Some(first)
       }
     } else possibleVersions0.lastOption

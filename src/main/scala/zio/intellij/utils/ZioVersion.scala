@@ -121,10 +121,10 @@ object ZioVersion {
 
   object ZIO {
     // note: 1.0.8 was the first version to support Scala 3.0.0
-    val `RC18-2`: ZioVersion     = ZioVersion.parseUnsafe("1.0.0-RC18-2")
-    val `1.0.0`: ZioVersion      = ZioVersion.parseUnsafe("1.0.0")
-    val `1.0.6`: ZioVersion      = ZioVersion.parseUnsafe("1.0.6")
-    val `1.0.10`: ZioVersion     = ZioVersion.parseUnsafe("1.0.10")
-    val `2.0.0`: ZioVersion      = ZioVersion.parseUnsafe("2.0.0")
+    val `RC18-2`: ZioVersion = ZioVersion.parseUnsafe("1.0.0-RC18-2")
+    val `1.0.0`: ZioVersion  = ZioVersion.parseUnsafe("1.0.0")
+    val `1.0.6`: ZioVersion  = ZioVersion.parseUnsafe("1.0.6")
+    val `1.0.10`: ZioVersion = ZioVersion.parseUnsafe("1.0.10")
+    val `2.0.0`: ZioVersion  = ZioVersion.parseUnsafe("2.0.0")
   }
 }

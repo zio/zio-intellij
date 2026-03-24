@@ -2,26 +2,28 @@ package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection.{LocalInspectionTool, ProblemHighlightType, ProblemsHolder}
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElementVisitor
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScThrow}
 import zio.intellij.inspections.`ZIO.fail`
 
 class ZIOFailThrowInspection extends LocalInspectionTool {
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case fail @ `ZIO.fail`(_, scThrow: ScThrow) =>
-      scThrow.expression match {
-        case Some(throwableExpr) =>
-          holder.registerProblem(
-            fail,
-            ZIOFailThrowInspection.message,
-            ProblemHighlightType.WARNING,
-            new QuickFix(scThrow, throwableExpr)
-          )
-        case None =>
-      }
-    case _ =>
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case fail @ `ZIO.fail`(_, scThrow: ScThrow) =>
+        scThrow.expression match {
+          case Some(throwableExpr) =>
+            holder.registerProblem(
+              fail,
+              ZIOFailThrowInspection.message,
+              ProblemHighlightType.WARNING,
+              new QuickFix(scThrow, throwableExpr)
+            )
+          case None =>
+        }
+      case _ =>
+    }
 
   final class QuickFix(
     val toReplace: ScExpression,

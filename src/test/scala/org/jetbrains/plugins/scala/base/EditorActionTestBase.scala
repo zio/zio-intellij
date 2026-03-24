@@ -65,10 +65,14 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
   }
 
   /**
-   * @param textBefore                     editor text with caret markers before the action
-   * @param textAfter                      editor text with caret markers after the action
-   * @param stripTrailingSpacesAfterAction whether to trim trailing editor spaces after action perform
-   * @param testBody                       action to perform with `textBefore`
+   *  @param textBefore
+   *    editor text with caret markers before the action
+   *  @param textAfter
+   *    editor text with caret markers after the action
+   *  @param stripTrailingSpacesAfterAction
+   *    whether to trim trailing editor spaces after action perform
+   *  @param testBody
+   *    action to perform with `textBefore`
    */
   protected def performTest(
     textBefore: String,
@@ -84,10 +88,9 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
     val (expectedText, expectedCarets) = findCaretOffsets(textAfter, trimTestDataText)
 
     /**
-     * Copied from `com.intellij.testFramework.fixtures.impl.CodeInsightTestFixtureImpl.checkResult`
-     * Replaced inner `checkResult` call with `checkCaretOffsets`
-     * It allows to see caret positions together with file text directly in the diff view of failed test
-     * It's more convenient then operating with caret offset (as simple integer value)
+     *  Copied from `com.intellij.testFramework.fixtures.impl.CodeInsightTestFixtureImpl.checkResult` Replaced inner
+     *  `checkResult` call with `checkCaretOffsets` It allows to see caret positions together with file text directly in
+     *  the diff view of failed test It's more convenient then operating with caret offset (as simple integer value)
      */
     Option(IdeaTestExecutionPolicy.current).foreach(_.beforeCheckResult(getFile))
     inWriteCommandAction {
@@ -225,7 +228,7 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
       if (expectedCarets.nonEmpty)
         patchTextWithCarets(actualText, actualCarets)
       else
-        actualText //if expected text doesn't contain any carets, just don't assert carets positions then
+        actualText // if expected text doesn't contain any carets, just don't assert carets positions then
     assertEquals(expected, actual)
   }
 }

@@ -199,7 +199,7 @@ class SimplifyTapInspectionTest extends BaseSimplifyTapInspectionTest(".tap") {
          |
          |build.${START}flatMap(server => server.serve().forkManaged.as(server))$END
          |""".stripMargin).assertHighlighted()
-    val text   = z(s"""class Server {
+    val text = z(s"""class Server {
                     |  def serve(): UIO[Unit] = ???
                     |}
                     |

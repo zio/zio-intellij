@@ -2,10 +2,10 @@ import Versions.*
 import org.jetbrains.sbtidea.packaging.PackagingMethod
 
 ThisBuild / intellijPluginName := "zio-intellij"
-ThisBuild / intellijBuild := intellijVersion
+ThisBuild / intellijBuild      := intellijVersion
 
 ThisBuild / autoRemoveOldCachedIntelliJSDK := true
-ThisBuild / autoRemoveOldCachedDownloads := true
+ThisBuild / autoRemoveOldCachedDownloads   := true
 
 Global / intellijAttachSources := true
 
@@ -49,6 +49,7 @@ lazy val root =
         <b>What's new?</b>
         <ul>
           <li>IntelliJ IDEA $intellijHumanVersion support!</li>
+          <li>Plugin now supports running all ZIO tests in a package</li>
         </ul>
         <b>Note:</b> The ZIO project wizard is temporarily disabled due to incompatibility issues.
         ]]>"""
@@ -72,9 +73,9 @@ lazy val macros =
 def newProject(projectName: String, base: File): Project =
   Project(projectName, base)
     .settings(
-      name := projectName,
+      name         := projectName,
       scalaVersion := scala213,
-      version := pluginVersion,
+      version      := pluginVersion,
       resolvers += Versions.intellijRepository_ForManagedIntellijDependencies,
       libraryDependencies ++= Dependencies.junit,
       libraryDependencies ++= Dependencies.intellijTestFrameworkAll,

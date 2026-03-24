@@ -26,7 +26,7 @@ object TypeCheckUtils {
   val zioTestAsserts  = List("zio.test.Assertion._", "zio.test.BoolAlgebra", "zio.test.BoolAlgebraM", "zio.test.Assert")
   val zioTestPackage  = List("zio.test._")
   val zioMagicPackage = List("zio.magic._")
-  val zioSpecTypes = List(
+  val zioSpecTypes    = List(
     "zio.test.Spec",
     "zio.test.SpecVersionSpecific",
     "zio.test.ProvideSomePartiallyApplied",

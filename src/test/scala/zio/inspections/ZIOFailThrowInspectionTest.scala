@@ -11,7 +11,7 @@ class ZIOFailThrowInspectionTest extends ZScalaInspectionTest[ZIOFailThrowInspec
     z(s"""for {
          |  x <- ${START}ZIO.fail(throw new RuntimeException("FAIL"))${END}
          |} yield ()""".stripMargin).assertHighlighted()
-    val text   = z(s"""for {
+    val text = z(s"""for {
                     |  x <- ZIO.fail(throw new RuntimeException("FAIL"))
                     |} yield ()""".stripMargin)
     val result = z(s"""for {

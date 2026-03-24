@@ -2,33 +2,35 @@ package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElementVisitor
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnTwoPsiElements, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.extensions.PsiElementExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGuard}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createElementFromText
 import org.jetbrains.plugins.scala.util.IntentionAvailabilityChecker
-import zio.intellij.inspections.mistakes.IfGuardInsteadOfWhenInspection.IfGuardQuickFix
 import zio.intellij.inspections._
+import zio.intellij.inspections.mistakes.IfGuardInsteadOfWhenInspection.IfGuardQuickFix
 import zio.intellij.utils.TypeCheckUtils._
 
 class IfGuardInsteadOfWhenInspection extends LocalInspectionTool {
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case element @ `_ <- x`(genExpr)
-        if fromZio(genExpr) && IntentionAvailabilityChecker.checkInspection(this, element.getParent) =>
-      element.nextSiblingNotWhitespaceComment.foreach {
-        case guard @ guard(_) =>
-          holder.registerProblem(
-            guard,
-            IfGuardInsteadOfWhenInspection.problemMessage,
-            ProblemHighlightType.WEAK_WARNING,
-            new IfGuardQuickFix(genExpr, guard)
-          )
-        case _ =>
-      }
-    case _ =>
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case element @ `_ <- x`(genExpr)
+          if fromZio(genExpr) && IntentionAvailabilityChecker.checkInspection(this, element.getParent) =>
+        element.nextSiblingNotWhitespaceComment.foreach {
+          case guard @ guard(_) =>
+            holder.registerProblem(
+              guard,
+              IfGuardInsteadOfWhenInspection.problemMessage,
+              ProblemHighlightType.WEAK_WARNING,
+              new IfGuardQuickFix(genExpr, guard)
+            )
+          case _ =>
+        }
+      case _ =>
+    }
 }
 
 object IfGuardInsteadOfWhenInspection {

@@ -19,10 +19,11 @@ trait RevertableChange {
   def revertChange(): Unit
 
   /**
-   * Applies the change and automatically reverts it when test disposable is disposed<br>
-   * (it's done in tearDown method of test case)
+   *  Applies the change and automatically reverts it when test disposable is disposed<br> (it's done in tearDown method
+   *  of test case)
    *
-   * @param parentDisposable most commonly UsefulTestCase.getTestRootDisposable
+   *  @param parentDisposable
+   *    most commonly UsefulTestCase.getTestRootDisposable
    */
   final def applyChange(parentDisposable: Disposable): Unit = {
     applyChange()

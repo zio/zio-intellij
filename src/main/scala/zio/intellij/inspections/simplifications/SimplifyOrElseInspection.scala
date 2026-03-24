@@ -26,7 +26,7 @@ object OrElseFailSimplificationType extends SimplificationType {
 
     expr match {
       case qual `.orElse` `ZIO.fail`(_, error) => Some(replacement(qual, error))
-      case qual `.orElse` (block: ScBlock) =>
+      case qual `.orElse` (block: ScBlock)     =>
         Option(block.statements).collect {
           case statements :+ `ZIO.fail`(_, error) => blockReplacement(qual, statements :+ error)
         }

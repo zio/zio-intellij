@@ -2,7 +2,7 @@ package zio.intellij.inspections.mistakes
 
 import com.intellij.codeInspection._
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiElement
+import com.intellij.psi.{PsiElement, PsiElementVisitor}
 import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.collections.{stripped, MethodRepr}
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
@@ -38,19 +38,20 @@ class InfallibleEffectRecoveryInspection extends LocalInspectionTool {
       "bimap"
     )
 
-  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitorSimple = {
-    case MethodRepr(expr, Some(base), Some(toDelete), _)
-        if isInfallibleEffect(base) && !mightMakeSense(toDelete.refName) =>
-      if (expr.findImplicitArguments.flatMap(_.args).map(_.element).exists(isCanFailEv)) {
-        holder.registerProblem(
-          expr,
-          description(toDelete.refName),
-          ProblemHighlightType.GENERIC_ERROR,
-          new RecoveryQuickFix(expr, base, toDelete.refName)
-        )
-      }
-    case _ =>
-  }
+  override def buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    PsiElementVisitorSimple(holder) {
+      case MethodRepr(expr, Some(base), Some(toDelete), _)
+          if isInfallibleEffect(base) && !mightMakeSense(toDelete.refName) =>
+        if (expr.findImplicitArguments.flatMap(_.args).map(_.element).exists(isCanFailEv)) {
+          holder.registerProblem(
+            expr,
+            description(toDelete.refName),
+            ProblemHighlightType.GENERIC_ERROR,
+            new RecoveryQuickFix(expr, base, toDelete.refName)
+          )
+        }
+      case _ =>
+    }
 }
 
 object InfallibleEffectRecoveryInspection {

@@ -61,12 +61,12 @@ private[zio] class ZTestFrameworkConsoleProperties(configuration: AbstractTestRu
 
     override def visitTestFailed(testFailed: TestFailed): Unit = {
       val details = testFailed.getStacktrace
-      val tf = regexFromHell
+      val tf      = regexFromHell
         .findFirstMatchIn(details)
         .map { m =>
           val actual   = unescapeAnsi(m.group(1)).trim
           val expected = unescapeAnsi(m.group(2)).trim
-          val ex = new Throwable with NoStackTrace {
+          val ex       = new Throwable with NoStackTrace {
             override def printStackTrace(s: PrintStream): Unit =
               s.println(details)
 
