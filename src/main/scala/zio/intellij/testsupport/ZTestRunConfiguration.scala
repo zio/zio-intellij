@@ -13,6 +13,7 @@ import com.intellij.openapi.util.InvalidDataException
 import com.intellij.psi.PsiClass
 import com.intellij.testIntegration.TestFramework
 import com.intellij.util.PathUtil
+import com.intellij.util.ui.UIUtil
 import org.jetbrains.plugins.scala.extensions._
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScObject
 import org.jetbrains.plugins.scala.testingSupport.test.CustomTestRunnerBasedStateProvider.TestFrameworkRunnerInfo
@@ -157,17 +158,19 @@ sealed abstract class ZTestRunConfiguration(project: Project, configurationFacto
       val processHandler = startProcess()
 
       val consoleView: ConsoleView =
-        if (useIntegratedRunner) {
-          val consoleProperties = new ZTestFrameworkConsoleProperties(self, executor)
-          SMTestRunnerConnectionUtil.createAndAttachConsole(
-            consoleProperties.getTestFrameworkName,
-            processHandler,
-            consoleProperties
-          )
-        } else {
-          val console = new ConsoleViewImpl(project, true)
-          console.attachToProcess(processHandler)
-          console
+        UIUtil.invokeAndWaitIfNeeded { () =>
+          if (useIntegratedRunner) {
+            val consoleProperties = new ZTestFrameworkConsoleProperties(self, executor)
+            SMTestRunnerConnectionUtil.createAndAttachConsole(
+              consoleProperties.getTestFrameworkName,
+              processHandler,
+              consoleProperties
+            )
+          } else {
+            val console = new ConsoleViewImpl(project, true)
+            console.attachToProcess(processHandler)
+            console
+          }
         }
 
       // TODO figure out whether we need a dedicated testConsoleView
