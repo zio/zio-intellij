@@ -16,7 +16,7 @@ object Versions {
 
   val minorVersion: String  = "0"
   val buildVersion: String  = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-  val pluginVersion: String = s"2026.1.2.$buildVersion"
+  val pluginVersion: String = s"2026.1.3.$buildVersion"
 
   val IntellijTestFrameworkVersion: String = intellijVersion_ForManagedIntellijDependencies
 
