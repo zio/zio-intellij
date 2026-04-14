@@ -50,6 +50,7 @@ lazy val root =
         <ul>
           <li>IntelliJ IDEA $intellijHumanVersion support!</li>
           <li>Plugin now supports running all ZIO tests in a package</li>
+          <li>BSP environment support for ZIO Test run/debug configuration</li>
         </ul>
         <b>Note:</b> The ZIO project wizard is temporarily disabled due to incompatibility issues.
         ]]>"""
