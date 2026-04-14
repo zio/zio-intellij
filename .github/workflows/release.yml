@@ -19,10 +19,6 @@ jobs:
 
       - uses: coursier/cache-action@v6
 
-      - name: Fetch Dependencies Warmup
-        continue-on-error: true
-        run: sbt +update
-
       - name: Fetch Dependencies
         run: sbt +update
 
