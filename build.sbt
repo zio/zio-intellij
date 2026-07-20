@@ -12,7 +12,7 @@ Global / intellijAttachSources := true
 addCommandAlias("fmt", "scalafmtAll")
 addCommandAlias("check", "scalafmtCheckAll")
 
-(Global / javacOptions) := Seq("--release", "17")
+ThisBuild / javacOptions := Seq("--release", "25")
 
 ThisBuild / scalacOptions ++= Seq(
   "-explaintypes",
@@ -32,9 +32,12 @@ ThisBuild / scalacOptions ++= Seq(
 lazy val zio2TestRunner =
   Project("zio2-test-runner", file("zio2-test-runner"))
     .settings(
-      name          := "zio2-test-runner",
-      scalaVersion  := scala213,
-      packageMethod := PackagingMethod.Standalone()
+      name         := "zio2-test-runner",
+      scalaVersion := scala213,
+      // This runner is executed inside the *user's* project JVM, not the IDE, so it must target an old enough
+      // bytecode version to load on whatever JDK their project uses.
+      Compile / javacOptions := Seq("--release", "8"),
+      packageMethod          := PackagingMethod.Standalone()
     )
 
 lazy val root =

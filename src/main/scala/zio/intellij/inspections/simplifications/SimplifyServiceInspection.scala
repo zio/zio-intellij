@@ -1,9 +1,9 @@
 package zio.intellij.inspections.simplifications
 
 import org.jetbrains.plugins.scala.codeInspection.collections.{Simplification, SimplificationType}
-import org.jetbrains.plugins.scala.lang.psi.api.base.types.ScTypeElement
 import org.jetbrains.plugins.scala.lang.psi.api.expr.{ScExpression, ScGenericCall, ScMethodCall}
 import org.jetbrains.plugins.scala.lang.psi.types.TypePresentationContext
+import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import org.jetbrains.plugins.scala.lang.refactoring.ScTypePresentationExt
 import zio.intellij.inspections._
 import zio.intellij.inspections.hasMethods.`.get`
@@ -15,8 +15,12 @@ class SimplifyServiceInspection extends ZInspection(AccessGetSimplificationType)
 object AccessGetSimplificationType extends SimplificationType {
   override def hint: String = "Replace with ZIO.service"
 
-  private def replacement(zioType: ZioType, accessExpr: ScExpression, accessTypeArg: Option[ScTypeElement] = None)(
-    implicit ctx: TypePresentationContext = TypePresentationContext(accessExpr)
+  private def replacement(
+    zioType: ZioType,
+    accessExpr: ScExpression,
+    accessTypeArg: Option[Typeable] = None
+  )(implicit
+    ctx: TypePresentationContext = TypePresentationContext(accessExpr)
   ): Option[Simplification] = {
     val tpe = extractServiceTypeArgument(accessTypeArg)
 

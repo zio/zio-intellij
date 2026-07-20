@@ -140,7 +140,7 @@ package object utils {
     forStmt.flatMap(_.enumerators).flatMap(_.generators.headOption)
   }
 
-  def extractServiceTypeArgument(accessTypeArg: Option[ScTypeElement]) = for {
+  def extractServiceTypeArgument(accessTypeArg: Option[Typeable]): Option[ScType] = for {
     arg           <- accessTypeArg
     tpe           <- arg.`type`().toOption
     innerTypeArgs <- extractAllTypeArguments(tpe)

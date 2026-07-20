@@ -1,4 +1,3 @@
-import org.jetbrains.sbtidea.IntelliJPlatform.IdeaCommunity
 import org.jetbrains.sbtidea.IntellijPlugin
 import org.jetbrains.sbtidea.Keys.*
 import org.jetbrains.sbtidea.download.BuildInfo
@@ -9,14 +8,14 @@ object Versions {
 
   val scala213: String = "2.13.18"
 
-  val intellijVersion: String      = "261.22158.277"
-  val intellijHumanVersion: String = "2026.1" // just for `What's new?`
+  val intellijVersion: String      = "262.8665.258"
+  val intellijHumanVersion: String = "2026.2" // just for `What's new?`
 
-  val scalaPluginVersion: String = "2026.1.16"
+  val scalaPluginVersion: String = "2026.2.15"
 
   val minorVersion: String  = "0"
   val buildVersion: String  = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-  val pluginVersion: String = s"2026.1.4.$buildVersion"
+  val pluginVersion: String = s"2026.2.1.$buildVersion"
 
   val IntellijTestFrameworkVersion: String = intellijVersion_ForManagedIntellijDependencies
 
@@ -27,7 +26,7 @@ object Versions {
 
   private def detectIntellijArtifactVersionAndRepository(intellijVersion: String): (String, MavenRepository) = {
     val locationDescriptor =
-      IntellijVersionUtils.detectArtifactLocation(BuildInfo(intellijVersion, IdeaCommunity), ".zip")
+      IntellijVersionUtils.detectArtifactLocation(BuildInfo(intellijVersion, IntelliJPlatform.Idea), ".zip")
     val artifactVersion = locationDescriptor.artifactVersion
     val artifactUrl     = locationDescriptor.url
     (artifactVersion, locationDescriptor.repository)
@@ -57,9 +56,18 @@ object Dependencies {
 
   val intellijPlugins: Seq[IntellijPlugin] =
     Seq(
-      "com.intellij.java".toPlugin,
-      s"org.intellij.scala:${Versions.scalaPluginVersion}".toPlugin
-    )
+      "com.intellij.java",
+      "intellij.java.aetherDependencyResolver.plugin",
+      "intellij.testRunner.plugin",
+
+      // structureView plugin + deps
+      "intellij.structureView.plugin",
+      "intellij.todo.plugin",
+      "intellij.libraries.misc.plugin",
+      "intellij.structuralSearch.plugin",
+
+      s"org.intellij.scala:${Versions.scalaPluginVersion}"
+    ).map(_.toPlugin)
 
   lazy val intellijTestFrameworkCore: ModuleID =
     "com.jetbrains.intellij.platform" % "test-framework-core" % Versions.IntellijTestFrameworkVersion

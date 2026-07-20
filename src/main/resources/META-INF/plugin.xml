@@ -19,12 +19,14 @@
 
     <change-notes>replaced-by-build</change-notes>
 
-    <idea-version since-build="261.22158" until-build="261.*"/>
+    <idea-version since-build="262.7574" until-build="262.*"/>
 
-    <depends>org.intellij.scala</depends>
-    <depends>com.intellij.modules.java</depends>
-    <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.lang</depends>
+    <dependencies>
+        <plugin id="org.intellij.scala"/>
+        <plugin id="com.intellij.modules.platform"/>
+        <plugin id="intellij.testRunner.plugin"/>
+        <module name="scalaCommunity.testing-support"/>
+    </dependencies>
 
     <extensions defaultExtensionNs="org.intellij.scala">
         <syntheticMemberInjector implementation="zio.intellij.synthetic.macros.ModulePatternAccessible"/>

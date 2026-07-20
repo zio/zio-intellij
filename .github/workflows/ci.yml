@@ -3,9 +3,9 @@ name: CI
 on:
   push:
     branches:
-      - idea252.x
       - idea253.x
       - idea261.x
+      - idea262.x
   pull_request:
 
 jobs:
@@ -17,12 +17,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Scala
         uses: coursier/setup-action@v1
         with:
-          jvm: adoptium:21
+          jvm: adoptium:25
           apps: sbt sbtn
 
       - uses: coursier/cache-action@v6
