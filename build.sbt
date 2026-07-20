@@ -63,7 +63,12 @@ lazy val root =
       // using PackagingMethod.Standalone, mirroring the pattern used by the Scala plugin for other test runners
       packageAdditionalProjects += zio2TestRunner
     )
-    .dependsOn(macros)
+    .dependsOn(macros, scalaPluginTestkit % "test->test")
+
+// Vendored copy of the IntelliJ Scala plugin test framework — see scala-plugin-testkit/ORIGIN.md.
+lazy val scalaPluginTestkit =
+  newProject("scala-plugin-testkit", file("scala-plugin-testkit"))
+    .enablePlugins(SbtIdeaPlugin)
 
 lazy val macros =
   newProject("macros", file("macros"))
