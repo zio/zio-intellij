@@ -6,9 +6,9 @@ import com.intellij.openapi.roots.OrderRootType
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.{JavaPsiFacade, PsiClass, PsiElement}
-import jetbrains.macroAnnotations.CachedInUserData
 import org.jetbrains.plugins.scala.ScalaVersion
 import org.jetbrains.plugins.scala.annotator.usageTracker.ScalaRefCountHolder
+import org.jetbrains.plugins.scala.caches.cachedInUserData
 import org.jetbrains.plugins.scala.extensions.PsiClassExt
 import org.jetbrains.plugins.scala.lang.psi.ElementScope
 import org.jetbrains.plugins.scala.lang.psi.api.base.ScFieldId
@@ -254,36 +254,39 @@ package object utils {
 
   implicit class ModuleSyntax(private val module: Module) extends AnyVal {
 
-    @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))
     def findLibrary(p: String => Boolean): Option[ZioVersion] =
-      (for {
-        library <- module.libraries
-        url     <- library.getUrls(OrderRootType.CLASSES)
-        if p(url)
-        trimmedUrl  = utils.trimAfterSuffix(url, ".jar")
-        versionStr <- LibraryExt.runtimeVersion(trimmedUrl) orElse localLibraryVersion(trimmedUrl)
-        version    <- ZioVersion.parse(versionStr)
-      } yield version).headOption
+      cachedInUserData("findLibrary", module, ScalaCompilerConfiguration.modTracker(module.getProject), Tuple1(p)) {
+        (for {
+          library <- module.libraries
+          url     <- library.getUrls(OrderRootType.CLASSES)
+          if p(url)
+          trimmedUrl  = utils.trimAfterSuffix(url, ".jar")
+          versionStr <- LibraryExt.runtimeVersion(trimmedUrl) orElse localLibraryVersion(trimmedUrl)
+          version    <- ZioVersion.parse(versionStr)
+        } yield version).headOption
+      }
 
     private def localLibraryVersion(str: String) =
       localRegex.findFirstMatchIn(str).map(_.group(1))
 
-    @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))
     def zioVersion: Option[ZioVersion] =
-      findLibrary(lib => lib.contains("/dev/zio/zio_") || lib.contains("/dev.zio/zio_"))
+      cachedInUserData("zioVersion", module, ScalaCompilerConfiguration.modTracker(module.getProject)) {
+        findLibrary(lib => lib.contains("/dev/zio/zio_") || lib.contains("/dev.zio/zio_"))
+      }
 
     def hasZio = zioVersion.isDefined
 
     def isZio1 = zioVersion.exists(_.major < ZioVersion.ZIO.`2.0.0`.major)
     def isZio2 = zioVersion.exists(_.major >= ZioVersion.ZIO.`2.0.0`.major)
 
-    @CachedInUserData(module, ScalaCompilerConfiguration.modTracker(module.getProject))
     def scalaVersion: Option[ScalaVersion] =
-      for {
-        scalaSdk     <- module.scalaSdk
-        compiler     <- scalaSdk.libraryVersion
-        scalaVersion <- ScalaVersion.fromString(compiler)
-      } yield scalaVersion
+      cachedInUserData("scalaVersion", module, ScalaCompilerConfiguration.modTracker(module.getProject)) {
+        for {
+          scalaSdk     <- module.scalaSdk
+          compiler     <- scalaSdk.libraryVersion
+          scalaVersion <- ScalaVersion.fromString(compiler)
+        } yield scalaVersion
+      }
   }
 
   /**
