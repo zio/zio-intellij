@@ -7,6 +7,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScTypeParam
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.{ScObject, ScTrait, ScTypeDefinition}
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.createTypeElementFromText
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
+import org.jetbrains.plugins.scala.lang.psi.types.ScTypeExt
 import org.jetbrains.plugins.scala.lang.psi.types.api.StdTypes
 import org.jetbrains.plugins.scala.lang.psi.types.{ScParameterizedType, ScType}
 import zio.intellij.intentions.suggestions.SuggestTypeAlias
@@ -64,10 +65,10 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
         val serviceEnv = if (hasHasAlias) aliasApplication else has(serviceApplication)(sco)
         val currentEnv =
           if (typeInfo.rTypeParam.isAny) ""
-          else s" with ${defaultPresentationStringForScalaType(typeInfo.rTypeParam)(sco)}"
+          else s" with ${defaultPresentationStringForScalaType(typeInfo.rTypeParam)(using sco)}"
 
         val r  = s"$serviceEnv$currentEnv"
-        val ea = typeInfo.otherTypeParams.map(defaultPresentationStringForScalaType(_)(sco)).mkString(", ")
+        val ea = typeInfo.otherTypeParams.map(defaultPresentationStringForScalaType(_)(using sco)).mkString(", ")
 
         s"${typeInfo.zioObject}[$r, $ea]"
       }
@@ -121,7 +122,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
 
   private object TypeInfo {
     def apply(tpe: ScType, ctx: PsiElement): TypeInfo = {
-      val any = StdTypes.instance(tpe.projectContext).Any
+      val any = StdTypes.instance(using tpe.projectContext).Any
 
       def zioTypeArgs(tpe: ScType): (ScType, List[ScType]) =
         extractAllTypeArguments(tpe).map(_.toList) match {
@@ -158,7 +159,7 @@ abstract class ModulePatternAccessibleBase extends SyntheticMembersInjector {
           otherTypeParams = rest
         )
       } else {
-        val element   = createTypeElementFromText("Throwable", ctx)(ctx)
+        val element   = createTypeElementFromText("Throwable", ctx)(using ctx)
         val throwable = element.`type`().getOrAny
         new TypeInfo(
           zioObject = "zio.ZIO",

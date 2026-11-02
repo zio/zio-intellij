@@ -19,12 +19,12 @@
 
     <change-notes>replaced-by-build</change-notes>
 
-    <idea-version since-build="262.7574" until-build="262.*"/>
+    <idea-version since-build="263.7307.44" until-build="263.*"/>
 
     <dependencies>
         <plugin id="org.intellij.scala"/>
         <plugin id="com.intellij.modules.platform"/>
-        <plugin id="intellij.testRunner.plugin"/>
+        <plugin id="com.intellij.platform.testRunner"/>
         <module name="scalaCommunity.testing-support"/>
     </dependencies>
 

@@ -92,7 +92,7 @@ private[testsupport] final class TestRunnerResolveService
     listener: DownloadProgressListener = NoopProgressListener
   ): ResolveResult = {
     val downloader = new TestRunnerDownloader(listener)
-    downloader.download(version)(scalaVersion).left.map(ResolveError.DownloadError.apply).flatMap {
+    downloader.download(version)(using scalaVersion).left.map(ResolveError.DownloadError.apply).flatMap {
       case DownloadSuccess(v, scalaVersion, jarUris) => resolveClassPath(v, scalaVersion, jarUris.toArray)
     }
   }

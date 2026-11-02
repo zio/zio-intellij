@@ -17,7 +17,7 @@ private[runner] class TestRunnerDownloader(progressListener: DownloadProgressLis
   def download(version: ZioVersion)(implicit scalaVersion: ScalaVersion): Either[DownloadFailure, DownloadSuccess] =
     try {
       val resolver             = new DependencyResolver(progressListener)
-      val resolvedDependencies = resolver.resolve(dependencies(version, scalaVersion): _*)
+      val resolvedDependencies = resolver.resolve(dependencies(version, scalaVersion)*)
       val jars: Seq[Path]      = resolvedDependencies.map(_.file)
       val uris: Seq[URI]       = jars.map(_.toUri)
       Right(DownloadSuccess(version, scalaVersion, uris))

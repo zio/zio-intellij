@@ -14,9 +14,8 @@ abstract class ZTypeAnnotationIntention extends AbstractTypeAnnotationIntention 
   final override def getText: String = getFamilyName
 
   override protected def descriptionStrategy: Strategy =
-    ZStrategy {
-      case (te, tpe) => (fromZioLike(tpe) || fromZioLayer(tpe)) && shouldSuggest(te, tpe)
-      case _         => false
+    ZStrategy { (te, tpe) =>
+      (fromZioLike(tpe) || fromZioLayer(tpe)) && shouldSuggest(te, tpe)
     }
 
   override def invocationStrategy(maybeEditor: Option[Editor]): Strategy =

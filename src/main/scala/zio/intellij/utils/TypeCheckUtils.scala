@@ -1,7 +1,7 @@
 package zio.intellij.utils
 
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
-import org.jetbrains.plugins.scala.lang.psi.types.ScType
+import org.jetbrains.plugins.scala.lang.psi.types.{ScType, ScTypeExt}
 import org.jetbrains.plugins.scala.lang.psi.types.result.TypeResult
 import zio.intellij.inspections.isOfClassFrom
 import zio.intellij.utils.types.{ZLayerTypes, ZioTypes}

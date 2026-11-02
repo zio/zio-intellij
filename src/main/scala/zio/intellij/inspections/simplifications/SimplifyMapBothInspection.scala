@@ -23,7 +23,7 @@ object MapBothSimplificationType extends SimplificationType {
         .highlightFrom(qual)
 
     def toFunctionExpr(e: ScExpression): ScExpression =
-      ScalaPsiElementFactory.createExpressionFromText(s"_ => ${e.getText}", e)(e)
+      ScalaPsiElementFactory.createExpressionFromText(s"_ => ${e.getText}", e)(using e)
 
     expr match {
       case qual `.map` a `.mapError` b   => Some(replacement(qual, a, b))

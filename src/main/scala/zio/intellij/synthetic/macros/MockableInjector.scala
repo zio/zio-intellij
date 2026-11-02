@@ -6,7 +6,7 @@ import org.jetbrains.plugins.scala.lang.psi.api.base.types.{ScParameterizedTypeE
 import org.jetbrains.plugins.scala.lang.psi.api.statements.params.{ScParameter, ScTypeParam}
 import org.jetbrains.plugins.scala.lang.psi.api.toplevel.typedef.ScTypeDefinition
 import org.jetbrains.plugins.scala.lang.psi.impl.toplevel.typedef.SyntheticMembersInjector
-import org.jetbrains.plugins.scala.lang.psi.types.{ScParameterizedType, ScType, TermSignature}
+import org.jetbrains.plugins.scala.lang.psi.types.{ScParameterizedType, ScType, ScTypeExt, TermSignature}
 import zio.intellij.synthetic.macros.utils.presentation.defaultPresentationStringForScalaType
 import zio.intellij.utils._
 
@@ -47,8 +47,8 @@ class MockableInjector extends SyntheticMembersInjector {
 }
 
 object MockableInjector {
-  private[this] val mockableAnnotation = "zio.test.mock.mockable"
-  private[this] val mockable2Annotation = "zio.mock.mockable"
+  private val mockableAnnotation = "zio.test.mock.mockable"
+  private val mockable2Annotation = "zio.mock.mockable"
 
   def findMacroAnnotationTypeElement(source: ScTypeDefinition): Option[(ScTypeElement, String)] = {
     val annotation = if (source.isZio2) mockable2Annotation else mockableAnnotation
@@ -177,14 +177,14 @@ object MockableInjector {
     import scala.math.Ordering.Implicits.seqOrdering
     import scala.collection.Seq
 
-    infos.sortBy(_.signature)(Ordering[Seq[String]].on {
+    infos.sortBy(_.signature)(using Ordering[Seq[String]].on {
       case Method(method) =>
         for {
           clause      <- method.paramClauses.clauses
           param       <- clause.parameters
           paramType   <- param.paramType
           tpe         <- paramType.typeElement.`type`().toOption
-          presentation = defaultPresentationStringForScalaType(tpe)(paramType)
+          presentation = defaultPresentationStringForScalaType(tpe)(using paramType)
         } yield presentation
       case _ => Seq.empty
     })

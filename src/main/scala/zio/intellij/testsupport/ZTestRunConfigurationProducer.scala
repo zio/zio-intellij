@@ -53,7 +53,7 @@ final class ZTestRunConfigurationProducer extends AbstractTestConfigurationProdu
         StringUtil.getShortName(testClass.qualifiedName) + testName.fold("")("::" + _)
     }
 
-  override def getTestClassWithTestName(location: Location[_ <: PsiElement]): Option[ClassWithTestName] =
+  override def getTestClassWithTestName(location: Location[? <: PsiElement]): Option[ClassWithTestName] =
     location.getPsiElement match {
       case IsZioTestElement(td, tm) =>
         tm match {

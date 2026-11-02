@@ -6,16 +6,16 @@ import sbt.*
 
 object Versions {
 
-  val scala213: String = "2.13.18"
+  val scala3: String = "3.9.0" // Keep in sync with the runtime bundled by the Scala plugin.
 
-  val intellijVersion: String      = "262.8665.258"
-  val intellijHumanVersion: String = "2026.2" // just for `What's new?`
+  val intellijVersion: String      = "263.7307.44"
+  val intellijHumanVersion: String = "2026.3" // just for `What's new?`
 
-  val scalaPluginVersion: String = "2026.2.15"
+  val scalaPluginVersion: String = "2026.3.22"
 
   val minorVersion: String  = "0"
   val buildVersion: String  = sys.env.getOrElse("ZIO_INTELLIJ_BUILD_NUMBER", minorVersion)
-  val pluginVersion: String = s"2026.2.1.$buildVersion"
+  val pluginVersion: String = s"2026.3.1.$buildVersion"
 
   val IntellijTestFrameworkVersion: String = intellijVersion_ForManagedIntellijDependencies
 
@@ -57,14 +57,16 @@ object Dependencies {
   val intellijPlugins: Seq[IntellijPlugin] =
     Seq(
       "com.intellij.java",
+      "com.intellij.xml",
+      "com.intellij.modules.jna",
       "intellij.java.aetherDependencyResolver.plugin",
-      "intellij.testRunner.plugin",
+      "com.intellij.platform.testRunner",
+      "com.intellij.platform.vcs",
 
       // structureView plugin + deps
-      "intellij.structureView.plugin",
-      "intellij.todo.plugin",
-      "intellij.libraries.misc.plugin",
-      "intellij.structuralSearch.plugin",
+      "com.intellij.structureView",
+      "com.intellij.todo",
+      "com.intellij.structuralSearch",
 
       s"org.intellij.scala:${Versions.scalaPluginVersion}"
     ).map(_.toPlugin)

@@ -17,7 +17,7 @@ object ExitCodeSimplificationType extends SimplificationType {
     expr match {
       case qual `.map` `_ => x`(exitCodeSuccess() | exitCodeFailure())             => Some(replacement(qual))
       case qual `.as` (exitCodeSuccess() | exitCodeFailure())                      => Some(replacement(qual))
-      case qual `.fold` (`_ => x`(exitCodeFailure()), `_ => x`(exitCodeSuccess())) => Some(replacement(qual))
+      case `.fold`(qual, `_ => x`(exitCodeFailure()), `_ => x`(exitCodeSuccess())) => Some(replacement(qual))
       case _                                                                       => None
     }
   }

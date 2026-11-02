@@ -21,13 +21,13 @@ import scala.jdk.CollectionConverters._
   namely to support the ZIO icon and custom hint text. Unfortunately the regular Postfix templates API does not allow
   extending the item presentation easily.
  */
-private[this] class ZPostfixLiveTemplateHack extends PostfixLiveTemplate {
+private class ZPostfixLiveTemplateHack extends PostfixLiveTemplate {
 
   override def getLookupElements(
     file: PsiFile,
     editor: Editor,
     offset: Int
-  ): util.Collection[_ <: CustomLiveTemplateLookupElement] = {
+  ): util.Collection[? <: CustomLiveTemplateLookupElement] = {
     if (!file.hasZio) return Collections.emptyList
 
     val result           = new util.HashSet[CustomLiveTemplateLookupElement]

@@ -154,7 +154,7 @@ sealed abstract class ZTestRunConfiguration(project: Project, configurationFacto
       mutableList.toList
     }
 
-    override def execute(executor: Executor, runner: ProgramRunner[_]): ExecutionResult = {
+    override def execute(executor: Executor, runner: ProgramRunner[?]): ExecutionResult = {
       val processHandler = startProcess()
 
       val consoleView: ConsoleView =
@@ -167,7 +167,7 @@ sealed abstract class ZTestRunConfiguration(project: Project, configurationFacto
               consoleProperties
             )
           } else {
-            val console = new ConsoleViewImpl(project, true)
+            val console = new ConsoleViewImpl(self.getProject, true)
             console.attachToProcess(processHandler)
             console
           }

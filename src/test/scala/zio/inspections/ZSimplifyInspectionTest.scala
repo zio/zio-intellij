@@ -9,7 +9,7 @@ import zio.intellij.inspections.ZInspection
 
 import scala.reflect._
 
-trait ZInspectionTestBase[T <: LocalInspectionTool] { base: ScalaInspectionTestBase =>
+trait ZInspectionTestBase[T <: LocalInspectionTool] extends ScalaInspectionTestBase {
 
   protected def isZIO1 = true
 
@@ -91,22 +91,18 @@ object ZInspectionTestBase {
   val versionPatternZIO2 = "[2.0,)" // matches all versions greater or equal to 2.0
 }
 
-abstract class ZSimplifyInspectionTest[T <: ZInspection: ClassTag]
-    extends ScalaInspectionTestBase
-    with ZInspectionTestBase[T] {
+abstract class ZSimplifyInspectionTest[T <: ZInspection: ClassTag] extends ZInspectionTestBase[T] {
 
   protected val hint: String
 
   override protected lazy val description: String = hint
 
   final override protected val classOfInspection =
-    classTag[T].runtimeClass.asInstanceOf[Class[_ <: ZInspection]]
+    classTag[T].runtimeClass.asInstanceOf[Class[? <: ZInspection]]
 }
 
-abstract class ZScalaInspectionTest[T <: LocalInspectionTool: ClassTag]
-    extends ScalaInspectionTestBase
-    with ZInspectionTestBase[T] {
+abstract class ZScalaInspectionTest[T <: LocalInspectionTool: ClassTag] extends ZInspectionTestBase[T] {
 
   final override protected val classOfInspection =
-    classTag[T].runtimeClass.asInstanceOf[Class[_ <: LocalInspectionTool]]
+    classTag[T].runtimeClass.asInstanceOf[Class[? <: LocalInspectionTool]]
 }
