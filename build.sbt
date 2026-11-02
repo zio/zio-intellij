@@ -20,7 +20,6 @@ ThisBuild / scalacOptions ++= Seq(
   "-unchecked",
   "-feature",
   "-Xlint:serial",
-  "-Ymacro-annotations",
   "-Xfatal-warnings",
   "-language:implicitConversions",
   "-language:reflectiveCalls",
@@ -63,21 +62,12 @@ lazy val root =
       // using PackagingMethod.Standalone, mirroring the pattern used by the Scala plugin for other test runners
       packageAdditionalProjects += zio2TestRunner
     )
-    .dependsOn(macros, scalaPluginTestkit % "test->test")
+    .dependsOn(scalaPluginTestkit % "test->test")
 
 // Vendored copy of the IntelliJ Scala plugin test framework — see scala-plugin-testkit/ORIGIN.md.
 lazy val scalaPluginTestkit =
   newProject("scala-plugin-testkit", file("scala-plugin-testkit"))
     .enablePlugins(SbtIdeaPlugin)
-
-lazy val macros =
-  newProject("macros", file("macros"))
-    .enablePlugins(SbtIdeaPlugin)
-    .settings(
-      libraryDependencies ++= Seq(
-        "org.scala-lang" % "scala-reflect" % scala213 intransitive ()
-      )
-    )
 
 def newProject(projectName: String, base: File): Project =
   Project(projectName, base)
@@ -89,6 +79,5 @@ def newProject(projectName: String, base: File): Project =
       libraryDependencies ++= Dependencies.junit,
       libraryDependencies ++= Dependencies.intellijTestFrameworkAll,
       intellijPlugins := Dependencies.intellijPlugins,
-      testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q"),
-      (Test / scalacOptions) += "-Xmacro-settings:enable-expression-tracers"
+      testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-s", "-a", "+c", "+q")
     )
