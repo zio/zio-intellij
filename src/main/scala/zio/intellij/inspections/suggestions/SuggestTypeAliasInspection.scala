@@ -38,7 +38,7 @@ class SuggestTypeAliasInspection extends LocalInspectionTool {
                 te,
                 getDisplayName,
                 ProblemHighlightType.INFORMATION,
-                typeElements.map(new TypeAliasQuickFix(te, _)): _*
+                typeElements.map(new TypeAliasQuickFix(te, _))*
               )
             }
           case _ =>

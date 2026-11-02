@@ -68,7 +68,7 @@ final class ZTestRunLineMarkerProvider extends ScalaTestRunLineMarkerProvider {
     }.getOrElse(defaultIcon)
   }
 
-  private[this] class ReplacementInfo(
+  private class ReplacementInfo(
     icon: Icon,
     actions: Array[AnAction],
     tooltipProvider: Function[PsiElement, String]

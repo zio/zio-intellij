@@ -4,6 +4,7 @@ import org.jetbrains.plugins.scala.codeInspection.collections.{invocationText, S
 import org.jetbrains.plugins.scala.extensions.BooleanExt
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
 import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
+import org.jetbrains.plugins.scala.lang.psi.types.ScTypeExt
 import zio.intellij.inspections.ZInspection
 import zio.intellij.inspections.zioMethods._
 

@@ -1,5 +1,6 @@
 package zio.macros
 
+import org.jetbrains.plugins.scala.lang.psi.types.ScTypeExt
 import org.junit.Assert.{assertEquals, assertTrue}
 import zio.intellij.utils.createType
 

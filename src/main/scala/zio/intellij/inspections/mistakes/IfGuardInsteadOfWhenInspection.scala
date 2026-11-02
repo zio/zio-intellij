@@ -42,7 +42,7 @@ object IfGuardInsteadOfWhenInspection {
       val replacement = createElementFromText[ScExpression](
         s"${generatorExpr.getText}.when(${guard.expr.fold("")(_.getText)})",
         generatorExpr
-      )(generatorExpr.projectContext)
+      )(using generatorExpr.projectContext)
       generatorExpr.replace(replacement)
       guard.delete()
     }

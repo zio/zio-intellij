@@ -15,24 +15,20 @@ addCommandAlias("check", "scalafmtCheckAll")
 ThisBuild / javacOptions := Seq("--release", "25")
 
 ThisBuild / scalacOptions ++= Seq(
-  "-explaintypes",
+  "-explain",
   "-deprecation",
   "-unchecked",
   "-feature",
-  "-Xlint:serial",
-  "-Xfatal-warnings",
-  "-language:implicitConversions",
-  "-language:reflectiveCalls",
-  "-language:existentials",
-  "-Wconf:msg=legacy-binding:s",
-  "-Ytasty-reader"
+  "-Werror",
+  "-language:implicitConversions"
 )
 
 lazy val zio2TestRunner =
   Project("zio2-test-runner", file("zio2-test-runner"))
     .settings(
-      name         := "zio2-test-runner",
-      scalaVersion := scala213,
+      name             := "zio2-test-runner",
+      scalaVersion     := scala3,
+      autoScalaLibrary := false,
       // This runner is executed inside the *user's* project JVM, not the IDE, so it must target an old enough
       // bytecode version to load on whatever JDK their project uses.
       Compile / javacOptions := Seq("--release", "8"),
@@ -73,7 +69,7 @@ def newProject(projectName: String, base: File): Project =
   Project(projectName, base)
     .settings(
       name         := projectName,
-      scalaVersion := scala213,
+      scalaVersion := scala3,
       version      := pluginVersion,
       resolvers += Versions.intellijRepository_ForManagedIntellijDependencies,
       libraryDependencies ++= Dependencies.junit,

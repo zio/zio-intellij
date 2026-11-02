@@ -11,7 +11,7 @@ import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory.{
 }
 import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
-import org.jetbrains.plugins.scala.lang.psi.types.{api, ScType, TypePresentationContext}
+import org.jetbrains.plugins.scala.lang.psi.types.{api, ScType, ScTypeExt, TypePresentationContext}
 import org.jetbrains.plugins.scala.project.{ProjectContext, ProjectPsiElementExt, ScalaFeatures}
 import zio.intellij.inspections._
 import zio.intellij.inspections.macros.LayerBuilder._

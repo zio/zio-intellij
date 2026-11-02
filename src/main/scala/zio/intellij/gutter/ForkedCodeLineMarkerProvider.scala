@@ -11,7 +11,7 @@ import zio.intellij.inspections.zioMethods._
 final class ForkedCodeLineMarkerProvider extends LineMarkerProvider {
   import zio.intellij.gutter.ForkedCodeLineMarkerProvider.createLineMarkerInfo
 
-  override def getLineMarkerInfo(element: PsiElement): LineMarkerInfo[_ <: PsiElement] =
+  override def getLineMarkerInfo(element: PsiElement): LineMarkerInfo[? <: PsiElement] =
     if (
       !element.isValid ||
       element.getNode.getElementType != ScalaTokenTypes.tIDENTIFIER ||

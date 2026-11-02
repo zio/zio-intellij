@@ -37,7 +37,7 @@ object ChainToForSimplificationType extends SimplificationType {
              |r <- ${exprs.last.getText}
              |} yield r""".stripMargin
 
-        ScalaPsiElementFactory.createExpressionFromText(text, expr)(expr.projectContext) match {
+        ScalaPsiElementFactory.createExpressionFromText(text, expr)(using expr.projectContext) match {
           case forExpr: ScFor => Some(replace(expr).withText(forExpr.getText).highlightFrom(expr))
           case _              => None
         }

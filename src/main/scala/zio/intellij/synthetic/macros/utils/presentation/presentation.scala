@@ -118,7 +118,7 @@ package object presentation {
     val buffer = new StringBuilder
 
     if (param.isCallByNameParameter) {
-      buffer.append(ScalaPsiUtil.functionArrow(param.getProject))
+      buffer.append(ScalaPsiUtil.functionArrow(using param.getProject))
       buffer.append(" ")
     }
 

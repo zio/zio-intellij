@@ -35,7 +35,7 @@ class ZioAccessorUsagesSearcher extends QueryExecutor[PsiReference, ReferencesSe
       }
   }
 
-  def execute(queryParameters: SearchParameters, consumer: Processor[_ >: PsiReference]): Boolean = {
+  def execute(queryParameters: SearchParameters, consumer: Processor[? >: PsiReference]): Boolean = {
     val element: PsiElement = queryParameters.getElementToSearch
     val accessorOpt         = inReadAction {
       element match {

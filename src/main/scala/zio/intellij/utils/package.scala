@@ -128,7 +128,7 @@ package object utils {
     createTypeElement(tpe.codeText, context)
 
   def createExpression(text: String, context: PsiElement): Option[ScExpression] =
-    ScalaPsiElementFactory.safe(_.createExpressionFromText(text, context)(context))
+    ScalaPsiElementFactory.safe(_.createExpressionFromText(text, context)(using context))
 
   def createForGenerator(name: String, expr: ScExpression): Option[ScGenerator] = {
     implicit val pc: ProjectContext = expr
@@ -190,7 +190,7 @@ package object utils {
       .find(ScalaNamesUtil.nameFitToPatterns(_, patterns, strict = false))
 
   def isExpressionOfType(fqns: String*): ScExpression => Boolean = {
-    case expression @ Typeable(scType) => fqns.exists(conformsToTypeFromClass(scType, _)(expression))
+    case expression @ Typeable(scType) => fqns.exists(conformsToTypeFromClass(scType, _)(using expression))
     case _                             => false
   }
 

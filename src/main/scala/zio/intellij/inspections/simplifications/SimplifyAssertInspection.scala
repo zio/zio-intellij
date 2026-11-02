@@ -5,6 +5,7 @@ import org.jetbrains.plugins.scala.codeInspection.collections.{&& => _, _}
 import org.jetbrains.plugins.scala.lang.psi.ElementScope
 import org.jetbrains.plugins.scala.lang.psi.api.base.literals.{ScBooleanLiteral, ScStringLiteral}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
+import org.jetbrains.plugins.scala.lang.psi.types.ScTypeExt
 import org.jetbrains.plugins.scala.lang.psi.types.api.UndefinedType
 import org.jetbrains.plugins.scala.lang.psi.types.api.designator.ScDesignatorType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
@@ -78,13 +79,13 @@ object SimplifyEqualToType extends SimplificationType {
   }
 
   // TODO this is a hack until I figure out why `isString` doesn't work in tests
-  private[this] def isStringHax: ScExpression => Boolean =
+  private def isStringHax: ScExpression => Boolean =
     isExpressionOfType("java.lang.String", "_root_.scala.Predef.String")
 
   private def isExpressionOfType(fqns: String*): ScExpression => Boolean = {
     case ScStringLiteral(_)            => true
     case expression @ Typeable(scType) =>
-      fqns.exists(conforms(scType, _)(expression)) ||
+      fqns.exists(conforms(scType, _)(using expression)) ||
       fqns.contains(scType.canonicalText)
     case _ => false
   }
@@ -121,7 +122,7 @@ object SimplifyAssertTrueChain extends SimplificationType {
 
   override def hint: String = "Replace with assertTrue(conditions: _*)"
 
-  def replacement(expr: ScExpression, body: FlattenedAssertions): Simplification = {
+  private def replacement(expr: ScExpression, body: FlattenedAssertions): Simplification = {
     val assertTrue = s"assertTrue(${body.assertions.map(_.getBracedText).mkString(", ")})"
     // we can safely combine via `&&` here since `||` is parsed differently and won't get here
     val assert = body.remainder.fold(assertTrue)(r => s"${r.getText} && $assertTrue")

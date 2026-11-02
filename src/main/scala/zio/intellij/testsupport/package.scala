@@ -37,7 +37,7 @@ package object testsupport {
       expr.parent match {
         case Some(m: ScMethodCall) =>
           m.argumentExpressions.headOption.flatMap {
-            case lit: ScLiteral => Option(lit.getValue()).map(_.toString)
+            case lit: ScLiteral => Option(lit.getValue).map(_.toString)
             case _              => None
           }
         case _ => None

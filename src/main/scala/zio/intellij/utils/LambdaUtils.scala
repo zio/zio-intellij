@@ -16,7 +16,7 @@ object LambdaUtils {
     e match {
       case ScFunctionExpr(Seq(param), Some(body)) if isUnusedNamedParam(param) =>
         val withWildcard = s"_ => ${body.getText}"
-        ScalaPsiElementFactory.safe(_.createElementFromText[ScFunctionExpr](withWildcard, e)(e)).getOrElse(e)
+        ScalaPsiElementFactory.safe(_.createElementFromText[ScFunctionExpr](withWildcard, e)(using e)).getOrElse(e)
       case _ => e
     }
 

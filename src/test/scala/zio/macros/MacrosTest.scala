@@ -21,8 +21,8 @@ abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestCase {
     else ZInspectionTestBase.versionPatternZIO2
   private val zioJsonVersion = if (isZIO1) "0.2.0" else "0.5.0"
 
-  protected var extendedObject: ScObject                                  = _
-  implicit protected var typePresentationContext: TypePresentationContext = _
+  protected var extendedObject: ScObject                                  = scala.compiletime.uninitialized
+  implicit protected var typePresentationContext: TypePresentationContext = scala.compiletime.uninitialized
   override protected def defaultVersionOverride: Option[ScalaVersion]     = Some(ScalaSdkOwner.preferableSdkVersion)
   override protected def includeScalaLibraryFilesInSdk: Boolean           = true
 
@@ -43,7 +43,7 @@ abstract class MacrosTest extends ScalaLightCodeInsightFixtureTestCase {
       if (isZIO1) Nil
       else Seq(zioOrg %% "zio-mock" % "1.0.0-RC8")
 
-    super.librariesLoaders :+ IvyManagedLoader(common ++ versionSpecific: _*)
+    super.librariesLoaders :+ IvyManagedLoader(common ++ versionSpecific*)
   }
 
   override def setUp(): Unit = {

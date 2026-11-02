@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nls
 import org.jetbrains.plugins.scala.codeInspection.collections.{stripped, MethodRepr}
 import org.jetbrains.plugins.scala.codeInspection.{AbstractFixOnPsiElement, PsiElementVisitorSimple}
 import org.jetbrains.plugins.scala.lang.psi.api.expr.ScExpression
-import org.jetbrains.plugins.scala.lang.psi.types.ScType
+import org.jetbrains.plugins.scala.lang.psi.types.{ScType, ScTypeExt}
 import org.jetbrains.plugins.scala.lang.psi.types.api.ParameterizedType
 import org.jetbrains.plugins.scala.lang.psi.types.result.Typeable
 import zio.intellij.inspections.mistakes.InfallibleEffectRecoveryInspection._

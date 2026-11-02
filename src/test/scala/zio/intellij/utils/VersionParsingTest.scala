@@ -71,7 +71,7 @@ class VersionParsingTest extends TestCase {
         ZioVersion.Major(1),
         ZioVersion.Minor(2),
         ZioVersion.Patch(3),
-        Some(ZioVersion.RC(List(4, 5).map(ZioVersion.PostfixSegment)))
+        Some(ZioVersion.RC(List(4, 5).map(ZioVersion.PostfixSegment(_))))
       )
     }
   }
@@ -85,7 +85,7 @@ class VersionParsingTest extends TestCase {
         ZioVersion.Major(1),
         ZioVersion.Minor(2),
         ZioVersion.Patch(3),
-        Some(ZioVersion.Milestone(List(4, 5).map(ZioVersion.PostfixSegment)))
+        Some(ZioVersion.Milestone(List(4, 5).map(ZioVersion.PostfixSegment(_))))
       )
     }
   }
@@ -113,7 +113,7 @@ class VersionParsingTest extends TestCase {
         ZioVersion.Major(1),
         ZioVersion.Minor(0),
         ZioVersion.Patch(4),
-        Some(ZioVersion.Ext(List(2, 100, 500, 9000).map(ZioVersion.PostfixSegment)))
+        Some(ZioVersion.Ext(List(2, 100, 500, 9000).map(ZioVersion.PostfixSegment(_))))
       )
     }
   }
