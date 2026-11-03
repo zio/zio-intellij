@@ -64,6 +64,9 @@ lazy val root =
 lazy val scalaPluginTestkit =
   newProject("scala-plugin-testkit", file("scala-plugin-testkit"))
     .enablePlugins(SbtIdeaPlugin)
+    .settings(
+      scalacOptions -= "-Werror" // let's not fail because of warnings synced from the scala-plugin
+    )
 
 def newProject(projectName: String, base: File): Project =
   Project(projectName, base)
