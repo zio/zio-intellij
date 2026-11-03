@@ -78,7 +78,7 @@ final class ScalaQuickFixTestFixture(
   ): Unit = {
     executeWriteActionCommand() {
       actions.foreach(_.invoke(getProject, getEditor, getFile))
-    }(getProject)
+    }(using getProject)
 
     val expectedFileText = createTestText(expected)
     val expectedFileTextProcessed = expectedFileText.withNormalizedSeparator.pipeIf(trimExpectedText)(_.trim)
@@ -241,7 +241,7 @@ final class ScalaQuickFixTestFixture(
     }
 
     val (_, expectedRanges) = MarkersUtils.extractMarker(fileTextNormalized, START, END, caretMarker = Some(CARET))
-    val expectedHighlights = expectedRanges.map(ExpectedHighlight)
+    val expectedHighlights = expectedRanges.map(ExpectedHighlight(_))
 
     onFileCreated(baseFixture.getFile)
     expectedHighlights

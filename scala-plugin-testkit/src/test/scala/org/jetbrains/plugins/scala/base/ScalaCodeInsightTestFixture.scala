@@ -4,8 +4,10 @@ import com.intellij.openapi.editor.{Editor, EditorCopyPasteHelper}
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.psi.PsiFile
 import com.intellij.testFramework.fixtures.JavaCodeInsightTestFixture
+import org.intellij.lang.annotations.Language
 import org.jetbrains.plugins.scala.ScalaFileType
 import org.jetbrains.plugins.scala.extensions.{StringExt, inWriteCommandAction}
+import org.jetbrains.plugins.scala.lang.psi.api.ScalaFile
 import org.junit.Assert.assertNotNull
 
 //NOTE: for now we intentionally inherit any base text feature (e.g. JavaCodeInsightTestFixture) and use composition instead.
@@ -42,6 +44,9 @@ final class ScalaCodeInsightTestFixture(
 
   def configureFromFileText(fileText: String): PsiFile =
     configureFromFileText(defaultFileType, fileText)
+
+  def configureScalaFromFileText(@Language("Scala") fileText: String): ScalaFile =
+    configureFromFileText(ScalaFileType.INSTANCE, fileText).asInstanceOf[ScalaFile]
 
   def configureFromFileText(fileType: FileType, fileText: String): PsiFile = {
     val fileTextPatched = fileTextPatcher(fileText.withNormalizedSeparator)
@@ -85,7 +90,7 @@ final class ScalaCodeInsightTestFixture(
     javaFixture.openFileInEditor(dummyFile.getVirtualFile)
     val pastedRanges = inWriteCommandAction {
       EditorCopyPasteHelper.getInstance().pasteFromClipboard(javaFixture.getEditor)
-    }(javaFixture.getProject)
+    }(using javaFixture.getProject)
     assertNotNull("Paste from clipboard failed", pastedRanges)
     javaFixture.checkResult(expectedClipboardContent, ignoreTrailingSpaces)
   }

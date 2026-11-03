@@ -20,12 +20,13 @@ import com.intellij.testFramework.{EditorTestUtil, IdeaTestUtil, LightProjectDes
 import com.intellij.util.lang.JavaVersion
 import org.intellij.lang.annotations.Language
 import org.jetbrains.jps.model.java.JavaSourceRootType
-import org.jetbrains.plugins.scala.base.libraryLoaders.{LibraryLoader, ScalaSDKLoader}
+import org.jetbrains.plugins.scala.base.libraryLoaders.{LibraryLoader, ScalaLibraryLoader, ScalaSDKLoader}
 import org.jetbrains.plugins.scala.extensions.StringExt
 import org.jetbrains.plugins.scala.lang.formatting.settings.ScalaCodeStyleSettings
+import org.jetbrains.plugins.scala.lang.psi.api.ScalaFile
 import org.jetbrains.plugins.scala.project.settings.ScalaCompilerConfiguration
 import org.jetbrains.plugins.scala.util.TestUtils
-import org.jetbrains.plugins.scala.{ScalaFileType, ScalaLanguage}
+import org.jetbrains.plugins.scala.{ScalaFileType, ScalaLanguage, ScalaVersion}
 import org.junit.Assert
 import org.junit.Assert.fail
 
@@ -44,7 +45,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected val END = EditorTestUtil.SELECTION_END_TAG
 
   // var is needed to pick up updated java fixture in setUp
-  private[this] var _scalaFixture: ScalaCodeInsightTestFixture = _
+  private var _scalaFixture: ScalaCodeInsightTestFixture = scala.compiletime.uninitialized
   protected def scalaFixture: ScalaCodeInsightTestFixture = _scalaFixture
 
   override def getTestDataPath: String = TestUtils.getTestDataPath + "/"
@@ -52,7 +53,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected def sourceRootPath: Path = null
 
   //start section: indexing mode setup
-  private[this] var indexingMode: IndexingMode = IndexingMode.SMART
+  private var indexingMode: IndexingMode = IndexingMode.SMART
 
   // SCL-21849
   override def getIndexingMode: IndexingMode = indexingMode
@@ -67,18 +68,37 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected def includeScalaLibrarySources: Boolean = false
   protected def includeScalaLibraryFilesInSdk: Boolean = false // zio-local
 
+  /**
+   * Configures a production Scala SDK with separate Scala libraries.
+   *
+   * Scala 3 uses the latest Scala 3 and Scala 2.13 libraries with a compiler SDK that does not include library files.
+   * Scala 2 retains its selected SDK and adds scala-reflect to the compiler classpath.
+   */
+  protected def useProductionScalaSdkWithSeparateLibraries: Boolean = false
+
   protected def additionalLibraries: Seq[LibraryLoader] = Seq.empty
 
-  override protected def librariesLoaders: Seq[LibraryLoader] = {
+  private def scalaSdkAndLibraryLoaders: Seq[LibraryLoader] = {
     val scalaSdkLoader = ScalaSDKLoader(
-      includeScalaReflectIntoCompilerClasspath = includeReflectLibrary,
+      includeScalaReflectIntoCompilerClasspath = includeReflectLibrary || useProductionScalaSdkWithSeparateLibraries,
       includeScalaCompilerIntoLibraryClasspath = includeCompilerAsLibrary,
       includeScalaLibrarySources = includeScalaLibrarySources,
       includeScalaLibraryFilesInSdk = includeScalaLibraryFilesInSdk // zio-local
     )
-    val additionalLoaders = additionalLibraries
-    scalaSdkLoader +: additionalLoaders
+
+    if (useProductionScalaSdkWithSeparateLibraries && version.isScala3) {
+      ScalaLibraryLoader.libraryLoadersWithSeparateScalaLibraries(
+        Seq(scalaSdkLoader),
+        ScalaVersion.Latest.Scala_2_13,
+        ScalaVersion.Latest.Scala_3
+      )
+    } else {
+      Seq(scalaSdkLoader)
+    }
   }
+
+  override protected def librariesLoaders: Seq[LibraryLoader] =
+    scalaSdkAndLibraryLoaders ++ additionalLibraries
   //end section: project libraries configuration
 
   //start section: project descriptor
@@ -181,15 +201,15 @@ abstract class ScalaLightCodeInsightFixtureTestCase
   protected final def configureFromFileText(fileName: String, fileText: String): PsiFile = scalaFixture.configureFromFileText(fileName, fileText)
   protected final def openEditorAtOffset(startOffset: Int): Editor = scalaFixture.openEditorAtOffset(startOffset)
 
-  protected final def configureScalaFromFileText(@Language("Scala") fileText: String): PsiFile = scalaFixture.configureFromFileText(fileText)
-  protected final def configureScala3FromFileText(@Language("Scala 3") fileText: String): PsiFile = scalaFixture.configureFromFileText(fileText)
-  protected final def addScalaFileToProject(relativePath: String, @Language("Scala") fileText: String): PsiFile = myFixture.addFileToProject(relativePath, fileText)
+  protected final def configureScalaFromFileText(@Language("Scala") fileText: String): ScalaFile = scalaFixture.configureScalaFromFileText(fileText)
+  protected final def configureScala3FromFileText(@Language("Scala 3") fileText: String): ScalaFile = scalaFixture.configureScalaFromFileText(fileText)
+  protected final def addScalaFileToProject(relativePath: String, @Language("Scala") fileText: String): ScalaFile = myFixture.addFileToProject(relativePath, fileText).asInstanceOf[ScalaFile]
   //end section: helper methods
 
   //TODO: consider extracting implementation body to ScalaCodeInsightTestFixture
   // or crete a similar fixture which would be more specific for highlighting
   //start section: check errors
-  protected def checkTextHasNoErrors(text: String): Unit = {
+  protected def checkTextHasNoErrors(@Language("Scala") text: String): Unit = {
     myFixture.configureByText(ScalaFileType.INSTANCE, text)
 
     //EditorTestUtil.buildInitialFoldingsInBackground(getEditor)
@@ -211,7 +231,7 @@ abstract class ScalaLightCodeInsightFixtureTestCase
     }
   }
 
-  protected def checkHasErrorAroundCaret(text: String): Unit = {
+  protected def checkHasErrorAroundCaret(@Language("Scala") text: String): Unit = {
     val normalizedText = text.withNormalizedSeparator
     myFixture.configureByText("dummy.scala", normalizedText)
     val caretIndex = normalizedText.indexOf(CARET)
