@@ -1,7 +1,7 @@
 # scala-plugin-testkit
 
 - **Source:** https://github.com/JetBrains/intellij-scala
-- **Synced from commit:** `345dc52da7ec2e7427da901667549728d6c8e73d` (branch `idea262.release`)
+- **Synced from commit:** `64b9a39f36ec0eb65068a9366308c7e0bcb87d2d` (branch `idea263.release`)
 
 Vendored copy of the IntelliJ **Scala plugin** test framework — the base classes, fixtures and helpers our
 inspection/refactoring tests build on. JetBrains does not publish these as a Maven artifact, so they have to be copied

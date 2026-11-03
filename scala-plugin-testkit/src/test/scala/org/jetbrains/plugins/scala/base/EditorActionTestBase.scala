@@ -142,7 +142,7 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
    * Without extra "commit" some tests might fail after fixes in the formatter related to SCL-25190
    */
   protected def performTypingActionAndCommitEachChar(text: String): Unit =
-    text.foreach { char: Char =>
+    text.foreach { (char: Char) =>
       performTypingAction(char)
 
       getEditor.getDocument.commit(getProject)
@@ -202,7 +202,7 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
   private def performEditorAction(action: String): Unit =
     startCommand() {
       myFixture.performEditorAction(action)
-    }(getProject)
+    }(using getProject)
 
   protected def checkTextWithCaretOffsets(
     expectedCarets: Seq[Int],
@@ -238,7 +238,7 @@ abstract class EditorActionTestBase extends ScalaLightCodeInsightFixtureTestCase
 
     def patchTextWithCarets(text: String, caretOffsets: Seq[Int]): String =
       caretOffsets
-        .sorted(Ordering.Int.reverse)
+        .sorted(using Ordering.Int.reverse)
         .foldLeft(text)(_.patch(_, CARET, 0))
 
     val expected0 = patchTextWithCarets(expectedText, expectedCarets)

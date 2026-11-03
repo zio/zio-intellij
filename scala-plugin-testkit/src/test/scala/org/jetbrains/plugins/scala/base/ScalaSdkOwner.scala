@@ -29,9 +29,12 @@ trait ScalaSdkOwner extends UsefulTestCase
     }
   }
 
-  private var _injectedScalaVersion: Option[ScalaVersion] = None
-  def injectedScalaVersion: Option[ScalaVersion] = _injectedScalaVersion
-  def injectedScalaVersion_=(version: ScalaVersion): Unit = _injectedScalaVersion = Option(version)
+  // A non-generic state accessor avoids Scala 3's raw trait-field accessors in Java subclasses.
+  private object ScalaVersionInjection {
+    var value: Option[ScalaVersion] = None
+  }
+  def injectedScalaVersion: Option[ScalaVersion] = ScalaVersionInjection.value
+  def injectedScalaVersion_=(version: ScalaVersion): Unit = ScalaVersionInjection.value = Option(version)
 
   private def configuredScalaVersion: Option[ScalaVersion] =
     injectedScalaVersion.orElse(globalConfiguredScalaVersion)
@@ -89,7 +92,7 @@ object ScalaSdkOwner {
   //       (or better, move ScalaLanguageLevel.getDefault to Scala_2_13 and use ScalaVersion.default again)
   //       for now just use defaultVersionOverride with Some(preferableSdkVersion) for test-(base)classes
   //       that should already work in newest version (SCL-15634)
-  val defaultSdkVersion: ScalaVersion = LatestScalaVersions.Scala_2_10 // ScalaVersion.default
+  val defaultSdkVersion: ScalaVersion = LatestScalaVersions.Scala_2_12 // ScalaVersion.default
   val preferableSdkVersion: ScalaVersion = LatestScalaVersions.Scala_2_13
   val allTestVersions: SortedSet[ScalaVersion] = SortedSet.from(LatestScalaVersions.allStableWithoutScalaNext.flatMap(_.generateAllMinorVersions))
 

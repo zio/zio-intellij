@@ -64,3 +64,12 @@ trait CompilationTests_IDEA
  * the `compiler-integration` module.
  */
 trait CompilerHighlightingTests
+
+trait BundleSortingTests
+
+trait SemanticTests
+
+/**
+ * Heavy projects that are fetched from GitHub, imported and highlighted.
+ */
+trait ProjectHighlightingTests
