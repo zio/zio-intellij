@@ -3,7 +3,6 @@ name: CI
 on:
   push:
     branches:
-      - idea253.x
       - idea261.x
       - idea262.x
       - idea263.x
